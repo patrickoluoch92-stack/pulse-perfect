@@ -55,7 +55,7 @@ export const listProperties = createServerFn({ method: "GET" })
     const { supabase } = context;
     const { data: props, error } = await supabase
       .from("properties")
-      .select("id, name, type, city, country, created_at")
+      .select("id, name, type, description, address, city, country, timezone, created_at")
       .eq("org_id", data.orgId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
