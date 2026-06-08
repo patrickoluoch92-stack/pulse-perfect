@@ -482,11 +482,24 @@ async function dispatchIncidentWebhooks(supabase: SupaClient, orgId: string, pay
         last_attempt_at: now,
         attempt_count: (h.attempt_count ?? 0) + result.attempts.length,
       }).eq("id", h.id);
+      // Record delivery in audit log for the dashboard.
+      await supabase.from("ical_webhook_deliveries").insert({
+        org_id: orgId,
+        webhook_id: h.id,
+        event,
+        payload: payload as unknown as Record<string, unknown>,
+        status: result.ok ? "ok" : "error",
+        http_status: result.finalStatus ?? null,
+        attempts: result.attempts.length,
+        last_error: result.ok ? null : (result.finalError ?? `HTTP ${lastAttempt?.status ?? "?"}`),
+        delivered_at: result.ok ? now : null,
+      });
     }
   } catch {
     // Never let webhook failures break the calling request.
   }
 }
+
 
 export const listIcalIncidentWebhooks = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -609,7 +622,12 @@ export const setIcalAccessLogRetention = createServerFn({ method: "POST" })
 
 export const exportIcalIncidentAudit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ incidentId: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) => z.object({
+    incidentId: z.string().uuid(),
+    since: z.string().datetime().optional(),
+    until: z.string().datetime().optional(),
+    actions: z.array(z.enum(["opened", "updated", "acknowledged", "resolved", "note"])).max(10).optional(),
+  }).parse(d))
   .handler(async ({ context, data }) => {
     const { buildCsv } = await import("@/lib/csv");
     const { data: inc, error: ie } = await context.supabase
@@ -617,12 +635,14 @@ export const exportIcalIncidentAudit = createServerFn({ method: "GET" })
     if (ie || !inc) throw new Error("Incident not found");
     await assertOrgRole(context.supabase, inc.org_id, context.userId);
     assertCsvRate(context.userId);
-    const { data: rows } = await context.supabase
+    let q = context.supabase
       .from("ical_incident_audit")
       .select("created_at, action, actor_id, note")
-      .eq("incident_id", data.incidentId)
-      .order("created_at", { ascending: false })
-      .limit(1000);
+      .eq("incident_id", data.incidentId);
+    if (data.since) q = q.gte("created_at", data.since);
+    if (data.until) q = q.lte("created_at", data.until);
+    if (data.actions && data.actions.length > 0) q = q.in("action", data.actions);
+    const { data: rows } = await q.order("created_at", { ascending: false }).limit(5000);
     const csv = buildCsv(
       ["created_at", "action", "actor_id", "note"],
       (rows ?? []).map((r) => [r.created_at, r.action, r.actor_id ?? "", r.note ?? ""]),
@@ -632,13 +652,14 @@ export const exportIcalIncidentAudit = createServerFn({ method: "GET" })
       token_prefix: "csv_export",
       status: "csv_export",
       ip: null,
-      user_agent: `user:${context.userId}:audit:incident=${data.incidentId.slice(0, 8)}:rows=${rows?.length ?? 0}`,
+      user_agent: `user:${context.userId}:audit:incident=${data.incidentId.slice(0, 8)}:rows=${rows?.length ?? 0}:filtered=${data.actions ? "1" : "0"}`,
     });
     return {
       filename: `incident-${inc.fingerprint.slice(0, 16)}-audit.csv`,
       csv,
     };
   });
+
 
 
 export const listIcalIncidentAudit = createServerFn({ method: "GET" })
@@ -827,3 +848,126 @@ export const listUnitBlocks = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return rows ?? [];
   });
+
+// ============================================================
+// Webhook delivery dashboard + re-delivery
+// ============================================================
+
+export const listIcalWebhookDeliveries = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    orgId: z.string().uuid(),
+    webhookId: z.string().uuid().optional(),
+    status: z.enum(["ok", "error", "all"]).optional(),
+    limit: z.number().int().min(1).max(200).optional(),
+    offset: z.number().int().min(0).max(100000).optional(),
+  }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
+    const limit = data.limit ?? 25;
+    const offset = data.offset ?? 0;
+    let q = context.supabase
+      .from("ical_webhook_deliveries")
+      .select("id, webhook_id, event, status, http_status, attempts, last_error, delivered_at, created_at, ical_incident_webhooks(url)", { count: "exact" })
+      .eq("org_id", data.orgId);
+    if (data.webhookId) q = q.eq("webhook_id", data.webhookId);
+    if (data.status && data.status !== "all") q = q.eq("status", data.status);
+    const { data: rows, error, count } = await q
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+    if (error) throw new Error(error.message);
+    return { rows: rows ?? [], total: count ?? 0, limit, offset };
+  });
+
+export const redeliverIcalWebhook = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ deliveryId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: del, error: de } = await context.supabase
+      .from("ical_webhook_deliveries")
+      .select("id, org_id, webhook_id, event, payload")
+      .eq("id", data.deliveryId).single();
+    if (de || !del) throw new Error("Delivery not found");
+    await assertOrgRole(context.supabase, del.org_id, context.userId);
+
+    const { data: hook, error: he } = await context.supabase
+      .from("ical_incident_webhooks")
+      .select("id, url, secret, enabled, attempt_count")
+      .eq("id", del.webhook_id).single();
+    if (he || !hook) throw new Error("Webhook not found");
+    if (!hook.enabled) throw new Error("Webhook is disabled");
+
+    const { deliverWithRetry } = await import("@/lib/webhook");
+    const basePayload = (del.payload ?? {}) as Record<string, unknown>;
+    const payload = { ...basePayload, redelivered_from: del.id, redelivered_at: new Date().toISOString() };
+    const result = await deliverWithRetry({
+      url: hook.url, secret: hook.secret, event: del.event, payload,
+      maxAttempts: 3, baseDelayMs: 500, timeoutMs: 5_000,
+    });
+    const now = new Date().toISOString();
+    const lastAttempt = result.attempts[result.attempts.length - 1];
+    await context.supabase.from("ical_incident_webhooks").update({
+      last_status: result.ok
+        ? `ok ${result.finalStatus} (redelivery)`
+        : `error ${result.finalStatus ?? "net"} (redelivery)`,
+      last_error: result.ok ? null : (result.finalError ?? `HTTP ${lastAttempt?.status ?? "?"}`),
+      last_delivered_at: result.ok ? now : null,
+      last_attempt_at: now,
+      attempt_count: (hook.attempt_count ?? 0) + result.attempts.length,
+    }).eq("id", hook.id);
+    await context.supabase.from("ical_webhook_deliveries").insert({
+      org_id: del.org_id,
+      webhook_id: hook.id,
+      event: del.event,
+      payload,
+      status: result.ok ? "ok" : "error",
+      http_status: result.finalStatus ?? null,
+      attempts: result.attempts.length,
+      last_error: result.ok ? null : (result.finalError ?? `HTTP ${lastAttempt?.status ?? "?"}`),
+      delivered_at: result.ok ? now : null,
+    });
+    return { ok: result.ok, status: result.finalStatus, attempts: result.attempts.length };
+  });
+
+export const getIcalWebhookAlerts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => orgIdSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
+    const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: rows, error } = await context.supabase
+      .from("ical_webhook_deliveries")
+      .select("webhook_id, status, http_status, created_at, ical_incident_webhooks(url)")
+      .eq("org_id", data.orgId)
+      .gte("created_at", since24h)
+      .order("created_at", { ascending: false })
+      .limit(2000);
+    if (error) throw new Error(error.message);
+    type Row = { webhook_id: string; status: string; ical_incident_webhooks: { url?: string } | null };
+    const grouped = new Map<string, { url: string; total: number; failed: number }>();
+    for (const r of (rows ?? []) as Row[]) {
+      const url = r.ical_incident_webhooks?.url ?? "(deleted)";
+      const g = grouped.get(r.webhook_id) ?? { url, total: 0, failed: 0 };
+      g.total += 1;
+      if (r.status !== "ok") g.failed += 1;
+      grouped.set(r.webhook_id, g);
+    }
+    const alerts: { severity: "high" | "medium" | "low"; webhookId: string; url: string; message: string }[] = [];
+    for (const [id, g] of grouped) {
+      if (g.total === 0) continue;
+      const rate = g.failed / g.total;
+      if (g.failed >= 5 && rate >= 0.5) {
+        alerts.push({
+          severity: "high", webhookId: id, url: g.url,
+          message: `Webhook is failing — ${g.failed}/${g.total} deliveries failed in last 24h.`,
+        });
+      } else if (g.failed >= 3) {
+        alerts.push({
+          severity: "medium", webhookId: id, url: g.url,
+          message: `${g.failed} of ${g.total} deliveries failed in last 24h.`,
+        });
+      }
+    }
+    return { alerts };
+  });
+
