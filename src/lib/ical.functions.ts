@@ -325,9 +325,20 @@ export const getIcalSecurityAlerts = createServerFn({ method: "GET" })
             incident_id: ins.data.id, org_id: data.orgId, actor_id: null,
             action: "opened", note: a.message,
           });
+          // Fire-and-forget webhook dispatch for newly opened incidents.
+          dispatchIncidentWebhooks(context.supabase, data.orgId, {
+            event: "incident.opened",
+            incident_id: ins.data.id,
+            severity: a.severity,
+            kind: a.kind,
+            fingerprint: a.fingerprint,
+            message: a.message,
+            occurred_at: new Date().toISOString(),
+          });
         }
       }
     }
+
 
 
     return {
