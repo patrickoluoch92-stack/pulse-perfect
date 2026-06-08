@@ -457,44 +457,31 @@ export const updateIcalIncidentStatus = createServerFn({ method: "POST" })
 type SupaClient = typeof import("@supabase/supabase-js").SupabaseClient.prototype;
 async function dispatchIncidentWebhooks(supabase: SupaClient, orgId: string, payload: Record<string, unknown>) {
   try {
+    const { deliverWithRetry } = await import("@/lib/webhook");
     const { data: hooks } = await supabase
       .from("ical_incident_webhooks")
-      .select("id, url, secret")
+      .select("id, url, secret, attempt_count")
       .eq("org_id", orgId)
       .eq("enabled", true);
     if (!hooks || hooks.length === 0) return;
-    const body = JSON.stringify(payload);
-    const enc = new TextEncoder();
+    const event = String(payload.event ?? "incident");
     for (const h of hooks) {
-      try {
-        const key = await crypto.subtle.importKey(
-          "raw", enc.encode(h.secret),
-          { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
-        );
-        const sig = await crypto.subtle.sign("HMAC", key, enc.encode(body));
-        const sigHex = Array.from(new Uint8Array(sig), (b) => b.toString(16).padStart(2, "0")).join("");
-        const res = await fetch(h.url, {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            "x-hostpulse-event": String(payload.event ?? "incident"),
-            "x-hostpulse-signature": `sha256=${sigHex}`,
-          },
-          body,
-          signal: AbortSignal.timeout(5_000),
-        });
-        await supabase.from("ical_incident_webhooks").update({
-          last_status: res.ok ? `ok ${res.status}` : `error ${res.status}`,
-          last_error: res.ok ? null : `HTTP ${res.status}`,
-          last_delivered_at: new Date().toISOString(),
-        }).eq("id", h.id);
-      } catch (err) {
-        await supabase.from("ical_incident_webhooks").update({
-          last_status: "error",
-          last_error: err instanceof Error ? err.message.slice(0, 500) : "unknown",
-          last_delivered_at: new Date().toISOString(),
-        }).eq("id", h.id);
-      }
+      const result = await deliverWithRetry({
+        url: h.url, secret: h.secret, event, payload,
+        maxAttempts: 3, baseDelayMs: 500, timeoutMs: 5_000,
+      });
+      const now = new Date().toISOString();
+      const lastAttempt = result.attempts[result.attempts.length - 1];
+      const status = result.ok
+        ? `ok ${result.finalStatus} (${result.attempts.length} attempt${result.attempts.length > 1 ? "s" : ""})`
+        : `error ${result.finalStatus ?? "net"} after ${result.attempts.length} attempts`;
+      await supabase.from("ical_incident_webhooks").update({
+        last_status: status,
+        last_error: result.ok ? null : (result.finalError ?? `HTTP ${lastAttempt?.status ?? "?"}`),
+        last_delivered_at: result.ok ? now : null,
+        last_attempt_at: now,
+        attempt_count: (h.attempt_count ?? 0) + result.attempts.length,
+      }).eq("id", h.id);
     }
   } catch {
     // Never let webhook failures break the calling request.
