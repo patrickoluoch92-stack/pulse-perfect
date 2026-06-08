@@ -46,6 +46,10 @@ function SyncPage() {
   const revokeFn = useServerFn(revokeIcalToken);
   const fetchLog = useServerFn(listIcalAccessLog);
   const exportLogFn = useServerFn(exportIcalAccessLog);
+  const exportAlertsFn = useServerFn(exportIcalSecurityAlerts);
+  const fetchIncidents = useServerFn(listIcalIncidents);
+  const updateIncidentFn = useServerFn(updateIcalIncidentStatus);
+
 
   const ctx = useQuery({ queryKey: ["workspace-context"], queryFn: () => fetchCtx() });
   const orgId = ctx.data?.currentOrg?.id;
