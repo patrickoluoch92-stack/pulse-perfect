@@ -227,6 +227,71 @@ export type Database = {
           },
         ]
       }
+      ical_incidents: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          created_at: string
+          fingerprint: string
+          first_seen_at: string
+          id: string
+          kind: string
+          last_seen_at: string
+          message: string
+          occurrences: number
+          org_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          fingerprint: string
+          first_seen_at?: string
+          id?: string
+          kind: string
+          last_seen_at?: string
+          message: string
+          occurrences?: number
+          org_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          fingerprint?: string
+          first_seen_at?: string
+          id?: string
+          kind?: string
+          last_seen_at?: string
+          message?: string
+          occurrences?: number
+          org_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ical_incidents_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_items: {
         Row: {
           amount: number
