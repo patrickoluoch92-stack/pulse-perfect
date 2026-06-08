@@ -57,6 +57,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           {nav.map((item) => {
             const active = pathname.startsWith(item.to);
             const Icon = item.icon;
+            const plan = (data?.currentOrg?.plan ?? null) as Plan | null;
+            const locked = "feature" in item && !planAllows(plan, item.feature);
             return (
               <Link
                 key={item.to}
@@ -72,6 +74,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                   <Icon className="h-4 w-4" />
                   {item.label}
                 </span>
+                {locked && <Lock className="h-3 w-3 opacity-60" />}
               </Link>
             );
           })}
