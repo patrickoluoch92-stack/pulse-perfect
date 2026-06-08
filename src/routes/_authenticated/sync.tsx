@@ -997,7 +997,36 @@ function SyncPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Webhook secret reveal — shown once */}
+      <Dialog open={!!revealedSecret} onOpenChange={(o) => !o && setRevealedSecret(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Webhook signing secret</DialogTitle>
+            <DialogDescription>
+              Store this secret somewhere safe — we don&apos;t display it again. Verify incoming requests by
+              computing <code>HMAC-SHA256(secret, raw_body)</code> and comparing to the
+              <code className="mx-1 rounded bg-muted px-1">x-hostpulse-signature</code> header.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Destination</Label>
+            <Input readOnly value={revealedSecret?.url ?? ""} className="font-mono text-xs" />
+            <Label>Secret</Label>
+            <div className="flex items-center gap-2">
+              <Input readOnly value={revealedSecret?.secret ?? ""} className="flex-1 font-mono text-xs" />
+              <Button size="sm" onClick={() => revealedSecret && copy(revealedSecret.secret)}>
+                <Copy className="h-3.5 w-3.5" /> Copy
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setRevealedSecret(null)}>I&apos;ve saved it</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
+
 
 
   );
