@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
+import { MfaSettings } from "@/components/mfa-settings";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — HostPulse" }] }),
@@ -37,6 +38,8 @@ function SettingsPage() {
           <div><dt className="text-muted-foreground">Full name</dt><dd className="mt-1 font-medium">{profile?.full_name ?? "—"}</dd></div>
         </dl>
       </section>
+
+      <MfaSettings />
     </div>
   );
 }

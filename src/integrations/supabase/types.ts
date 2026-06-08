@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_errors: {
+        Row: {
+          context: Json
+          created_at: string
+          id: string
+          level: string
+          message: string
+          org_id: string | null
+          source: string | null
+          stack: string | null
+          url: string | null
+          user_id: string | null
+        }
+        Insert: {
+          context?: Json
+          created_at?: string
+          id?: string
+          level?: string
+          message: string
+          org_id?: string | null
+          source?: string | null
+          stack?: string | null
+          url?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          context?: Json
+          created_at?: string
+          id?: string
+          level?: string
+          message?: string
+          org_id?: string | null
+          source?: string | null
+          stack?: string | null
+          url?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_errors_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calendar_blocks: {
         Row: {
           created_at: string
@@ -831,6 +878,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rate_limit_events: {
+        Row: {
+          bucket: string
+          created_at: string
+          id: number
+          key: string | null
+          user_id: string | null
+        }
+        Insert: {
+          bucket: string
+          created_at?: string
+          id?: number
+          key?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          id?: number
+          key?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       reservations: {
         Row: {
