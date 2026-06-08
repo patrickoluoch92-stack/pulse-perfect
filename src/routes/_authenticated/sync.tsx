@@ -93,12 +93,39 @@ function SyncPage() {
   });
 
   const rotate = useMutation({
-    mutationFn: (unitId: string) => rotateFn({ data: { unitId } }),
+    mutationFn: (vars: { unitId: string; ttlDays?: number }) =>
+      rotateFn({ data: vars }),
     onSuccess: () => {
       toast.success("Token rotated. Old feed URL is now revoked.");
       qc.invalidateQueries({ queryKey: ["export-units"] });
     },
     onError: (e: Error) => toast.error(e.message),
+  });
+
+  const updateExpiry = useMutation({
+    mutationFn: (vars: { unitId: string; ttlDays: number | null }) =>
+      setExpiryFn({ data: vars }),
+    onSuccess: () => {
+      toast.success("Expiration updated");
+      qc.invalidateQueries({ queryKey: ["export-units"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const revoke = useMutation({
+    mutationFn: (unitId: string) => revokeFn({ data: { unitId } }),
+    onSuccess: () => {
+      toast.success("Token revoked");
+      qc.invalidateQueries({ queryKey: ["export-units"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const accessLog = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-access-log", orgId],
+    queryFn: () => fetchLog({ data: { orgId: orgId!, limit: 50 } }),
+    refetchInterval: 30000,
   });
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
