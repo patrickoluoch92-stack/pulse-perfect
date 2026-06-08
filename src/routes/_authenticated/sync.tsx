@@ -157,6 +157,8 @@ function SyncPage() {
     | null
     | { unitId: string; unitName: string; url: string; expiresAt: string | null }
   >(null);
+  const [pendingRotate, setPendingRotate] = useState<{ unitId: string; unitName: string } | null>(null);
+  const [rotateTtl, setRotateTtl] = useState<string>("365");
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
