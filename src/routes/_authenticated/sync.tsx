@@ -776,7 +776,41 @@ function SyncPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Incident audit trail */}
+      <Dialog open={!!auditFor} onOpenChange={(o) => !o && setAuditFor(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Incident audit trail</DialogTitle>
+            <DialogDescription>{auditFor?.title}</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] space-y-2 overflow-y-auto">
+            {audit.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+            {audit.data && audit.data.length === 0 && (
+              <p className="text-sm text-muted-foreground">No audit entries yet.</p>
+            )}
+            <ul className="divide-y">
+              {(audit.data ?? []).map((a) => (
+                <li key={a.id} className="py-2 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium capitalize">{a.action}</span>
+                    <span className="text-xs text-muted-foreground">{timeAgo(a.created_at)}</span>
+                  </div>
+                  {a.note && <p className="mt-0.5 text-xs text-muted-foreground">{a.note}</p>}
+                  <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
+                    {a.actor_id ? `by ${a.actor_id.slice(0, 8)}…` : "system"}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAuditFor(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
+
 
   );
 }
