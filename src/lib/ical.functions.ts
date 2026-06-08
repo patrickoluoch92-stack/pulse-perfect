@@ -119,13 +119,47 @@ export const revokeIcalToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ unitId: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
-    // Expire immediately — the URL stops working, but the column stays non-null.
+    const unit = await assertCanManageUnit(context.supabase, data.unitId, context.userId);
     const { error } = await context.supabase
       .from("units")
       .update({ ical_export_token_expires_at: new Date(Date.now() - 1000).toISOString() })
       .eq("id", data.unitId);
     if (error) throw new Error(error.message);
+    await context.supabase.from("ical_access_log").insert({
+      org_id: unit.org_id,
+      unit_id: unit.id,
+      token_prefix: "revoked",
+      status: "revoked",
+      ip: null,
+      user_agent: `user:${context.userId}`,
+    });
     return { ok: true };
+  });
+
+export const exportIcalAccessLog = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ orgId: z.string().uuid(), limit: z.number().int().min(1).max(10000).optional() }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: rows, error } = await context.supabase
+      .from("ical_access_log")
+      .select("created_at, status, token_prefix, ip, user_agent, unit_id, units(name)")
+      .eq("org_id", data.orgId)
+      .order("created_at", { ascending: false })
+      .limit(data.limit ?? 5000);
+    if (error) throw new Error(error.message);
+    const esc = (v: unknown) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const header = "created_at,status,unit,token_prefix,ip,user_agent\n";
+    const body = (rows ?? []).map((r) => [
+      r.created_at, r.status,
+      (r as { units?: { name?: string } | null }).units?.name ?? "",
+      r.token_prefix, r.ip ?? "", r.user_agent ?? "",
+    ].map(esc).join(",")).join("\n");
+    return { filename: `ical-access-log-${new Date().toISOString().slice(0, 10)}.csv`, csv: header + body };
   });
 
 export const listIcalAccessLog = createServerFn({ method: "GET" })
