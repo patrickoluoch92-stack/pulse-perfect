@@ -21,6 +21,22 @@ export const listExportableUnits = createServerFn({ method: "GET" })
   });
 
 const MIN_ROTATION_INTERVAL_MS = 10_000;
+const LOG_ROLES = ["owner", "admin", "manager"] as const;
+
+async function assertOrgRole(
+  supabase: typeof import("@supabase/supabase-js").SupabaseClient.prototype,
+  orgId: string,
+  userId: string,
+  roles: readonly string[] = LOG_ROLES,
+) {
+  const { data: ok, error } = await supabase.rpc("has_org_role", {
+    _user_id: userId,
+    _org_id: orgId,
+    _roles: roles as unknown as string[],
+  });
+  if (error) throw new Error(error.message);
+  if (!ok) throw new Error("You don't have permission for this action");
+}
 
 async function assertCanManageUnit(
   supabase: typeof import("@supabase/supabase-js").SupabaseClient.prototype,
@@ -33,15 +49,10 @@ async function assertCanManageUnit(
     .eq("id", unitId)
     .single();
   if (error || !unit) throw new Error("Unit not found");
-  const { data: ok, error: roleErr } = await supabase.rpc("has_org_role", {
-    _user_id: userId,
-    _org_id: unit.org_id,
-    _roles: ["owner", "admin", "manager"],
-  });
-  if (roleErr) throw new Error(roleErr.message);
-  if (!ok) throw new Error("You don't have permission to manage this unit's iCal token");
+  await assertOrgRole(supabase, unit.org_id, userId);
   return unit;
 }
+
 
 export const rotateIcalExportToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
