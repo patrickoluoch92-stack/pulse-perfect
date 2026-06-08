@@ -43,6 +43,7 @@ function SyncPage() {
   const setExpiryFn = useServerFn(setIcalTokenExpiry);
   const revokeFn = useServerFn(revokeIcalToken);
   const fetchLog = useServerFn(listIcalAccessLog);
+  const exportLogFn = useServerFn(exportIcalAccessLog);
 
   const ctx = useQuery({ queryKey: ["workspace-context"], queryFn: () => fetchCtx() });
   const orgId = ctx.data?.currentOrg?.id;
