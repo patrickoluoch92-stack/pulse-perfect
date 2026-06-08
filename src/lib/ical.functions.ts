@@ -342,6 +342,8 @@ export const exportIcalSecurityAlerts = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({ orgId: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
     await assertOrgRole(context.supabase, data.orgId, context.userId);
+    assertCsvRate(context.userId);
+
     const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { data: incidents } = await context.supabase
       .from("ical_incidents")
