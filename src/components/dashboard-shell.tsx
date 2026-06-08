@@ -2,11 +2,12 @@ import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  BedDouble, Calendar, ChartBar, FileText, Home, LogOut, Settings, Sparkles, Users,
+  BedDouble, Calendar, ChartBar, FileText, Home, Lock, LogOut, Settings, Sparkles, Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
+import { planAllows, type Plan } from "@/lib/plans";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +17,7 @@ const nav = [
   { to: "/reservations", label: "Reservations", icon: Calendar },
   { to: "/invoices", label: "Invoices", icon: FileText },
   { to: "/team", label: "Team", icon: Users },
-  { to: "/analytics", label: "Analytics", icon: ChartBar },
+  { to: "/analytics", label: "Analytics", icon: ChartBar, feature: "analytics.basic" as const },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
