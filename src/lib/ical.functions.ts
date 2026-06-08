@@ -904,12 +904,16 @@ export const redeliverIcalWebhook = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ deliveryId: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
+    // Safer redelivery: per-user rate limit + per-delivery cooldown.
+    assertRedeliverUserRate(context.userId);
+    assertRedeliverCooldown(data.deliveryId);
     const { data: del, error: de } = await context.supabase
       .from("ical_webhook_deliveries")
       .select("id, org_id, webhook_id, event, payload")
       .eq("id", data.deliveryId).single();
     if (de || !del) throw new Error("Delivery not found");
     await assertOrgRole(context.supabase, del.org_id, context.userId);
+
 
     const { data: hook, error: he } = await context.supabase
       .from("ical_incident_webhooks")
