@@ -748,6 +748,13 @@ function SyncPage() {
                   className="w-32"
                 />
               </div>
+              <div className="flex gap-1">
+                {[30, 90, 180, 365].map((d) => (
+                  <Button key={d} size="sm" variant="ghost" type="button"
+                    onClick={() => setRetentionDays(String(d))}
+                    className="h-7 px-2 text-xs">{d}d</Button>
+                ))}
+              </div>
               <Button
                 variant="outline"
                 onClick={() => saveRetention.mutate()}
@@ -771,6 +778,13 @@ function SyncPage() {
                   className="w-32"
                 />
               </div>
+              <div className="flex gap-1">
+                {[30, 90, 180, 365, 730].map((d) => (
+                  <Button key={d} size="sm" variant="ghost" type="button"
+                    onClick={() => setAccessRetentionDays(String(d))}
+                    className="h-7 px-2 text-xs">{d}d</Button>
+                ))}
+              </div>
               <Button
                 variant="outline"
                 onClick={() => saveAccessRetention.mutate()}
@@ -784,7 +798,103 @@ function SyncPage() {
               </p>
             </div>
           </div>
+
+          {/* Webhook alerting rules */}
+          {(webhookAlerts.data?.alerts.length ?? 0) > 0 && (
+            <div className="space-y-1 rounded-lg border border-destructive/40 bg-destructive/5 p-3">
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-destructive">
+                <ShieldAlert className="h-3.5 w-3.5" /> Webhook health
+              </p>
+              <ul className="space-y-1">
+                {webhookAlerts.data!.alerts.map((a) => (
+                  <li key={a.webhookId} className="text-xs">
+                    <span className={a.severity === "high" ? "font-semibold text-destructive" : "text-amber-700 dark:text-amber-400"}>
+                      [{a.severity}]
+                    </span>{" "}
+                    <span className="font-mono">{a.url}</span> — {a.message}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Webhook delivery dashboard */}
+          <div className="space-y-2 border-t pt-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold">Delivery log</h3>
+              <div className="flex items-center gap-2">
+                <Select value={delStatusFilter} onValueChange={(v) => { setDelStatusFilter(v as "ok" | "error" | "all"); setDelPage(0); }}>
+                  <SelectTrigger className="h-8 w-[120px] text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="ok">Succeeded</SelectItem>
+                    <SelectItem value="error">Failed</SelectItem>
+                  </SelectContent>
+                </Select>
+                {hooks.data && hooks.data.length > 0 && (
+                  <Select value={delHookFilter || "_all"} onValueChange={(v) => { setDelHookFilter(v === "_all" ? "" : v); setDelPage(0); }}>
+                    <SelectTrigger className="h-8 w-[180px] text-xs"><SelectValue placeholder="All webhooks" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_all">All webhooks</SelectItem>
+                      {hooks.data.map((h) => (
+                        <SelectItem key={h.id} value={h.id} className="font-mono text-[11px]">
+                          {h.url.length > 40 ? "…" + h.url.slice(-38) : h.url}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+            </div>
+            {deliveries.isLoading && <p className="text-xs text-muted-foreground">Loading…</p>}
+            {deliveries.data && deliveries.data.rows.length === 0 && (
+              <p className="rounded-lg border border-dashed p-4 text-center text-xs text-muted-foreground">No deliveries yet.</p>
+            )}
+            {deliveries.data && deliveries.data.rows.length > 0 && (
+              <ul className="divide-y rounded-lg border text-sm">
+                {deliveries.data.rows.map((d) => {
+                  const hookRel = d as unknown as { ical_incident_webhooks?: { url?: string } | null };
+                  return (
+                    <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs">
+                          <span className={d.status === "ok" ? "font-semibold text-emerald-600" : "font-semibold text-destructive"}>
+                            {d.status === "ok" ? `OK ${d.http_status ?? ""}` : `FAIL ${d.http_status ?? "net"}`}
+                          </span>
+                          {" · "}<span className="font-mono">{d.event}</span>
+                          {" · "}{d.attempts} attempt{d.attempts === 1 ? "" : "s"}
+                          {" · "}{timeAgo(d.created_at)}
+                        </p>
+                        <p className="truncate font-mono text-[11px] text-muted-foreground">{hookRel.ical_incident_webhooks?.url ?? "(deleted)"}</p>
+                        {d.last_error && <p className="text-[11px] text-destructive">{d.last_error}</p>}
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => redeliver.mutate(d.id)} disabled={redeliver.isPending}>
+                        <RefreshCw className={`h-3.5 w-3.5 ${redeliver.isPending ? "animate-spin" : ""}`} /> Redeliver
+                      </Button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            {deliveries.data && deliveries.data.total > deliveries.data.limit && (
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{deliveries.data.total} total</span>
+                <div className="flex items-center gap-1">
+                  <Button size="sm" variant="ghost" disabled={delPage === 0} onClick={() => setDelPage((p) => Math.max(0, p - 1))}>
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                  </Button>
+                  <span>Page {delPage + 1}</span>
+                  <Button size="sm" variant="ghost"
+                    disabled={(delPage + 1) * deliveries.data.limit >= deliveries.data.total}
+                    onClick={() => setDelPage((p) => p + 1)}>
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
         </section>
+
 
 
 
