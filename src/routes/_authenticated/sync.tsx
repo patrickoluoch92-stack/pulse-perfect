@@ -655,7 +655,73 @@ function SyncPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Extend expiration */}
+      <Dialog open={!!pendingExtend} onOpenChange={(o) => !o && setPendingExtend(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Extend expiration</DialogTitle>
+            <DialogDescription>
+              {pendingExtend?.unitName}. The existing URL keeps working; only the expiry date moves forward.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label>New expiration (days from now)</Label>
+            <Input type="number" min={1} max={3650}
+              value={extendTtl} onChange={(e) => setExtendTtl(e.target.value)} />
+            <p className="text-xs text-muted-foreground">Between 1 and 3650.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingExtend(null)}>Cancel</Button>
+            <Button
+              disabled={updateExpiry.isPending}
+              onClick={() => {
+                const n = parseInt(extendTtl, 10);
+                if (!Number.isFinite(n) || n < 1 || n > 3650) {
+                  toast.error("Enter a number between 1 and 3650");
+                  return;
+                }
+                const p = pendingExtend!;
+                setPendingExtend(null);
+                updateExpiry.mutate({ unitId: p.unitId, ttlDays: n });
+              }}
+            >
+              {updateExpiry.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              Extend
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Revoke confirm */}
+      <Dialog open={!!pendingRevoke} onOpenChange={(o) => !o && setPendingRevoke(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Revoke feed URL</DialogTitle>
+            <DialogDescription>
+              {pendingRevoke?.unitName}. The current URL stops working immediately. Subscribers (Airbnb, VRBO…) will
+              show stale data until you rotate and re-share a new URL.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingRevoke(null)}>Cancel</Button>
+            <Button
+              variant="destructive"
+              disabled={revoke.isPending}
+              onClick={() => {
+                const p = pendingRevoke!;
+                setPendingRevoke(null);
+                revoke.mutate(p.unitId);
+              }}
+            >
+              {revoke.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              Revoke now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
+
   );
 }
 
