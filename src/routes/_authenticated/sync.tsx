@@ -15,6 +15,7 @@ import {
   listIcalIncidentAudit, listIcalIncidentNotifications, markIcalIncidentNotificationsRead,
   listIcalIncidentWebhooks, addIcalIncidentWebhook, deleteIcalIncidentWebhook,
   testIcalIncidentWebhook, getIcalIncidentRetention, setIcalIncidentRetention,
+  setIcalAccessLogRetention, exportIcalIncidentAudit,
 } from "@/lib/ical.functions";
 
 
