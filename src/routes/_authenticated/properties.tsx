@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -215,7 +215,12 @@ function PropertiesPage() {
                   {[p.city, p.country].filter(Boolean).join(", ")}
                 </p>
               )}
-              <div className="mt-4 flex gap-2 pt-2">
+              <div className="mt-4 flex flex-wrap gap-2 pt-2">
+                <Button asChild size="sm">
+                  <Link to="/properties/$propertyId" params={{ propertyId: p.id }}>
+                    Manage units
+                  </Link>
+                </Button>
                 <Button size="sm" variant="outline" onClick={() => openEdit(p)}>
                   <Pencil className="mr-1.5 h-3.5 w-3.5" /> Edit
                 </Button>
