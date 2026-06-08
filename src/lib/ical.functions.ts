@@ -375,18 +375,14 @@ export const updateIcalIncidentStatus = createServerFn({ method: "POST" })
     if (getErr || !inc) throw new Error("Incident not found");
     await assertOrgRole(context.supabase, inc.org_id, context.userId);
     const now = new Date().toISOString();
-    const patch: Record<string, unknown> = { status: data.status };
-    if (data.status === "acknowledged") {
-      patch.acknowledged_at = now;
-      patch.acknowledged_by = context.userId;
-    } else {
-      patch.resolved_at = now;
-      patch.resolved_by = context.userId;
-    }
+    const patch = data.status === "acknowledged"
+      ? { status: data.status, acknowledged_at: now, acknowledged_by: context.userId }
+      : { status: data.status, resolved_at: now, resolved_by: context.userId };
     const { error } = await context.supabase.from("ical_incidents").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
 
 
 
