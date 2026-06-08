@@ -30,6 +30,27 @@ function assertCsvRate(userId: string) {
   assertCsvRateLimit(userId);
 }
 
+// Per-user redelivery throttle: at most 10 redeliveries / minute.
+const assertRedeliverUserRate = makeRateLimiter(10, 60_000);
+// Per-delivery cooldown: same delivery can't be re-fired within 30s.
+const redeliverCooldown = new Map<string, number>();
+function assertRedeliverCooldown(deliveryId: string, cooldownMs = 30_000) {
+  const now = Date.now();
+  const last = redeliverCooldown.get(deliveryId) ?? 0;
+  if (now - last < cooldownMs) {
+    const wait = Math.ceil((cooldownMs - (now - last)) / 1000);
+    throw new Error(`Please wait ${wait}s before redelivering this event again.`);
+  }
+  redeliverCooldown.set(deliveryId, now);
+  // light GC
+  if (redeliverCooldown.size > 1000) {
+    for (const [k, v] of redeliverCooldown) {
+      if (now - v > 5 * 60_000) redeliverCooldown.delete(k);
+    }
+  }
+}
+
+
 
 
 async function assertOrgRole(
