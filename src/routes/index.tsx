@@ -48,6 +48,9 @@ function Landing() {
           </Link>
           <nav className="flex items-center gap-2">
             <Button asChild variant="ghost">
+              <Link to="/pricing">Pricing</Link>
+            </Button>
+            <Button asChild variant="ghost">
               <Link to="/auth">Sign in</Link>
             </Button>
             <Button asChild>
