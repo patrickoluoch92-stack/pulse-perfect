@@ -582,10 +582,62 @@ export const getIcalIncidentRetention = createServerFn({ method: "GET" })
     await assertOrgRole(context.supabase, data.orgId, context.userId);
     const { data: row, error } = await context.supabase
       .from("organizations")
-      .select("ical_incident_retention_days")
+      .select("ical_incident_retention_days, ical_access_log_retention_days")
       .eq("id", data.orgId).single();
     if (error) throw new Error(error.message);
-    return { days: row?.ical_incident_retention_days ?? 90 };
+    return {
+      days: row?.ical_incident_retention_days ?? 90,
+      accessLogDays: row?.ical_access_log_retention_days ?? 180,
+    };
+  });
+
+export const setIcalAccessLogRetention = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    orgId: z.string().uuid(),
+    days: z.number().int().min(7).max(3650),
+  }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId, ["owner", "admin"] as const);
+    const { error } = await context.supabase
+      .from("organizations")
+      .update({ ical_access_log_retention_days: data.days })
+      .eq("id", data.orgId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const exportIcalIncidentAudit = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ incidentId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { buildCsv } = await import("@/lib/csv");
+    const { data: inc, error: ie } = await context.supabase
+      .from("ical_incidents").select("id, org_id, fingerprint").eq("id", data.incidentId).single();
+    if (ie || !inc) throw new Error("Incident not found");
+    await assertOrgRole(context.supabase, inc.org_id, context.userId);
+    assertCsvRate(context.userId);
+    const { data: rows } = await context.supabase
+      .from("ical_incident_audit")
+      .select("created_at, action, actor_id, note")
+      .eq("incident_id", data.incidentId)
+      .order("created_at", { ascending: false })
+      .limit(1000);
+    const csv = buildCsv(
+      ["created_at", "action", "actor_id", "note"],
+      (rows ?? []).map((r) => [r.created_at, r.action, r.actor_id ?? "", r.note ?? ""]),
+    );
+    await context.supabase.from("ical_access_log").insert({
+      org_id: inc.org_id, unit_id: null,
+      token_prefix: "csv_export",
+      status: "csv_export",
+      ip: null,
+      user_agent: `user:${context.userId}:audit:incident=${data.incidentId.slice(0, 8)}:rows=${rows?.length ?? 0}`,
+    });
+    return {
+      filename: `incident-${inc.fingerprint.slice(0, 16)}-audit.csv`,
+      csv,
+    };
   });
 
 
