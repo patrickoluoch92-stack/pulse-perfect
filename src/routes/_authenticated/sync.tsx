@@ -158,6 +158,23 @@ function SyncPage() {
     refetchInterval: 60000,
   });
 
+  const incidents = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-incidents", orgId],
+    queryFn: () => fetchIncidents({ data: { orgId: orgId!, status: "open" } }),
+    refetchInterval: 60000,
+  });
+
+  const updateIncident = useMutation({
+    mutationFn: (vars: { id: string; status: "acknowledged" | "resolved" }) =>
+      updateIncidentFn({ data: vars }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ical-incidents"] });
+      qc.invalidateQueries({ queryKey: ["ical-security-alerts"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   // Rotation result dialog
   const [rotateResult, setRotateResult] = useState<
     | null
@@ -165,6 +182,12 @@ function SyncPage() {
   >(null);
   const [pendingRotate, setPendingRotate] = useState<{ unitId: string; unitName: string } | null>(null);
   const [rotateTtl, setRotateTtl] = useState<string>("365");
+
+  // Extend / Revoke dialogs (replace prompt/confirm)
+  const [pendingExtend, setPendingExtend] = useState<{ unitId: string; unitName: string } | null>(null);
+  const [extendTtl, setExtendTtl] = useState<string>("365");
+  const [pendingRevoke, setPendingRevoke] = useState<{ unitId: string; unitName: string } | null>(null);
+
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
