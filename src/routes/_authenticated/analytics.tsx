@@ -84,19 +84,27 @@ function AnalyticsPage() {
           </p>
         </div>
         <div className="flex gap-1 rounded-lg border border-border/60 bg-card p-1">
-          {RANGES.map((r) => (
-            <button
-              key={r.key}
-              onClick={() => setRange(r.key)}
-              className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
-                range === r.key
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
+          {RANGES.map((r) => {
+            const allowed = planAllows(plan, r.feature);
+            return (
+              <button
+                key={r.key}
+                onClick={() => allowed && setRange(r.key)}
+                disabled={!allowed}
+                title={allowed ? r.label : `Requires ${PLAN_LABEL[r.feature === "analytics.range.ytd" ? "business" : "professional"]} plan`}
+                className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-sm transition-colors ${
+                  range === r.key
+                    ? "bg-primary text-primary-foreground"
+                    : allowed
+                      ? "text-muted-foreground hover:text-foreground"
+                      : "text-muted-foreground/50 cursor-not-allowed"
+                }`}
+              >
+                {!allowed && <Lock className="h-3 w-3" />}
+                {r.label}
+              </button>
+            );
+          })}
         </div>
       </header>
 
