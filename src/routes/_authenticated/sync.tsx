@@ -3,13 +3,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Calendar, Copy, KeyRound, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { Calendar, Copy, KeyRound, Loader2, Plus, RefreshCw, ShieldOff, Trash2 } from "lucide-react";
 
 
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 import {
   listIcalSources, addIcalSource, deleteIcalSource, syncIcalSource,
-  listExportableUnits, rotateIcalExportToken,
+  listExportableUnits, rotateIcalExportToken, setIcalTokenExpiry,
+  revokeIcalToken, listIcalAccessLog,
 } from "@/lib/ical.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
