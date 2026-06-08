@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { AlertTriangle, Bell, Calendar, Check, CheckCircle2, ChevronLeft, ChevronRight, Copy, Download, History, KeyRound, Loader2, Plus, RefreshCw, ShieldAlert, ShieldOff, Trash2 } from "lucide-react";
+import { AlertTriangle, Bell, Calendar, Check, CheckCircle2, ChevronLeft, ChevronRight, Copy, Download, History, KeyRound, Loader2, Plus, RefreshCw, Save, Send, ShieldAlert, ShieldOff, Trash2, Webhook } from "lucide-react";
 
 
 import { getWorkspaceContext } from "@/lib/workspace.functions";
@@ -13,6 +13,8 @@ import {
   revokeIcalToken, listIcalAccessLog, exportIcalAccessLog, getIcalSecurityAlerts,
   exportIcalSecurityAlerts, listIcalIncidents, updateIcalIncidentStatus,
   listIcalIncidentAudit, listIcalIncidentNotifications, markIcalIncidentNotificationsRead,
+  listIcalIncidentWebhooks, addIcalIncidentWebhook, deleteIcalIncidentWebhook,
+  testIcalIncidentWebhook, getIcalIncidentRetention, setIcalIncidentRetention,
 } from "@/lib/ical.functions";
 
 
@@ -25,6 +27,7 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export const Route = createFileRoute("/_authenticated/sync")({
   head: () => ({ meta: [{ title: "Calendar Sync — HostPulse" }] }),
@@ -205,6 +208,68 @@ function SyncPage() {
     queryFn: () => fetchAuditFn({ data: { incidentId: auditFor!.id } }),
   });
 
+  // Webhooks
+  const fetchHooks = useServerFn(listIcalIncidentWebhooks);
+  const addHookFn = useServerFn(addIcalIncidentWebhook);
+  const delHookFn = useServerFn(deleteIcalIncidentWebhook);
+  const testHookFn = useServerFn(testIcalIncidentWebhook);
+  const hooks = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-incident-webhooks", orgId],
+    queryFn: () => fetchHooks({ data: { orgId: orgId! } }),
+  });
+  const [newHookUrl, setNewHookUrl] = useState("");
+  const [revealedSecret, setRevealedSecret] = useState<{ url: string; secret: string } | null>(null);
+  const addHook = useMutation({
+    mutationFn: () => addHookFn({ data: { orgId: orgId!, url: newHookUrl.trim() } }),
+    onSuccess: (row) => {
+      toast.success("Webhook added");
+      setNewHookUrl("");
+      setRevealedSecret({ url: row.url, secret: row.secret });
+      qc.invalidateQueries({ queryKey: ["ical-incident-webhooks"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const delHook = useMutation({
+    mutationFn: (id: string) => delHookFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Webhook removed");
+      qc.invalidateQueries({ queryKey: ["ical-incident-webhooks"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const testHook = useMutation({
+    mutationFn: (id: string) => testHookFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Test event sent");
+      qc.invalidateQueries({ queryKey: ["ical-incident-webhooks"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  // Retention
+  const fetchRetention = useServerFn(getIcalIncidentRetention);
+  const setRetentionFn = useServerFn(setIcalIncidentRetention);
+  const retention = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-incident-retention", orgId],
+    queryFn: () => fetchRetention({ data: { orgId: orgId! } }),
+  });
+  const [retentionDays, setRetentionDays] = useState<string>("");
+  const saveRetention = useMutation({
+    mutationFn: () => {
+      const n = parseInt(retentionDays, 10);
+      if (!Number.isFinite(n) || n < 7 || n > 3650) throw new Error("Enter 7–3650 days");
+      return setRetentionFn({ data: { orgId: orgId!, days: n } });
+    },
+    onSuccess: () => {
+      toast.success("Retention updated");
+      qc.invalidateQueries({ queryKey: ["ical-incident-retention"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
 
   // Rotation result dialog
   const [rotateResult, setRotateResult] = useState<
@@ -247,26 +312,64 @@ function SyncPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="relative">
-              <Button
-                variant="outline" size="sm"
-                disabled={!orgId || (notifs.data?.unread ?? 0) === 0 || markRead.isPending}
-                onClick={() => markRead.mutate()}
-                title={`${notifs.data?.unread ?? 0} unread incident notification${(notifs.data?.unread ?? 0) === 1 ? "" : "s"}`}
-              >
-                <Bell className="h-4 w-4" />
-                {(notifs.data?.unread ?? 0) > 0 ? `${notifs.data!.unread} unread` : "No new alerts"}
-              </Button>
-              {(notifs.data?.unread ?? 0) > 0 && (
-                <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
-                  {Math.min(99, notifs.data!.unread)}
-                </span>
-              )}
-            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" disabled={!orgId} className="relative">
+                  <Bell className="h-4 w-4" />
+                  Alerts
+                  {(notifs.data?.unread ?? 0) > 0 && (
+                    <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                      {Math.min(99, notifs.data!.unread)}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-[360px] p-0">
+                <div className="flex items-center justify-between border-b px-3 py-2">
+                  <div className="text-sm font-medium">Incident notifications</div>
+                  <Button
+                    variant="ghost" size="sm"
+                    disabled={(notifs.data?.unread ?? 0) === 0 || markRead.isPending}
+                    onClick={() => markRead.mutate()}
+                  >
+                    Mark all read
+                  </Button>
+                </div>
+                <div className="max-h-[420px] overflow-y-auto">
+                  {!notifs.data || notifs.data.items.length === 0 ? (
+                    <p className="px-3 py-6 text-center text-xs text-muted-foreground">
+                      No open incidents.
+                    </p>
+                  ) : (
+                    <ul className="divide-y">
+                      {notifs.data.items.map((n) => (
+                        <li key={n.id} className={`flex gap-2 px-3 py-2 text-sm ${n.read ? "opacity-60" : ""}`}>
+                          <span
+                            className={
+                              "mt-1 h-2 w-2 shrink-0 rounded-full " +
+                              (n.severity === "high" ? "bg-destructive" : "bg-amber-500")
+                            }
+                            aria-hidden
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-baseline justify-between gap-2">
+                              <span className="truncate text-xs font-medium capitalize">{n.kind}</span>
+                              <span className="text-[10px] text-muted-foreground">{timeAgo(n.last_seen_at)}</span>
+                            </div>
+                            <p className="mt-0.5 text-xs text-muted-foreground line-clamp-3">{n.message}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
             <Button onClick={() => setOpen(true)} disabled={!orgId || (units.data?.length ?? 0) === 0}>
               <Plus className="h-4 w-4" /> Add import feed
             </Button>
           </div>
+
 
         </header>
 
@@ -489,6 +592,91 @@ function SyncPage() {
             </p>
           )}
         </section>
+
+        <section className="space-y-3 rounded-xl border bg-card p-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <Webhook className="h-4 w-4 text-muted-foreground" />
+            <h2 className="font-display text-lg font-semibold">Incident webhooks</h2>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            POSTed when an incident opens, is acknowledged, or resolved. Each request includes an
+            <code className="mx-1 rounded bg-muted px-1">x-hostpulse-signature</code> HMAC-SHA256 header
+            so you can verify it came from us. HTTPS only.
+          </p>
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="min-w-[260px] flex-1 space-y-1.5">
+              <Label htmlFor="hook-url">Webhook URL</Label>
+              <Input
+                id="hook-url" value={newHookUrl} onChange={(e) => setNewHookUrl(e.target.value)}
+                placeholder="https://example.com/hooks/hostpulse"
+              />
+            </div>
+            <Button
+              onClick={() => addHook.mutate()}
+              disabled={!orgId || addHook.isPending || !newHookUrl.trim()}
+            >
+              {addHook.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              <Plus className="h-4 w-4" /> Add
+            </Button>
+          </div>
+          {hooks.data && hooks.data.length > 0 ? (
+            <ul className="divide-y rounded-lg border">
+              {hooks.data.map((h) => (
+                <li key={h.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-mono text-xs">{h.url}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {h.last_delivered_at
+                        ? <>Last: <span className={h.last_status?.startsWith("ok") ? "text-emerald-600" : "text-destructive"}>{h.last_status}</span> · {timeAgo(h.last_delivered_at)}</>
+                        : "Never delivered"}
+                      {h.last_error && <> · <span className="text-destructive">{h.last_error}</span></>}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button size="sm" variant="outline" onClick={() => testHook.mutate(h.id)} disabled={testHook.isPending}>
+                      <Send className="h-3.5 w-3.5" /> Test
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => delHook.mutate(h.id)} disabled={delHook.isPending}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="rounded-lg border border-dashed p-4 text-center text-xs text-muted-foreground">
+              No webhooks configured.
+            </p>
+          )}
+
+          <div className="mt-2 border-t pt-3">
+            <div className="flex flex-wrap items-end gap-2">
+              <div className="min-w-[140px] space-y-1.5">
+                <Label htmlFor="retention">Incident retention (days)</Label>
+                <Input
+                  id="retention" type="number" min={7} max={3650}
+                  placeholder={String(retention.data?.days ?? 90)}
+                  value={retentionDays}
+                  onChange={(e) => setRetentionDays(e.target.value)}
+                  className="w-32"
+                />
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => saveRetention.mutate()}
+                disabled={!orgId || saveRetention.isPending || !retentionDays.trim()}
+              >
+                {saveRetention.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                <Save className="h-3.5 w-3.5" /> Save
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Currently keeping resolved incidents {retention.data?.days ?? 90} days. Access logs are kept 180 days.
+              </p>
+            </div>
+          </div>
+        </section>
+
+
 
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -809,7 +997,36 @@ function SyncPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Webhook secret reveal — shown once */}
+      <Dialog open={!!revealedSecret} onOpenChange={(o) => !o && setRevealedSecret(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Webhook signing secret</DialogTitle>
+            <DialogDescription>
+              Store this secret somewhere safe — we don&apos;t display it again. Verify incoming requests by
+              computing <code>HMAC-SHA256(secret, raw_body)</code> and comparing to the
+              <code className="mx-1 rounded bg-muted px-1">x-hostpulse-signature</code> header.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Destination</Label>
+            <Input readOnly value={revealedSecret?.url ?? ""} className="font-mono text-xs" />
+            <Label>Secret</Label>
+            <div className="flex items-center gap-2">
+              <Input readOnly value={revealedSecret?.secret ?? ""} className="flex-1 font-mono text-xs" />
+              <Button size="sm" onClick={() => revealedSecret && copy(revealedSecret.secret)}>
+                <Copy className="h-3.5 w-3.5" /> Copy
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setRevealedSecret(null)}>I&apos;ve saved it</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
+
 
 
   );

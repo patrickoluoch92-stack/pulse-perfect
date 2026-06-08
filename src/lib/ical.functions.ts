@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { parseICS } from "@/lib/ical";
+import { makeRateLimiter } from "@/lib/csv";
 
 const orgIdSchema = z.object({ orgId: z.string().uuid() });
 
@@ -23,19 +24,12 @@ export const listExportableUnits = createServerFn({ method: "GET" })
 const MIN_ROTATION_INTERVAL_MS = 10_000;
 const LOG_ROLES = ["owner", "admin", "manager"] as const;
 
-// In-memory CSV export throttle: per-user max 5 exports / 60s
-const csvExportHits = new Map<string, number[]>();
-const CSV_MAX_PER_MIN = 5;
+// Per-user CSV export throttle (in-memory, per worker).
+const assertCsvRateLimit = makeRateLimiter(5, 60_000);
 function assertCsvRate(userId: string) {
-  const now = Date.now();
-  const cutoff = now - 60_000;
-  const arr = (csvExportHits.get(userId) ?? []).filter((t) => t > cutoff);
-  if (arr.length >= CSV_MAX_PER_MIN) {
-    throw new Error("Too many CSV exports — please wait a minute and try again");
-  }
-  arr.push(now);
-  csvExportHits.set(userId, arr);
+  assertCsvRateLimit(userId);
 }
+
 
 
 async function assertOrgRole(
@@ -331,9 +325,20 @@ export const getIcalSecurityAlerts = createServerFn({ method: "GET" })
             incident_id: ins.data.id, org_id: data.orgId, actor_id: null,
             action: "opened", note: a.message,
           });
+          // Fire-and-forget webhook dispatch for newly opened incidents.
+          dispatchIncidentWebhooks(context.supabase, data.orgId, {
+            event: "incident.opened",
+            incident_id: ins.data.id,
+            severity: a.severity,
+            kind: a.kind,
+            fingerprint: a.fingerprint,
+            message: a.message,
+            occurred_at: new Date().toISOString(),
+          });
         }
       }
     }
+
 
 
     return {
@@ -438,8 +443,157 @@ export const updateIcalIncidentStatus = createServerFn({ method: "POST" })
       incident_id: data.id, org_id: inc.org_id, actor_id: context.userId,
       action: data.status, note: data.note ?? null,
     });
+    dispatchIncidentWebhooks(context.supabase, inc.org_id, {
+      event: `incident.${data.status}`,
+      incident_id: data.id,
+      actor_id: context.userId,
+      note: data.note ?? null,
+      occurred_at: new Date().toISOString(),
+    });
     return { ok: true };
   });
+
+/** Webhook dispatch — fire-and-forget. HMAC-signs body with each webhook's secret. */
+type SupaClient = typeof import("@supabase/supabase-js").SupabaseClient.prototype;
+async function dispatchIncidentWebhooks(supabase: SupaClient, orgId: string, payload: Record<string, unknown>) {
+  try {
+    const { data: hooks } = await supabase
+      .from("ical_incident_webhooks")
+      .select("id, url, secret")
+      .eq("org_id", orgId)
+      .eq("enabled", true);
+    if (!hooks || hooks.length === 0) return;
+    const body = JSON.stringify(payload);
+    const enc = new TextEncoder();
+    for (const h of hooks) {
+      try {
+        const key = await crypto.subtle.importKey(
+          "raw", enc.encode(h.secret),
+          { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+        );
+        const sig = await crypto.subtle.sign("HMAC", key, enc.encode(body));
+        const sigHex = Array.from(new Uint8Array(sig), (b) => b.toString(16).padStart(2, "0")).join("");
+        const res = await fetch(h.url, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-hostpulse-event": String(payload.event ?? "incident"),
+            "x-hostpulse-signature": `sha256=${sigHex}`,
+          },
+          body,
+          signal: AbortSignal.timeout(5_000),
+        });
+        await supabase.from("ical_incident_webhooks").update({
+          last_status: res.ok ? `ok ${res.status}` : `error ${res.status}`,
+          last_error: res.ok ? null : `HTTP ${res.status}`,
+          last_delivered_at: new Date().toISOString(),
+        }).eq("id", h.id);
+      } catch (err) {
+        await supabase.from("ical_incident_webhooks").update({
+          last_status: "error",
+          last_error: err instanceof Error ? err.message.slice(0, 500) : "unknown",
+          last_delivered_at: new Date().toISOString(),
+        }).eq("id", h.id);
+      }
+    }
+  } catch {
+    // Never let webhook failures break the calling request.
+  }
+}
+
+export const listIcalIncidentWebhooks = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => orgIdSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
+    const { data: rows, error } = await context.supabase
+      .from("ical_incident_webhooks")
+      .select("id, url, enabled, last_status, last_error, last_delivered_at, created_at")
+      .eq("org_id", data.orgId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const addIcalIncidentWebhook = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    orgId: z.string().uuid(),
+    url: z.string().trim().url().max(2000).refine((u) => /^https:\/\//i.test(u), "Must be HTTPS"),
+  }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    const secret = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    const { data: row, error } = await context.supabase
+      .from("ical_incident_webhooks")
+      .insert({ org_id: data.orgId, url: data.url, secret })
+      .select("id, url, secret").single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const deleteIcalIncidentWebhook = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: hook, error: ge } = await context.supabase
+      .from("ical_incident_webhooks").select("id, org_id").eq("id", data.id).single();
+    if (ge || !hook) throw new Error("Webhook not found");
+    await assertOrgRole(context.supabase, hook.org_id, context.userId);
+    const { error } = await context.supabase
+      .from("ical_incident_webhooks").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const testIcalIncidentWebhook = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: hook, error: ge } = await context.supabase
+      .from("ical_incident_webhooks").select("id, org_id").eq("id", data.id).single();
+    if (ge || !hook) throw new Error("Webhook not found");
+    await assertOrgRole(context.supabase, hook.org_id, context.userId);
+    await dispatchIncidentWebhooks(context.supabase, hook.org_id, {
+      event: "incident.test",
+      incident_id: null,
+      message: "Test delivery from HostPulse",
+      occurred_at: new Date().toISOString(),
+    });
+    return { ok: true };
+  });
+
+export const setIcalIncidentRetention = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    orgId: z.string().uuid(),
+    days: z.number().int().min(7).max(3650),
+  }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId, ["owner", "admin"] as const);
+    const { error } = await context.supabase
+      .from("organizations")
+      .update({ ical_incident_retention_days: data.days })
+      .eq("id", data.orgId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const getIcalIncidentRetention = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => orgIdSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
+    const { data: row, error } = await context.supabase
+      .from("organizations")
+      .select("ical_incident_retention_days")
+      .eq("id", data.orgId).single();
+    if (error) throw new Error(error.message);
+    return { days: row?.ical_incident_retention_days ?? 90 };
+  });
+
 
 export const listIcalIncidentAudit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
