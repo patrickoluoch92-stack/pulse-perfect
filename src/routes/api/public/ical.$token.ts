@@ -1,24 +1,79 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { buildICS, type ICSEvent } from "@/lib/ical";
 
+const SECURITY_HEADERS = {
+  "Cache-Control": "private, no-store, max-age=0",
+  "X-Content-Type-Options": "nosniff",
+  "X-Robots-Tag": "noindex, nofollow",
+  "Referrer-Policy": "no-referrer",
+};
+
+function clientIp(req: Request): string | null {
+  const h = req.headers;
+  return (
+    h.get("cf-connecting-ip") ||
+    h.get("x-real-ip") ||
+    (h.get("x-forwarded-for")?.split(",")[0].trim() ?? null)
+  );
+}
+
 export const Route = createFileRoute("/api/public/ical/$token")({
   server: {
     handlers: {
-      GET: async ({ params }) => {
-        // Strip optional ".ics" suffix; tokens are 48 hex chars.
-        const token = String(params.token ?? "").replace(/\.ics$/i, "");
-        if (!/^[a-f0-9]{32,128}$/i.test(token)) {
-          return new Response("Not found", { status: 404 });
+      GET: async ({ params, request }) => {
+        const raw = String(params.token ?? "").replace(/\.ics$/i, "");
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const ua = request.headers.get("user-agent")?.slice(0, 300) ?? null;
+        const ip = clientIp(request);
+
+        const log = (
+          status: string,
+          unit: { id?: string; org_id?: string } | null,
+        ) =>
+          supabaseAdmin
+            .from("ical_access_log")
+            .insert({
+              org_id: unit?.org_id ?? null,
+              unit_id: unit?.id ?? null,
+              token_prefix: raw.slice(0, 8),
+              status,
+              ip,
+              user_agent: ua,
+            })
+            .then(() => undefined, () => undefined);
+
+        // Strict format check before any DB lookup.
+        if (!/^[a-f0-9]{32,128}$/.test(raw)) {
+          await log("invalid_format", null);
+          return new Response("Not found", { status: 404, headers: SECURITY_HEADERS });
         }
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        // Only GET / HEAD permitted (handler is GET; HEAD handled by runtime).
+        if (request.method !== "GET" && request.method !== "HEAD") {
+          return new Response("Method not allowed", {
+            status: 405,
+            headers: { ...SECURITY_HEADERS, Allow: "GET, HEAD" },
+          });
+        }
 
         const { data: unit } = await supabaseAdmin
           .from("units")
-          .select("id, name, org_id")
-          .eq("ical_export_token", token)
+          .select("id, name, org_id, ical_export_token_expires_at")
+          .eq("ical_export_token", raw)
           .maybeSingle();
-        if (!unit) return new Response("Not found", { status: 404 });
+
+        if (!unit) {
+          await log("not_found", null);
+          return new Response("Not found", { status: 404, headers: SECURITY_HEADERS });
+        }
+
+        if (
+          unit.ical_export_token_expires_at &&
+          new Date(unit.ical_export_token_expires_at).getTime() < Date.now()
+        ) {
+          await log("expired", unit);
+          return new Response("Token expired", { status: 410, headers: SECURITY_HEADERS });
+        }
 
         const [resv, blocks] = await Promise.all([
           supabaseAdmin
@@ -56,12 +111,14 @@ export const Route = createFileRoute("/api/public/ical/$token")({
           events,
         });
 
+        await log("ok", unit);
+
         return new Response(body, {
           status: 200,
           headers: {
+            ...SECURITY_HEADERS,
             "Content-Type": "text/calendar; charset=utf-8",
             "Content-Disposition": `inline; filename="${unit.id}.ics"`,
-            "Cache-Control": "private, max-age=300",
           },
         });
       },
