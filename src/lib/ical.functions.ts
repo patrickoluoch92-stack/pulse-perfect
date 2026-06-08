@@ -495,7 +495,7 @@ export const listIcalIncidentWebhooks = createServerFn({ method: "GET" })
     await assertOrgRole(context.supabase, data.orgId, context.userId);
     const { data: rows, error } = await context.supabase
       .from("ical_incident_webhooks")
-      .select("id, url, enabled, last_status, last_error, last_delivered_at, created_at")
+      .select("id, url, enabled, last_status, last_error, last_delivered_at, last_attempt_at, last_test_at, attempt_count, created_at")
       .eq("org_id", data.orgId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -545,10 +545,17 @@ export const testIcalIncidentWebhook = createServerFn({ method: "POST" })
     await assertOrgRole(context.supabase, hook.org_id, context.userId);
     await dispatchIncidentWebhooks(context.supabase, hook.org_id, {
       event: "incident.test",
+      test: true,
       incident_id: null,
-      message: "Test delivery from HostPulse",
+      severity: "info",
+      message: "Test delivery from HostPulse — if you can read this, signing and retry are configured correctly.",
+      actor_id: context.userId,
       occurred_at: new Date().toISOString(),
     });
+    await context.supabase
+      .from("ical_incident_webhooks")
+      .update({ last_test_at: new Date().toISOString() })
+      .eq("id", data.id);
     return { ok: true };
   });
 
