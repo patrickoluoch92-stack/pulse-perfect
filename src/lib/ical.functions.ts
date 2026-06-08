@@ -482,11 +482,24 @@ async function dispatchIncidentWebhooks(supabase: SupaClient, orgId: string, pay
         last_attempt_at: now,
         attempt_count: (h.attempt_count ?? 0) + result.attempts.length,
       }).eq("id", h.id);
+      // Record delivery in audit log for the dashboard.
+      await supabase.from("ical_webhook_deliveries").insert({
+        org_id: orgId,
+        webhook_id: h.id,
+        event,
+        payload: payload as unknown as Record<string, unknown>,
+        status: result.ok ? "ok" : "error",
+        http_status: result.finalStatus ?? null,
+        attempts: result.attempts.length,
+        last_error: result.ok ? null : (result.finalError ?? `HTTP ${lastAttempt?.status ?? "?"}`),
+        delivered_at: result.ok ? now : null,
+      });
     }
   } catch {
     // Never let webhook failures break the calling request.
   }
 }
+
 
 export const listIcalIncidentWebhooks = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
