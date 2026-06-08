@@ -14,6 +14,100 @@ export type Database = {
   }
   public: {
     Tables: {
+      guests: {
+        Row: {
+          country: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          org_id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          org_id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          org_id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          org_id: string
+          role: Database["public"]["Enums"]["org_role"]
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          org_id: string
+          role?: Database["public"]["Enums"]["org_role"]
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          org_id?: string
+          role?: Database["public"]["Enums"]["org_role"]
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_invitations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string
@@ -161,6 +255,95 @@ export type Database = {
           },
         ]
       }
+      reservations: {
+        Row: {
+          adults: number
+          check_in: string
+          check_out: string
+          children: number
+          confirmation_code: string
+          created_at: string
+          currency: string
+          guest_id: string
+          id: string
+          notes: string | null
+          org_id: string
+          property_id: string
+          source: Database["public"]["Enums"]["reservation_source"]
+          status: Database["public"]["Enums"]["reservation_status"]
+          total_amount: number
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          adults?: number
+          check_in: string
+          check_out: string
+          children?: number
+          confirmation_code?: string
+          created_at?: string
+          currency?: string
+          guest_id: string
+          id?: string
+          notes?: string | null
+          org_id: string
+          property_id: string
+          source?: Database["public"]["Enums"]["reservation_source"]
+          status?: Database["public"]["Enums"]["reservation_status"]
+          total_amount?: number
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          adults?: number
+          check_in?: string
+          check_out?: string
+          children?: number
+          confirmation_code?: string
+          created_at?: string
+          currency?: string
+          guest_id?: string
+          id?: string
+          notes?: string | null
+          org_id?: string
+          property_id?: string
+          source?: Database["public"]["Enums"]["reservation_source"]
+          status?: Database["public"]["Enums"]["reservation_status"]
+          total_amount?: number
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservations_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       units: {
         Row: {
           base_price: number
@@ -220,6 +403,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_organization_invitation: {
+        Args: { _token: string }
+        Returns: string
+      }
+      get_invitation_by_token: {
+        Args: { _token: string }
+        Returns: {
+          accepted_at: string
+          email: string
+          expires_at: string
+          org_id: string
+          org_name: string
+          role: Database["public"]["Enums"]["org_role"]
+        }[]
+      }
       has_org_role: {
         Args: {
           _org_id: string
@@ -242,6 +440,20 @@ export type Database = {
         | "vacation_rental"
         | "airbnb"
         | "tour_operator"
+      reservation_source:
+        | "direct"
+        | "airbnb"
+        | "booking_com"
+        | "vrbo"
+        | "expedia"
+        | "other"
+      reservation_status:
+        | "pending"
+        | "confirmed"
+        | "checked_in"
+        | "checked_out"
+        | "cancelled"
+        | "no_show"
       subscription_plan: "starter" | "professional" | "business" | "enterprise"
       unit_status:
         | "available"
@@ -392,6 +604,22 @@ export const Constants = {
         "vacation_rental",
         "airbnb",
         "tour_operator",
+      ],
+      reservation_source: [
+        "direct",
+        "airbnb",
+        "booking_com",
+        "vrbo",
+        "expedia",
+        "other",
+      ],
+      reservation_status: [
+        "pending",
+        "confirmed",
+        "checked_in",
+        "checked_out",
+        "cancelled",
+        "no_show",
       ],
       subscription_plan: ["starter", "professional", "business", "enterprise"],
       unit_status: [
