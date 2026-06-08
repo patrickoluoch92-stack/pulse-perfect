@@ -222,6 +222,29 @@ function SyncPage() {
 
         {alerts.data && alerts.data.alerts.length > 0 && (
           <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                Security alerts
+              </h2>
+              <Button
+                size="sm" variant="outline" disabled={!orgId}
+                onClick={async () => {
+                  try {
+                    const res = await exportAlertsFn({ data: { orgId: orgId! } });
+                    const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8" });
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = res.filename;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                  } catch (e) {
+                    toast.error(e instanceof Error ? e.message : "Export failed");
+                  }
+                }}
+              >
+                <Download className="h-3.5 w-3.5" /> Export alerts
+              </Button>
+            </div>
             {alerts.data.alerts.map((a, i) => {
               const tone = a.severity === "high"
                 ? "border-destructive/40 bg-destructive/10 text-destructive"
@@ -242,6 +265,51 @@ function SyncPage() {
             </p>
           </div>
         )}
+
+        {incidents.data && incidents.data.length > 0 && (
+          <section className="space-y-2 rounded-xl border bg-card p-4 shadow-sm">
+            <h2 className="font-display text-lg font-semibold">Open incidents</h2>
+            <p className="text-xs text-muted-foreground">
+              High-severity alerts open an incident automatically. Acknowledge to silence; resolve when handled.
+            </p>
+            <ul className="divide-y">
+              {incidents.data.map((inc) => (
+                <li key={inc.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className={
+                        "rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase " +
+                        (inc.severity === "high" ? "bg-destructive/15 text-destructive" : "bg-amber-500/15 text-amber-700 dark:text-amber-300")
+                      }>{inc.severity}</span>
+                      <span className="text-xs font-medium">{inc.kind}</span>
+                      <span className="text-xs text-muted-foreground">· {inc.occurrences}× · last seen {timeAgo(inc.last_seen_at)}</span>
+                      {inc.status === "acknowledged" && (
+                        <span className="text-[10px] uppercase text-muted-foreground">acknowledged</span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-sm">{inc.message}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {inc.status === "open" && (
+                      <Button size="sm" variant="outline"
+                        onClick={() => updateIncident.mutate({ id: inc.id, status: "acknowledged" })}
+                        disabled={updateIncident.isPending}>
+                        <Check className="h-3.5 w-3.5" /> Ack
+                      </Button>
+                    )}
+                    <Button size="sm" variant="ghost"
+                      onClick={() => updateIncident.mutate({ id: inc.id, status: "resolved" })}
+                      disabled={updateIncident.isPending}>
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Resolve
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+
 
         <section className="space-y-4">
           {(units.data ?? []).map((u) => {
