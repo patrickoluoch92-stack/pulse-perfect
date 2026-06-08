@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { parseICS } from "@/lib/ical";
 import { makeRateLimiter } from "@/lib/csv";
+import { enforceAuthRateLimit, requireMfa } from "@/lib/security";
 
 const orgIdSchema = z.object({ orgId: z.string().uuid() });
 
@@ -93,6 +94,8 @@ export const rotateIcalExportToken = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    requireMfa(context.claims);
+    await enforceAuthRateLimit({ bucket: "ical.token.rotate", userId: context.userId, key: data.unitId, limit: 5, windowSec: 600 });
     const unit = await assertCanManageUnit(context.supabase, data.unitId, context.userId);
 
     if (unit.ical_export_token_created_at) {
@@ -160,6 +163,8 @@ export const revokeIcalToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ unitId: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
+    requireMfa(context.claims);
+    await enforceAuthRateLimit({ bucket: "ical.token.revoke", userId: context.userId, limit: 10, windowSec: 600 });
     const unit = await assertCanManageUnit(context.supabase, data.unitId, context.userId);
     const { error } = await context.supabase
       .from("units")
