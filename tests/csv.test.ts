@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { escapeCsvField, buildCsv, makeRateLimiter } from "../csv";
+import { escapeCsvField, buildCsv, makeRateLimiter } from "@/lib/csv";
 
 describe("escapeCsvField — formula injection hardening", () => {
   it("prefixes leading = with single quote", () => {
