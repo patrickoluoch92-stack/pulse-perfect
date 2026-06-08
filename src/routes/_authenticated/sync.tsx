@@ -223,11 +223,7 @@ function SyncPage() {
                   </Button>
                   <Button
                     variant="outline" size="sm"
-                    onClick={() => {
-                      if (confirm("Rotate token? Any calendar subscribed to the current URL will stop syncing.")) {
-                        rotate.mutate({ unitId: u.id });
-                      }
-                    }}
+                    onClick={() => setPendingRotate({ unitId: u.id, unitName: `${u.properties?.name ?? ""} · ${u.name}` })}
                     disabled={rotate.isPending}
                   >
                     {rotate.isPending && rotate.variables?.unitId === u.id
