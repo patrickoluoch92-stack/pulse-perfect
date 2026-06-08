@@ -313,6 +313,10 @@ export const getIcalSecurityAlerts = createServerFn({ method: "GET" })
             message: a.message,
           })
           .eq("id", existing.id);
+        await context.supabase.from("ical_incident_audit").insert({
+          incident_id: existing.id, org_id: data.orgId, actor_id: null,
+          action: "updated", note: a.message,
+        });
       } else {
         const ins = await context.supabase.from("ical_incidents").insert({
           org_id: data.orgId,
@@ -320,10 +324,17 @@ export const getIcalSecurityAlerts = createServerFn({ method: "GET" })
           kind: a.kind,
           fingerprint: a.fingerprint,
           message: a.message,
-        });
-        if (!ins.error) opened++;
+        }).select("id").single();
+        if (!ins.error && ins.data) {
+          opened++;
+          await context.supabase.from("ical_incident_audit").insert({
+            incident_id: ins.data.id, org_id: data.orgId, actor_id: null,
+            action: "opened", note: a.message,
+          });
+        }
       }
     }
+
 
     return {
       counts: {
