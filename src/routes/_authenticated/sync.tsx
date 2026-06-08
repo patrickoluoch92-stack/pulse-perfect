@@ -3,13 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Calendar, Copy, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { Calendar, Copy, KeyRound, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 
 
 import { getWorkspaceContext } from "@/lib/workspace.functions";
-import { listUnitsForOrg } from "@/lib/reservations.functions";
 import {
   listIcalSources, addIcalSource, deleteIcalSource, syncIcalSource,
+  listExportableUnits, rotateIcalExportToken,
 } from "@/lib/ical.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,11 +33,12 @@ export const Route = createFileRoute("/_authenticated/sync")({
 function SyncPage() {
   const qc = useQueryClient();
   const fetchCtx = useServerFn(getWorkspaceContext);
-  const fetchUnits = useServerFn(listUnitsForOrg);
+  const fetchUnits = useServerFn(listExportableUnits);
   const fetchSources = useServerFn(listIcalSources);
   const addFn = useServerFn(addIcalSource);
   const delFn = useServerFn(deleteIcalSource);
   const syncFn = useServerFn(syncIcalSource);
+  const rotateFn = useServerFn(rotateIcalExportToken);
 
   const ctx = useQuery({ queryKey: ["workspace-context"], queryFn: () => fetchCtx() });
   const orgId = ctx.data?.currentOrg?.id;
