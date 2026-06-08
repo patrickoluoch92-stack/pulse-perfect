@@ -5,13 +5,15 @@ import { parseICS } from "@/lib/ical";
 
 const orgIdSchema = z.object({ orgId: z.string().uuid() });
 
+const DEFAULT_TOKEN_TTL_DAYS = 365;
+
 export const listExportableUnits = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => orgIdSchema.parse(d))
   .handler(async ({ context, data }) => {
     const { data: rows, error } = await context.supabase
       .from("units")
-      .select("id, name, property_id, ical_export_token, properties(name)")
+      .select("id, name, property_id, ical_export_token, ical_export_token_created_at, ical_export_token_expires_at, properties(name)")
       .eq("org_id", data.orgId)
       .order("name", { ascending: true });
     if (error) throw new Error(error.message);
@@ -20,21 +22,82 @@ export const listExportableUnits = createServerFn({ method: "GET" })
 
 export const rotateIcalExportToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ unitId: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({
+      unitId: z.string().uuid(),
+      ttlDays: z.number().int().min(1).max(3650).optional(),
+    }).parse(d),
+  )
   .handler(async ({ context, data }) => {
-    // Generate a 32-byte random token, hex-encoded.
     const bytes = new Uint8Array(32);
     crypto.getRandomValues(bytes);
     const token = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    const now = new Date();
+    const expires = new Date(now.getTime() + (data.ttlDays ?? DEFAULT_TOKEN_TTL_DAYS) * 86400000);
 
     const { data: row, error } = await context.supabase
       .from("units")
-      .update({ ical_export_token: token })
+      .update({
+        ical_export_token: token,
+        ical_export_token_created_at: now.toISOString(),
+        ical_export_token_expires_at: expires.toISOString(),
+      })
       .eq("id", data.unitId)
-      .select("id, ical_export_token")
+      .select("id, ical_export_token, ical_export_token_expires_at")
       .single();
     if (error) throw new Error(error.message);
     return row;
+  });
+
+export const setIcalTokenExpiry = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      unitId: z.string().uuid(),
+      ttlDays: z.number().int().min(1).max(3650).nullable(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const expires = data.ttlDays === null
+      ? null
+      : new Date(Date.now() + data.ttlDays * 86400000).toISOString();
+    const { data: row, error } = await context.supabase
+      .from("units")
+      .update({ ical_export_token_expires_at: expires })
+      .eq("id", data.unitId)
+      .select("id, ical_export_token_expires_at")
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const revokeIcalToken = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ unitId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    // Expire immediately — the URL stops working, but the column stays non-null.
+    const { error } = await context.supabase
+      .from("units")
+      .update({ ical_export_token_expires_at: new Date(Date.now() - 1000).toISOString() })
+      .eq("id", data.unitId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const listIcalAccessLog = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ orgId: z.string().uuid(), limit: z.number().int().min(1).max(200).optional() }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: rows, error } = await context.supabase
+      .from("ical_access_log")
+      .select("id, unit_id, status, ip, user_agent, token_prefix, created_at, units(name)")
+      .eq("org_id", data.orgId)
+      .order("created_at", { ascending: false })
+      .limit(data.limit ?? 50);
+    if (error) throw new Error(error.message);
+    return rows ?? [];
   });
 
 

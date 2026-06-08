@@ -3,13 +3,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Calendar, Copy, KeyRound, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { Calendar, Copy, KeyRound, Loader2, Plus, RefreshCw, ShieldOff, Trash2 } from "lucide-react";
 
 
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 import {
   listIcalSources, addIcalSource, deleteIcalSource, syncIcalSource,
-  listExportableUnits, rotateIcalExportToken,
+  listExportableUnits, rotateIcalExportToken, setIcalTokenExpiry,
+  revokeIcalToken, listIcalAccessLog,
 } from "@/lib/ical.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,9 @@ function SyncPage() {
   const delFn = useServerFn(deleteIcalSource);
   const syncFn = useServerFn(syncIcalSource);
   const rotateFn = useServerFn(rotateIcalExportToken);
+  const setExpiryFn = useServerFn(setIcalTokenExpiry);
+  const revokeFn = useServerFn(revokeIcalToken);
+  const fetchLog = useServerFn(listIcalAccessLog);
 
   const ctx = useQuery({ queryKey: ["workspace-context"], queryFn: () => fetchCtx() });
   const orgId = ctx.data?.currentOrg?.id;
@@ -89,12 +93,39 @@ function SyncPage() {
   });
 
   const rotate = useMutation({
-    mutationFn: (unitId: string) => rotateFn({ data: { unitId } }),
+    mutationFn: (vars: { unitId: string; ttlDays?: number }) =>
+      rotateFn({ data: vars }),
     onSuccess: () => {
       toast.success("Token rotated. Old feed URL is now revoked.");
       qc.invalidateQueries({ queryKey: ["export-units"] });
     },
     onError: (e: Error) => toast.error(e.message),
+  });
+
+  const updateExpiry = useMutation({
+    mutationFn: (vars: { unitId: string; ttlDays: number | null }) =>
+      setExpiryFn({ data: vars }),
+    onSuccess: () => {
+      toast.success("Expiration updated");
+      qc.invalidateQueries({ queryKey: ["export-units"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const revoke = useMutation({
+    mutationFn: (unitId: string) => revokeFn({ data: { unitId } }),
+    onSuccess: () => {
+      toast.success("Token revoked");
+      qc.invalidateQueries({ queryKey: ["export-units"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const accessLog = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-access-log", orgId],
+    queryFn: () => fetchLog({ data: { orgId: orgId!, limit: 50 } }),
+    refetchInterval: 30000,
   });
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -130,7 +161,10 @@ function SyncPage() {
 
         <section className="space-y-4">
           {(units.data ?? []).map((u) => {
-            const feedUrl = u.ical_export_token
+            const expired = u.ical_export_token_expires_at
+              ? new Date(u.ical_export_token_expires_at).getTime() < Date.now()
+              : false;
+            const feedUrl = u.ical_export_token && !expired
               ? `${origin}/api/public/ical/${u.ical_export_token}.ics`
               : "";
             const unitSources = grouped.get(u.id) ?? [];
@@ -142,28 +176,59 @@ function SyncPage() {
                       {u.properties?.name} · {u.name}
                     </h2>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      Signed export feed — anyone with this URL can read availability.
+                      {expired ? (
+                        <span className="text-destructive">Token expired — rotate to issue a new URL.</span>
+                      ) : u.ical_export_token_expires_at ? (
+                        <>Expires {new Date(u.ical_export_token_expires_at).toLocaleDateString()} · {daysUntil(u.ical_export_token_expires_at)} days left</>
+                      ) : (
+                        <span className="text-muted-foreground">No expiration set.</span>
+                      )}
                     </p>
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <Input readOnly value={feedUrl} className="flex-1 font-mono text-xs" />
-                  <Button variant="outline" size="sm" onClick={() => copy(feedUrl)}>
+                  <Input readOnly value={feedUrl || (expired ? "Token expired — rotate to issue new URL" : "No token issued")} className="flex-1 font-mono text-xs" />
+                  <Button variant="outline" size="sm" onClick={() => copy(feedUrl)} disabled={!feedUrl}>
                     <Copy className="h-3.5 w-3.5" /> Copy
                   </Button>
                   <Button
                     variant="outline" size="sm"
                     onClick={() => {
                       if (confirm("Rotate token? Any calendar subscribed to the current URL will stop syncing.")) {
-                        rotate.mutate(u.id);
+                        rotate.mutate({ unitId: u.id });
                       }
                     }}
                     disabled={rotate.isPending}
                   >
-                    {rotate.isPending && rotate.variables === u.id
+                    {rotate.isPending && rotate.variables?.unitId === u.id
                       ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       : <KeyRound className="h-3.5 w-3.5" />}
                     Rotate
+                  </Button>
+                  <Button
+                    variant="outline" size="sm"
+                    onClick={() => {
+                      const days = prompt("Extend expiration by how many days from now? (1-3650)", "365");
+                      if (!days) return;
+                      const n = parseInt(days, 10);
+                      if (!Number.isFinite(n) || n < 1 || n > 3650) {
+                        toast.error("Enter a number between 1 and 3650");
+                        return;
+                      }
+                      updateExpiry.mutate({ unitId: u.id, ttlDays: n });
+                    }}
+                    disabled={updateExpiry.isPending}
+                  >
+                    Extend
+                  </Button>
+                  <Button
+                    variant="ghost" size="sm"
+                    onClick={() => {
+                      if (confirm("Revoke this feed URL immediately?")) revoke.mutate(u.id);
+                    }}
+                    disabled={revoke.isPending || expired}
+                  >
+                    <ShieldOff className="h-3.5 w-3.5" /> Revoke
                   </Button>
                 </div>
 
@@ -227,6 +292,48 @@ function SyncPage() {
             </p>
           )}
         </section>
+
+        <section className="space-y-3">
+          <h2 className="font-display text-xl font-semibold">Access log</h2>
+          <p className="text-xs text-muted-foreground">
+            Recent requests to your public export feeds. Refreshes every 30s.
+          </p>
+          <div className="overflow-hidden rounded-xl border bg-card">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th className="px-3 py-2 text-left">When</th>
+                  <th className="px-3 py-2 text-left">Unit</th>
+                  <th className="px-3 py-2 text-left">Status</th>
+                  <th className="px-3 py-2 text-left">IP</th>
+                  <th className="px-3 py-2 text-left">User-Agent</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(accessLog.data ?? []).length === 0 && (
+                  <tr><td colSpan={5} className="px-3 py-6 text-center text-xs text-muted-foreground">
+                    No accesses yet.
+                  </td></tr>
+                )}
+                {(accessLog.data ?? []).map((row) => (
+                  <tr key={row.id} className="border-t">
+                    <td className="px-3 py-2 text-xs">{timeAgo(row.created_at)}</td>
+                    <td className="px-3 py-2 text-xs">{row.units?.name ?? "—"}</td>
+                    <td className="px-3 py-2 text-xs">
+                      <span className={
+                        row.status === "ok" ? "text-emerald-600" :
+                        row.status === "expired" ? "text-amber-600" :
+                        "text-destructive"
+                      }>{row.status}</span>
+                    </td>
+                    <td className="px-3 py-2 font-mono text-xs">{row.ip ?? "—"}</td>
+                    <td className="px-3 py-2 truncate text-xs max-w-[20rem]">{row.user_agent ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -285,4 +392,8 @@ function timeAgo(iso: string | null): string {
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h ago`;
   return `${Math.floor(h / 24)}d ago`;
+}
+
+function daysUntil(iso: string): number {
+  return Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000));
 }
