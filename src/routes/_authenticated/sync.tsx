@@ -905,9 +905,26 @@ function SyncPage() {
                         <p className="truncate font-mono text-[11px] text-muted-foreground">{hookRel.ical_incident_webhooks?.url ?? "(deleted)"}</p>
                         {d.last_error && <p className="text-[11px] text-destructive">{d.last_error}</p>}
                       </div>
-                      <Button size="sm" variant="outline" onClick={() => redeliver.mutate(d.id)} disabled={redeliver.isPending}>
-                        <RefreshCw className={`h-3.5 w-3.5 ${redeliver.isPending ? "animate-spin" : ""}`} /> Redeliver
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="outline" disabled={redeliver.isPending}>
+                            <RefreshCw className={`h-3.5 w-3.5 ${redeliver.isPending ? "animate-spin" : ""}`} /> Redeliver
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Redeliver this event?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              The receiver will get another <span className="font-mono">{d.event}</span> POST with the original payload (plus a <span className="font-mono">redelivered_from</span> marker). Same event can be redelivered again only after 30 seconds.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => redeliver.mutate(d.id)}>Redeliver</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+
                     </li>
                   );
                 })}
