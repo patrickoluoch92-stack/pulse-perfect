@@ -14,6 +14,70 @@ export type Database = {
   }
   public: {
     Tables: {
+      calendar_blocks: {
+        Row: {
+          created_at: string
+          ends_on: string
+          id: string
+          org_id: string
+          raw: Json | null
+          source_id: string | null
+          starts_on: string
+          summary: string | null
+          uid: string
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_on: string
+          id?: string
+          org_id: string
+          raw?: Json | null
+          source_id?: string | null
+          starts_on: string
+          summary?: string | null
+          uid: string
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_on?: string
+          id?: string
+          org_id?: string
+          raw?: Json | null
+          source_id?: string | null
+          starts_on?: string
+          summary?: string | null
+          uid?: string
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_blocks_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_blocks_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "ical_import_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_blocks_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guests: {
         Row: {
           country: string | null
@@ -54,6 +118,63 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ical_import_sources: {
+        Row: {
+          created_at: string
+          event_count: number
+          id: string
+          last_error: string | null
+          last_status: string | null
+          last_synced_at: string | null
+          name: string
+          org_id: string
+          unit_id: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          event_count?: number
+          id?: string
+          last_error?: string | null
+          last_status?: string | null
+          last_synced_at?: string | null
+          name: string
+          org_id: string
+          unit_id: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          event_count?: number
+          id?: string
+          last_error?: string | null
+          last_status?: string | null
+          last_synced_at?: string | null
+          name?: string
+          org_id?: string
+          unit_id?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ical_import_sources_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ical_import_sources_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
             referencedColumns: ["id"]
           },
         ]
