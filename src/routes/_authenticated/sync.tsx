@@ -495,6 +495,76 @@ function SyncPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Rotation confirm */}
+      <Dialog open={!!pendingRotate} onOpenChange={(o) => !o && setPendingRotate(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rotate iCal token</DialogTitle>
+            <DialogDescription>
+              {pendingRotate?.unitName}. Generates a new URL and immediately revokes the current one — any
+              calendar still subscribed to the old URL will stop receiving updates until it&apos;s re-added.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label>New expiration (days from now)</Label>
+            <Input
+              type="number" min={1} max={3650}
+              value={rotateTtl}
+              onChange={(e) => setRotateTtl(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">Between 1 and 3650.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingRotate(null)}>Cancel</Button>
+            <Button
+              disabled={rotate.isPending}
+              onClick={() => {
+                const n = parseInt(rotateTtl, 10);
+                if (!Number.isFinite(n) || n < 1 || n > 3650) {
+                  toast.error("Enter a number between 1 and 3650");
+                  return;
+                }
+                const p = pendingRotate!;
+                setPendingRotate(null);
+                rotate.mutate({ unitId: p.unitId, unitName: p.unitName, ttlDays: n });
+              }}
+            >
+              {rotate.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              Rotate token
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rotation result */}
+      <Dialog open={!!rotateResult} onOpenChange={(o) => !o && setRotateResult(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New URL issued</DialogTitle>
+            <DialogDescription>
+              Update Airbnb / VRBO / Booking.com with the new URL below. The previous URL is now revoked.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Feed URL · {rotateResult?.unitName}</Label>
+            <div className="flex items-center gap-2">
+              <Input readOnly value={rotateResult?.url ?? ""} className="flex-1 font-mono text-xs" />
+              <Button size="sm" onClick={() => rotateResult && copy(rotateResult.url)}>
+                <Copy className="h-3.5 w-3.5" /> Copy
+              </Button>
+            </div>
+            {rotateResult?.expiresAt && (
+              <p className="text-xs text-muted-foreground">
+                Expires {new Date(rotateResult.expiresAt).toLocaleDateString()} ({daysUntil(rotateResult.expiresAt)} days).
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setRotateResult(null)}>Done</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
