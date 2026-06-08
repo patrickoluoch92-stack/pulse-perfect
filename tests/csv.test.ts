@@ -12,7 +12,8 @@ describe("escapeCsvField — formula injection hardening", () => {
   });
   it("prefixes leading tab and CR (clipboard tricks)", () => {
     expect(escapeCsvField("\t=evil")).toBe("'\t=evil");
-    expect(escapeCsvField("\revil")).toBe("'\revil");
+    // \r forces quoting, but the leading ' is still applied first
+    expect(escapeCsvField("\revil")).toBe('"\'\revil"');
   });
   it("does not prefix safe leading text", () => {
     expect(escapeCsvField("hello")).toBe("hello");
