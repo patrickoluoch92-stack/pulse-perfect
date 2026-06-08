@@ -329,25 +329,40 @@ function SyncPage() {
                 Recent requests to your public export feeds. Refreshes every 30s.
               </p>
             </div>
-            <Button
-              variant="outline" size="sm"
-              disabled={!orgId}
-              onClick={async () => {
-                try {
-                  const res = await exportLogFn({ data: { orgId: orgId!, limit: 10000 } });
-                  const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8" });
-                  const a = document.createElement("a");
-                  a.href = URL.createObjectURL(blob);
-                  a.download = res.filename;
-                  a.click();
-                  URL.revokeObjectURL(a.href);
-                } catch (e) {
-                  toast.error(e instanceof Error ? e.message : "Export failed");
-                }
-              }}
-            >
-              <Download className="h-3.5 w-3.5" /> Export CSV
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Select value={logStatus} onValueChange={(v) => { setLogStatus(v); setLogPage(0); }}>
+                <SelectTrigger className="h-9 w-[160px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="ok">ok</SelectItem>
+                  <SelectItem value="expired">expired</SelectItem>
+                  <SelectItem value="rate_limited">rate_limited</SelectItem>
+                  <SelectItem value="invalid_format">invalid_format</SelectItem>
+                  <SelectItem value="not_found">not_found</SelectItem>
+                  <SelectItem value="rotated">rotated</SelectItem>
+                  <SelectItem value="revoked">revoked</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline" size="sm"
+                disabled={!orgId}
+                onClick={async () => {
+                  try {
+                    const res = await exportLogFn({ data: { orgId: orgId!, limit: 10000 } });
+                    const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8" });
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = res.filename;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                  } catch (e) {
+                    toast.error(e instanceof Error ? e.message : "Export failed");
+                  }
+                }}
+              >
+                <Download className="h-3.5 w-3.5" /> Export CSV
+              </Button>
+            </div>
           </div>
           <div className="overflow-hidden rounded-xl border bg-card">
             <table className="w-full text-sm">
