@@ -250,6 +250,46 @@ function SyncPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Webhook delivery dashboard
+  const fetchDeliveries = useServerFn(listIcalWebhookDeliveries);
+  const redeliverFn = useServerFn(redeliverIcalWebhook);
+  const fetchWebhookAlerts = useServerFn(getIcalWebhookAlerts);
+  const [delPage, setDelPage] = useState(0);
+  const [delStatusFilter, setDelStatusFilter] = useState<"ok" | "error" | "all">("all");
+  const [delHookFilter, setDelHookFilter] = useState<string>("");
+  const deliveries = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-webhook-deliveries", orgId, delPage, delStatusFilter, delHookFilter],
+    queryFn: () => fetchDeliveries({ data: {
+      orgId: orgId!,
+      status: delStatusFilter,
+      webhookId: delHookFilter || undefined,
+      limit: 10, offset: delPage * 10,
+    } }),
+  });
+  const webhookAlerts = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-webhook-alerts", orgId],
+    queryFn: () => fetchWebhookAlerts({ data: { orgId: orgId! } }),
+    refetchInterval: 60_000,
+  });
+  const redeliver = useMutation({
+    mutationFn: (deliveryId: string) => redeliverFn({ data: { deliveryId } }),
+    onSuccess: (r) => {
+      toast.success(r.ok ? `Redelivered (HTTP ${r.status})` : `Redelivery failed (HTTP ${r.status ?? "?"})`);
+      qc.invalidateQueries({ queryKey: ["ical-webhook-deliveries"] });
+      qc.invalidateQueries({ queryKey: ["ical-incident-webhooks"] });
+      qc.invalidateQueries({ queryKey: ["ical-webhook-alerts"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  // Audit export filters
+  const [auditSince, setAuditSince] = useState<string>("");
+  const [auditUntil, setAuditUntil] = useState<string>("");
+  const [auditActions, setAuditActions] = useState<Set<string>>(new Set());
+
+
   // Retention
   const fetchRetention = useServerFn(getIcalIncidentRetention);
   const setRetentionFn = useServerFn(setIcalIncidentRetention);
