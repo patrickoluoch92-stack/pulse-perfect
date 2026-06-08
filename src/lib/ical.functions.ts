@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { parseICS } from "@/lib/ical";
+import { makeRateLimiter } from "@/lib/csv";
 
 const orgIdSchema = z.object({ orgId: z.string().uuid() });
 
@@ -23,19 +24,12 @@ export const listExportableUnits = createServerFn({ method: "GET" })
 const MIN_ROTATION_INTERVAL_MS = 10_000;
 const LOG_ROLES = ["owner", "admin", "manager"] as const;
 
-// In-memory CSV export throttle: per-user max 5 exports / 60s
-const csvExportHits = new Map<string, number[]>();
-const CSV_MAX_PER_MIN = 5;
+// Per-user CSV export throttle (in-memory, per worker).
+const assertCsvRateLimit = makeRateLimiter(5, 60_000);
 function assertCsvRate(userId: string) {
-  const now = Date.now();
-  const cutoff = now - 60_000;
-  const arr = (csvExportHits.get(userId) ?? []).filter((t) => t > cutoff);
-  if (arr.length >= CSV_MAX_PER_MIN) {
-    throw new Error("Too many CSV exports — please wait a minute and try again");
-  }
-  arr.push(now);
-  csvExportHits.set(userId, arr);
+  assertCsvRateLimit(userId);
 }
+
 
 
 async function assertOrgRole(
