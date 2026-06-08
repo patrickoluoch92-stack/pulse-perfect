@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Calendar, Copy, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 
-import { DashboardShell } from "@/components/dashboard-shell";
+
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 import { listUnitsForOrg } from "@/lib/reservations.functions";
 import {
@@ -104,7 +104,7 @@ function SyncPage() {
   }
 
   return (
-    <DashboardShell>
+    <>
       <div className="mx-auto max-w-5xl space-y-8 p-6 md:p-10">
         <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
