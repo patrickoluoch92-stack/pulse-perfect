@@ -150,9 +150,20 @@ function AnalyticsPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-border/60 bg-card p-6">
-          <h2 className="font-display text-lg font-semibold">Revenue by property</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-lg font-semibold">Revenue by property</h2>
+            {!canPropertyBreakdown && (
+              <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                <Lock className="h-3 w-3" /> Business
+              </span>
+            )}
+          </div>
           <div className="mt-4 h-64">
-            {d && d.propertyChart.length > 0 ? (
+            {!canPropertyBreakdown ? (
+              <div className="grid h-full place-items-center px-6 text-center text-sm text-muted-foreground">
+                Upgrade to <span className="mx-1 font-medium text-foreground">Business</span> to see revenue split by property.
+              </div>
+            ) : d && d.propertyChart.length > 0 ? (
               <ResponsiveContainer>
                 <BarChart data={d.propertyChart} layout="vertical" margin={{ left: 16, right: 16 }}>
                   <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" horizontal={false} />
