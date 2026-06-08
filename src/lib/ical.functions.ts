@@ -165,17 +165,96 @@ export const exportIcalAccessLog = createServerFn({ method: "GET" })
 export const listIcalAccessLog = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ orgId: z.string().uuid(), limit: z.number().int().min(1).max(200).optional() }).parse(d),
+    z.object({
+      orgId: z.string().uuid(),
+      limit: z.number().int().min(1).max(200).optional(),
+      offset: z.number().int().min(0).max(100000).optional(),
+      status: z.string().trim().min(1).max(40).optional(),
+    }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    const limit = data.limit ?? 25;
+    const offset = data.offset ?? 0;
+    let q = context.supabase
+      .from("ical_access_log")
+      .select("id, unit_id, status, ip, user_agent, token_prefix, created_at, units(name)", { count: "exact" })
+      .eq("org_id", data.orgId);
+    if (data.status) q = q.eq("status", data.status);
+    const { data: rows, error, count } = await q
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+    if (error) throw new Error(error.message);
+    return { rows: rows ?? [], total: count ?? 0, limit, offset };
+  });
+
+export const getIcalSecurityAlerts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ orgId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const since1h = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
     const { data: rows, error } = await context.supabase
       .from("ical_access_log")
-      .select("id, unit_id, status, ip, user_agent, token_prefix, created_at, units(name)")
+      .select("status, ip, created_at")
       .eq("org_id", data.orgId)
+      .gte("created_at", since24h)
       .order("created_at", { ascending: false })
-      .limit(data.limit ?? 50);
+      .limit(2000);
     if (error) throw new Error(error.message);
-    return rows ?? [];
+
+    type Alert = { severity: "high" | "medium" | "low"; kind: string; message: string };
+    const alerts: Alert[] = [];
+    const recent = rows ?? [];
+    const lastHour = recent.filter((r) => r.created_at >= since1h);
+
+    const rateHits = lastHour.filter((r) => r.status === "rate_limited").length;
+    if (rateHits >= 10) {
+      alerts.push({ severity: "high", kind: "rate_limit",
+        message: `${rateHits} rate-limited requests in the last hour — possible scraping or DoS.` });
+    } else if (rateHits > 0) {
+      alerts.push({ severity: "medium", kind: "rate_limit",
+        message: `${rateHits} rate-limited request${rateHits === 1 ? "" : "s"} in the last hour.` });
+    }
+
+    const probes = lastHour.filter((r) => r.status === "invalid_format" || r.status === "not_found").length;
+    if (probes >= 25) {
+      alerts.push({ severity: "high", kind: "probe",
+        message: `${probes} bad-token requests in the last hour — likely token enumeration.` });
+    } else if (probes >= 5) {
+      alerts.push({ severity: "medium", kind: "probe",
+        message: `${probes} bad-token requests in the last hour.` });
+    }
+
+    const expiredCount = recent.filter((r) => r.status === "expired").length;
+    if (expiredCount > 0) {
+      alerts.push({ severity: "medium", kind: "expired",
+        message: `${expiredCount} request${expiredCount === 1 ? "" : "s"} to an expired token in the last 24h. Rotate and re-share the URL.` });
+    }
+
+    const ipCounts = new Map<string, number>();
+    for (const r of lastHour) {
+      if (!r.ip) continue;
+      ipCounts.set(r.ip, (ipCounts.get(r.ip) ?? 0) + 1);
+    }
+    const topIps = [...ipCounts.entries()]
+      .filter(([, n]) => n >= 30)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+    for (const [ip, n] of topIps) {
+      alerts.push({ severity: n >= 100 ? "high" : "medium", kind: "ip_volume",
+        message: `IP ${ip} made ${n} requests in the last hour.` });
+    }
+
+    return {
+      counts: {
+        total24h: recent.length,
+        rateLimited1h: rateHits,
+        badToken1h: probes,
+        expired24h: expiredCount,
+      },
+      alerts,
+    };
   });
 
 
