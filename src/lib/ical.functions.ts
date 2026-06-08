@@ -564,6 +564,8 @@ export const deleteIcalIncidentWebhook = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
+    requireMfa(context.claims);
+    await enforceAuthRateLimit({ bucket: "webhook.delete", userId: context.userId });
     const { data: hook, error: ge } = await context.supabase
       .from("ical_incident_webhooks").select("id, org_id").eq("id", data.id).single();
     if (ge || !hook) throw new Error("Webhook not found");
