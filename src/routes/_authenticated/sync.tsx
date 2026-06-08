@@ -288,14 +288,8 @@ function SyncPage() {
                   <Button
                     variant="outline" size="sm"
                     onClick={() => {
-                      const days = prompt("Extend expiration by how many days from now? (1-3650)", "365");
-                      if (!days) return;
-                      const n = parseInt(days, 10);
-                      if (!Number.isFinite(n) || n < 1 || n > 3650) {
-                        toast.error("Enter a number between 1 and 3650");
-                        return;
-                      }
-                      updateExpiry.mutate({ unitId: u.id, ttlDays: n });
+                      setExtendTtl("365");
+                      setPendingExtend({ unitId: u.id, unitName: `${u.properties?.name ?? ""} · ${u.name}` });
                     }}
                     disabled={updateExpiry.isPending}
                   >
@@ -303,11 +297,10 @@ function SyncPage() {
                   </Button>
                   <Button
                     variant="ghost" size="sm"
-                    onClick={() => {
-                      if (confirm("Revoke this feed URL immediately?")) revoke.mutate(u.id);
-                    }}
+                    onClick={() => setPendingRevoke({ unitId: u.id, unitName: `${u.properties?.name ?? ""} · ${u.name}` })}
                     disabled={revoke.isPending || expired}
                   >
+
                     <ShieldOff className="h-3.5 w-3.5" /> Revoke
                   </Button>
                 </div>
