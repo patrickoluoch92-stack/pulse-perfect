@@ -20,6 +20,29 @@ export const listExportableUnits = createServerFn({ method: "GET" })
     return rows ?? [];
   });
 
+const MIN_ROTATION_INTERVAL_MS = 10_000;
+
+async function assertCanManageUnit(
+  supabase: typeof import("@supabase/supabase-js").SupabaseClient.prototype,
+  unitId: string,
+  userId: string,
+) {
+  const { data: unit, error } = await supabase
+    .from("units")
+    .select("id, org_id, ical_export_token_created_at")
+    .eq("id", unitId)
+    .single();
+  if (error || !unit) throw new Error("Unit not found");
+  const { data: ok, error: roleErr } = await supabase.rpc("has_org_role", {
+    _user_id: userId,
+    _org_id: unit.org_id,
+    _roles: ["owner", "admin", "manager"],
+  });
+  if (roleErr) throw new Error(roleErr.message);
+  if (!ok) throw new Error("You don't have permission to manage this unit's iCal token");
+  return unit;
+}
+
 export const rotateIcalExportToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
@@ -29,6 +52,15 @@ export const rotateIcalExportToken = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    const unit = await assertCanManageUnit(context.supabase, data.unitId, context.userId);
+
+    if (unit.ical_export_token_created_at) {
+      const age = Date.now() - new Date(unit.ical_export_token_created_at).getTime();
+      if (age < MIN_ROTATION_INTERVAL_MS) {
+        throw new Error("Token was just rotated — please wait a moment before rotating again");
+      }
+    }
+
     const bytes = new Uint8Array(32);
     crypto.getRandomValues(bytes);
     const token = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
@@ -46,6 +78,17 @@ export const rotateIcalExportToken = createServerFn({ method: "POST" })
       .select("id, ical_export_token, ical_export_token_expires_at")
       .single();
     if (error) throw new Error(error.message);
+
+    // Audit the rotation
+    await context.supabase.from("ical_access_log").insert({
+      org_id: unit.org_id,
+      unit_id: unit.id,
+      token_prefix: token.slice(0, 8),
+      status: "rotated",
+      ip: null,
+      user_agent: `user:${context.userId}`,
+    });
+
     return row;
   });
 
@@ -58,6 +101,7 @@ export const setIcalTokenExpiry = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    await assertCanManageUnit(context.supabase, data.unitId, context.userId);
     const expires = data.ttlDays === null
       ? null
       : new Date(Date.now() + data.ttlDays * 86400000).toISOString();
