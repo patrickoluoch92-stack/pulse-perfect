@@ -169,6 +169,8 @@ export const exportIcalAccessLog = createServerFn({ method: "GET" })
   )
   .handler(async ({ context, data }) => {
     await assertOrgRole(context.supabase, data.orgId, context.userId);
+    assertCsvRate(context.userId);
+
     const { data: rows, error } = await context.supabase
       .from("ical_access_log")
       .select("created_at, status, token_prefix, ip, user_agent, unit_id, units(name)")
