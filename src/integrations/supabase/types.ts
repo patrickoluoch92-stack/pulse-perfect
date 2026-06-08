@@ -620,6 +620,7 @@ export type Database = {
           base_price: number
           capacity: number
           created_at: string
+          ical_export_token: string
           id: string
           name: string
           org_id: string
@@ -632,6 +633,7 @@ export type Database = {
           base_price?: number
           capacity?: number
           created_at?: string
+          ical_export_token?: string
           id?: string
           name: string
           org_id: string
@@ -644,6 +646,7 @@ export type Database = {
           base_price?: number
           capacity?: number
           created_at?: string
+          ical_export_token?: string
           id?: string
           name?: string
           org_id?: string

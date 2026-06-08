@@ -1,14 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { buildICS, type ICSEvent } from "@/lib/ical";
 
-export const Route = createFileRoute("/api/public/ical/$orgId/$unitId")({
+export const Route = createFileRoute("/api/public/ical/$token")({
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const orgId = String(params.orgId ?? "").replace(/\.ics$/i, "");
-        const unitId = String(params.unitId ?? "").replace(/\.ics$/i, "");
-        const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        if (!uuidRe.test(orgId) || !uuidRe.test(unitId)) {
+        // Strip optional ".ics" suffix; tokens are 48 hex chars.
+        const token = String(params.token ?? "").replace(/\.ics$/i, "");
+        if (!/^[a-f0-9]{32,128}$/i.test(token)) {
           return new Response("Not found", { status: 404 });
         }
 
@@ -17,19 +16,20 @@ export const Route = createFileRoute("/api/public/ical/$orgId/$unitId")({
         const { data: unit } = await supabaseAdmin
           .from("units")
           .select("id, name, org_id")
-          .eq("id", unitId).eq("org_id", orgId).maybeSingle();
+          .eq("ical_export_token", token)
+          .maybeSingle();
         if (!unit) return new Response("Not found", { status: 404 });
 
         const [resv, blocks] = await Promise.all([
           supabaseAdmin
             .from("reservations")
-            .select("id, confirmation_code, check_in, check_out, status")
-            .eq("unit_id", unitId)
+            .select("id, check_in, check_out, status")
+            .eq("unit_id", unit.id)
             .not("status", "in", "(cancelled,no_show)"),
           supabaseAdmin
             .from("calendar_blocks")
             .select("id, summary, starts_on, ends_on")
-            .eq("unit_id", unitId),
+            .eq("unit_id", unit.id),
         ]);
 
         const events: ICSEvent[] = [];
@@ -60,8 +60,8 @@ export const Route = createFileRoute("/api/public/ical/$orgId/$unitId")({
           status: 200,
           headers: {
             "Content-Type": "text/calendar; charset=utf-8",
-            "Content-Disposition": `inline; filename="${unitId}.ics"`,
-            "Cache-Control": "public, max-age=300",
+            "Content-Disposition": `inline; filename="${unit.id}.ics"`,
+            "Cache-Control": "private, max-age=300",
           },
         });
       },

@@ -3,13 +3,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Calendar, Copy, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { Calendar, Copy, KeyRound, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 
 
 import { getWorkspaceContext } from "@/lib/workspace.functions";
-import { listUnitsForOrg } from "@/lib/reservations.functions";
 import {
   listIcalSources, addIcalSource, deleteIcalSource, syncIcalSource,
+  listExportableUnits, rotateIcalExportToken,
 } from "@/lib/ical.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,18 +33,19 @@ export const Route = createFileRoute("/_authenticated/sync")({
 function SyncPage() {
   const qc = useQueryClient();
   const fetchCtx = useServerFn(getWorkspaceContext);
-  const fetchUnits = useServerFn(listUnitsForOrg);
+  const fetchUnits = useServerFn(listExportableUnits);
   const fetchSources = useServerFn(listIcalSources);
   const addFn = useServerFn(addIcalSource);
   const delFn = useServerFn(deleteIcalSource);
   const syncFn = useServerFn(syncIcalSource);
+  const rotateFn = useServerFn(rotateIcalExportToken);
 
   const ctx = useQuery({ queryKey: ["workspace-context"], queryFn: () => fetchCtx() });
   const orgId = ctx.data?.currentOrg?.id;
 
   const units = useQuery({
     enabled: !!orgId,
-    queryKey: ["units", orgId],
+    queryKey: ["export-units", orgId],
     queryFn: () => fetchUnits({ data: { orgId: orgId! } }),
   });
 
@@ -87,6 +88,15 @@ function SyncPage() {
     onError: (e: Error) => toast.error(`Sync failed: ${e.message}`),
   });
 
+  const rotate = useMutation({
+    mutationFn: (unitId: string) => rotateFn({ data: { unitId } }),
+    onSuccess: () => {
+      toast.success("Token rotated. Old feed URL is now revoked.");
+      qc.invalidateQueries({ queryKey: ["export-units"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
   function copy(text: string) {
@@ -120,8 +130,8 @@ function SyncPage() {
 
         <section className="space-y-4">
           {(units.data ?? []).map((u) => {
-            const feedUrl = orgId
-              ? `${origin}/api/public/ical/${orgId}/${u.id}.ics`
+            const feedUrl = u.ical_export_token
+              ? `${origin}/api/public/ical/${u.ical_export_token}.ics`
               : "";
             const unitSources = grouped.get(u.id) ?? [];
             return (
@@ -132,14 +142,28 @@ function SyncPage() {
                       {u.properties?.name} · {u.name}
                     </h2>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      Export feed (one-way: HostPulse → OTA)
+                      Signed export feed — anyone with this URL can read availability.
                     </p>
                   </div>
                 </div>
-                <div className="mt-3 flex items-center gap-2">
-                  <Input readOnly value={feedUrl} className="font-mono text-xs" />
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <Input readOnly value={feedUrl} className="flex-1 font-mono text-xs" />
                   <Button variant="outline" size="sm" onClick={() => copy(feedUrl)}>
                     <Copy className="h-3.5 w-3.5" /> Copy
+                  </Button>
+                  <Button
+                    variant="outline" size="sm"
+                    onClick={() => {
+                      if (confirm("Rotate token? Any calendar subscribed to the current URL will stop syncing.")) {
+                        rotate.mutate(u.id);
+                      }
+                    }}
+                    disabled={rotate.isPending}
+                  >
+                    {rotate.isPending && rotate.variables === u.id
+                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      : <KeyRound className="h-3.5 w-3.5" />}
+                    Rotate
                   </Button>
                 </div>
 
