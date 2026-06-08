@@ -17,8 +17,10 @@ import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/t
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedReservationsRouteImport } from './routes/_authenticated/reservations'
 import { Route as AuthenticatedPropertiesRouteImport } from './routes/_authenticated/properties'
+import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
+import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -60,6 +62,11 @@ const AuthenticatedPropertiesRoute = AuthenticatedPropertiesRouteImport.update({
   path: '/properties',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedInvoicesRoute = AuthenticatedInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -71,27 +78,37 @@ const AuthenticatedPropertiesPropertyIdRoute =
     path: '/$propertyId',
     getParentRoute: () => AuthenticatedPropertiesRoute,
   } as any)
+const AuthenticatedInvoicesInvoiceIdRoute =
+  AuthenticatedInvoicesInvoiceIdRouteImport.update({
+    id: '/$invoiceId',
+    path: '/$invoiceId',
+    getParentRoute: () => AuthenticatedInvoicesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/reservations': typeof AuthenticatedReservationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/reservations': typeof AuthenticatedReservationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/team': typeof AuthenticatedTeamRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
 }
 export interface FileRoutesById {
@@ -100,11 +117,13 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/_authenticated/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/_authenticated/reservations': typeof AuthenticatedReservationsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
 }
 export interface FileRouteTypes {
@@ -113,22 +132,26 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/invoices'
     | '/properties'
     | '/reservations'
     | '/settings'
     | '/team'
     | '/invite/$token'
+    | '/invoices/$invoiceId'
     | '/properties/$propertyId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/invoices'
     | '/properties'
     | '/reservations'
     | '/settings'
     | '/team'
     | '/invite/$token'
+    | '/invoices/$invoiceId'
     | '/properties/$propertyId'
   id:
     | '__root__'
@@ -136,11 +159,13 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/dashboard'
+    | '/_authenticated/invoices'
     | '/_authenticated/properties'
     | '/_authenticated/reservations'
     | '/_authenticated/settings'
     | '/_authenticated/team'
     | '/invite/$token'
+    | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/properties/$propertyId'
   fileRoutesById: FileRoutesById
 }
@@ -209,6 +234,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPropertiesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/invoices': {
+      id: '/_authenticated/invoices'
+      path: '/invoices'
+      fullPath: '/invoices'
+      preLoaderRoute: typeof AuthenticatedInvoicesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -223,8 +255,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPropertiesPropertyIdRouteImport
       parentRoute: typeof AuthenticatedPropertiesRoute
     }
+    '/_authenticated/invoices/$invoiceId': {
+      id: '/_authenticated/invoices/$invoiceId'
+      path: '/$invoiceId'
+      fullPath: '/invoices/$invoiceId'
+      preLoaderRoute: typeof AuthenticatedInvoicesInvoiceIdRouteImport
+      parentRoute: typeof AuthenticatedInvoicesRoute
+    }
   }
 }
+
+interface AuthenticatedInvoicesRouteChildren {
+  AuthenticatedInvoicesInvoiceIdRoute: typeof AuthenticatedInvoicesInvoiceIdRoute
+}
+
+const AuthenticatedInvoicesRouteChildren: AuthenticatedInvoicesRouteChildren = {
+  AuthenticatedInvoicesInvoiceIdRoute: AuthenticatedInvoicesInvoiceIdRoute,
+}
+
+const AuthenticatedInvoicesRouteWithChildren =
+  AuthenticatedInvoicesRoute._addFileChildren(
+    AuthenticatedInvoicesRouteChildren,
+  )
 
 interface AuthenticatedPropertiesRouteChildren {
   AuthenticatedPropertiesPropertyIdRoute: typeof AuthenticatedPropertiesPropertyIdRoute
@@ -243,6 +295,7 @@ const AuthenticatedPropertiesRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRouteWithChildren
   AuthenticatedPropertiesRoute: typeof AuthenticatedPropertiesRouteWithChildren
   AuthenticatedReservationsRoute: typeof AuthenticatedReservationsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -251,6 +304,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedInvoicesRoute: AuthenticatedInvoicesRouteWithChildren,
   AuthenticatedPropertiesRoute: AuthenticatedPropertiesRouteWithChildren,
   AuthenticatedReservationsRoute: AuthenticatedReservationsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
@@ -269,3 +323,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
