@@ -996,3 +996,109 @@ export const getIcalWebhookAlerts = createServerFn({ method: "GET" })
     return { alerts };
   });
 
+
+// ============================================================
+// Webhook SLA metrics + alert-rule tester
+// ============================================================
+
+export const getIcalWebhookSlaMetrics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    orgId: z.string().uuid(),
+    hours: z.number().int().min(1).max(720).optional(),
+  }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
+    const hours = data.hours ?? 24;
+    const since = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+    const { data: rows, error } = await context.supabase
+      .from("ical_webhook_deliveries")
+      .select("webhook_id, status, attempts, http_status, delivered_at, created_at, ical_incident_webhooks(url)")
+      .eq("org_id", data.orgId)
+      .gte("created_at", since)
+      .limit(5000);
+    if (error) throw new Error(error.message);
+    type Row = {
+      webhook_id: string; status: string; attempts: number | null;
+      delivered_at: string | null; created_at: string;
+      ical_incident_webhooks: { url?: string } | null;
+    };
+    const groups = new Map<string, Row[]>();
+    for (const r of (rows ?? []) as Row[]) {
+      const arr = groups.get(r.webhook_id) ?? [];
+      arr.push(r);
+      groups.set(r.webhook_id, arr);
+    }
+    const percentile = (sorted: number[], p: number) => {
+      if (!sorted.length) return 0;
+      const idx = Math.min(sorted.length - 1, Math.ceil((p / 100) * sorted.length) - 1);
+      return sorted[Math.max(0, idx)];
+    };
+    const metrics = Array.from(groups.entries()).map(([webhookId, list]) => {
+      const total = list.length;
+      const succeeded = list.filter((r) => r.status === "ok").length;
+      const failed = total - succeeded;
+      const attemptsArr = list.map((r) => r.attempts ?? 1).sort((a, b) => a - b);
+      const avgAttempts = attemptsArr.reduce((s, n) => s + n, 0) / Math.max(1, total);
+      const lastDeliveredAt = list
+        .map((r) => r.delivered_at).filter(Boolean)
+        .sort().reverse()[0] ?? null;
+      return {
+        webhookId,
+        url: list[0]?.ical_incident_webhooks?.url ?? "(deleted)",
+        total,
+        succeeded,
+        failed,
+        successRate: total === 0 ? 1 : succeeded / total,
+        avgAttempts: Number(avgAttempts.toFixed(2)),
+        p95Attempts: percentile(attemptsArr, 95),
+        lastDeliveredAt,
+      };
+    });
+    metrics.sort((a, b) => a.successRate - b.successRate);
+    return { hours, metrics };
+  });
+
+export const testIcalWebhookAlertRule = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    orgId: z.string().uuid(),
+    hours: z.number().int().min(1).max(720),
+    minFailures: z.number().int().min(1).max(1000),
+    failureRatePct: z.number().int().min(1).max(100),
+  }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
+    const since = new Date(Date.now() - data.hours * 60 * 60 * 1000).toISOString();
+    const { data: rows, error } = await context.supabase
+      .from("ical_webhook_deliveries")
+      .select("webhook_id, status, ical_incident_webhooks(url)")
+      .eq("org_id", data.orgId)
+      .gte("created_at", since)
+      .limit(5000);
+    if (error) throw new Error(error.message);
+    type Row = { webhook_id: string; status: string; ical_incident_webhooks: { url?: string } | null };
+    const grouped = new Map<string, { url: string; total: number; failed: number }>();
+    for (const r of (rows ?? []) as Row[]) {
+      const url = r.ical_incident_webhooks?.url ?? "(deleted)";
+      const g = grouped.get(r.webhook_id) ?? { url, total: 0, failed: 0 };
+      g.total += 1;
+      if (r.status !== "ok") g.failed += 1;
+      grouped.set(r.webhook_id, g);
+    }
+    const threshold = data.failureRatePct / 100;
+    const matches: { webhookId: string; url: string; total: number; failed: number; failureRate: number }[] = [];
+    for (const [id, g] of grouped) {
+      const rate = g.total === 0 ? 0 : g.failed / g.total;
+      if (g.failed >= data.minFailures && rate >= threshold) {
+        matches.push({ webhookId: id, url: g.url, total: g.total, failed: g.failed, failureRate: Number(rate.toFixed(3)) });
+      }
+    }
+    matches.sort((a, b) => b.failureRate - a.failureRate);
+    return {
+      windowHours: data.hours,
+      sampleSize: rows?.length ?? 0,
+      hookCount: grouped.size,
+      matches,
+    };
+  });
