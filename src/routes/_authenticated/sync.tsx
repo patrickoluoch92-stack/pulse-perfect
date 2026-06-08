@@ -291,6 +291,36 @@ function SyncPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Webhook SLA metrics
+  const fetchSla = useServerFn(getIcalWebhookSlaMetrics);
+  const [slaHours, setSlaHours] = useState<number>(24);
+  const sla = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-webhook-sla", orgId, slaHours],
+    queryFn: () => fetchSla({ data: { orgId: orgId!, hours: slaHours } }),
+    refetchInterval: 60_000,
+  });
+
+  // Alert rule tester
+  const testRuleFn = useServerFn(testIcalWebhookAlertRule);
+  const [ruleHours, setRuleHours] = useState<string>("24");
+  const [ruleMinFailures, setRuleMinFailures] = useState<string>("3");
+  const [ruleRatePct, setRuleRatePct] = useState<string>("50");
+  const ruleTest = useMutation({
+    mutationFn: () => {
+      const h = parseInt(ruleHours, 10);
+      const f = parseInt(ruleMinFailures, 10);
+      const r = parseInt(ruleRatePct, 10);
+      if (!Number.isFinite(h) || h < 1 || h > 720) throw new Error("Hours: 1–720");
+      if (!Number.isFinite(f) || f < 1) throw new Error("Min failures: ≥ 1");
+      if (!Number.isFinite(r) || r < 1 || r > 100) throw new Error("Rate: 1–100");
+      return testRuleFn({ data: { orgId: orgId!, hours: h, minFailures: f, failureRatePct: r } });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
+
   // Audit export filters
   const [auditSince, setAuditSince] = useState<string>("");
   const [auditUntil, setAuditUntil] = useState<string>("");
