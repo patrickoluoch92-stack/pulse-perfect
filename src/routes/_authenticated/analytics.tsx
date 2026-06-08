@@ -1,13 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 import { getAnalytics } from "@/lib/analytics.functions";
-import { BedDouble, DollarSign, TrendingUp, CalendarCheck } from "lucide-react";
+import { planAllows, PLAN_LABEL, type Plan } from "@/lib/plans";
+import { BedDouble, DollarSign, TrendingUp, CalendarCheck, Lock, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { LucideIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/analytics")({
@@ -16,10 +18,10 @@ export const Route = createFileRoute("/_authenticated/analytics")({
 });
 
 const RANGES = [
-  { key: "7d", label: "Last 7 days", days: 7 },
-  { key: "30d", label: "Last 30 days", days: 30 },
-  { key: "90d", label: "Last 90 days", days: 90 },
-  { key: "ytd", label: "Year to date", days: 0 },
+  { key: "7d", label: "Last 7 days", days: 7, feature: "analytics.basic" as const },
+  { key: "30d", label: "Last 30 days", days: 30, feature: "analytics.basic" as const },
+  { key: "90d", label: "Last 90 days", days: 90, feature: "analytics.range.90d" as const },
+  { key: "ytd", label: "Year to date", days: 0, feature: "analytics.range.ytd" as const },
 ] as const;
 
 function rangeDates(key: string) {
@@ -43,13 +45,28 @@ function AnalyticsPage() {
 
   const ctx = useQuery({ queryKey: ["workspace-context"], queryFn: () => fetchCtx() });
   const orgId = ctx.data?.currentOrg?.id;
+  const plan = (ctx.data?.currentOrg?.plan ?? null) as Plan | null;
+
+  const canBasic = planAllows(plan, "analytics.basic");
+  const canPropertyBreakdown = planAllows(plan, "analytics.property_breakdown");
+
+  // Snap range back if plan disallows current selection.
+  useEffect(() => {
+    const r = RANGES.find((x) => x.key === range);
+    if (r && !planAllows(plan, r.feature)) setRange("30d");
+  }, [plan, range]);
+
   const { from, to } = useMemo(() => rangeDates(range), [range]);
 
   const q = useQuery({
     queryKey: ["analytics", orgId, from, to],
     queryFn: () => fetchAnalytics({ data: { orgId: orgId!, from, to } }),
-    enabled: !!orgId,
+    enabled: !!orgId && canBasic,
   });
+
+  if (ctx.data && !canBasic) {
+    return <UpgradeGate currentPlan={plan} required="professional" />;
+  }
 
   const d = q.data;
   const currency = "USD";
@@ -67,19 +84,27 @@ function AnalyticsPage() {
           </p>
         </div>
         <div className="flex gap-1 rounded-lg border border-border/60 bg-card p-1">
-          {RANGES.map((r) => (
-            <button
-              key={r.key}
-              onClick={() => setRange(r.key)}
-              className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
-                range === r.key
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
+          {RANGES.map((r) => {
+            const allowed = planAllows(plan, r.feature);
+            return (
+              <button
+                key={r.key}
+                onClick={() => allowed && setRange(r.key)}
+                disabled={!allowed}
+                title={allowed ? r.label : `Requires ${PLAN_LABEL[r.feature === "analytics.range.ytd" ? "business" : "professional"]} plan`}
+                className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-sm transition-colors ${
+                  range === r.key
+                    ? "bg-primary text-primary-foreground"
+                    : allowed
+                      ? "text-muted-foreground hover:text-foreground"
+                      : "text-muted-foreground/50 cursor-not-allowed"
+                }`}
+              >
+                {!allowed && <Lock className="h-3 w-3" />}
+                {r.label}
+              </button>
+            );
+          })}
         </div>
       </header>
 
@@ -125,9 +150,20 @@ function AnalyticsPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-border/60 bg-card p-6">
-          <h2 className="font-display text-lg font-semibold">Revenue by property</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-lg font-semibold">Revenue by property</h2>
+            {!canPropertyBreakdown && (
+              <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                <Lock className="h-3 w-3" /> Business
+              </span>
+            )}
+          </div>
           <div className="mt-4 h-64">
-            {d && d.propertyChart.length > 0 ? (
+            {!canPropertyBreakdown ? (
+              <div className="grid h-full place-items-center px-6 text-center text-sm text-muted-foreground">
+                Upgrade to <span className="mx-1 font-medium text-foreground">Business</span> to see revenue split by property.
+              </div>
+            ) : d && d.propertyChart.length > 0 ? (
               <ResponsiveContainer>
                 <BarChart data={d.propertyChart} layout="vertical" margin={{ left: 16, right: 16 }}>
                   <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" horizontal={false} />
@@ -202,6 +238,63 @@ function EmptyChart({ loading }: { loading: boolean }) {
   return (
     <div className="grid h-full place-items-center text-sm text-muted-foreground">
       {loading ? "Loading…" : "No data for this period yet."}
+    </div>
+  );
+}
+
+function UpgradeGate({ currentPlan, required }: { currentPlan: Plan | null; required: Plan }) {
+  return (
+    <div className="mx-auto max-w-3xl space-y-6 p-8">
+      <header>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">Analytics</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Occupancy, ADR, RevPAR, and revenue across your portfolio.
+        </p>
+      </header>
+      <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+        <div className="bg-gradient-to-br from-primary/15 via-card to-card p-8">
+          <span className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-primary">
+            <Sparkles className="h-3.5 w-3.5" /> Upgrade required
+          </span>
+          <h2 className="mt-4 font-display text-2xl font-semibold">
+            Unlock analytics with {PLAN_LABEL[required]}
+          </h2>
+          <p className="mt-2 max-w-lg text-sm text-muted-foreground">
+            You're on the{" "}
+            <span className="font-medium text-foreground">
+              {currentPlan ? PLAN_LABEL[currentPlan] : "Starter"}
+            </span>{" "}
+            plan. Upgrade to {PLAN_LABEL[required]} to see occupancy, ADR, RevPAR, daily revenue
+            trends, and booking source breakdowns. Business unlocks per-property breakdowns and
+            year-to-date ranges.
+          </p>
+          <div className="mt-6 flex gap-3">
+            <Button asChild>
+              <Link to="/settings">Manage plan</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/dashboard">Back to overview</Link>
+            </Button>
+          </div>
+        </div>
+        <ul className="grid gap-3 border-t border-border/60 p-6 sm:grid-cols-2">
+          {[
+            "Occupancy rate & nights sold",
+            "ADR (average daily rate)",
+            "RevPAR (revenue per available unit)",
+            "Daily revenue trend chart",
+            "Bookings by source (Airbnb, direct, …)",
+            "Per-property revenue breakdown (Business)",
+          ].map((f) => (
+            <li key={f} className="flex items-start gap-2 text-sm">
+              <span className="mt-1 grid h-4 w-4 place-items-center rounded-full bg-primary/15 text-primary">
+                <Sparkles className="h-2.5 w-2.5" />
+              </span>
+              {f}
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

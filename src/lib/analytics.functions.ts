@@ -27,6 +27,18 @@ export const getAnalytics = createServerFn({ method: "GET" })
     const { supabase } = context;
     const { orgId, from, to } = data;
 
+    // Plan gate: analytics requires professional or higher.
+    const { data: org, error: orgErr } = await supabase
+      .from("organizations")
+      .select("plan")
+      .eq("id", orgId)
+      .maybeSingle();
+    if (orgErr) throw new Error(orgErr.message);
+    const { planAllows } = await import("@/lib/plans");
+    if (!planAllows(org?.plan as any, "analytics.basic")) {
+      throw new Error("PLAN_REQUIRED:professional");
+    }
+
     const periodNights = daysBetween(from, to);
 
     const [unitsRes, resRes] = await Promise.all([
