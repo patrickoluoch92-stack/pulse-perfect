@@ -153,6 +153,7 @@ export const exportIcalAccessLog = createServerFn({ method: "GET" })
     z.object({ orgId: z.string().uuid(), limit: z.number().int().min(1).max(10000).optional() }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
     const { data: rows, error } = await context.supabase
       .from("ical_access_log")
       .select("created_at, status, token_prefix, ip, user_agent, unit_id, units(name)")
@@ -184,6 +185,7 @@ export const listIcalAccessLog = createServerFn({ method: "GET" })
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
     const limit = data.limit ?? 25;
     const offset = data.offset ?? 0;
     let q = context.supabase
@@ -197,6 +199,7 @@ export const listIcalAccessLog = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { rows: rows ?? [], total: count ?? 0, limit, offset };
   });
+
 
 export const getIcalSecurityAlerts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
