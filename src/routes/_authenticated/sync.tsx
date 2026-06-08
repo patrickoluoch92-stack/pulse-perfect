@@ -270,6 +270,37 @@ function SyncPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Access log retention
+  const setAccessRetentionFn = useServerFn(setIcalAccessLogRetention);
+  const [accessRetentionDays, setAccessRetentionDays] = useState<string>("");
+  const saveAccessRetention = useMutation({
+    mutationFn: () => {
+      const n = parseInt(accessRetentionDays, 10);
+      if (!Number.isFinite(n) || n < 7 || n > 3650) throw new Error("Enter 7–3650 days");
+      return setAccessRetentionFn({ data: { orgId: orgId!, days: n } });
+    },
+    onSuccess: () => {
+      toast.success("Access log retention updated");
+      qc.invalidateQueries({ queryKey: ["ical-incident-retention"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  // Audit CSV export
+  const exportAuditFn = useServerFn(exportIcalIncidentAudit);
+  const exportAudit = useMutation({
+    mutationFn: (incidentId: string) => exportAuditFn({ data: { incidentId } }),
+    onSuccess: ({ filename, csv }) => {
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Audit trail exported");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
 
   // Rotation result dialog
