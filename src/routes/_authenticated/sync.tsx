@@ -1212,6 +1212,41 @@ function SyncPage() {
               ))}
             </ul>
           </div>
+          <div className="space-y-2 border-t pt-3">
+            <p className="text-xs font-semibold text-muted-foreground">Export filters</p>
+            <div className="flex flex-wrap items-end gap-2">
+              <div className="space-y-1">
+                <Label htmlFor="audit-since" className="text-xs">From</Label>
+                <Input id="audit-since" type="date" value={auditSince}
+                  onChange={(e) => setAuditSince(e.target.value)} className="h-8 w-[150px] text-xs" />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="audit-until" className="text-xs">To</Label>
+                <Input id="audit-until" type="date" value={auditUntil}
+                  onChange={(e) => setAuditUntil(e.target.value)} className="h-8 w-[150px] text-xs" />
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {(["opened", "updated", "acknowledged", "resolved", "note"] as const).map((act) => {
+                const on = auditActions.has(act);
+                return (
+                  <Button key={act} size="sm" type="button"
+                    variant={on ? "default" : "outline"}
+                    onClick={() => setAuditActions((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(act)) next.delete(act); else next.add(act);
+                      return next;
+                    })}
+                    className="h-6 px-2 text-[11px] capitalize">{act}</Button>
+                );
+              })}
+              {auditActions.size > 0 && (
+                <Button size="sm" variant="ghost" type="button"
+                  onClick={() => setAuditActions(new Set())}
+                  className="h-6 px-2 text-[11px]">Clear</Button>
+              )}
+            </div>
+          </div>
           <DialogFooter>
             <Button
               variant="outline"
@@ -1223,6 +1258,7 @@ function SyncPage() {
             </Button>
             <Button variant="outline" onClick={() => setAuditFor(null)}>Close</Button>
           </DialogFooter>
+
         </DialogContent>
       </Dialog>
 
