@@ -75,9 +75,10 @@ export const revokeIcalToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ unitId: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
+    // Expire immediately — the URL stops working, but the column stays non-null.
     const { error } = await context.supabase
       .from("units")
-      .update({ ical_export_token: null, ical_export_token_expires_at: null })
+      .update({ ical_export_token_expires_at: new Date(Date.now() - 1000).toISOString() })
       .eq("id", data.unitId);
     if (error) throw new Error(error.message);
     return { ok: true };
