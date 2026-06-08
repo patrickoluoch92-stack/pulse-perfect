@@ -300,36 +300,45 @@ export type Database = {
       }
       ical_incident_webhooks: {
         Row: {
+          attempt_count: number
           created_at: string
           enabled: boolean
           id: string
+          last_attempt_at: string | null
           last_delivered_at: string | null
           last_error: string | null
           last_status: string | null
+          last_test_at: string | null
           org_id: string
           secret: string
           updated_at: string
           url: string
         }
         Insert: {
+          attempt_count?: number
           created_at?: string
           enabled?: boolean
           id?: string
+          last_attempt_at?: string | null
           last_delivered_at?: string | null
           last_error?: string | null
           last_status?: string | null
+          last_test_at?: string | null
           org_id: string
           secret: string
           updated_at?: string
           url: string
         }
         Update: {
+          attempt_count?: number
           created_at?: string
           enabled?: boolean
           id?: string
+          last_attempt_at?: string | null
           last_delivered_at?: string | null
           last_error?: string | null
           last_status?: string | null
+          last_test_at?: string | null
           org_id?: string
           secret?: string
           updated_at?: string
@@ -645,6 +654,7 @@ export type Database = {
       organizations: {
         Row: {
           created_at: string
+          ical_access_log_retention_days: number
           ical_incident_retention_days: number
           id: string
           name: string
@@ -655,6 +665,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          ical_access_log_retention_days?: number
           ical_incident_retention_days?: number
           id?: string
           name: string
@@ -665,6 +676,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          ical_access_log_retention_days?: number
           ical_incident_retention_days?: number
           id?: string
           name?: string

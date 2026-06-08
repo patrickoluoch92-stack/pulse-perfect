@@ -15,6 +15,7 @@ import {
   listIcalIncidentAudit, listIcalIncidentNotifications, markIcalIncidentNotificationsRead,
   listIcalIncidentWebhooks, addIcalIncidentWebhook, deleteIcalIncidentWebhook,
   testIcalIncidentWebhook, getIcalIncidentRetention, setIcalIncidentRetention,
+  setIcalAccessLogRetention, exportIcalIncidentAudit,
 } from "@/lib/ical.functions";
 
 
@@ -265,6 +266,37 @@ function SyncPage() {
     onSuccess: () => {
       toast.success("Retention updated");
       qc.invalidateQueries({ queryKey: ["ical-incident-retention"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  // Access log retention
+  const setAccessRetentionFn = useServerFn(setIcalAccessLogRetention);
+  const [accessRetentionDays, setAccessRetentionDays] = useState<string>("");
+  const saveAccessRetention = useMutation({
+    mutationFn: () => {
+      const n = parseInt(accessRetentionDays, 10);
+      if (!Number.isFinite(n) || n < 7 || n > 3650) throw new Error("Enter 7–3650 days");
+      return setAccessRetentionFn({ data: { orgId: orgId!, days: n } });
+    },
+    onSuccess: () => {
+      toast.success("Access log retention updated");
+      qc.invalidateQueries({ queryKey: ["ical-incident-retention"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  // Audit CSV export
+  const exportAuditFn = useServerFn(exportIcalIncidentAudit);
+  const exportAudit = useMutation({
+    mutationFn: (incidentId: string) => exportAuditFn({ data: { incidentId } }),
+    onSuccess: ({ filename, csv }) => {
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Audit trail exported");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -626,9 +658,13 @@ function SyncPage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-mono text-xs">{h.url}</p>
                     <p className="text-[11px] text-muted-foreground">
-                      {h.last_delivered_at
-                        ? <>Last: <span className={h.last_status?.startsWith("ok") ? "text-emerald-600" : "text-destructive"}>{h.last_status}</span> · {timeAgo(h.last_delivered_at)}</>
+                      {h.last_attempt_at
+                        ? <>Last: <span className={h.last_status?.startsWith("ok") ? "text-emerald-600" : "text-destructive"}>{h.last_status}</span> · {timeAgo(h.last_attempt_at)}</>
                         : "Never delivered"}
+                      {typeof h.attempt_count === "number" && h.attempt_count > 0 && (
+                        <> · {h.attempt_count} attempt{h.attempt_count === 1 ? "" : "s"} total</>
+                      )}
+                      {h.last_test_at && <> · last test {timeAgo(h.last_test_at)}</>}
                       {h.last_error && <> · <span className="text-destructive">{h.last_error}</span></>}
                     </p>
                   </div>
@@ -649,7 +685,7 @@ function SyncPage() {
             </p>
           )}
 
-          <div className="mt-2 border-t pt-3">
+          <div className="mt-2 space-y-3 border-t pt-3">
             <div className="flex flex-wrap items-end gap-2">
               <div className="min-w-[140px] space-y-1.5">
                 <Label htmlFor="retention">Incident retention (days)</Label>
@@ -670,7 +706,30 @@ function SyncPage() {
                 <Save className="h-3.5 w-3.5" /> Save
               </Button>
               <p className="text-xs text-muted-foreground">
-                Currently keeping resolved incidents {retention.data?.days ?? 90} days. Access logs are kept 180 days.
+                Resolved incidents kept for {retention.data?.days ?? 90} days.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-end gap-2">
+              <div className="min-w-[140px] space-y-1.5">
+                <Label htmlFor="access-retention">Access log retention (days)</Label>
+                <Input
+                  id="access-retention" type="number" min={7} max={3650}
+                  placeholder={String(retention.data?.accessLogDays ?? 180)}
+                  value={accessRetentionDays}
+                  onChange={(e) => setAccessRetentionDays(e.target.value)}
+                  className="w-32"
+                />
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => saveAccessRetention.mutate()}
+                disabled={!orgId || saveAccessRetention.isPending || !accessRetentionDays.trim()}
+              >
+                {saveAccessRetention.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                <Save className="h-3.5 w-3.5" /> Save
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Access logs kept for {retention.data?.accessLogDays ?? 180} days. Pruned nightly.
               </p>
             </div>
           </div>
@@ -993,6 +1052,14 @@ function SyncPage() {
             </ul>
           </div>
           <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => auditFor && exportAudit.mutate(auditFor.id)}
+              disabled={!auditFor || exportAudit.isPending}
+            >
+              {exportAudit.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              <Download className="h-3.5 w-3.5" /> Export CSV
+            </Button>
             <Button variant="outline" onClick={() => setAuditFor(null)}>Close</Button>
           </DialogFooter>
         </DialogContent>
