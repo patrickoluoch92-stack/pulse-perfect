@@ -16,7 +16,7 @@ const nav = [
   { to: "/reservations", label: "Reservations", icon: Calendar },
   { to: "/invoices", label: "Invoices", icon: FileText },
   { to: "/team", label: "Team", icon: Users },
-  { to: "/analytics", label: "Analytics", icon: ChartBar, soon: true },
+  { to: "/analytics", label: "Analytics", icon: ChartBar },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
