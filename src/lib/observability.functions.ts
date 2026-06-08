@@ -24,10 +24,10 @@ export const reportAppError = createServerFn({ method: "POST" })
     let orgId: string | null = null;
 
     try {
-      // Best-effort: read the bearer token if present
-      const { getRequestHeader } = await import("@tanstack/react-start/server");
-      const auth = getRequestHeader("authorization");
-      if (auth?.startsWith("Bearer ")) {
+      const { getRequest } = await import("@tanstack/react-start/server");
+      const req = getRequest();
+      const auth = req?.headers.get("authorization") ?? "";
+      if (auth.startsWith("Bearer ")) {
         const { data: u } = await supabaseAdmin.auth.getUser(auth.slice(7));
         userId = u.user?.id ?? null;
         if (userId) {
@@ -40,7 +40,7 @@ export const reportAppError = createServerFn({ method: "POST" })
         }
       }
     } catch {
-      // ignore
+      // ignore — never block error reporting
     }
 
     await supabaseAdmin.from("app_errors").insert({
