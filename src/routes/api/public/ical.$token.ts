@@ -48,6 +48,24 @@ export const Route = createFileRoute("/api/public/ical/$token")({
           return new Response("Not found", { status: 404, headers: SECURITY_HEADERS });
         }
 
+        // Ad-hoc rate limit: max 60 requests per IP in the last 60 seconds.
+        // Tradeoff: extra DB roundtrip per request; no proper primitive available.
+        if (ip) {
+          const since = new Date(Date.now() - 60_000).toISOString();
+          const { count } = await supabaseAdmin
+            .from("ical_access_log")
+            .select("id", { count: "exact", head: true })
+            .eq("ip", ip)
+            .gte("created_at", since);
+          if ((count ?? 0) >= 60) {
+            await log("rate_limited", null);
+            return new Response("Too many requests", {
+              status: 429,
+              headers: { ...SECURITY_HEADERS, "Retry-After": "60" },
+            });
+          }
+        }
+
         // Only GET / HEAD permitted (handler is GET; HEAD handled by runtime).
         if (request.method !== "GET" && request.method !== "HEAD") {
           return new Response("Method not allowed", {
