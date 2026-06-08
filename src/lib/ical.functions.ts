@@ -5,6 +5,39 @@ import { parseICS } from "@/lib/ical";
 
 const orgIdSchema = z.object({ orgId: z.string().uuid() });
 
+export const listExportableUnits = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => orgIdSchema.parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: rows, error } = await context.supabase
+      .from("units")
+      .select("id, name, property_id, ical_export_token, properties(name)")
+      .eq("org_id", data.orgId)
+      .order("name", { ascending: true });
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const rotateIcalExportToken = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ unitId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    // Generate a 32-byte random token, hex-encoded.
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    const token = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+
+    const { data: row, error } = await context.supabase
+      .from("units")
+      .update({ ical_export_token: token })
+      .eq("id", data.unitId)
+      .select("id, ical_export_token")
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+
 export const listIcalSources = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => orgIdSchema.parse(d))
