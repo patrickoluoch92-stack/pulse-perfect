@@ -417,6 +417,7 @@ export const updateIcalIncidentStatus = createServerFn({ method: "POST" })
     z.object({
       id: z.string().uuid(),
       status: z.enum(["acknowledged", "resolved"]),
+      note: z.string().trim().max(500).optional(),
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
@@ -433,8 +434,83 @@ export const updateIcalIncidentStatus = createServerFn({ method: "POST" })
       : { status: data.status, resolved_at: now, resolved_by: context.userId };
     const { error } = await context.supabase.from("ical_incidents").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
+    await context.supabase.from("ical_incident_audit").insert({
+      incident_id: data.id, org_id: inc.org_id, actor_id: context.userId,
+      action: data.status, note: data.note ?? null,
+    });
     return { ok: true };
   });
+
+export const listIcalIncidentAudit = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ incidentId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: inc, error: ie } = await context.supabase
+      .from("ical_incidents").select("id, org_id").eq("id", data.incidentId).single();
+    if (ie || !inc) throw new Error("Incident not found");
+    await assertOrgRole(context.supabase, inc.org_id, context.userId);
+    const { data: rows, error } = await context.supabase
+      .from("ical_incident_audit")
+      .select("id, action, note, actor_id, created_at")
+      .eq("incident_id", data.incidentId)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const listIcalIncidentNotifications = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ orgId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
+    const { data: open, error } = await context.supabase
+      .from("ical_incidents")
+      .select("id, severity, kind, message, last_seen_at")
+      .eq("org_id", data.orgId)
+      .neq("status", "resolved")
+      .order("last_seen_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    const ids = (open ?? []).map((i) => i.id);
+    let readIds = new Set<string>();
+    if (ids.length) {
+      const { data: reads } = await context.supabase
+        .from("ical_incident_reads")
+        .select("incident_id")
+        .in("incident_id", ids)
+        .eq("user_id", context.userId);
+      readIds = new Set((reads ?? []).map((r) => r.incident_id));
+    }
+    const items = (open ?? []).map((i) => ({ ...i, read: readIds.has(i.id) }));
+    return { items, unread: items.filter((i) => !i.read).length };
+  });
+
+export const markIcalIncidentNotificationsRead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      orgId: z.string().uuid(),
+      incidentIds: z.array(z.string().uuid()).max(100).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
+    let ids = data.incidentIds;
+    if (!ids || ids.length === 0) {
+      const { data: open } = await context.supabase
+        .from("ical_incidents").select("id").eq("org_id", data.orgId).neq("status", "resolved").limit(50);
+      ids = (open ?? []).map((i) => i.id);
+    }
+    if (ids.length === 0) return { ok: true, count: 0 };
+    const rows = ids.map((incident_id) => ({ incident_id, user_id: context.userId }));
+    const { error } = await context.supabase
+      .from("ical_incident_reads")
+      .upsert(rows, { onConflict: "incident_id,user_id", ignoreDuplicates: true });
+    if (error) throw new Error(error.message);
+    return { ok: true, count: ids.length };
+  });
+
 
 
 
