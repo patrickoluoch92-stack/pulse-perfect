@@ -17,7 +17,9 @@ import {
   testIcalIncidentWebhook, getIcalIncidentRetention, setIcalIncidentRetention,
   setIcalAccessLogRetention, exportIcalIncidentAudit,
   listIcalWebhookDeliveries, redeliverIcalWebhook, getIcalWebhookAlerts,
+  getIcalWebhookSlaMetrics, testIcalWebhookAlertRule,
 } from "@/lib/ical.functions";
+
 
 
 
@@ -30,7 +32,12 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
 
 export const Route = createFileRoute("/_authenticated/sync")({
   head: () => ({ meta: [{ title: "Calendar Sync — HostPulse" }] }),
@@ -283,6 +290,36 @@ function SyncPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  // Webhook SLA metrics
+  const fetchSla = useServerFn(getIcalWebhookSlaMetrics);
+  const [slaHours, setSlaHours] = useState<number>(24);
+  const sla = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-webhook-sla", orgId, slaHours],
+    queryFn: () => fetchSla({ data: { orgId: orgId!, hours: slaHours } }),
+    refetchInterval: 60_000,
+  });
+
+  // Alert rule tester
+  const testRuleFn = useServerFn(testIcalWebhookAlertRule);
+  const [ruleHours, setRuleHours] = useState<string>("24");
+  const [ruleMinFailures, setRuleMinFailures] = useState<string>("3");
+  const [ruleRatePct, setRuleRatePct] = useState<string>("50");
+  const ruleTest = useMutation({
+    mutationFn: () => {
+      const h = parseInt(ruleHours, 10);
+      const f = parseInt(ruleMinFailures, 10);
+      const r = parseInt(ruleRatePct, 10);
+      if (!Number.isFinite(h) || h < 1 || h > 720) throw new Error("Hours: 1–720");
+      if (!Number.isFinite(f) || f < 1) throw new Error("Min failures: ≥ 1");
+      if (!Number.isFinite(r) || r < 1 || r > 100) throw new Error("Rate: 1–100");
+      return testRuleFn({ data: { orgId: orgId!, hours: h, minFailures: f, failureRatePct: r } });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
 
   // Audit export filters
   const [auditSince, setAuditSince] = useState<string>("");
@@ -818,7 +855,102 @@ function SyncPage() {
             </div>
           )}
 
+          {/* Webhook SLA metrics */}
+          <div className="space-y-2 border-t pt-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold">Delivery SLA</h3>
+              <Select value={String(slaHours)} onValueChange={(v) => setSlaHours(parseInt(v, 10))}>
+                <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Last 1h</SelectItem>
+                  <SelectItem value="24">Last 24h</SelectItem>
+                  <SelectItem value="168">Last 7 days</SelectItem>
+                  <SelectItem value="720">Last 30 days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {sla.data && sla.data.metrics.length === 0 ? (
+              <p className="rounded-lg border border-dashed p-4 text-center text-xs text-muted-foreground">No deliveries in this window.</p>
+            ) : sla.data ? (
+              <div className="overflow-x-auto rounded-lg border">
+                <table className="w-full text-xs">
+                  <thead className="bg-muted/40 text-muted-foreground">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-medium">Webhook</th>
+                      <th className="px-3 py-2 text-right font-medium">Success</th>
+                      <th className="px-3 py-2 text-right font-medium">Failed / Total</th>
+                      <th className="px-3 py-2 text-right font-medium">Avg attempts</th>
+                      <th className="px-3 py-2 text-right font-medium">P95</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sla.data.metrics.map((m) => {
+                      const pct = Math.round(m.successRate * 100);
+                      const tone = pct >= 99 ? "text-emerald-600" : pct >= 95 ? "text-amber-600" : "text-destructive";
+                      return (
+                        <tr key={m.webhookId} className="border-t">
+                          <td className="max-w-[260px] truncate px-3 py-2 font-mono">{m.url}</td>
+                          <td className={`px-3 py-2 text-right font-semibold ${tone}`}>{pct}%</td>
+                          <td className="px-3 py-2 text-right">{m.failed} / {m.total}</td>
+                          <td className="px-3 py-2 text-right">{m.avgAttempts}</td>
+                          <td className="px-3 py-2 text-right">{m.p95Attempts}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
+          </div>
+
+          {/* Alert rule tester */}
+          <div className="space-y-2 border-t pt-3">
+            <h3 className="text-sm font-semibold">Alert rule tester</h3>
+            <p className="text-xs text-muted-foreground">
+              Preview which webhooks would trigger an alert under custom thresholds, against historical deliveries.
+            </p>
+            <div className="flex flex-wrap items-end gap-2">
+              <div className="space-y-1">
+                <Label className="text-xs">Window (hours)</Label>
+                <Input className="h-8 w-24 text-xs" value={ruleHours} onChange={(e) => setRuleHours(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Min failures</Label>
+                <Input className="h-8 w-24 text-xs" value={ruleMinFailures} onChange={(e) => setRuleMinFailures(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Failure rate %</Label>
+                <Input className="h-8 w-24 text-xs" value={ruleRatePct} onChange={(e) => setRuleRatePct(e.target.value)} />
+              </div>
+              <Button size="sm" onClick={() => ruleTest.mutate()} disabled={ruleTest.isPending}>
+                {ruleTest.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldAlert className="h-3.5 w-3.5" />}
+                Run test
+              </Button>
+            </div>
+            {ruleTest.data && (
+              <div className="rounded-lg border p-3 text-xs">
+                <p className="text-muted-foreground">
+                  Window {ruleTest.data.windowHours}h · {ruleTest.data.sampleSize} deliveries across {ruleTest.data.hookCount} webhook(s) ·{" "}
+                  <span className={ruleTest.data.matches.length > 0 ? "font-semibold text-destructive" : "font-semibold text-emerald-600"}>
+                    {ruleTest.data.matches.length} match{ruleTest.data.matches.length === 1 ? "" : "es"}
+                  </span>
+                </p>
+                {ruleTest.data.matches.length > 0 && (
+                  <ul className="mt-2 space-y-1">
+                    {ruleTest.data.matches.map((m) => (
+                      <li key={m.webhookId} className="flex items-center justify-between gap-2">
+                        <span className="truncate font-mono">{m.url}</span>
+                        <span>{m.failed}/{m.total} ({Math.round(m.failureRate * 100)}%)</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Webhook delivery dashboard */}
+
           <div className="space-y-2 border-t pt-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h3 className="text-sm font-semibold">Delivery log</h3>
@@ -868,9 +1000,26 @@ function SyncPage() {
                         <p className="truncate font-mono text-[11px] text-muted-foreground">{hookRel.ical_incident_webhooks?.url ?? "(deleted)"}</p>
                         {d.last_error && <p className="text-[11px] text-destructive">{d.last_error}</p>}
                       </div>
-                      <Button size="sm" variant="outline" onClick={() => redeliver.mutate(d.id)} disabled={redeliver.isPending}>
-                        <RefreshCw className={`h-3.5 w-3.5 ${redeliver.isPending ? "animate-spin" : ""}`} /> Redeliver
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="outline" disabled={redeliver.isPending}>
+                            <RefreshCw className={`h-3.5 w-3.5 ${redeliver.isPending ? "animate-spin" : ""}`} /> Redeliver
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Redeliver this event?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              The receiver will get another <span className="font-mono">{d.event}</span> POST with the original payload (plus a <span className="font-mono">redelivered_from</span> marker). Same event can be redelivered again only after 30 seconds.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => redeliver.mutate(d.id)}>Redeliver</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+
                     </li>
                   );
                 })}

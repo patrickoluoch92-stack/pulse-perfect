@@ -3,8 +3,11 @@ import {
   deliverWithRetry,
   signHmacSha256,
   isRetryableStatus,
+  verifyV1Signature,
+  timingSafeEqualHex,
   type FetchLike,
 } from "@/lib/webhook";
+
 
 const noSleep = () => Promise.resolve();
 
@@ -53,20 +56,60 @@ describe("deliverWithRetry — E2E with mocked fetch", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
-  it("signs the body and forwards event/signature headers", async () => {
+  it("signs body+timestamp and forwards v1 signature headers", async () => {
     const fetchImpl = vi.fn<FetchLike>().mockResolvedValue({ ok: true, status: 200 });
     await deliverWithRetry({
       url: "https://example.com/hook", secret: "topsecret",
       event: "incident.test", payload: { foo: "bar" },
-      fetchImpl, sleep: noSleep,
+      fetchImpl, sleep: noSleep, now: () => 1700000000,
     });
     const [, init] = fetchImpl.mock.calls[0];
     expect(init.method).toBe("POST");
     expect(init.headers["content-type"]).toBe("application/json");
     expect(init.headers["x-hostpulse-event"]).toBe("incident.test");
-    expect(init.headers["x-hostpulse-signature"]).toMatch(/^sha256=[0-9a-f]{64}$/);
+    expect(init.headers["x-hostpulse-timestamp"]).toBe("1700000000");
+    expect(init.headers["x-hostpulse-signature"]).toMatch(/^t=1700000000,v1=[0-9a-f]{64}$/);
+    expect(init.headers["x-hostpulse-signature-legacy"]).toMatch(/^sha256=[0-9a-f]{64}$/);
     expect(init.body).toBe('{"foo":"bar"}');
   });
+
+  it("verifyV1Signature accepts a valid signature within the window", async () => {
+    const body = '{"hello":"world"}';
+    const ts = 1700000000;
+    const v1 = await signHmacSha256("s", `${ts}.${body}`);
+    const ok = await verifyV1Signature({
+      secret: "s", body, signatureHeader: `t=${ts},v1=${v1}`,
+      now: () => ts + 10,
+    });
+    expect(ok).toBe(true);
+  });
+
+  it("verifyV1Signature rejects stale or tampered requests", async () => {
+    const body = '{"hello":"world"}';
+    const ts = 1700000000;
+    const v1 = await signHmacSha256("s", `${ts}.${body}`);
+    // stale
+    expect(await verifyV1Signature({
+      secret: "s", body, signatureHeader: `t=${ts},v1=${v1}`,
+      now: () => ts + 10_000, maxAgeSec: 300,
+    })).toBe(false);
+    // tampered body
+    expect(await verifyV1Signature({
+      secret: "s", body: body + "x", signatureHeader: `t=${ts},v1=${v1}`,
+      now: () => ts,
+    })).toBe(false);
+    // missing header
+    expect(await verifyV1Signature({
+      secret: "s", body, signatureHeader: null, now: () => ts,
+    })).toBe(false);
+  });
+
+  it("timingSafeEqualHex is length-aware", () => {
+    expect(timingSafeEqualHex("abc", "abc")).toBe(true);
+    expect(timingSafeEqualHex("abc", "abd")).toBe(false);
+    expect(timingSafeEqualHex("abc", "abcd")).toBe(false);
+  });
+
 
   it("retries on 503 and recovers", async () => {
     const fetchImpl = vi.fn<FetchLike>()
