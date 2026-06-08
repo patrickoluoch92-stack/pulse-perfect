@@ -18,10 +18,10 @@ export const Route = createFileRoute("/_authenticated/analytics")({
 });
 
 const RANGES = [
-  { key: "7d", label: "Last 7 days", days: 7 },
-  { key: "30d", label: "Last 30 days", days: 30 },
-  { key: "90d", label: "Last 90 days", days: 90 },
-  { key: "ytd", label: "Year to date", days: 0 },
+  { key: "7d", label: "Last 7 days", days: 7, feature: "analytics.basic" as const },
+  { key: "30d", label: "Last 30 days", days: 30, feature: "analytics.basic" as const },
+  { key: "90d", label: "Last 90 days", days: 90, feature: "analytics.range.90d" as const },
+  { key: "ytd", label: "Year to date", days: 0, feature: "analytics.range.ytd" as const },
 ] as const;
 
 function rangeDates(key: string) {
