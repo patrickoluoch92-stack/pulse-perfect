@@ -177,9 +177,34 @@ function SyncPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ical-incidents"] });
       qc.invalidateQueries({ queryKey: ["ical-security-alerts"] });
+      qc.invalidateQueries({ queryKey: ["ical-incident-notifs"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const notifs = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-incident-notifs", orgId],
+    queryFn: () => fetchNotifs({ data: { orgId: orgId! } }),
+    refetchInterval: 60000,
+  });
+
+  const markRead = useMutation({
+    mutationFn: () => markReadFn({ data: { orgId: orgId! } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ical-incident-notifs"] });
+      toast.success("Notifications marked as read");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const [auditFor, setAuditFor] = useState<{ id: string; title: string } | null>(null);
+  const audit = useQuery({
+    enabled: !!auditFor,
+    queryKey: ["ical-incident-audit", auditFor?.id],
+    queryFn: () => fetchAuditFn({ data: { incidentId: auditFor!.id } }),
+  });
+
 
   // Rotation result dialog
   const [rotateResult, setRotateResult] = useState<
