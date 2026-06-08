@@ -161,9 +161,12 @@ export const exportIcalAccessLog = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 5000);
     if (error) throw new Error(error.message);
+    // CSV injection-safe escaper: quote on special chars AND prefix risky leaders with '
     const esc = (v: unknown) => {
-      const s = v == null ? "" : String(v);
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      let s = v == null ? "" : String(v);
+      if (s.length > 32768) s = s.slice(0, 32768);
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+      return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const header = "created_at,status,unit,token_prefix,ip,user_agent\n";
     const body = (rows ?? []).map((r) => [
@@ -171,8 +174,18 @@ export const exportIcalAccessLog = createServerFn({ method: "GET" })
       (r as { units?: { name?: string } | null }).units?.name ?? "",
       r.token_prefix, r.ip ?? "", r.user_agent ?? "",
     ].map(esc).join(",")).join("\n");
-    return { filename: `ical-access-log-${new Date().toISOString().slice(0, 10)}.csv`, csv: header + body };
+    // Audit the export
+    await context.supabase.from("ical_access_log").insert({
+      org_id: data.orgId, unit_id: null,
+      token_prefix: "csv_export",
+      status: "csv_export",
+      ip: null,
+      user_agent: `user:${context.userId}:rows=${rows?.length ?? 0}`,
+    });
+    // Prepend BOM for Excel UTF-8 compatibility
+    return { filename: `ical-access-log-${new Date().toISOString().slice(0, 10)}.csv`, csv: "\uFEFF" + header + body };
   });
+
 
 export const listIcalAccessLog = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
