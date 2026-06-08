@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
+import { Route as AuthenticatedToursRouteImport } from './routes/_authenticated/tours'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedSyncRouteImport } from './routes/_authenticated/sync'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -43,6 +44,11 @@ const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
   path: '/invite/$token',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedToursRoute = AuthenticatedToursRouteImport.update({
+  id: '/tours',
+  path: '/tours',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
   id: '/team',
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/sync': typeof AuthenticatedSyncRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/tours': typeof AuthenticatedToursRoute
   '/invite/$token': typeof InviteTokenRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/sync': typeof AuthenticatedSyncRoute
   '/team': typeof AuthenticatedTeamRoute
+  '/tours': typeof AuthenticatedToursRoute
   '/invite/$token': typeof InviteTokenRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/sync': typeof AuthenticatedSyncRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
+  '/_authenticated/tours': typeof AuthenticatedToursRoute
   '/invite/$token': typeof InviteTokenRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sync'
     | '/team'
+    | '/tours'
     | '/invite/$token'
     | '/invoices/$invoiceId'
     | '/properties/$propertyId'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/sync'
     | '/team'
+    | '/tours'
     | '/invite/$token'
     | '/invoices/$invoiceId'
     | '/properties/$propertyId'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/sync'
     | '/_authenticated/team'
+    | '/_authenticated/tours'
     | '/invite/$token'
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/properties/$propertyId'
@@ -242,6 +254,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/invite/$token'
       preLoaderRoute: typeof InviteTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/tours': {
+      id: '/_authenticated/tours'
+      path: '/tours'
+      fullPath: '/tours'
+      preLoaderRoute: typeof AuthenticatedToursRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/team': {
       id: '/_authenticated/team'
@@ -360,6 +379,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSyncRoute: typeof AuthenticatedSyncRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
+  AuthenticatedToursRoute: typeof AuthenticatedToursRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -371,6 +391,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSyncRoute: AuthenticatedSyncRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
+  AuthenticatedToursRoute: AuthenticatedToursRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
