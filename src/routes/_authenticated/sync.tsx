@@ -122,12 +122,35 @@ function SyncPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const [logPage, setLogPage] = useState(0);
+  const [logStatus, setLogStatus] = useState<string>("all");
+  const PAGE_SIZE = 25;
+
   const accessLog = useQuery({
     enabled: !!orgId,
-    queryKey: ["ical-access-log", orgId],
-    queryFn: () => fetchLog({ data: { orgId: orgId!, limit: 50 } }),
+    queryKey: ["ical-access-log", orgId, logPage, logStatus],
+    queryFn: () => fetchLog({ data: {
+      orgId: orgId!,
+      limit: PAGE_SIZE,
+      offset: logPage * PAGE_SIZE,
+      status: logStatus === "all" ? undefined : logStatus,
+    } }),
     refetchInterval: 30000,
   });
+
+  const fetchAlerts = useServerFn(getIcalSecurityAlerts);
+  const alerts = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-security-alerts", orgId],
+    queryFn: () => fetchAlerts({ data: { orgId: orgId! } }),
+    refetchInterval: 60000,
+  });
+
+  // Rotation result dialog
+  const [rotateResult, setRotateResult] = useState<
+    | null
+    | { unitId: string; unitName: string; url: string; expiresAt: string | null }
+  >(null);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
