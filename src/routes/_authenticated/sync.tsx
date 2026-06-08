@@ -1052,6 +1052,14 @@ function SyncPage() {
             </ul>
           </div>
           <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => auditFor && exportAudit.mutate(auditFor.id)}
+              disabled={!auditFor || exportAudit.isPending}
+            >
+              {exportAudit.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              <Download className="h-3.5 w-3.5" /> Export CSV
+            </Button>
             <Button variant="outline" onClick={() => setAuditFor(null)}>Close</Button>
           </DialogFooter>
         </DialogContent>
