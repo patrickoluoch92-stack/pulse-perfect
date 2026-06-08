@@ -241,3 +241,60 @@ function EmptyChart({ loading }: { loading: boolean }) {
     </div>
   );
 }
+
+function UpgradeGate({ currentPlan, required }: { currentPlan: Plan | null; required: Plan }) {
+  return (
+    <div className="mx-auto max-w-3xl space-y-6 p-8">
+      <header>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">Analytics</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Occupancy, ADR, RevPAR, and revenue across your portfolio.
+        </p>
+      </header>
+      <section className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+        <div className="bg-gradient-to-br from-primary/15 via-card to-card p-8">
+          <span className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-primary">
+            <Sparkles className="h-3.5 w-3.5" /> Upgrade required
+          </span>
+          <h2 className="mt-4 font-display text-2xl font-semibold">
+            Unlock analytics with {PLAN_LABEL[required]}
+          </h2>
+          <p className="mt-2 max-w-lg text-sm text-muted-foreground">
+            You're on the{" "}
+            <span className="font-medium text-foreground">
+              {currentPlan ? PLAN_LABEL[currentPlan] : "Starter"}
+            </span>{" "}
+            plan. Upgrade to {PLAN_LABEL[required]} to see occupancy, ADR, RevPAR, daily revenue
+            trends, and booking source breakdowns. Business unlocks per-property breakdowns and
+            year-to-date ranges.
+          </p>
+          <div className="mt-6 flex gap-3">
+            <Button asChild>
+              <Link to="/settings">Manage plan</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/dashboard">Back to overview</Link>
+            </Button>
+          </div>
+        </div>
+        <ul className="grid gap-3 border-t border-border/60 p-6 sm:grid-cols-2">
+          {[
+            "Occupancy rate & nights sold",
+            "ADR (average daily rate)",
+            "RevPAR (revenue per available unit)",
+            "Daily revenue trend chart",
+            "Bookings by source (Airbnb, direct, …)",
+            "Per-property revenue breakdown (Business)",
+          ].map((f) => (
+            <li key={f} className="flex items-start gap-2 text-sm">
+              <span className="mt-1 grid h-4 w-4 place-items-center rounded-full bg-primary/15 text-primary">
+                <Sparkles className="h-2.5 w-2.5" />
+              </span>
+              {f}
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
+}
