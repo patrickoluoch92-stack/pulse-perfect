@@ -331,7 +331,15 @@ function SyncPage() {
   // Audit CSV export
   const exportAuditFn = useServerFn(exportIcalIncidentAudit);
   const exportAudit = useMutation({
-    mutationFn: (incidentId: string) => exportAuditFn({ data: { incidentId } }),
+    mutationFn: (incidentId: string) => {
+      const actions = Array.from(auditActions) as ("opened" | "updated" | "acknowledged" | "resolved" | "note")[];
+      return exportAuditFn({ data: {
+        incidentId,
+        since: auditSince ? new Date(auditSince).toISOString() : undefined,
+        until: auditUntil ? new Date(auditUntil).toISOString() : undefined,
+        actions: actions.length > 0 ? actions : undefined,
+      } });
+    },
     onSuccess: ({ filename, csv }) => {
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
@@ -342,6 +350,7 @@ function SyncPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
 
 
