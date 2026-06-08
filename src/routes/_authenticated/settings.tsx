@@ -38,6 +38,8 @@ function SettingsPage() {
           <div><dt className="text-muted-foreground">Full name</dt><dd className="mt-1 font-medium">{profile?.full_name ?? "—"}</dd></div>
         </dl>
       </section>
+
+      <MfaSettings />
     </div>
   );
 }
