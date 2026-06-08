@@ -46,7 +46,16 @@ jobs:
         run: bun run test
 
       - name: Run Playwright tests
+        id: e2e
         run: bun run test:e2e -- --project=${{ matrix.browser }}
+        env:
+          CI: "true"
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'http://localhost:54321' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'public-anon-key' }}
+
+      - name: Re-run failed Playwright specs
+        if: failure() && steps.e2e.conclusion == 'failure'
+        run: bun run test:e2e -- --project=${{ matrix.browser }} --last-failed
         env:
           CI: "true"
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'http://localhost:54321' }}
