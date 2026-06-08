@@ -40,6 +40,9 @@ function SyncPage() {
   const delFn = useServerFn(deleteIcalSource);
   const syncFn = useServerFn(syncIcalSource);
   const rotateFn = useServerFn(rotateIcalExportToken);
+  const setExpiryFn = useServerFn(setIcalTokenExpiry);
+  const revokeFn = useServerFn(revokeIcalToken);
+  const fetchLog = useServerFn(listIcalAccessLog);
 
   const ctx = useQuery({ queryKey: ["workspace-context"], queryFn: () => fetchCtx() });
   const orgId = ctx.data?.currentOrg?.id;
