@@ -250,26 +250,64 @@ function SyncPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="relative">
-              <Button
-                variant="outline" size="sm"
-                disabled={!orgId || (notifs.data?.unread ?? 0) === 0 || markRead.isPending}
-                onClick={() => markRead.mutate()}
-                title={`${notifs.data?.unread ?? 0} unread incident notification${(notifs.data?.unread ?? 0) === 1 ? "" : "s"}`}
-              >
-                <Bell className="h-4 w-4" />
-                {(notifs.data?.unread ?? 0) > 0 ? `${notifs.data!.unread} unread` : "No new alerts"}
-              </Button>
-              {(notifs.data?.unread ?? 0) > 0 && (
-                <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
-                  {Math.min(99, notifs.data!.unread)}
-                </span>
-              )}
-            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" disabled={!orgId} className="relative">
+                  <Bell className="h-4 w-4" />
+                  Alerts
+                  {(notifs.data?.unread ?? 0) > 0 && (
+                    <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                      {Math.min(99, notifs.data!.unread)}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-[360px] p-0">
+                <div className="flex items-center justify-between border-b px-3 py-2">
+                  <div className="text-sm font-medium">Incident notifications</div>
+                  <Button
+                    variant="ghost" size="sm"
+                    disabled={(notifs.data?.unread ?? 0) === 0 || markRead.isPending}
+                    onClick={() => markRead.mutate()}
+                  >
+                    Mark all read
+                  </Button>
+                </div>
+                <div className="max-h-[420px] overflow-y-auto">
+                  {!notifs.data || notifs.data.items.length === 0 ? (
+                    <p className="px-3 py-6 text-center text-xs text-muted-foreground">
+                      No open incidents.
+                    </p>
+                  ) : (
+                    <ul className="divide-y">
+                      {notifs.data.items.map((n) => (
+                        <li key={n.id} className={`flex gap-2 px-3 py-2 text-sm ${n.read ? "opacity-60" : ""}`}>
+                          <span
+                            className={
+                              "mt-1 h-2 w-2 shrink-0 rounded-full " +
+                              (n.severity === "high" ? "bg-destructive" : "bg-amber-500")
+                            }
+                            aria-hidden
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-baseline justify-between gap-2">
+                              <span className="truncate text-xs font-medium capitalize">{n.kind}</span>
+                              <span className="text-[10px] text-muted-foreground">{timeAgo(n.last_seen_at)}</span>
+                            </div>
+                            <p className="mt-0.5 text-xs text-muted-foreground line-clamp-3">{n.message}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
             <Button onClick={() => setOpen(true)} disabled={!orgId || (units.data?.length ?? 0) === 0}>
               <Plus className="h-4 w-4" /> Add import feed
             </Button>
           </div>
+
 
         </header>
 
