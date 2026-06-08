@@ -51,6 +51,10 @@ function SyncPage() {
   const exportAlertsFn = useServerFn(exportIcalSecurityAlerts);
   const fetchIncidents = useServerFn(listIcalIncidents);
   const updateIncidentFn = useServerFn(updateIcalIncidentStatus);
+  const fetchAuditFn = useServerFn(listIcalIncidentAudit);
+  const fetchNotifs = useServerFn(listIcalIncidentNotifications);
+  const markReadFn = useServerFn(markIcalIncidentNotificationsRead);
+
 
 
   const ctx = useQuery({ queryKey: ["workspace-context"], queryFn: () => fetchCtx() });
