@@ -622,7 +622,12 @@ export const setIcalAccessLogRetention = createServerFn({ method: "POST" })
 
 export const exportIcalIncidentAudit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ incidentId: z.string().uuid() }).parse(d))
+  .inputValidator((d: unknown) => z.object({
+    incidentId: z.string().uuid(),
+    since: z.string().datetime().optional(),
+    until: z.string().datetime().optional(),
+    actions: z.array(z.enum(["opened", "updated", "acknowledged", "resolved", "note"])).max(10).optional(),
+  }).parse(d))
   .handler(async ({ context, data }) => {
     const { buildCsv } = await import("@/lib/csv");
     const { data: inc, error: ie } = await context.supabase
@@ -630,12 +635,14 @@ export const exportIcalIncidentAudit = createServerFn({ method: "GET" })
     if (ie || !inc) throw new Error("Incident not found");
     await assertOrgRole(context.supabase, inc.org_id, context.userId);
     assertCsvRate(context.userId);
-    const { data: rows } = await context.supabase
+    let q = context.supabase
       .from("ical_incident_audit")
       .select("created_at, action, actor_id, note")
-      .eq("incident_id", data.incidentId)
-      .order("created_at", { ascending: false })
-      .limit(1000);
+      .eq("incident_id", data.incidentId);
+    if (data.since) q = q.gte("created_at", data.since);
+    if (data.until) q = q.lte("created_at", data.until);
+    if (data.actions && data.actions.length > 0) q = q.in("action", data.actions);
+    const { data: rows } = await q.order("created_at", { ascending: false }).limit(5000);
     const csv = buildCsv(
       ["created_at", "action", "actor_id", "note"],
       (rows ?? []).map((r) => [r.created_at, r.action, r.actor_id ?? "", r.note ?? ""]),
@@ -645,13 +652,14 @@ export const exportIcalIncidentAudit = createServerFn({ method: "GET" })
       token_prefix: "csv_export",
       status: "csv_export",
       ip: null,
-      user_agent: `user:${context.userId}:audit:incident=${data.incidentId.slice(0, 8)}:rows=${rows?.length ?? 0}`,
+      user_agent: `user:${context.userId}:audit:incident=${data.incidentId.slice(0, 8)}:rows=${rows?.length ?? 0}:filtered=${data.actions ? "1" : "0"}`,
     });
     return {
       filename: `incident-${inc.fingerprint.slice(0, 16)}-audit.csv`,
       csv,
     };
   });
+
 
 
 export const listIcalIncidentAudit = createServerFn({ method: "GET" })
