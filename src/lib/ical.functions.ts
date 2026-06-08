@@ -333,19 +333,29 @@ export const exportIcalSecurityAlerts = createServerFn({ method: "GET" })
       .gte("last_seen_at", since24h)
       .order("last_seen_at", { ascending: false });
     const esc = (v: unknown) => {
-      const s = v == null ? "" : String(v);
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      let s = v == null ? "" : String(v);
+      if (s.length > 32768) s = s.slice(0, 32768);
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+      return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const header = "severity,kind,fingerprint,status,occurrences,first_seen_at,last_seen_at,resolved_at,message\n";
     const body = (incidents ?? []).map((i) => [
       i.severity, i.kind, i.fingerprint, i.status, i.occurrences,
       i.first_seen_at, i.last_seen_at, i.resolved_at ?? "", i.message,
     ].map(esc).join(",")).join("\n");
+    await context.supabase.from("ical_access_log").insert({
+      org_id: data.orgId, unit_id: null,
+      token_prefix: "csv_export",
+      status: "csv_export",
+      ip: null,
+      user_agent: `user:${context.userId}:alerts:rows=${incidents?.length ?? 0}`,
+    });
     return {
       filename: `ical-security-alerts-${new Date().toISOString().slice(0, 10)}.csv`,
-      csv: header + body,
+      csv: "\uFEFF" + header + body,
     };
   });
+
 
 export const listIcalIncidents = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
