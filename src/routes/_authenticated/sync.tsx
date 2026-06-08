@@ -94,11 +94,17 @@ function SyncPage() {
   });
 
   const rotate = useMutation({
-    mutationFn: (vars: { unitId: string; ttlDays?: number }) =>
-      rotateFn({ data: vars }),
-    onSuccess: () => {
-      toast.success("Token rotated. Old feed URL is now revoked.");
+    mutationFn: (vars: { unitId: string; ttlDays?: number; unitName: string }) =>
+      rotateFn({ data: { unitId: vars.unitId, ttlDays: vars.ttlDays } }).then((row) => ({ ...row, unitName: vars.unitName })),
+    onSuccess: (row) => {
       qc.invalidateQueries({ queryKey: ["export-units"] });
+      qc.invalidateQueries({ queryKey: ["ical-access-log"] });
+      setRotateResult({
+        unitId: row.id,
+        unitName: row.unitName,
+        url: `${origin}/api/public/ical/${row.ical_export_token}.ics`,
+        expiresAt: row.ical_export_token_expires_at ?? null,
+      });
     },
     onError: (e: Error) => toast.error(e.message),
   });
