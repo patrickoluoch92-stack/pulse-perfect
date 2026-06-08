@@ -191,6 +191,29 @@ function SyncPage() {
           </Button>
         </header>
 
+        {alerts.data && alerts.data.alerts.length > 0 && (
+          <div className="space-y-2">
+            {alerts.data.alerts.map((a, i) => {
+              const tone = a.severity === "high"
+                ? "border-destructive/40 bg-destructive/10 text-destructive"
+                : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300";
+              const Icon = a.severity === "high" ? ShieldAlert : AlertTriangle;
+              return (
+                <div key={i} className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-sm ${tone}`}>
+                  <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div className="flex-1">
+                    <span className="font-medium capitalize">{a.severity}</span> · {a.message}
+                  </div>
+                </div>
+              );
+            })}
+            <p className="text-xs text-muted-foreground">
+              Last 24h: {alerts.data.counts.total24h} requests · {alerts.data.counts.rateLimited1h} rate-limited (1h) ·{" "}
+              {alerts.data.counts.badToken1h} bad-token (1h) · {alerts.data.counts.expired24h} expired-token hits
+            </p>
+          </div>
+        )}
+
         <section className="space-y-4">
           {(units.data ?? []).map((u) => {
             const expired = u.ical_export_token_expires_at
