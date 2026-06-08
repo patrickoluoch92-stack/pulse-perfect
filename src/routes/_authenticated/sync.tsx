@@ -352,6 +352,12 @@ function SyncPage() {
                       disabled={updateIncident.isPending}>
                       <CheckCircle2 className="h-3.5 w-3.5" /> Resolve
                     </Button>
+                    <Button size="sm" variant="ghost"
+                      onClick={() => setAuditFor({ id: inc.id, title: `${inc.kind} · ${inc.severity}` })}
+                      title="View audit trail">
+                      <History className="h-3.5 w-3.5" /> Audit
+                    </Button>
+
                   </div>
                 </li>
               ))}
