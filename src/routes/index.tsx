@@ -16,6 +16,20 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "Reservations, housekeeping, billing, and analytics for modern hosts.",
       },
+      { property: "og:url", content: "/" },
+    ],
+    links: [{ rel: "canonical", href: "/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "HostPulse",
+          description:
+            "Hospitality operations for hosts, hotels, lodges, and tour operators.",
+        }),
+      },
     ],
   }),
   component: Landing,
