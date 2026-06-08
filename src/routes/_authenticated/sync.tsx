@@ -361,29 +361,56 @@ function SyncPage() {
                 </tr>
               </thead>
               <tbody>
-                {(accessLog.data ?? []).length === 0 && (
-                  <tr><td colSpan={5} className="px-3 py-6 text-center text-xs text-muted-foreground">
-                    No accesses yet.
-                  </td></tr>
-                )}
-                {(accessLog.data ?? []).map((row) => (
-                  <tr key={row.id} className="border-t">
-                    <td className="px-3 py-2 text-xs">{timeAgo(row.created_at)}</td>
-                    <td className="px-3 py-2 text-xs">{row.units?.name ?? "—"}</td>
-                    <td className="px-3 py-2 text-xs">
-                      <span className={
-                        row.status === "ok" ? "text-emerald-600" :
-                        row.status === "expired" ? "text-amber-600" :
-                        "text-destructive"
-                      }>{row.status}</span>
-                    </td>
-                    <td className="px-3 py-2 font-mono text-xs">{row.ip ?? "—"}</td>
-                    <td className="px-3 py-2 truncate text-xs max-w-[20rem]">{row.user_agent ?? "—"}</td>
-                  </tr>
-                ))}
+                {(() => {
+                  const d = Array.isArray(accessLog.data) ? { rows: [], total: 0 } : (accessLog.data ?? { rows: [], total: 0 });
+                  const rows = d.rows;
+                  if (rows.length === 0) {
+                    return (
+                      <tr><td colSpan={5} className="px-3 py-6 text-center text-xs text-muted-foreground">
+                        No accesses match the current filter.
+                      </td></tr>
+                    );
+                  }
+                  return rows.map((row) => (
+                    <tr key={row.id} className="border-t">
+                      <td className="px-3 py-2 text-xs">{timeAgo(row.created_at)}</td>
+                      <td className="px-3 py-2 text-xs">{row.units?.name ?? "—"}</td>
+                      <td className="px-3 py-2 text-xs">
+                        <span className={
+                          row.status === "ok" ? "text-emerald-600" :
+                          row.status === "expired" || row.status === "rate_limited" ? "text-amber-600" :
+                          row.status === "rotated" || row.status === "revoked" ? "text-blue-600" :
+                          "text-destructive"
+                        }>{row.status}</span>
+                      </td>
+                      <td className="px-3 py-2 font-mono text-xs">{row.ip ?? "—"}</td>
+                      <td className="px-3 py-2 truncate text-xs max-w-[20rem]">{row.user_agent ?? "—"}</td>
+                    </tr>
+                  ));
+                })()}
               </tbody>
             </table>
           </div>
+          {(() => {
+            const d = Array.isArray(accessLog.data) ? { rows: [], total: 0 } : (accessLog.data ?? { rows: [], total: 0 });
+            const total = d.total;
+            const start = total === 0 ? 0 : logPage * PAGE_SIZE + 1;
+            const end = Math.min(total, (logPage + 1) * PAGE_SIZE);
+            const hasNext = end < total;
+            return (
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{total === 0 ? "0 of 0" : `${start}–${end} of ${total}`}</span>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" disabled={logPage === 0} onClick={() => setLogPage((p) => Math.max(0, p - 1))}>
+                    <ChevronLeft className="h-3.5 w-3.5" /> Prev
+                  </Button>
+                  <Button variant="outline" size="sm" disabled={!hasNext} onClick={() => setLogPage((p) => p + 1)}>
+                    Next <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
         </section>
       </div>
 
