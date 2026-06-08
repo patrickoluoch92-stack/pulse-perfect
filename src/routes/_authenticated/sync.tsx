@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { AlertTriangle, Calendar, ChevronLeft, ChevronRight, Copy, Download, KeyRound, Loader2, Plus, RefreshCw, ShieldAlert, ShieldOff, Trash2 } from "lucide-react";
+import { AlertTriangle, Calendar, Check, CheckCircle2, ChevronLeft, ChevronRight, Copy, Download, KeyRound, Loader2, Plus, RefreshCw, ShieldAlert, ShieldOff, Trash2 } from "lucide-react";
 
 
 import { getWorkspaceContext } from "@/lib/workspace.functions";
@@ -11,7 +11,9 @@ import {
   listIcalSources, addIcalSource, deleteIcalSource, syncIcalSource,
   listExportableUnits, rotateIcalExportToken, setIcalTokenExpiry,
   revokeIcalToken, listIcalAccessLog, exportIcalAccessLog, getIcalSecurityAlerts,
+  exportIcalSecurityAlerts, listIcalIncidents, updateIcalIncidentStatus,
 } from "@/lib/ical.functions";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,6 +46,10 @@ function SyncPage() {
   const revokeFn = useServerFn(revokeIcalToken);
   const fetchLog = useServerFn(listIcalAccessLog);
   const exportLogFn = useServerFn(exportIcalAccessLog);
+  const exportAlertsFn = useServerFn(exportIcalSecurityAlerts);
+  const fetchIncidents = useServerFn(listIcalIncidents);
+  const updateIncidentFn = useServerFn(updateIcalIncidentStatus);
+
 
   const ctx = useQuery({ queryKey: ["workspace-context"], queryFn: () => fetchCtx() });
   const orgId = ctx.data?.currentOrg?.id;
@@ -152,6 +158,23 @@ function SyncPage() {
     refetchInterval: 60000,
   });
 
+  const incidents = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-incidents", orgId],
+    queryFn: () => fetchIncidents({ data: { orgId: orgId!, status: "open" } }),
+    refetchInterval: 60000,
+  });
+
+  const updateIncident = useMutation({
+    mutationFn: (vars: { id: string; status: "acknowledged" | "resolved" }) =>
+      updateIncidentFn({ data: vars }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ical-incidents"] });
+      qc.invalidateQueries({ queryKey: ["ical-security-alerts"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   // Rotation result dialog
   const [rotateResult, setRotateResult] = useState<
     | null
@@ -159,6 +182,12 @@ function SyncPage() {
   >(null);
   const [pendingRotate, setPendingRotate] = useState<{ unitId: string; unitName: string } | null>(null);
   const [rotateTtl, setRotateTtl] = useState<string>("365");
+
+  // Extend / Revoke dialogs (replace prompt/confirm)
+  const [pendingExtend, setPendingExtend] = useState<{ unitId: string; unitName: string } | null>(null);
+  const [extendTtl, setExtendTtl] = useState<string>("365");
+  const [pendingRevoke, setPendingRevoke] = useState<{ unitId: string; unitName: string } | null>(null);
+
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -193,6 +222,29 @@ function SyncPage() {
 
         {alerts.data && alerts.data.alerts.length > 0 && (
           <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                Security alerts
+              </h2>
+              <Button
+                size="sm" variant="outline" disabled={!orgId}
+                onClick={async () => {
+                  try {
+                    const res = await exportAlertsFn({ data: { orgId: orgId! } });
+                    const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8" });
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = res.filename;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                  } catch (e) {
+                    toast.error(e instanceof Error ? e.message : "Export failed");
+                  }
+                }}
+              >
+                <Download className="h-3.5 w-3.5" /> Export alerts
+              </Button>
+            </div>
             {alerts.data.alerts.map((a, i) => {
               const tone = a.severity === "high"
                 ? "border-destructive/40 bg-destructive/10 text-destructive"
@@ -213,6 +265,51 @@ function SyncPage() {
             </p>
           </div>
         )}
+
+        {incidents.data && incidents.data.length > 0 && (
+          <section className="space-y-2 rounded-xl border bg-card p-4 shadow-sm">
+            <h2 className="font-display text-lg font-semibold">Open incidents</h2>
+            <p className="text-xs text-muted-foreground">
+              High-severity alerts open an incident automatically. Acknowledge to silence; resolve when handled.
+            </p>
+            <ul className="divide-y">
+              {incidents.data.map((inc) => (
+                <li key={inc.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className={
+                        "rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase " +
+                        (inc.severity === "high" ? "bg-destructive/15 text-destructive" : "bg-amber-500/15 text-amber-700 dark:text-amber-300")
+                      }>{inc.severity}</span>
+                      <span className="text-xs font-medium">{inc.kind}</span>
+                      <span className="text-xs text-muted-foreground">· {inc.occurrences}× · last seen {timeAgo(inc.last_seen_at)}</span>
+                      {inc.status === "acknowledged" && (
+                        <span className="text-[10px] uppercase text-muted-foreground">acknowledged</span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-sm">{inc.message}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {inc.status === "open" && (
+                      <Button size="sm" variant="outline"
+                        onClick={() => updateIncident.mutate({ id: inc.id, status: "acknowledged" })}
+                        disabled={updateIncident.isPending}>
+                        <Check className="h-3.5 w-3.5" /> Ack
+                      </Button>
+                    )}
+                    <Button size="sm" variant="ghost"
+                      onClick={() => updateIncident.mutate({ id: inc.id, status: "resolved" })}
+                      disabled={updateIncident.isPending}>
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Resolve
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+
 
         <section className="space-y-4">
           {(units.data ?? []).map((u) => {
@@ -259,14 +356,8 @@ function SyncPage() {
                   <Button
                     variant="outline" size="sm"
                     onClick={() => {
-                      const days = prompt("Extend expiration by how many days from now? (1-3650)", "365");
-                      if (!days) return;
-                      const n = parseInt(days, 10);
-                      if (!Number.isFinite(n) || n < 1 || n > 3650) {
-                        toast.error("Enter a number between 1 and 3650");
-                        return;
-                      }
-                      updateExpiry.mutate({ unitId: u.id, ttlDays: n });
+                      setExtendTtl("365");
+                      setPendingExtend({ unitId: u.id, unitName: `${u.properties?.name ?? ""} · ${u.name}` });
                     }}
                     disabled={updateExpiry.isPending}
                   >
@@ -274,11 +365,10 @@ function SyncPage() {
                   </Button>
                   <Button
                     variant="ghost" size="sm"
-                    onClick={() => {
-                      if (confirm("Revoke this feed URL immediately?")) revoke.mutate(u.id);
-                    }}
+                    onClick={() => setPendingRevoke({ unitId: u.id, unitName: `${u.properties?.name ?? ""} · ${u.name}` })}
                     disabled={revoke.isPending || expired}
                   >
+
                     <ShieldOff className="h-3.5 w-3.5" /> Revoke
                   </Button>
                 </div>
@@ -565,7 +655,73 @@ function SyncPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Extend expiration */}
+      <Dialog open={!!pendingExtend} onOpenChange={(o) => !o && setPendingExtend(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Extend expiration</DialogTitle>
+            <DialogDescription>
+              {pendingExtend?.unitName}. The existing URL keeps working; only the expiry date moves forward.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label>New expiration (days from now)</Label>
+            <Input type="number" min={1} max={3650}
+              value={extendTtl} onChange={(e) => setExtendTtl(e.target.value)} />
+            <p className="text-xs text-muted-foreground">Between 1 and 3650.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingExtend(null)}>Cancel</Button>
+            <Button
+              disabled={updateExpiry.isPending}
+              onClick={() => {
+                const n = parseInt(extendTtl, 10);
+                if (!Number.isFinite(n) || n < 1 || n > 3650) {
+                  toast.error("Enter a number between 1 and 3650");
+                  return;
+                }
+                const p = pendingExtend!;
+                setPendingExtend(null);
+                updateExpiry.mutate({ unitId: p.unitId, ttlDays: n });
+              }}
+            >
+              {updateExpiry.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              Extend
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Revoke confirm */}
+      <Dialog open={!!pendingRevoke} onOpenChange={(o) => !o && setPendingRevoke(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Revoke feed URL</DialogTitle>
+            <DialogDescription>
+              {pendingRevoke?.unitName}. The current URL stops working immediately. Subscribers (Airbnb, VRBO…) will
+              show stale data until you rotate and re-share a new URL.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingRevoke(null)}>Cancel</Button>
+            <Button
+              variant="destructive"
+              disabled={revoke.isPending}
+              onClick={() => {
+                const p = pendingRevoke!;
+                setPendingRevoke(null);
+                revoke.mutate(p.unitId);
+              }}
+            >
+              {revoke.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              Revoke now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
+
   );
 }
 

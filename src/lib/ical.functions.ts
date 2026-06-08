@@ -21,6 +21,22 @@ export const listExportableUnits = createServerFn({ method: "GET" })
   });
 
 const MIN_ROTATION_INTERVAL_MS = 10_000;
+const LOG_ROLES = ["owner", "admin", "manager"] as const;
+
+async function assertOrgRole(
+  supabase: typeof import("@supabase/supabase-js").SupabaseClient.prototype,
+  orgId: string,
+  userId: string,
+  roles: readonly string[] = LOG_ROLES,
+) {
+  const { data: ok, error } = await supabase.rpc("has_org_role", {
+    _user_id: userId,
+    _org_id: orgId,
+    _roles: roles as unknown as string[],
+  });
+  if (error) throw new Error(error.message);
+  if (!ok) throw new Error("You don't have permission for this action");
+}
 
 async function assertCanManageUnit(
   supabase: typeof import("@supabase/supabase-js").SupabaseClient.prototype,
@@ -33,15 +49,10 @@ async function assertCanManageUnit(
     .eq("id", unitId)
     .single();
   if (error || !unit) throw new Error("Unit not found");
-  const { data: ok, error: roleErr } = await supabase.rpc("has_org_role", {
-    _user_id: userId,
-    _org_id: unit.org_id,
-    _roles: ["owner", "admin", "manager"],
-  });
-  if (roleErr) throw new Error(roleErr.message);
-  if (!ok) throw new Error("You don't have permission to manage this unit's iCal token");
+  await assertOrgRole(supabase, unit.org_id, userId);
   return unit;
 }
+
 
 export const rotateIcalExportToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -142,6 +153,7 @@ export const exportIcalAccessLog = createServerFn({ method: "GET" })
     z.object({ orgId: z.string().uuid(), limit: z.number().int().min(1).max(10000).optional() }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
     const { data: rows, error } = await context.supabase
       .from("ical_access_log")
       .select("created_at, status, token_prefix, ip, user_agent, unit_id, units(name)")
@@ -173,6 +185,7 @@ export const listIcalAccessLog = createServerFn({ method: "GET" })
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
     const limit = data.limit ?? 25;
     const offset = data.offset ?? 0;
     let q = context.supabase
@@ -187,10 +200,13 @@ export const listIcalAccessLog = createServerFn({ method: "GET" })
     return { rows: rows ?? [], total: count ?? 0, limit, offset };
   });
 
+type Alert = { severity: "high" | "medium" | "low"; kind: string; fingerprint: string; message: string };
+
 export const getIcalSecurityAlerts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ orgId: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
     const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const since1h = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
@@ -203,32 +219,31 @@ export const getIcalSecurityAlerts = createServerFn({ method: "GET" })
       .limit(2000);
     if (error) throw new Error(error.message);
 
-    type Alert = { severity: "high" | "medium" | "low"; kind: string; message: string };
     const alerts: Alert[] = [];
     const recent = rows ?? [];
     const lastHour = recent.filter((r) => r.created_at >= since1h);
 
     const rateHits = lastHour.filter((r) => r.status === "rate_limited").length;
     if (rateHits >= 10) {
-      alerts.push({ severity: "high", kind: "rate_limit",
+      alerts.push({ severity: "high", kind: "rate_limit", fingerprint: "1h",
         message: `${rateHits} rate-limited requests in the last hour — possible scraping or DoS.` });
     } else if (rateHits > 0) {
-      alerts.push({ severity: "medium", kind: "rate_limit",
+      alerts.push({ severity: "medium", kind: "rate_limit", fingerprint: "1h",
         message: `${rateHits} rate-limited request${rateHits === 1 ? "" : "s"} in the last hour.` });
     }
 
     const probes = lastHour.filter((r) => r.status === "invalid_format" || r.status === "not_found").length;
     if (probes >= 25) {
-      alerts.push({ severity: "high", kind: "probe",
+      alerts.push({ severity: "high", kind: "probe", fingerprint: "1h",
         message: `${probes} bad-token requests in the last hour — likely token enumeration.` });
     } else if (probes >= 5) {
-      alerts.push({ severity: "medium", kind: "probe",
+      alerts.push({ severity: "medium", kind: "probe", fingerprint: "1h",
         message: `${probes} bad-token requests in the last hour.` });
     }
 
     const expiredCount = recent.filter((r) => r.status === "expired").length;
     if (expiredCount > 0) {
-      alerts.push({ severity: "medium", kind: "expired",
+      alerts.push({ severity: "medium", kind: "expired", fingerprint: "24h",
         message: `${expiredCount} request${expiredCount === 1 ? "" : "s"} to an expired token in the last 24h. Rotate and re-share the URL.` });
     }
 
@@ -242,8 +257,42 @@ export const getIcalSecurityAlerts = createServerFn({ method: "GET" })
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3);
     for (const [ip, n] of topIps) {
-      alerts.push({ severity: n >= 100 ? "high" : "medium", kind: "ip_volume",
+      alerts.push({ severity: n >= 100 ? "high" : "medium", kind: "ip_volume", fingerprint: ip,
         message: `IP ${ip} made ${n} requests in the last hour.` });
+    }
+
+    // Automated incident triggers: only high-severity alerts open incidents.
+    const triggered = alerts.filter((a) => a.severity === "high");
+    let opened = 0;
+    for (const a of triggered) {
+      const { data: existing } = await context.supabase
+        .from("ical_incidents")
+        .select("id, occurrences")
+        .eq("org_id", data.orgId)
+        .eq("kind", a.kind)
+        .eq("fingerprint", a.fingerprint)
+        .neq("status", "resolved")
+        .maybeSingle();
+      if (existing) {
+        await context.supabase
+          .from("ical_incidents")
+          .update({
+            last_seen_at: new Date().toISOString(),
+            occurrences: (existing.occurrences ?? 1) + 1,
+            severity: a.severity,
+            message: a.message,
+          })
+          .eq("id", existing.id);
+      } else {
+        const ins = await context.supabase.from("ical_incidents").insert({
+          org_id: data.orgId,
+          severity: a.severity,
+          kind: a.kind,
+          fingerprint: a.fingerprint,
+          message: a.message,
+        });
+        if (!ins.error) opened++;
+      }
     }
 
     return {
@@ -252,10 +301,90 @@ export const getIcalSecurityAlerts = createServerFn({ method: "GET" })
         rateLimited1h: rateHits,
         badToken1h: probes,
         expired24h: expiredCount,
+        incidentsOpened: opened,
       },
       alerts,
     };
   });
+
+export const exportIcalSecurityAlerts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ orgId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
+    const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: incidents } = await context.supabase
+      .from("ical_incidents")
+      .select("severity, kind, fingerprint, message, status, occurrences, first_seen_at, last_seen_at, resolved_at")
+      .eq("org_id", data.orgId)
+      .gte("last_seen_at", since24h)
+      .order("last_seen_at", { ascending: false });
+    const esc = (v: unknown) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const header = "severity,kind,fingerprint,status,occurrences,first_seen_at,last_seen_at,resolved_at,message\n";
+    const body = (incidents ?? []).map((i) => [
+      i.severity, i.kind, i.fingerprint, i.status, i.occurrences,
+      i.first_seen_at, i.last_seen_at, i.resolved_at ?? "", i.message,
+    ].map(esc).join(",")).join("\n");
+    return {
+      filename: `ical-security-alerts-${new Date().toISOString().slice(0, 10)}.csv`,
+      csv: header + body,
+    };
+  });
+
+export const listIcalIncidents = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      orgId: z.string().uuid(),
+      status: z.enum(["open", "acknowledged", "resolved", "all"]).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
+    let q = context.supabase
+      .from("ical_incidents")
+      .select("id, severity, kind, fingerprint, message, status, occurrences, first_seen_at, last_seen_at, acknowledged_at, resolved_at")
+      .eq("org_id", data.orgId);
+    if (!data.status || data.status === "open") {
+      q = q.neq("status", "resolved");
+    } else if (data.status !== "all") {
+      q = q.eq("status", data.status);
+    }
+    const { data: rows, error } = await q.order("last_seen_at", { ascending: false }).limit(200);
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const updateIcalIncidentStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      id: z.string().uuid(),
+      status: z.enum(["acknowledged", "resolved"]),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: inc, error: getErr } = await context.supabase
+      .from("ical_incidents")
+      .select("id, org_id")
+      .eq("id", data.id)
+      .single();
+    if (getErr || !inc) throw new Error("Incident not found");
+    await assertOrgRole(context.supabase, inc.org_id, context.userId);
+    const now = new Date().toISOString();
+    const patch = data.status === "acknowledged"
+      ? { status: data.status, acknowledged_at: now, acknowledged_by: context.userId }
+      : { status: data.status, resolved_at: now, resolved_by: context.userId };
+    const { error } = await context.supabase.from("ical_incidents").update(patch).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
+
 
 
 export const listIcalSources = createServerFn({ method: "GET" })
