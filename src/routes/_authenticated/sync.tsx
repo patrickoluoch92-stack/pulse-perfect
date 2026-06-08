@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { AlertTriangle, Calendar, Check, CheckCircle2, ChevronLeft, ChevronRight, Copy, Download, KeyRound, Loader2, Plus, RefreshCw, ShieldAlert, ShieldOff, Trash2 } from "lucide-react";
+import { AlertTriangle, Bell, Calendar, Check, CheckCircle2, ChevronLeft, ChevronRight, Copy, Download, History, KeyRound, Loader2, Plus, RefreshCw, ShieldAlert, ShieldOff, Trash2 } from "lucide-react";
 
 
 import { getWorkspaceContext } from "@/lib/workspace.functions";
@@ -12,7 +12,9 @@ import {
   listExportableUnits, rotateIcalExportToken, setIcalTokenExpiry,
   revokeIcalToken, listIcalAccessLog, exportIcalAccessLog, getIcalSecurityAlerts,
   exportIcalSecurityAlerts, listIcalIncidents, updateIcalIncidentStatus,
+  listIcalIncidentAudit, listIcalIncidentNotifications, markIcalIncidentNotificationsRead,
 } from "@/lib/ical.functions";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +51,10 @@ function SyncPage() {
   const exportAlertsFn = useServerFn(exportIcalSecurityAlerts);
   const fetchIncidents = useServerFn(listIcalIncidents);
   const updateIncidentFn = useServerFn(updateIcalIncidentStatus);
+  const fetchAuditFn = useServerFn(listIcalIncidentAudit);
+  const fetchNotifs = useServerFn(listIcalIncidentNotifications);
+  const markReadFn = useServerFn(markIcalIncidentNotificationsRead);
+
 
 
   const ctx = useQuery({ queryKey: ["workspace-context"], queryFn: () => fetchCtx() });
@@ -171,9 +177,34 @@ function SyncPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ical-incidents"] });
       qc.invalidateQueries({ queryKey: ["ical-security-alerts"] });
+      qc.invalidateQueries({ queryKey: ["ical-incident-notifs"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const notifs = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-incident-notifs", orgId],
+    queryFn: () => fetchNotifs({ data: { orgId: orgId! } }),
+    refetchInterval: 60000,
+  });
+
+  const markRead = useMutation({
+    mutationFn: () => markReadFn({ data: { orgId: orgId! } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ical-incident-notifs"] });
+      toast.success("Notifications marked as read");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const [auditFor, setAuditFor] = useState<{ id: string; title: string } | null>(null);
+  const audit = useQuery({
+    enabled: !!auditFor,
+    queryKey: ["ical-incident-audit", auditFor?.id],
+    queryFn: () => fetchAuditFn({ data: { incidentId: auditFor!.id } }),
+  });
+
 
   // Rotation result dialog
   const [rotateResult, setRotateResult] = useState<
@@ -215,9 +246,28 @@ function SyncPage() {
               Share availability with Airbnb, VRBO &amp; Booking.com via iCal. Import their feeds to block dates here.
             </p>
           </div>
-          <Button onClick={() => setOpen(true)} disabled={!orgId || (units.data?.length ?? 0) === 0}>
-            <Plus className="h-4 w-4" /> Add import feed
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Button
+                variant="outline" size="sm"
+                disabled={!orgId || (notifs.data?.unread ?? 0) === 0 || markRead.isPending}
+                onClick={() => markRead.mutate()}
+                title={`${notifs.data?.unread ?? 0} unread incident notification${(notifs.data?.unread ?? 0) === 1 ? "" : "s"}`}
+              >
+                <Bell className="h-4 w-4" />
+                {(notifs.data?.unread ?? 0) > 0 ? `${notifs.data!.unread} unread` : "No new alerts"}
+              </Button>
+              {(notifs.data?.unread ?? 0) > 0 && (
+                <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                  {Math.min(99, notifs.data!.unread)}
+                </span>
+              )}
+            </div>
+            <Button onClick={() => setOpen(true)} disabled={!orgId || (units.data?.length ?? 0) === 0}>
+              <Plus className="h-4 w-4" /> Add import feed
+            </Button>
+          </div>
+
         </header>
 
         {alerts.data && alerts.data.alerts.length > 0 && (
@@ -302,6 +352,12 @@ function SyncPage() {
                       disabled={updateIncident.isPending}>
                       <CheckCircle2 className="h-3.5 w-3.5" /> Resolve
                     </Button>
+                    <Button size="sm" variant="ghost"
+                      onClick={() => setAuditFor({ id: inc.id, title: `${inc.kind} · ${inc.severity}` })}
+                      title="View audit trail">
+                      <History className="h-3.5 w-3.5" /> Audit
+                    </Button>
+
                   </div>
                 </li>
               ))}
@@ -720,7 +776,41 @@ function SyncPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Incident audit trail */}
+      <Dialog open={!!auditFor} onOpenChange={(o) => !o && setAuditFor(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Incident audit trail</DialogTitle>
+            <DialogDescription>{auditFor?.title}</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] space-y-2 overflow-y-auto">
+            {audit.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+            {audit.data && audit.data.length === 0 && (
+              <p className="text-sm text-muted-foreground">No audit entries yet.</p>
+            )}
+            <ul className="divide-y">
+              {(audit.data ?? []).map((a) => (
+                <li key={a.id} className="py-2 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium capitalize">{a.action}</span>
+                    <span className="text-xs text-muted-foreground">{timeAgo(a.created_at)}</span>
+                  </div>
+                  {a.note && <p className="mt-0.5 text-xs text-muted-foreground">{a.note}</p>}
+                  <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
+                    {a.actor_id ? `by ${a.actor_id.slice(0, 8)}…` : "system"}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAuditFor(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
+
 
   );
 }

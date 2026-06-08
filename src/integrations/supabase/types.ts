@@ -227,6 +227,77 @@ export type Database = {
           },
         ]
       }
+      ical_incident_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          incident_id: string
+          note: string | null
+          org_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          incident_id: string
+          note?: string | null
+          org_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          incident_id?: string
+          note?: string | null
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ical_incident_audit_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "ical_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ical_incident_audit_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ical_incident_reads: {
+        Row: {
+          incident_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          incident_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          incident_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ical_incident_reads_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "ical_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ical_incidents: {
         Row: {
           acknowledged_at: string | null

@@ -23,6 +23,21 @@ export const listExportableUnits = createServerFn({ method: "GET" })
 const MIN_ROTATION_INTERVAL_MS = 10_000;
 const LOG_ROLES = ["owner", "admin", "manager"] as const;
 
+// In-memory CSV export throttle: per-user max 5 exports / 60s
+const csvExportHits = new Map<string, number[]>();
+const CSV_MAX_PER_MIN = 5;
+function assertCsvRate(userId: string) {
+  const now = Date.now();
+  const cutoff = now - 60_000;
+  const arr = (csvExportHits.get(userId) ?? []).filter((t) => t > cutoff);
+  if (arr.length >= CSV_MAX_PER_MIN) {
+    throw new Error("Too many CSV exports — please wait a minute and try again");
+  }
+  arr.push(now);
+  csvExportHits.set(userId, arr);
+}
+
+
 async function assertOrgRole(
   supabase: typeof import("@supabase/supabase-js").SupabaseClient.prototype,
   orgId: string,
@@ -154,6 +169,8 @@ export const exportIcalAccessLog = createServerFn({ method: "GET" })
   )
   .handler(async ({ context, data }) => {
     await assertOrgRole(context.supabase, data.orgId, context.userId);
+    assertCsvRate(context.userId);
+
     const { data: rows, error } = await context.supabase
       .from("ical_access_log")
       .select("created_at, status, token_prefix, ip, user_agent, unit_id, units(name)")
@@ -161,9 +178,12 @@ export const exportIcalAccessLog = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 5000);
     if (error) throw new Error(error.message);
+    // CSV injection-safe escaper: quote on special chars AND prefix risky leaders with '
     const esc = (v: unknown) => {
-      const s = v == null ? "" : String(v);
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      let s = v == null ? "" : String(v);
+      if (s.length > 32768) s = s.slice(0, 32768);
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+      return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const header = "created_at,status,unit,token_prefix,ip,user_agent\n";
     const body = (rows ?? []).map((r) => [
@@ -171,8 +191,18 @@ export const exportIcalAccessLog = createServerFn({ method: "GET" })
       (r as { units?: { name?: string } | null }).units?.name ?? "",
       r.token_prefix, r.ip ?? "", r.user_agent ?? "",
     ].map(esc).join(",")).join("\n");
-    return { filename: `ical-access-log-${new Date().toISOString().slice(0, 10)}.csv`, csv: header + body };
+    // Audit the export
+    await context.supabase.from("ical_access_log").insert({
+      org_id: data.orgId, unit_id: null,
+      token_prefix: "csv_export",
+      status: "csv_export",
+      ip: null,
+      user_agent: `user:${context.userId}:rows=${rows?.length ?? 0}`,
+    });
+    // Prepend BOM for Excel UTF-8 compatibility
+    return { filename: `ical-access-log-${new Date().toISOString().slice(0, 10)}.csv`, csv: "\uFEFF" + header + body };
   });
+
 
 export const listIcalAccessLog = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -283,6 +313,10 @@ export const getIcalSecurityAlerts = createServerFn({ method: "GET" })
             message: a.message,
           })
           .eq("id", existing.id);
+        await context.supabase.from("ical_incident_audit").insert({
+          incident_id: existing.id, org_id: data.orgId, actor_id: null,
+          action: "updated", note: a.message,
+        });
       } else {
         const ins = await context.supabase.from("ical_incidents").insert({
           org_id: data.orgId,
@@ -290,10 +324,17 @@ export const getIcalSecurityAlerts = createServerFn({ method: "GET" })
           kind: a.kind,
           fingerprint: a.fingerprint,
           message: a.message,
-        });
-        if (!ins.error) opened++;
+        }).select("id").single();
+        if (!ins.error && ins.data) {
+          opened++;
+          await context.supabase.from("ical_incident_audit").insert({
+            incident_id: ins.data.id, org_id: data.orgId, actor_id: null,
+            action: "opened", note: a.message,
+          });
+        }
       }
     }
+
 
     return {
       counts: {
@@ -312,6 +353,8 @@ export const exportIcalSecurityAlerts = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({ orgId: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
     await assertOrgRole(context.supabase, data.orgId, context.userId);
+    assertCsvRate(context.userId);
+
     const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { data: incidents } = await context.supabase
       .from("ical_incidents")
@@ -320,19 +363,29 @@ export const exportIcalSecurityAlerts = createServerFn({ method: "GET" })
       .gte("last_seen_at", since24h)
       .order("last_seen_at", { ascending: false });
     const esc = (v: unknown) => {
-      const s = v == null ? "" : String(v);
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      let s = v == null ? "" : String(v);
+      if (s.length > 32768) s = s.slice(0, 32768);
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+      return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const header = "severity,kind,fingerprint,status,occurrences,first_seen_at,last_seen_at,resolved_at,message\n";
     const body = (incidents ?? []).map((i) => [
       i.severity, i.kind, i.fingerprint, i.status, i.occurrences,
       i.first_seen_at, i.last_seen_at, i.resolved_at ?? "", i.message,
     ].map(esc).join(",")).join("\n");
+    await context.supabase.from("ical_access_log").insert({
+      org_id: data.orgId, unit_id: null,
+      token_prefix: "csv_export",
+      status: "csv_export",
+      ip: null,
+      user_agent: `user:${context.userId}:alerts:rows=${incidents?.length ?? 0}`,
+    });
     return {
       filename: `ical-security-alerts-${new Date().toISOString().slice(0, 10)}.csv`,
-      csv: header + body,
+      csv: "\uFEFF" + header + body,
     };
   });
+
 
 export const listIcalIncidents = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -364,6 +417,7 @@ export const updateIcalIncidentStatus = createServerFn({ method: "POST" })
     z.object({
       id: z.string().uuid(),
       status: z.enum(["acknowledged", "resolved"]),
+      note: z.string().trim().max(500).optional(),
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
@@ -380,8 +434,83 @@ export const updateIcalIncidentStatus = createServerFn({ method: "POST" })
       : { status: data.status, resolved_at: now, resolved_by: context.userId };
     const { error } = await context.supabase.from("ical_incidents").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
+    await context.supabase.from("ical_incident_audit").insert({
+      incident_id: data.id, org_id: inc.org_id, actor_id: context.userId,
+      action: data.status, note: data.note ?? null,
+    });
     return { ok: true };
   });
+
+export const listIcalIncidentAudit = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ incidentId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: inc, error: ie } = await context.supabase
+      .from("ical_incidents").select("id, org_id").eq("id", data.incidentId).single();
+    if (ie || !inc) throw new Error("Incident not found");
+    await assertOrgRole(context.supabase, inc.org_id, context.userId);
+    const { data: rows, error } = await context.supabase
+      .from("ical_incident_audit")
+      .select("id, action, note, actor_id, created_at")
+      .eq("incident_id", data.incidentId)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const listIcalIncidentNotifications = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ orgId: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
+    const { data: open, error } = await context.supabase
+      .from("ical_incidents")
+      .select("id, severity, kind, message, last_seen_at")
+      .eq("org_id", data.orgId)
+      .neq("status", "resolved")
+      .order("last_seen_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    const ids = (open ?? []).map((i) => i.id);
+    let readIds = new Set<string>();
+    if (ids.length) {
+      const { data: reads } = await context.supabase
+        .from("ical_incident_reads")
+        .select("incident_id")
+        .in("incident_id", ids)
+        .eq("user_id", context.userId);
+      readIds = new Set((reads ?? []).map((r) => r.incident_id));
+    }
+    const items = (open ?? []).map((i) => ({ ...i, read: readIds.has(i.id) }));
+    return { items, unread: items.filter((i) => !i.read).length };
+  });
+
+export const markIcalIncidentNotificationsRead = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      orgId: z.string().uuid(),
+      incidentIds: z.array(z.string().uuid()).max(100).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await assertOrgRole(context.supabase, data.orgId, context.userId);
+    let ids = data.incidentIds;
+    if (!ids || ids.length === 0) {
+      const { data: open } = await context.supabase
+        .from("ical_incidents").select("id").eq("org_id", data.orgId).neq("status", "resolved").limit(50);
+      ids = (open ?? []).map((i) => i.id);
+    }
+    if (ids.length === 0) return { ok: true, count: 0 };
+    const rows = ids.map((incident_id) => ({ incident_id, user_id: context.userId }));
+    const { error } = await context.supabase
+      .from("ical_incident_reads")
+      .upsert(rows, { onConflict: "incident_id,user_id", ignoreDuplicates: true });
+    if (error) throw new Error(error.message);
+    return { ok: true, count: ids.length };
+  });
+
 
 
 
