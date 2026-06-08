@@ -2,7 +2,7 @@ import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  BedDouble, Calendar, ChartBar, Home, LogOut, Settings, Sparkles, Users,
+  BedDouble, Calendar, ChartBar, FileText, Home, LogOut, Settings, Sparkles, Users,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,7 @@ const nav = [
   { to: "/dashboard", label: "Overview", icon: Home },
   { to: "/properties", label: "Properties", icon: BedDouble },
   { to: "/reservations", label: "Reservations", icon: Calendar },
+  { to: "/invoices", label: "Invoices", icon: FileText },
   { to: "/team", label: "Team", icon: Users },
   { to: "/analytics", label: "Analytics", icon: ChartBar, soon: true },
   { to: "/settings", label: "Settings", icon: Settings },
