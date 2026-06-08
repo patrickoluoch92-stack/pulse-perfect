@@ -3,14 +3,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Calendar, Copy, Download, KeyRound, Loader2, Plus, RefreshCw, ShieldOff, Trash2 } from "lucide-react";
+import { AlertTriangle, Calendar, ChevronLeft, ChevronRight, Copy, Download, KeyRound, Loader2, Plus, RefreshCw, ShieldAlert, ShieldOff, Trash2 } from "lucide-react";
 
 
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 import {
   listIcalSources, addIcalSource, deleteIcalSource, syncIcalSource,
   listExportableUnits, rotateIcalExportToken, setIcalTokenExpiry,
-  revokeIcalToken, listIcalAccessLog, exportIcalAccessLog,
+  revokeIcalToken, listIcalAccessLog, exportIcalAccessLog, getIcalSecurityAlerts,
 } from "@/lib/ical.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,11 +94,17 @@ function SyncPage() {
   });
 
   const rotate = useMutation({
-    mutationFn: (vars: { unitId: string; ttlDays?: number }) =>
-      rotateFn({ data: vars }),
-    onSuccess: () => {
-      toast.success("Token rotated. Old feed URL is now revoked.");
+    mutationFn: (vars: { unitId: string; ttlDays?: number; unitName: string }) =>
+      rotateFn({ data: { unitId: vars.unitId, ttlDays: vars.ttlDays } }).then((row) => ({ ...row, unitName: vars.unitName })),
+    onSuccess: (row) => {
       qc.invalidateQueries({ queryKey: ["export-units"] });
+      qc.invalidateQueries({ queryKey: ["ical-access-log"] });
+      setRotateResult({
+        unitId: row.id,
+        unitName: row.unitName,
+        url: `${origin}/api/public/ical/${row.ical_export_token}.ics`,
+        expiresAt: row.ical_export_token_expires_at ?? null,
+      });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -122,12 +128,37 @@ function SyncPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const [logPage, setLogPage] = useState(0);
+  const [logStatus, setLogStatus] = useState<string>("all");
+  const PAGE_SIZE = 25;
+
   const accessLog = useQuery({
     enabled: !!orgId,
-    queryKey: ["ical-access-log", orgId],
-    queryFn: () => fetchLog({ data: { orgId: orgId!, limit: 50 } }),
+    queryKey: ["ical-access-log", orgId, logPage, logStatus],
+    queryFn: () => fetchLog({ data: {
+      orgId: orgId!,
+      limit: PAGE_SIZE,
+      offset: logPage * PAGE_SIZE,
+      status: logStatus === "all" ? undefined : logStatus,
+    } }),
     refetchInterval: 30000,
   });
+
+  const fetchAlerts = useServerFn(getIcalSecurityAlerts);
+  const alerts = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-security-alerts", orgId],
+    queryFn: () => fetchAlerts({ data: { orgId: orgId! } }),
+    refetchInterval: 60000,
+  });
+
+  // Rotation result dialog
+  const [rotateResult, setRotateResult] = useState<
+    | null
+    | { unitId: string; unitName: string; url: string; expiresAt: string | null }
+  >(null);
+  const [pendingRotate, setPendingRotate] = useState<{ unitId: string; unitName: string } | null>(null);
+  const [rotateTtl, setRotateTtl] = useState<string>("365");
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -159,6 +190,29 @@ function SyncPage() {
             <Plus className="h-4 w-4" /> Add import feed
           </Button>
         </header>
+
+        {alerts.data && alerts.data.alerts.length > 0 && (
+          <div className="space-y-2">
+            {alerts.data.alerts.map((a, i) => {
+              const tone = a.severity === "high"
+                ? "border-destructive/40 bg-destructive/10 text-destructive"
+                : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300";
+              const Icon = a.severity === "high" ? ShieldAlert : AlertTriangle;
+              return (
+                <div key={i} className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-sm ${tone}`}>
+                  <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div className="flex-1">
+                    <span className="font-medium capitalize">{a.severity}</span> · {a.message}
+                  </div>
+                </div>
+              );
+            })}
+            <p className="text-xs text-muted-foreground">
+              Last 24h: {alerts.data.counts.total24h} requests · {alerts.data.counts.rateLimited1h} rate-limited (1h) ·{" "}
+              {alerts.data.counts.badToken1h} bad-token (1h) · {alerts.data.counts.expired24h} expired-token hits
+            </p>
+          </div>
+        )}
 
         <section className="space-y-4">
           {(units.data ?? []).map((u) => {
@@ -194,11 +248,7 @@ function SyncPage() {
                   </Button>
                   <Button
                     variant="outline" size="sm"
-                    onClick={() => {
-                      if (confirm("Rotate token? Any calendar subscribed to the current URL will stop syncing.")) {
-                        rotate.mutate({ unitId: u.id });
-                      }
-                    }}
+                    onClick={() => setPendingRotate({ unitId: u.id, unitName: `${u.properties?.name ?? ""} · ${u.name}` })}
                     disabled={rotate.isPending}
                   >
                     {rotate.isPending && rotate.variables?.unitId === u.id
@@ -302,25 +352,40 @@ function SyncPage() {
                 Recent requests to your public export feeds. Refreshes every 30s.
               </p>
             </div>
-            <Button
-              variant="outline" size="sm"
-              disabled={!orgId}
-              onClick={async () => {
-                try {
-                  const res = await exportLogFn({ data: { orgId: orgId!, limit: 10000 } });
-                  const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8" });
-                  const a = document.createElement("a");
-                  a.href = URL.createObjectURL(blob);
-                  a.download = res.filename;
-                  a.click();
-                  URL.revokeObjectURL(a.href);
-                } catch (e) {
-                  toast.error(e instanceof Error ? e.message : "Export failed");
-                }
-              }}
-            >
-              <Download className="h-3.5 w-3.5" /> Export CSV
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Select value={logStatus} onValueChange={(v) => { setLogStatus(v); setLogPage(0); }}>
+                <SelectTrigger className="h-9 w-[160px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="ok">ok</SelectItem>
+                  <SelectItem value="expired">expired</SelectItem>
+                  <SelectItem value="rate_limited">rate_limited</SelectItem>
+                  <SelectItem value="invalid_format">invalid_format</SelectItem>
+                  <SelectItem value="not_found">not_found</SelectItem>
+                  <SelectItem value="rotated">rotated</SelectItem>
+                  <SelectItem value="revoked">revoked</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline" size="sm"
+                disabled={!orgId}
+                onClick={async () => {
+                  try {
+                    const res = await exportLogFn({ data: { orgId: orgId!, limit: 10000 } });
+                    const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8" });
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = res.filename;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                  } catch (e) {
+                    toast.error(e instanceof Error ? e.message : "Export failed");
+                  }
+                }}
+              >
+                <Download className="h-3.5 w-3.5" /> Export CSV
+              </Button>
+            </div>
           </div>
           <div className="overflow-hidden rounded-xl border bg-card">
             <table className="w-full text-sm">
@@ -334,29 +399,56 @@ function SyncPage() {
                 </tr>
               </thead>
               <tbody>
-                {(accessLog.data ?? []).length === 0 && (
-                  <tr><td colSpan={5} className="px-3 py-6 text-center text-xs text-muted-foreground">
-                    No accesses yet.
-                  </td></tr>
-                )}
-                {(accessLog.data ?? []).map((row) => (
-                  <tr key={row.id} className="border-t">
-                    <td className="px-3 py-2 text-xs">{timeAgo(row.created_at)}</td>
-                    <td className="px-3 py-2 text-xs">{row.units?.name ?? "—"}</td>
-                    <td className="px-3 py-2 text-xs">
-                      <span className={
-                        row.status === "ok" ? "text-emerald-600" :
-                        row.status === "expired" ? "text-amber-600" :
-                        "text-destructive"
-                      }>{row.status}</span>
-                    </td>
-                    <td className="px-3 py-2 font-mono text-xs">{row.ip ?? "—"}</td>
-                    <td className="px-3 py-2 truncate text-xs max-w-[20rem]">{row.user_agent ?? "—"}</td>
-                  </tr>
-                ))}
+                {(() => {
+                  const d = Array.isArray(accessLog.data) ? { rows: [], total: 0 } : (accessLog.data ?? { rows: [], total: 0 });
+                  const rows = d.rows;
+                  if (rows.length === 0) {
+                    return (
+                      <tr><td colSpan={5} className="px-3 py-6 text-center text-xs text-muted-foreground">
+                        No accesses match the current filter.
+                      </td></tr>
+                    );
+                  }
+                  return rows.map((row) => (
+                    <tr key={row.id} className="border-t">
+                      <td className="px-3 py-2 text-xs">{timeAgo(row.created_at)}</td>
+                      <td className="px-3 py-2 text-xs">{row.units?.name ?? "—"}</td>
+                      <td className="px-3 py-2 text-xs">
+                        <span className={
+                          row.status === "ok" ? "text-emerald-600" :
+                          row.status === "expired" || row.status === "rate_limited" ? "text-amber-600" :
+                          row.status === "rotated" || row.status === "revoked" ? "text-blue-600" :
+                          "text-destructive"
+                        }>{row.status}</span>
+                      </td>
+                      <td className="px-3 py-2 font-mono text-xs">{row.ip ?? "—"}</td>
+                      <td className="px-3 py-2 truncate text-xs max-w-[20rem]">{row.user_agent ?? "—"}</td>
+                    </tr>
+                  ));
+                })()}
               </tbody>
             </table>
           </div>
+          {(() => {
+            const d = Array.isArray(accessLog.data) ? { rows: [], total: 0 } : (accessLog.data ?? { rows: [], total: 0 });
+            const total = d.total;
+            const start = total === 0 ? 0 : logPage * PAGE_SIZE + 1;
+            const end = Math.min(total, (logPage + 1) * PAGE_SIZE);
+            const hasNext = end < total;
+            return (
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{total === 0 ? "0 of 0" : `${start}–${end} of ${total}`}</span>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" disabled={logPage === 0} onClick={() => setLogPage((p) => Math.max(0, p - 1))}>
+                    <ChevronLeft className="h-3.5 w-3.5" /> Prev
+                  </Button>
+                  <Button variant="outline" size="sm" disabled={!hasNext} onClick={() => setLogPage((p) => p + 1)}>
+                    Next <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
         </section>
       </div>
 
@@ -400,6 +492,76 @@ function SyncPage() {
               {add.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Add
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rotation confirm */}
+      <Dialog open={!!pendingRotate} onOpenChange={(o) => !o && setPendingRotate(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rotate iCal token</DialogTitle>
+            <DialogDescription>
+              {pendingRotate?.unitName}. Generates a new URL and immediately revokes the current one — any
+              calendar still subscribed to the old URL will stop receiving updates until it&apos;s re-added.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label>New expiration (days from now)</Label>
+            <Input
+              type="number" min={1} max={3650}
+              value={rotateTtl}
+              onChange={(e) => setRotateTtl(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">Between 1 and 3650.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingRotate(null)}>Cancel</Button>
+            <Button
+              disabled={rotate.isPending}
+              onClick={() => {
+                const n = parseInt(rotateTtl, 10);
+                if (!Number.isFinite(n) || n < 1 || n > 3650) {
+                  toast.error("Enter a number between 1 and 3650");
+                  return;
+                }
+                const p = pendingRotate!;
+                setPendingRotate(null);
+                rotate.mutate({ unitId: p.unitId, unitName: p.unitName, ttlDays: n });
+              }}
+            >
+              {rotate.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              Rotate token
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rotation result */}
+      <Dialog open={!!rotateResult} onOpenChange={(o) => !o && setRotateResult(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New URL issued</DialogTitle>
+            <DialogDescription>
+              Update Airbnb / VRBO / Booking.com with the new URL below. The previous URL is now revoked.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Feed URL · {rotateResult?.unitName}</Label>
+            <div className="flex items-center gap-2">
+              <Input readOnly value={rotateResult?.url ?? ""} className="flex-1 font-mono text-xs" />
+              <Button size="sm" onClick={() => rotateResult && copy(rotateResult.url)}>
+                <Copy className="h-3.5 w-3.5" /> Copy
+              </Button>
+            </div>
+            {rotateResult?.expiresAt && (
+              <p className="text-xs text-muted-foreground">
+                Expires {new Date(rotateResult.expiresAt).toLocaleDateString()} ({daysUntil(rotateResult.expiresAt)} days).
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setRotateResult(null)}>Done</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
