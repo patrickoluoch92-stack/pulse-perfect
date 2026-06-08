@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 const nav = [
   { to: "/dashboard", label: "Overview", icon: Home },
   { to: "/properties", label: "Properties", icon: BedDouble },
-  { to: "/reservations", label: "Reservations", icon: Calendar, soon: true },
-  { to: "/guests", label: "Guests", icon: Users, soon: true },
+  { to: "/reservations", label: "Reservations", icon: Calendar },
+  { to: "/team", label: "Team", icon: Users },
   { to: "/analytics", label: "Analytics", icon: ChartBar, soon: true },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
