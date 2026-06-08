@@ -208,6 +208,68 @@ function SyncPage() {
     queryFn: () => fetchAuditFn({ data: { incidentId: auditFor!.id } }),
   });
 
+  // Webhooks
+  const fetchHooks = useServerFn(listIcalIncidentWebhooks);
+  const addHookFn = useServerFn(addIcalIncidentWebhook);
+  const delHookFn = useServerFn(deleteIcalIncidentWebhook);
+  const testHookFn = useServerFn(testIcalIncidentWebhook);
+  const hooks = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-incident-webhooks", orgId],
+    queryFn: () => fetchHooks({ data: { orgId: orgId! } }),
+  });
+  const [newHookUrl, setNewHookUrl] = useState("");
+  const [revealedSecret, setRevealedSecret] = useState<{ url: string; secret: string } | null>(null);
+  const addHook = useMutation({
+    mutationFn: () => addHookFn({ data: { orgId: orgId!, url: newHookUrl.trim() } }),
+    onSuccess: (row) => {
+      toast.success("Webhook added");
+      setNewHookUrl("");
+      setRevealedSecret({ url: row.url, secret: row.secret });
+      qc.invalidateQueries({ queryKey: ["ical-incident-webhooks"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const delHook = useMutation({
+    mutationFn: (id: string) => delHookFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Webhook removed");
+      qc.invalidateQueries({ queryKey: ["ical-incident-webhooks"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const testHook = useMutation({
+    mutationFn: (id: string) => testHookFn({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Test event sent");
+      qc.invalidateQueries({ queryKey: ["ical-incident-webhooks"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  // Retention
+  const fetchRetention = useServerFn(getIcalIncidentRetention);
+  const setRetentionFn = useServerFn(setIcalIncidentRetention);
+  const retention = useQuery({
+    enabled: !!orgId,
+    queryKey: ["ical-incident-retention", orgId],
+    queryFn: () => fetchRetention({ data: { orgId: orgId! } }),
+  });
+  const [retentionDays, setRetentionDays] = useState<string>("");
+  const saveRetention = useMutation({
+    mutationFn: () => {
+      const n = parseInt(retentionDays, 10);
+      if (!Number.isFinite(n) || n < 7 || n > 3650) throw new Error("Enter 7–3650 days");
+      return setRetentionFn({ data: { orgId: orgId!, days: n } });
+    },
+    onSuccess: () => {
+      toast.success("Retention updated");
+      qc.invalidateQueries({ queryKey: ["ical-incident-retention"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+
 
   // Rotation result dialog
   const [rotateResult, setRotateResult] = useState<
