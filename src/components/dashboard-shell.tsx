@@ -71,11 +71,6 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                   <Icon className="h-4 w-4" />
                   {item.label}
                 </span>
-                {"soon" in item && item.soon && (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-                    soon
-                  </span>
-                )}
               </Link>
             );
           })}
