@@ -51,7 +51,7 @@ export const reportAppError = createServerFn({ method: "POST" })
       stack: data.stack?.slice(0, 8000) ?? null,
       source: data.source ?? null,
       url: data.url ?? null,
-      context: (data.context ?? {}) as Record<string, unknown>,
+      context: JSON.parse(JSON.stringify(data.context ?? {})),
     });
 
     return { ok: true };
