@@ -45,13 +45,28 @@ function AnalyticsPage() {
 
   const ctx = useQuery({ queryKey: ["workspace-context"], queryFn: () => fetchCtx() });
   const orgId = ctx.data?.currentOrg?.id;
+  const plan = (ctx.data?.currentOrg?.plan ?? null) as Plan | null;
+
+  const canBasic = planAllows(plan, "analytics.basic");
+  const canPropertyBreakdown = planAllows(plan, "analytics.property_breakdown");
+
+  // Snap range back if plan disallows current selection.
+  useEffect(() => {
+    const r = RANGES.find((x) => x.key === range);
+    if (r && !planAllows(plan, r.feature)) setRange("30d");
+  }, [plan, range]);
+
   const { from, to } = useMemo(() => rangeDates(range), [range]);
 
   const q = useQuery({
     queryKey: ["analytics", orgId, from, to],
     queryFn: () => fetchAnalytics({ data: { orgId: orgId!, from, to } }),
-    enabled: !!orgId,
+    enabled: !!orgId && canBasic,
   });
+
+  if (ctx.data && !canBasic) {
+    return <UpgradeGate currentPlan={plan} required="professional" />;
+  }
 
   const d = q.data;
   const currency = "USD";
