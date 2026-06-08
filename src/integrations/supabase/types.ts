@@ -122,6 +122,54 @@ export type Database = {
           },
         ]
       }
+      ical_access_log: {
+        Row: {
+          created_at: string
+          id: string
+          ip: string | null
+          org_id: string | null
+          status: string
+          token_prefix: string
+          unit_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip?: string | null
+          org_id?: string | null
+          status: string
+          token_prefix: string
+          unit_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip?: string | null
+          org_id?: string | null
+          status?: string
+          token_prefix?: string
+          unit_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ical_access_log_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ical_access_log_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ical_import_sources: {
         Row: {
           created_at: string
@@ -621,6 +669,8 @@ export type Database = {
           capacity: number
           created_at: string
           ical_export_token: string
+          ical_export_token_created_at: string | null
+          ical_export_token_expires_at: string | null
           id: string
           name: string
           org_id: string
@@ -634,6 +684,8 @@ export type Database = {
           capacity?: number
           created_at?: string
           ical_export_token?: string
+          ical_export_token_created_at?: string | null
+          ical_export_token_expires_at?: string | null
           id?: string
           name: string
           org_id: string
@@ -647,6 +699,8 @@ export type Database = {
           capacity?: number
           created_at?: string
           ical_export_token?: string
+          ical_export_token_created_at?: string | null
+          ical_export_token_expires_at?: string | null
           id?: string
           name?: string
           org_id?: string
