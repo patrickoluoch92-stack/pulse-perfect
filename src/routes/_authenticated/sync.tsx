@@ -246,9 +246,28 @@ function SyncPage() {
               Share availability with Airbnb, VRBO &amp; Booking.com via iCal. Import their feeds to block dates here.
             </p>
           </div>
-          <Button onClick={() => setOpen(true)} disabled={!orgId || (units.data?.length ?? 0) === 0}>
-            <Plus className="h-4 w-4" /> Add import feed
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Button
+                variant="outline" size="sm"
+                disabled={!orgId || (notifs.data?.unread ?? 0) === 0 || markRead.isPending}
+                onClick={() => markRead.mutate()}
+                title={`${notifs.data?.unread ?? 0} unread incident notification${(notifs.data?.unread ?? 0) === 1 ? "" : "s"}`}
+              >
+                <Bell className="h-4 w-4" />
+                {(notifs.data?.unread ?? 0) > 0 ? `${notifs.data!.unread} unread` : "No new alerts"}
+              </Button>
+              {(notifs.data?.unread ?? 0) > 0 && (
+                <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                  {Math.min(99, notifs.data!.unread)}
+                </span>
+              )}
+            </div>
+            <Button onClick={() => setOpen(true)} disabled={!orgId || (units.data?.length ?? 0) === 0}>
+              <Plus className="h-4 w-4" /> Add import feed
+            </Button>
+          </div>
+
         </header>
 
         {alerts.data && alerts.data.alerts.length > 0 && (
