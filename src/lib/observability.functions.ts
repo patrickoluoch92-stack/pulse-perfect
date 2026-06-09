@@ -66,7 +66,7 @@ export const reportAppError = createServerFn({ method: "POST" })
       url: data.url ?? null,
       action: data.action ?? null,
       correlation_id: data.correlationId ?? null,
-      context,
+      context: context as never,
     });
 
     return { ok: true };
