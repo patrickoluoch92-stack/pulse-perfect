@@ -109,12 +109,12 @@ if (typeof globalThis.addEventListener === "function" && typeof window !== "unde
   try {
     addBreadcrumb({ category: "navigation", message: window.location.pathname });
     const wrap = (key: "pushState" | "replaceState") => {
-      const orig = history[key];
-      history[key] = function (...args: Parameters<typeof orig>) {
-        const r = orig.apply(this, args);
+      const orig = history[key].bind(history);
+      history[key] = ((...args: Parameters<typeof orig>) => {
+        const r = orig(...args);
         addBreadcrumb({ category: "navigation", message: window.location.pathname });
         return r;
-      } as typeof orig;
+      }) as typeof history.pushState;
     };
     wrap("pushState");
     wrap("replaceState");
