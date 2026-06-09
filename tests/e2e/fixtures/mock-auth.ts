@@ -144,4 +144,7 @@ export async function installMocks(page: Page, opts: MockOptions) {
 
     return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ result: null }) });
   });
+
+  // Wait for route handlers to be fully registered before returning
+  await page.waitForLoadState('domcontentloaded');
 }
