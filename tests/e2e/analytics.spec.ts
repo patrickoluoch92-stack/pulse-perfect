@@ -1,12 +1,17 @@
 import { test, expect } from "@playwright/test";
-import { installMocks } from "./fixtures/mock-auth";
+import { installMocks, waitForAnalyticsPage, waitForUpgradeGate } from "./fixtures/mock-auth";
 
 test.describe("/analytics plan gating", () => {
   test("starter shows the upgrade gate and no KPI cards", async ({ page }) => {
+    // Install mocks BEFORE navigation
     await installMocks(page, { plan: "starter" });
-    await page.goto("/analytics");
 
-    await expect(page.getByRole("heading", { name: /unlock analytics/i })).toBeVisible();
+    // Now navigate - mocks are already in place
+    await page.goto("/analytics", { waitUntil: "domcontentloaded" });
+
+    // Wait for upgrade gate to appear
+    await waitForUpgradeGate(page);
+
     await expect(page.getByText(/upgrade required/i)).toBeVisible();
     await expect(page.getByRole("link", { name: /manage plan/i })).toHaveAttribute("href", "/settings");
 
@@ -17,15 +22,25 @@ test.describe("/analytics plan gating", () => {
 
   test("professional unlocks 7d/30d but locks 90d and YTD", async ({ page }) => {
     await installMocks(page, { plan: "professional" });
-    await page.goto("/analytics");
+    await page.goto("/analytics", { waitUntil: "domcontentloaded" });
+
+    // Wait for page to fully load with data
+    await waitForAnalyticsPage(page);
 
     await expect(page.getByRole("heading", { name: "Analytics", level: 1 })).toBeVisible();
     await expect(page.getByText("Occupancy", { exact: true })).toBeVisible();
 
+    // Use more robust selectors with proper waiting
     const last7 = page.getByRole("button", { name: /last 7 days/i });
     const last30 = page.getByRole("button", { name: /last 30 days/i });
     const last90 = page.getByRole("button", { name: /last 90 days/i });
     const ytd = page.getByRole("button", { name: /year to date/i });
+
+    // Wait for buttons to be visible before checking state
+    await last7.waitFor({ state: "visible", timeout: 10000 });
+    await last30.waitFor({ state: "visible", timeout: 10000 });
+    await last90.waitFor({ state: "visible", timeout: 10000 });
+    await ytd.waitFor({ state: "visible", timeout: 10000 });
 
     await expect(last7).toBeEnabled();
     await expect(last30).toBeEnabled();
@@ -38,12 +53,23 @@ test.describe("/analytics plan gating", () => {
 
   test("business unlocks every range and the property breakdown", async ({ page }) => {
     await installMocks(page, { plan: "business" });
-    await page.goto("/analytics");
+    await page.goto("/analytics", { waitUntil: "domcontentloaded" });
+
+    await waitForAnalyticsPage(page);
 
     await expect(page.getByRole("heading", { name: "Analytics", level: 1 })).toBeVisible();
 
-    for (const name of [/last 7 days/i, /last 30 days/i, /last 90 days/i, /year to date/i]) {
-      await expect(page.getByRole("button", { name })).toBeEnabled();
+    // Wait for all buttons before checking
+    const buttons = [
+      page.getByRole("button", { name: /last 7 days/i }),
+      page.getByRole("button", { name: /last 30 days/i }),
+      page.getByRole("button", { name: /last 90 days/i }),
+      page.getByRole("button", { name: /year to date/i }),
+    ];
+
+    for (const btn of buttons) {
+      await btn.waitFor({ state: "visible", timeout: 10000 });
+      await expect(btn).toBeEnabled();
     }
 
     // No upgrade prompt for the property breakdown.
@@ -53,10 +79,21 @@ test.describe("/analytics plan gating", () => {
 
   test("enterprise also unlocks every range", async ({ page }) => {
     await installMocks(page, { plan: "enterprise" });
-    await page.goto("/analytics");
+    await page.goto("/analytics", { waitUntil: "domcontentloaded" });
 
-    for (const name of [/last 7 days/i, /last 30 days/i, /last 90 days/i, /year to date/i]) {
-      await expect(page.getByRole("button", { name })).toBeEnabled();
+    await waitForAnalyticsPage(page);
+
+    // Wait for all buttons before checking
+    const buttons = [
+      page.getByRole("button", { name: /last 7 days/i }),
+      page.getByRole("button", { name: /last 30 days/i }),
+      page.getByRole("button", { name: /last 90 days/i }),
+      page.getByRole("button", { name: /year to date/i }),
+    ];
+
+    for (const btn of buttons) {
+      await btn.waitFor({ state: "visible", timeout: 10000 });
+      await expect(btn).toBeEnabled();
     }
   });
 });

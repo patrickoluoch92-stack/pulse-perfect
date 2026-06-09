@@ -7,11 +7,10 @@ import type { Plan } from "../../../src/lib/plans";
  * real backend session.
  *
  * Strategy:
- *  - Seed localStorage with a fake supabase session before any app code runs.
- *  - Intercept Supabase REST auth endpoints (`/auth/v1/user`, token refresh).
- *  - Intercept TanStack Start server function calls (`/_serverFn/**`). The
- *    workspace-context fn is `method:"GET"` and the analytics fn is POST with
- *    `{ data: { orgId, ... } }`, so we route by HTTP method.
+ *  - Set up route handlers BEFORE navigation (critical for mocking)
+ *  - Seed localStorage with a fake supabase session before any app code runs
+ *  - Intercept Supabase REST auth endpoints (`/auth/v1/user`, token refresh)
+ *  - Intercept TanStack Start server function calls (`/_serverFn/**`)
  */
 export type MockOptions = {
   plan: Plan;
@@ -73,23 +72,17 @@ function defaultAnalytics(): AnalyticsPayload {
   };
 }
 
+/**
+ * Install mock auth and server functions BEFORE navigation.
+ * This is critical: route handlers must be registered before any network requests occur.
+ */
 export async function installMocks(page: Page, opts: MockOptions) {
   const supabaseUrl = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL ?? "";
   const storageKey = supabaseUrl
     ? `sb-${new URL(supabaseUrl).hostname.split(".")[0]}-auth-token`
     : "sb-auth-token";
 
-  await page.addInitScript(
-    ({ key, session }) => {
-      try {
-        window.localStorage.setItem(key, JSON.stringify(session));
-      } catch {
-        /* ignore */
-      }
-    },
-    { key: storageKey, session: FAKE_SESSION },
-  );
-
+  // Step 1: Register route handlers FIRST (before any navigation)
   // Supabase REST auth endpoints
   await page.route(/\/auth\/v1\/(user|token).*/, async (route: Route) => {
     const url = route.request().url();
@@ -145,6 +138,38 @@ export async function installMocks(page: Page, opts: MockOptions) {
     return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ result: null }) });
   });
 
-  // Wait for route handlers to be fully registered before returning
-  await page.waitForLoadState('domcontentloaded');
+  // Step 2: Seed localStorage AFTER routes are registered
+  await page.addInitScript(
+    ({ key, session }) => {
+      try {
+        window.localStorage.setItem(key, JSON.stringify(session));
+      } catch {
+        /* ignore */
+      }
+    },
+    { key: storageKey, session: FAKE_SESSION },
+  );
+}
+
+/**
+ * Wait for the analytics page to fully load with mocked data.
+ * Ensures heading and KPI elements are present before assertions.
+ */
+export async function waitForAnalyticsPage(page: Page) {
+  // Wait for the main heading to be visible
+  await page.getByRole("heading", { name: "Analytics", level: 1 }).waitFor({ state: "visible", timeout: 10000 });
+
+  // Wait for at least one KPI card to render
+  await page.getByText("Occupancy", { exact: true }).waitFor({ state: "visible", timeout: 10000 });
+
+  // Wait for network to be idle to ensure all data has loaded
+  await page.waitForLoadState("networkidle", { timeout: 10000 });
+}
+
+/**
+ * Wait for upgrade gate to appear (for restricted plans)
+ */
+export async function waitForUpgradeGate(page: Page) {
+  await page.getByRole("heading", { name: /unlock analytics/i }).waitFor({ state: "visible", timeout: 10000 });
+  await page.getByText(/upgrade required/i).waitFor({ state: "visible", timeout: 10000 });
 }
