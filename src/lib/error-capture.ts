@@ -2,8 +2,8 @@
 // when h3 has already swallowed the throw into a generic 500 Response.
 // Also flushes errors to the server-side `app_errors` sink (Sentry-style)
 // from BOTH browser (window) and server (process) runtimes, with rich
-// trace metadata (tenantId, userId, action, correlationId) so on-call
-// engineers can filter incidents reliably.
+// trace metadata (tenantId, userId, action, correlationId, breadcrumbs)
+// so on-call engineers can filter incidents reliably.
 
 import { reportAppError } from "./observability.functions";
 
@@ -15,15 +15,35 @@ export type ErrorMetadata = {
   context?: Record<string, unknown>;
 };
 
+export type Breadcrumb = {
+  ts: number;
+  category: "navigation" | "fetch" | "ui" | "auth" | "log" | "custom";
+  message: string;
+  level?: "info" | "warn" | "error";
+  data?: Record<string, unknown>;
+};
+
 let lastCapturedError: { error: unknown; at: number } | undefined;
 const TTL_MS = 5_000;
 
+// --- Breadcrumbs (ring buffer) --------------------------------------------
+const BREADCRUMB_MAX = 50;
+const breadcrumbs: Breadcrumb[] = [];
+
+export function addBreadcrumb(b: Omit<Breadcrumb, "ts"> & { ts?: number }): void {
+  breadcrumbs.push({ ts: b.ts ?? Date.now(), ...b });
+  if (breadcrumbs.length > BREADCRUMB_MAX) breadcrumbs.splice(0, breadcrumbs.length - BREADCRUMB_MAX);
+}
+
+export function getBreadcrumbs(): Breadcrumb[] {
+  return breadcrumbs.slice();
+}
+
+export function clearBreadcrumbs(): void {
+  breadcrumbs.length = 0;
+}
+
 // --- Ambient metadata ------------------------------------------------------
-// Browser: a single mutable scope updated by the app (e.g. on auth change,
-// org switch, route change). Server runs share process state but each request
-// may set/clear ambient via `withErrorContext` below for the duration of a
-// handler. AsyncLocalStorage would be ideal but is not portable across the
-// Worker runtime — `withErrorContext` is best-effort and safe.
 let ambient: ErrorMetadata = {};
 
 export function setErrorContext(meta: ErrorMetadata): void {
@@ -38,7 +58,6 @@ export function getErrorContext(): ErrorMetadata {
   return ambient;
 }
 
-/** Run `fn` with `meta` merged into the ambient context, restored after. */
 export async function withErrorContext<T>(meta: ErrorMetadata, fn: () => Promise<T>): Promise<T> {
   const prev = ambient;
   ambient = {
@@ -53,7 +72,7 @@ export async function withErrorContext<T>(meta: ErrorMetadata, fn: () => Promise
   }
 }
 
-function newCorrelationId(): string {
+export function newCorrelationId(): string {
   try {
     return crypto.randomUUID();
   } catch {
@@ -66,14 +85,78 @@ function record(error: unknown, source = "global", meta: ErrorMetadata = {}) {
   void flush(error, source, meta);
 }
 
-// --- Browser ---------------------------------------------------------------
-if (typeof globalThis.addEventListener === "function") {
-  globalThis.addEventListener("error", (event) =>
-    record((event as ErrorEvent).error ?? event, "window.error"),
-  );
-  globalThis.addEventListener("unhandledrejection", (event) =>
-    record((event as PromiseRejectionEvent).reason, "window.unhandledrejection"),
-  );
+// --- Browser: auto-install listeners + breadcrumb instrumentation ---------
+if (typeof globalThis.addEventListener === "function" && typeof window !== "undefined") {
+  globalThis.addEventListener("error", (event) => {
+    addBreadcrumb({
+      category: "log",
+      level: "error",
+      message: (event as ErrorEvent).message || "window.error",
+    });
+    record((event as ErrorEvent).error ?? event, "window.error");
+  });
+  globalThis.addEventListener("unhandledrejection", (event) => {
+    const reason = (event as PromiseRejectionEvent).reason;
+    addBreadcrumb({
+      category: "log",
+      level: "error",
+      message: reason instanceof Error ? reason.message : String(reason),
+    });
+    record(reason, "window.unhandledrejection");
+  });
+
+  // History/navigation breadcrumbs
+  try {
+    addBreadcrumb({ category: "navigation", message: window.location.pathname });
+    const wrap = (key: "pushState" | "replaceState") => {
+      const orig = history[key];
+      history[key] = function (...args: Parameters<typeof orig>) {
+        const r = orig.apply(this, args);
+        addBreadcrumb({ category: "navigation", message: window.location.pathname });
+        return r;
+      } as typeof orig;
+    };
+    wrap("pushState");
+    wrap("replaceState");
+    window.addEventListener("popstate", () =>
+      addBreadcrumb({ category: "navigation", message: window.location.pathname }),
+    );
+  } catch {
+    // ignore
+  }
+
+  // Fetch breadcrumbs + correlation header injection
+  try {
+    const origFetch = window.fetch.bind(window);
+    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+      const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
+      const cid = ambient.correlationId ?? newCorrelationId();
+      const headers = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined));
+      if (!headers.has("x-correlation-id")) headers.set("x-correlation-id", cid);
+      const t0 = Date.now();
+      try {
+        const res = await origFetch(input as RequestInfo, { ...init, headers });
+        addBreadcrumb({
+          category: "fetch",
+          level: res.ok ? "info" : "error",
+          message: `${method} ${url} → ${res.status}`,
+          data: { status: res.status, ms: Date.now() - t0, correlationId: cid },
+        });
+        return res;
+      } catch (err) {
+        addBreadcrumb({
+          category: "fetch",
+          level: "error",
+          message: `${method} ${url} threw`,
+          data: { ms: Date.now() - t0, correlationId: cid },
+        });
+        throw err;
+      }
+    };
+  } catch {
+    // ignore — best-effort
+  }
 }
 
 // --- Server (Node / Worker) ------------------------------------------------
@@ -117,8 +200,6 @@ async function flush(error: unknown, source: string, meta: ErrorMetadata = {}) {
       context: { ...(ambient.context ?? {}), ...(meta.context ?? {}) },
     };
 
-    // Throttle identical (source, message, action) tuples within 10s to avoid
-    // log floods, but never collapse rows that differ by correlation id.
     const key = `${source}:${merged.action ?? ""}:${message}:${merged.correlationId ?? ""}`.slice(0, 240);
     if (sentRecently.has(key)) return;
     sentRecently.add(key);
@@ -135,6 +216,7 @@ async function flush(error: unknown, source: string, meta: ErrorMetadata = {}) {
         tenantId: merged.tenantId ?? null,
         userId: merged.userId ?? null,
         context: merged.context ?? {},
+        breadcrumbs: getBreadcrumbs().slice(-25),
       },
     });
   } catch {
@@ -148,9 +230,9 @@ export function captureError(error: unknown, source = "manual", meta: ErrorMetad
 
 /**
  * Wrap an async function so any thrown error is reported to the app_errors
- * sink with the given source/action tag, then re-thrown. A correlation id is
- * generated per invocation so every error emitted during the call (including
- * downstream `captureError` calls) shares the same trace id.
+ * sink. A correlation id is generated per invocation (unless one is already
+ * ambient — e.g. inherited from an inbound `x-correlation-id` header) so the
+ * trace can be stitched across client → server boundaries.
  */
 export function withErrorCapture<TArgs extends unknown[], TRet>(
   fn: (...args: TArgs) => Promise<TRet>,
@@ -158,7 +240,7 @@ export function withErrorCapture<TArgs extends unknown[], TRet>(
   options: { action?: string } = {},
 ): (...args: TArgs) => Promise<TRet> {
   return async (...args: TArgs) => {
-    const correlationId = newCorrelationId();
+    const correlationId = ambient.correlationId ?? newCorrelationId();
     const action = options.action ?? source;
     return withErrorContext({ action, correlationId }, async () => {
       try {
