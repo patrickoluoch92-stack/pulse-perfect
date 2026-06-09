@@ -9,6 +9,12 @@ const reportSchema = z.object({
   source: z.string().max(255).optional().nullable(),
   url: z.string().max(2000).optional().nullable(),
   level: z.enum(["error", "warn", "info"]).optional(),
+  // New trace metadata. tenantId is the org id when known; userId allows the
+  // browser to attribute errors even before we resolve it from the auth header.
+  action: z.string().min(1).max(120).optional().nullable(),
+  correlationId: z.string().min(1).max(120).optional().nullable(),
+  tenantId: z.string().uuid().optional().nullable(),
+  userId: z.string().uuid().optional().nullable(),
   context: z.record(z.string().max(64), z.unknown()).optional(),
 });
 
@@ -20,8 +26,8 @@ const reportSchema = z.object({
 export const reportAppError = createServerFn({ method: "POST" })
   .inputValidator((data) => reportSchema.parse(data))
   .handler(async ({ data }) => {
-    let userId: string | null = null;
-    let orgId: string | null = null;
+    let userId: string | null = data.userId ?? null;
+    let orgId: string | null = data.tenantId ?? null;
 
     try {
       const { getRequest } = await import("@tanstack/react-start/server");
@@ -29,19 +35,26 @@ export const reportAppError = createServerFn({ method: "POST" })
       const auth = req?.headers.get("authorization") ?? "";
       if (auth.startsWith("Bearer ")) {
         const { data: u } = await supabaseAdmin.auth.getUser(auth.slice(7));
-        userId = u.user?.id ?? null;
-        if (userId) {
-          const { data: profile } = await supabaseAdmin
-            .from("profiles")
-            .select("current_org_id")
-            .eq("id", userId)
-            .maybeSingle();
-          orgId = profile?.current_org_id ?? null;
+        const authedId = u.user?.id ?? null;
+        if (authedId) {
+          userId = userId ?? authedId;
+          if (!orgId) {
+            const { data: profile } = await supabaseAdmin
+              .from("profiles")
+              .select("current_org_id")
+              .eq("id", authedId)
+              .maybeSingle();
+            orgId = profile?.current_org_id ?? null;
+          }
         }
       }
     } catch {
       // ignore — never block error reporting
     }
+
+    const context = JSON.parse(JSON.stringify(data.context ?? {})) as Record<string, unknown>;
+    if (data.correlationId) context.correlationId = data.correlationId;
+    if (data.action) context.action = data.action;
 
     await supabaseAdmin.from("app_errors").insert({
       user_id: userId,
@@ -51,7 +64,9 @@ export const reportAppError = createServerFn({ method: "POST" })
       stack: data.stack?.slice(0, 8000) ?? null,
       source: data.source ?? null,
       url: data.url ?? null,
-      context: JSON.parse(JSON.stringify(data.context ?? {})),
+      action: data.action ?? null,
+      correlation_id: data.correlationId ?? null,
+      context,
     });
 
     return { ok: true };
@@ -63,7 +78,7 @@ export const listAppErrors = createServerFn({ method: "GET" })
     const { supabase } = context;
     const { data, error } = await supabase
       .from("app_errors")
-      .select("id, level, message, source, url, created_at, stack")
+      .select("id, level, message, source, url, action, correlation_id, created_at, stack")
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) throw new Error(error.message);
