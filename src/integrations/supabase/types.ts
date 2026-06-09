@@ -16,7 +16,9 @@ export type Database = {
     Tables: {
       app_errors: {
         Row: {
+          action: string | null
           context: Json
+          correlation_id: string | null
           created_at: string
           id: string
           level: string
@@ -28,7 +30,9 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          action?: string | null
           context?: Json
+          correlation_id?: string | null
           created_at?: string
           id?: string
           level?: string
@@ -40,7 +44,9 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          action?: string | null
           context?: Json
+          correlation_id?: string | null
           created_at?: string
           id?: string
           level?: string
