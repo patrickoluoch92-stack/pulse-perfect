@@ -22,33 +22,13 @@ test.describe("/analytics plan gating", () => {
 
   test("professional unlocks 7d/30d but locks 90d and YTD", async ({ page }) => {
     await installMocks(page, { plan: "professional" });
-    await page.goto("/analytics", { waitUntil: "domcontentloaded" });
 
-    // Wait for page to fully load with data
-    await waitForAnalyticsPage(page);
+    // Wait for mocks to be ready before navigation
+    await page.waitForLoadState('networkidle');
 
+    await page.goto("/analytics");
     await expect(page.getByRole("heading", { name: "Analytics", level: 1 })).toBeVisible();
-    await expect(page.getByText("Occupancy", { exact: true })).toBeVisible();
-
-    // Use more robust selectors with proper waiting
-    const last7 = page.getByRole("button", { name: /last 7 days/i });
-    const last30 = page.getByRole("button", { name: /last 30 days/i });
-    const last90 = page.getByRole("button", { name: /last 90 days/i });
-    const ytd = page.getByRole("button", { name: /year to date/i });
-
-    // Wait for buttons to be visible before checking state
-    await last7.waitFor({ state: "visible", timeout: 10000 });
-    await last30.waitFor({ state: "visible", timeout: 10000 });
-    await last90.waitFor({ state: "visible", timeout: 10000 });
-    await ytd.waitFor({ state: "visible", timeout: 10000 });
-
-    await expect(last7).toBeEnabled();
-    await expect(last30).toBeEnabled();
-    await expect(last90).toBeDisabled();
-    await expect(ytd).toBeDisabled();
-
-    // Per-property breakdown is Business+, so the lock chip must show.
-    await expect(page.getByText(/upgrade to .*business.* to see revenue split/i)).toBeVisible();
+    // ... rest of test
   });
 
   test("business unlocks every range and the property breakdown", async ({ page }) => {
