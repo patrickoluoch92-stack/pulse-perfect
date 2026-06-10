@@ -31,7 +31,7 @@ describe("error-capture metadata", () => {
     captureError(new Error("boom"), "test");
     await flushMicro();
     expect(reportMock).toHaveBeenCalledTimes(1);
-    const payload = reportMock.mock.calls[0][0].data;
+    const payload = (reportMock.mock.calls[0] as any)[0].data;
     expect(payload.action).toBe("fromAmbient");
     expect(payload.tenantId).toBe("11111111-1111-1111-1111-111111111111");
     expect(payload.userId).toBe("22222222-2222-2222-2222-222222222222");
