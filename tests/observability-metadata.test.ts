@@ -47,10 +47,10 @@ describe("error-capture metadata", () => {
     await expect(wrapped()).rejects.toThrow("outer");
     await flushMicro();
     expect(reportMock).toHaveBeenCalledTimes(2);
-    const cids = reportMock.mock.calls.map((c) => c[0].data.correlationId);
+    const cids = reportMock.mock.calls.map((c) => (c as any)[0].data.correlationId);
     expect(cids[0]).toBeTruthy();
     expect(cids[0]).toEqual(cids[1]);
-    expect(reportMock.mock.calls[0][0].data.action).toBe("doThing");
+    expect((reportMock.mock.calls[0] as any)[0].data.action).toBe("doThing");
   });
 
   it("inherits an existing ambient correlation id rather than minting a new one", async () => {
@@ -62,7 +62,7 @@ describe("error-capture metadata", () => {
       await expect(wrapped()).rejects.toThrow();
     });
     await flushMicro();
-    expect(reportMock.mock.calls[0][0].data.correlationId).toBe(cid);
+    expect((reportMock.mock.calls[0] as any)[0].data.correlationId).toBe(cid);
   });
 
   it("throttles identical (source,action,message,correlation) tuples", async () => {
@@ -86,10 +86,10 @@ describe("error-capture metadata", () => {
     for (let i = 0; i < 30; i++) addBreadcrumb({ category: "ui", message: `step-${i}` });
     captureError(new Error("with crumbs"), "src");
     await flushMicro();
-    const payload = reportMock.mock.calls[0][0].data;
+    const payload = (reportMock.mock.calls[0] as any)[0].data;
     expect(payload.breadcrumbs).toHaveLength(25);
-    expect(payload.breadcrumbs![24].message).toBe("step-29");
-    expect(payload.breadcrumbs![0].message).toBe("step-5");
+    expect(payload.breadcrumbs[24].message).toBe("step-29");
+    expect(payload.breadcrumbs[0].message).toBe("step-5");
   });
 
   it("breadcrumb ring buffer caps at 50 entries", () => {
