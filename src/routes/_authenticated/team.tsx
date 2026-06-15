@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { authPageMeta } from "@/lib/route-meta";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -21,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/_authenticated/team")({
-  head: () => ({ meta: [{ title: "Team — HostPulse" }] }),
+  head: () => ({ meta: authPageMeta({ title: "Team", description: "Invite teammates, assign roles, and manage workspace access." }) }),
   component: TeamPage,
 });
 

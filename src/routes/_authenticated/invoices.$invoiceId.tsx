@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { authPageMeta } from "@/lib/route-meta";
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -18,7 +19,7 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/invoices/$invoiceId")({
-  head: () => ({ meta: [{ title: "Invoice — HostPulse" }] }),
+  head: () => ({ meta: authPageMeta({ title: "Invoice", description: "View and edit invoice details, line items, and payment status." }) }),
   component: InvoiceEditorPage,
 });
 

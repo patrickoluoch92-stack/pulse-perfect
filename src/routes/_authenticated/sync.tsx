@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { authPageMeta } from "@/lib/route-meta";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -40,7 +41,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 
 export const Route = createFileRoute("/_authenticated/sync")({
-  head: () => ({ meta: [{ title: "Calendar Sync — HostPulse" }] }),
+  head: () => ({ meta: authPageMeta({ title: "Calendar Sync", description: "Two-way iCal sync, webhooks, and channel manager integrations." }) }),
   component: SyncPage,
   errorComponent: ({ error }) => (
     <div className="p-8 text-sm text-destructive">{error.message}</div>

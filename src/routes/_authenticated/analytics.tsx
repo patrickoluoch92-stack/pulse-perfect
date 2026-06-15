@@ -1,3 +1,4 @@
+import { authPageMeta } from "@/lib/route-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -13,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import type { LucideIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/analytics")({
-  head: () => ({ meta: [{ title: "Analytics — HostPulse" }] }),
+  head: () => ({ meta: authPageMeta({ title: "Analytics", description: "Revenue, occupancy, and booking performance across your portfolio." }) }),
   component: AnalyticsPage,
 });
 

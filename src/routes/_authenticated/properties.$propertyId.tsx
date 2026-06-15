@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { authPageMeta } from "@/lib/route-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -46,7 +47,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/properties/$propertyId")({
-  head: () => ({ meta: [{ title: "Property — HostPulse" }] }),
+  head: () => ({ meta: authPageMeta({ title: "Property", description: "Manage units, photos, amenities, and settings for this property." }) }),
   component: PropertyDetailPage,
 });
 

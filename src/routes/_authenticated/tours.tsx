@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { authPageMeta } from "@/lib/route-meta";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -35,7 +36,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/tours")({
-  head: () => ({ meta: [{ title: "Tours — HostPulse" }] }),
+  head: () => ({ meta: authPageMeta({ title: "Tours", description: "Tour catalog, availability, bookings, and itineraries." }) }),
   component: ToursPage,
   errorComponent: ({ error }) => <div className="p-8 text-sm text-destructive">{error.message}</div>,
   notFoundComponent: () => <div className="p-8">Not found</div>,
