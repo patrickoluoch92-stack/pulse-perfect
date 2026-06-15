@@ -1,3 +1,4 @@
+import { authPageMeta } from "@/lib/route-meta";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -6,7 +7,7 @@ import { BedDouble, Building2, CheckCircle2, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Overview — HostPulse" }] }),
+  head: () => ({ meta: authPageMeta({ title: "Overview", description: "Your HostPulse workspace at a glance — properties, units, and live availability." }) }),
   component: DashboardPage,
 });
 
