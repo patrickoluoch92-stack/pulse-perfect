@@ -81,14 +81,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "HostPulse" },
       { name: "description", content: "Hospitality operations for hosts, hotels, lodges, and tour operators." },
       { name: "author", content: "HostPulse" },
-      { property: "og:title", content: "HostPulse" },
-      { property: "og:description", content: "Hospitality operations for hosts, hotels, lodges, and tour operators." },
+      { name: "theme-color", content: "#0e4f5a" },
+      { property: "og:site_name", content: "HostPulse" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
