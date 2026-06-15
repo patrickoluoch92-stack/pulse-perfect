@@ -15,7 +15,17 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
-  head: () => ({ meta: [{ title: "Sign in — HostPulse" }] }),
+  head: () => ({
+    meta: [
+      { title: "Sign in — HostPulse" },
+      { name: "description", content: "Sign in or create your HostPulse workspace to manage reservations, billing, and operations." },
+      { name: "robots", content: "noindex, follow" },
+      { property: "og:title", content: "Sign in — HostPulse" },
+      { property: "og:description", content: "Access your HostPulse hospitality workspace." },
+      { property: "og:url", content: "/auth" },
+    ],
+    links: [{ rel: "canonical", href: "/auth" }],
+  }),
   component: AuthPage,
 });
 

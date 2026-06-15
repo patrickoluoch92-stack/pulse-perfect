@@ -10,7 +10,14 @@ import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/invite/$token")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Accept invitation — HostPulse" }] }),
+  head: () => ({
+    meta: [
+      { title: "Accept invitation — HostPulse" },
+      { name: "description", content: "Join a HostPulse workspace you've been invited to." },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "Join your team on HostPulse" },
+    ],
+  }),
   component: InvitePage,
 });
 
