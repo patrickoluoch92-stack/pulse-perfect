@@ -13,7 +13,7 @@ test.describe("Mobile Testing - iPhone 15", () => {
   });
 
   test("should fill forms on mobile", async ({ page }) => {
-    await page.goto("/login");
+    await page.goto("/auth");
 
     // Fill form
     const emailInput = page.getByLabel(/email/i);
@@ -51,7 +51,7 @@ test.describe("Mobile Testing - Pixel 8", () => {
   });
 
   test("should handle keyboard on mobile", async ({ page }) => {
-    await page.goto("/login");
+    await page.goto("/auth");
 
     // Focus input
     const emailInput = page.getByLabel(/email/i);
@@ -96,7 +96,7 @@ test.describe("Mobile Navigation", () => {
 
 test.describe("Mobile Forms", () => {
   test("should show mobile-friendly form inputs", async ({ page }) => {
-    await page.goto("/login");
+    await page.goto("/auth");
 
     // Check for mobile-optimized inputs
     const emailInput = page.getByLabel(/email/i);
@@ -107,14 +107,14 @@ test.describe("Mobile Forms", () => {
   });
 
   test("should handle form submission on mobile", async ({ page }) => {
-    await page.goto("/login");
+    await page.goto("/auth");
 
     // Fill form
     await page.getByLabel(/email/i).fill("test@example.com");
     await page.getByLabel(/password/i).fill("password");
 
     // Submit - should work on mobile
-    const submitButton = page.getByRole("button", { name: /login|submit/i });
+    const submitButton = page.getByRole("button", { name: /auth|submit/i });
     await submitButton.click();
 
     // Should navigate or show feedback
