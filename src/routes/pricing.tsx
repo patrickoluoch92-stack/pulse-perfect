@@ -86,7 +86,7 @@ function PricingPage() {
     try {
       await openCheckout({
         priceId: tier.paddlePriceId,
-        customerEmail: ctx.data?.profile?.email ?? undefined,
+        customerEmail: ctx.data?.user?.email ?? undefined,
         customData: { userId: user.id, orgId },
         successUrl: `${window.location.origin}/dashboard?checkout=success&plan=${tier.key}`,
       });
