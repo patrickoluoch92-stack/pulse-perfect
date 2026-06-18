@@ -998,6 +998,83 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          environment: string
+          id: string
+          mpesa_amount_kes: number | null
+          mpesa_checkout_request_id: string | null
+          mpesa_merchant_request_id: string | null
+          mpesa_phone: string | null
+          mpesa_receipt_number: string | null
+          org_id: string
+          paddle_customer_id: string | null
+          paddle_price_id: string | null
+          paddle_subscription_id: string | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          provider: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          mpesa_amount_kes?: number | null
+          mpesa_checkout_request_id?: string | null
+          mpesa_merchant_request_id?: string | null
+          mpesa_phone?: string | null
+          mpesa_receipt_number?: string | null
+          org_id: string
+          paddle_customer_id?: string | null
+          paddle_price_id?: string | null
+          paddle_subscription_id?: string | null
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          provider: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          mpesa_amount_kes?: number | null
+          mpesa_checkout_request_id?: string | null
+          mpesa_merchant_request_id?: string | null
+          mpesa_phone?: string | null
+          mpesa_receipt_number?: string | null
+          org_id?: string
+          paddle_customer_id?: string | null
+          paddle_price_id?: string | null
+          paddle_subscription_id?: string | null
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          provider?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tour_bookings: {
         Row: {
           created_at: string
@@ -1363,6 +1440,10 @@ export type Database = {
         Returns: boolean
       }
       next_invoice_number: { Args: { _org_id: string }; Returns: string }
+      org_has_active_subscription: {
+        Args: { _org_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       invoice_status: "draft" | "sent" | "paid" | "void" | "overdue"
