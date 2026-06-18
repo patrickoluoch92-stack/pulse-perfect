@@ -76,7 +76,7 @@ export const Route = createFileRoute("/api/public/mpesa/callback")({
           // Apply plan to org (30-day access already set by start).
           await supabase
             .from("organizations")
-            .update({ plan: sub.plan as string, updated_at: new Date().toISOString() })
+            .update({ plan: sub.plan as Database["public"]["Enums"]["subscription_plan"], updated_at: new Date().toISOString() })
             .eq("id", sub.org_id as string);
         } else {
           await supabase
