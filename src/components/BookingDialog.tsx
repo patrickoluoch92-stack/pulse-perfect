@@ -41,6 +41,7 @@ export function BookingDialog({ propertyId, propertyName, pricePerNight, currenc
   const router = useRouter();
   const navigate = useNavigate();
   const create = useServerFn(createBooking);
+  const checkFn = useServerFn(checkAvailability);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -58,6 +59,13 @@ export function BookingDialog({ propertyId, propertyName, pricePerNight, currenc
     ),
   );
   const total = (pricePerNight ?? 0) * nights;
+
+  const availability = useQuery({
+    queryKey: ["mkt-availability", propertyId, checkIn, checkOut],
+    queryFn: () => checkFn({ data: { propertyId, checkIn, checkOut } }),
+    enabled: open && nights > 0,
+  });
+
 
   const submit = useMutation({
     mutationFn: async () => {
