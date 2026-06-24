@@ -62,11 +62,7 @@ function EditListing() {
   const counties = useQuery({ queryKey: ["mkt-counties"], queryFn: () => countiesFn() });
   const propQuery = useQuery({
     queryKey: ["mkt-my-prop", id],
-    queryFn: async () => {
-      const p = await getFn({ data: { id } });
-      if (!p) throw notFound();
-      return p;
-    },
+    queryFn: () => getFn({ data: { id } }),
   });
 
   const prop = propQuery.data;
