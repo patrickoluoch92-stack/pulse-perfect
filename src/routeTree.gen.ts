@@ -35,6 +35,7 @@ import { Route as AuthenticatedBookingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authenticated/listings.index'
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
+import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-vitals'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
 import { Route as AuthenticatedListingsImportRouteImport } from './routes/_authenticated/listings.import'
 import { Route as AuthenticatedListingsAnalyticsRouteImport } from './routes/_authenticated/listings.analytics'
@@ -176,6 +177,11 @@ const MarketplacePSlugRoute = MarketplacePSlugRouteImport.update({
   path: '/p/$slug',
   getParentRoute: () => MarketplaceRoute,
 } as any)
+const ApiPublicWebVitalsRoute = ApiPublicWebVitalsRouteImport.update({
+  id: '/api/public/web-vitals',
+  path: '/api/public/web-vitals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedPropertiesPropertyIdRoute =
   AuthenticatedPropertiesPropertyIdRouteImport.update({
     id: '/$propertyId',
@@ -259,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
+  '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
@@ -293,6 +300,7 @@ export interface FileRoutesByTo {
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
+  '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
@@ -331,6 +339,7 @@ export interface FileRoutesById {
   '/_authenticated/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/_authenticated/listings/import': typeof AuthenticatedListingsImportRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
+  '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
@@ -369,6 +378,7 @@ export interface FileRouteTypes {
     | '/listings/analytics'
     | '/listings/import'
     | '/properties/$propertyId'
+    | '/api/public/web-vitals'
     | '/marketplace/p/$slug'
     | '/listings/'
     | '/listings/$id/availability'
@@ -403,6 +413,7 @@ export interface FileRouteTypes {
     | '/listings/analytics'
     | '/listings/import'
     | '/properties/$propertyId'
+    | '/api/public/web-vitals'
     | '/marketplace/p/$slug'
     | '/listings'
     | '/listings/$id/availability'
@@ -440,6 +451,7 @@ export interface FileRouteTypes {
     | '/_authenticated/listings/analytics'
     | '/_authenticated/listings/import'
     | '/_authenticated/properties/$propertyId'
+    | '/api/public/web-vitals'
     | '/marketplace/p/$slug'
     | '/_authenticated/listings/'
     | '/_authenticated/listings/$id/availability'
@@ -456,6 +468,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CountiesSlugRoute: typeof CountiesSlugRoute
   InviteTokenRoute: typeof InviteTokenRoute
+  ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
   ApiPublicIcalTokenRoute: typeof ApiPublicIcalTokenRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -643,6 +656,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/marketplace/p/$slug'
       preLoaderRoute: typeof MarketplacePSlugRouteImport
       parentRoute: typeof MarketplaceRoute
+    }
+    '/api/public/web-vitals': {
+      id: '/api/public/web-vitals'
+      path: '/api/public/web-vitals'
+      fullPath: '/api/public/web-vitals'
+      preLoaderRoute: typeof ApiPublicWebVitalsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/properties/$propertyId': {
       id: '/_authenticated/properties/$propertyId'
@@ -836,6 +856,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   CountiesSlugRoute: CountiesSlugRoute,
   InviteTokenRoute: InviteTokenRoute,
+  ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
   ApiPublicIcalTokenRoute: ApiPublicIcalTokenRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
