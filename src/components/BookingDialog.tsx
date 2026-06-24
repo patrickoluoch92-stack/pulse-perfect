@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useRouter, useNavigate } from "@tanstack/react-router";
-import { CalendarDays, Users } from "lucide-react";
+import { CalendarDays, Users, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -20,6 +20,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { createBooking } from "@/lib/marketplace-extra.functions";
+import { checkAvailability } from "@/lib/marketplace-ops.functions";
+
 
 interface Props {
   propertyId: string;
