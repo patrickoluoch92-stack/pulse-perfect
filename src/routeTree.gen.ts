@@ -41,6 +41,7 @@ import { Route as AuthenticatedListingsIdRouteImport } from './routes/_authentic
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
+import { Route as AuthenticatedListingsIdAvailabilityRouteImport } from './routes/_authenticated/listings.$id.availability'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -207,6 +208,12 @@ const ApiPublicIcalTokenRoute = ApiPublicIcalTokenRouteImport.update({
   path: '/api/public/ical/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedListingsIdAvailabilityRoute =
+  AuthenticatedListingsIdAvailabilityRouteImport.update({
+    id: '/availability',
+    path: '/availability',
+    getParentRoute: () => AuthenticatedListingsIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -233,11 +240,12 @@ export interface FileRoutesByFullPath {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
-  '/listings/$id': typeof AuthenticatedListingsIdRoute
+  '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/listings/admin': typeof AuthenticatedListingsAdminRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
+  '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -264,11 +272,12 @@ export interface FileRoutesByTo {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/marketplace': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
-  '/listings/$id': typeof AuthenticatedListingsIdRoute
+  '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/listings/admin': typeof AuthenticatedListingsAdminRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
+  '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -299,11 +308,12 @@ export interface FileRoutesById {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
-  '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRoute
+  '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/_authenticated/listings/admin': typeof AuthenticatedListingsAdminRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
+  '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/properties/$propertyId'
     | '/marketplace/p/$slug'
     | '/listings/'
+    | '/listings/$id/availability'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -370,6 +381,7 @@ export interface FileRouteTypes {
     | '/properties/$propertyId'
     | '/marketplace/p/$slug'
     | '/listings'
+    | '/listings/$id/availability'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   id:
@@ -404,6 +416,7 @@ export interface FileRouteTypes {
     | '/_authenticated/properties/$propertyId'
     | '/marketplace/p/$slug'
     | '/_authenticated/listings/'
+    | '/_authenticated/listings/$id/availability'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -647,6 +660,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIcalTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/listings/$id/availability': {
+      id: '/_authenticated/listings/$id/availability'
+      path: '/availability'
+      fullPath: '/listings/$id/availability'
+      preLoaderRoute: typeof AuthenticatedListingsIdAvailabilityRouteImport
+      parentRoute: typeof AuthenticatedListingsIdRoute
+    }
   }
 }
 
@@ -663,14 +683,29 @@ const AuthenticatedInvoicesRouteWithChildren =
     AuthenticatedInvoicesRouteChildren,
   )
 
+interface AuthenticatedListingsIdRouteChildren {
+  AuthenticatedListingsIdAvailabilityRoute: typeof AuthenticatedListingsIdAvailabilityRoute
+}
+
+const AuthenticatedListingsIdRouteChildren: AuthenticatedListingsIdRouteChildren =
+  {
+    AuthenticatedListingsIdAvailabilityRoute:
+      AuthenticatedListingsIdAvailabilityRoute,
+  }
+
+const AuthenticatedListingsIdRouteWithChildren =
+  AuthenticatedListingsIdRoute._addFileChildren(
+    AuthenticatedListingsIdRouteChildren,
+  )
+
 interface AuthenticatedListingsRouteChildren {
-  AuthenticatedListingsIdRoute: typeof AuthenticatedListingsIdRoute
+  AuthenticatedListingsIdRoute: typeof AuthenticatedListingsIdRouteWithChildren
   AuthenticatedListingsAdminRoute: typeof AuthenticatedListingsAdminRoute
   AuthenticatedListingsIndexRoute: typeof AuthenticatedListingsIndexRoute
 }
 
 const AuthenticatedListingsRouteChildren: AuthenticatedListingsRouteChildren = {
-  AuthenticatedListingsIdRoute: AuthenticatedListingsIdRoute,
+  AuthenticatedListingsIdRoute: AuthenticatedListingsIdRouteWithChildren,
   AuthenticatedListingsAdminRoute: AuthenticatedListingsAdminRoute,
   AuthenticatedListingsIndexRoute: AuthenticatedListingsIndexRoute,
 }
