@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
 import { Route as MarketplaceCountyRouteImport } from './routes/marketplace.$county'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
+import { Route as CountiesSlugRouteImport } from './routes/counties.$slug'
 import { Route as AuthenticatedToursRouteImport } from './routes/_authenticated/tours'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedSyncRouteImport } from './routes/_authenticated/sync'
@@ -81,6 +82,11 @@ const MarketplaceCountyRoute = MarketplaceCountyRouteImport.update({
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
   path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CountiesSlugRoute = CountiesSlugRouteImport.update({
+  id: '/counties/$slug',
+  path: '/counties/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedToursRoute = AuthenticatedToursRouteImport.update({
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/sync': typeof AuthenticatedSyncRoute
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
+  '/counties/$slug': typeof CountiesSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/': typeof MarketplaceIndexRoute
@@ -236,6 +243,7 @@ export interface FileRoutesByTo {
   '/sync': typeof AuthenticatedSyncRoute
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
+  '/counties/$slug': typeof CountiesSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace': typeof MarketplaceIndexRoute
@@ -268,6 +276,7 @@ export interface FileRoutesById {
   '/_authenticated/sync': typeof AuthenticatedSyncRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/tours': typeof AuthenticatedToursRoute
+  '/counties/$slug': typeof CountiesSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/': typeof MarketplaceIndexRoute
@@ -300,6 +309,7 @@ export interface FileRouteTypes {
     | '/sync'
     | '/team'
     | '/tours'
+    | '/counties/$slug'
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/sync'
     | '/team'
     | '/tours'
+    | '/counties/$slug'
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sync'
     | '/_authenticated/team'
     | '/_authenticated/tours'
+    | '/counties/$slug'
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/'
@@ -379,6 +391,7 @@ export interface RootRouteChildren {
   MarketplaceRoute: typeof MarketplaceRouteWithChildren
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  CountiesSlugRoute: typeof CountiesSlugRoute
   InviteTokenRoute: typeof InviteTokenRoute
   ApiPublicIcalTokenRoute: typeof ApiPublicIcalTokenRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -447,6 +460,13 @@ declare module '@tanstack/react-router' {
       path: '/invite/$token'
       fullPath: '/invite/$token'
       preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/counties/$slug': {
+      id: '/counties/$slug'
+      path: '/counties/$slug'
+      fullPath: '/counties/$slug'
+      preLoaderRoute: typeof CountiesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/tours': {
@@ -693,6 +713,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketplaceRoute: MarketplaceRouteWithChildren,
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  CountiesSlugRoute: CountiesSlugRoute,
   InviteTokenRoute: InviteTokenRoute,
   ApiPublicIcalTokenRoute: ApiPublicIcalTokenRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
