@@ -148,7 +148,7 @@ function MarketplaceListing() {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="md:w-52"><SelectValue placeholder="County" /></SelectTrigger>
+              <SelectTrigger className="md:w-52" aria-label="Filter by county"><SelectValue placeholder="County" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All counties</SelectItem>
                 {counties.data?.map((c) => (
