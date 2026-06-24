@@ -79,6 +79,7 @@ function InvoiceEditorPage() {
   const [values, setValues] = useState<FormValues>(emptyForm());
   const [reservationId, setReservationId] = useState<string | null>(null);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+  const [mpesaOpen, setMpesaOpen] = useState(false);
 
   useEffect(() => {
     if (!existing.data) return;
