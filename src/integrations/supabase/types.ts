@@ -700,6 +700,170 @@ export type Database = {
           },
         ]
       }
+      kenya_counties: {
+        Row: {
+          code: string
+          name: string
+          region: string | null
+          slug: string
+        }
+        Insert: {
+          code: string
+          name: string
+          region?: string | null
+          slug: string
+        }
+        Update: {
+          code?: string
+          name?: string
+          region?: string | null
+          slug?: string
+        }
+        Relationships: []
+      }
+      marketplace_properties: {
+        Row: {
+          amenities: string[]
+          availability: Database["public"]["Enums"]["mkt_availability"]
+          category: Database["public"]["Enums"]["mkt_property_category"]
+          contact_email: string | null
+          contact_phone: string | null
+          contact_whatsapp: string | null
+          county_code: string
+          created_at: string
+          created_by: string
+          currency: string
+          description: string
+          google_maps_url: string | null
+          id: string
+          is_featured: boolean
+          latitude: number | null
+          longitude: number | null
+          main_image_path: string | null
+          name: string
+          org_id: string
+          price_per_night: number | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slug: string
+          status: Database["public"]["Enums"]["mkt_listing_status"]
+          submitted_at: string | null
+          town: string
+          updated_at: string
+        }
+        Insert: {
+          amenities?: string[]
+          availability?: Database["public"]["Enums"]["mkt_availability"]
+          category: Database["public"]["Enums"]["mkt_property_category"]
+          contact_email?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          county_code: string
+          created_at?: string
+          created_by: string
+          currency?: string
+          description: string
+          google_maps_url?: string | null
+          id?: string
+          is_featured?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          main_image_path?: string | null
+          name: string
+          org_id: string
+          price_per_night?: number | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slug: string
+          status?: Database["public"]["Enums"]["mkt_listing_status"]
+          submitted_at?: string | null
+          town: string
+          updated_at?: string
+        }
+        Update: {
+          amenities?: string[]
+          availability?: Database["public"]["Enums"]["mkt_availability"]
+          category?: Database["public"]["Enums"]["mkt_property_category"]
+          contact_email?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          county_code?: string
+          created_at?: string
+          created_by?: string
+          currency?: string
+          description?: string
+          google_maps_url?: string | null
+          id?: string
+          is_featured?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          main_image_path?: string | null
+          name?: string
+          org_id?: string
+          price_per_night?: number | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slug?: string
+          status?: Database["public"]["Enums"]["mkt_listing_status"]
+          submitted_at?: string | null
+          town?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_properties_county_code_fkey"
+            columns: ["county_code"]
+            isOneToOne: false
+            referencedRelation: "kenya_counties"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "marketplace_properties_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_property_images: {
+        Row: {
+          alt_text: string | null
+          created_at: string
+          id: string
+          property_id: string
+          sort_order: number
+          storage_path: string
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          property_id: string
+          sort_order?: number
+          storage_path: string
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string
+          id?: string
+          property_id?: string
+          sort_order?: number
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_property_images_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mpesa_transactions: {
         Row: {
           amount: number | null
@@ -1537,6 +1701,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1565,6 +1750,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_org_member: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
@@ -1576,7 +1768,24 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       invoice_status: "draft" | "sent" | "paid" | "void" | "overdue"
+      mkt_availability: "available" | "limited" | "booked_out"
+      mkt_listing_status:
+        | "draft"
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "archived"
+      mkt_property_category:
+        | "hotel"
+        | "resort"
+        | "lodge"
+        | "camp"
+        | "guest_house"
+        | "serviced_apartment"
+        | "airbnb"
+        | "villa"
       org_role: "owner" | "admin" | "manager" | "staff"
       property_type:
         | "hotel"
@@ -1741,7 +1950,26 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       invoice_status: ["draft", "sent", "paid", "void", "overdue"],
+      mkt_availability: ["available", "limited", "booked_out"],
+      mkt_listing_status: [
+        "draft",
+        "pending",
+        "approved",
+        "rejected",
+        "archived",
+      ],
+      mkt_property_category: [
+        "hotel",
+        "resort",
+        "lodge",
+        "camp",
+        "guest_house",
+        "serviced_apartment",
+        "airbnb",
+        "villa",
+      ],
       org_role: ["owner", "admin", "manager", "staff"],
       property_type: [
         "hotel",
