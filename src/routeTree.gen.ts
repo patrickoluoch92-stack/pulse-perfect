@@ -30,6 +30,7 @@ import { Route as AuthenticatedListingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authenticated/incidents'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedBookingsRouteImport } from './routes/_authenticated/bookings'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authenticated/listings.index'
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
@@ -145,6 +146,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBookingsRoute = AuthenticatedBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -203,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/bookings': typeof AuthenticatedBookingsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/bookings': typeof AuthenticatedBookingsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
+  '/_authenticated/bookings': typeof AuthenticatedBookingsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/incidents': typeof AuthenticatedIncidentsRoute
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRouteWithChildren
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/analytics'
+    | '/bookings'
     | '/dashboard'
     | '/incidents'
     | '/invoices'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/analytics'
+    | '/bookings'
     | '/dashboard'
     | '/incidents'
     | '/invoices'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/_authenticated/analytics'
+    | '/_authenticated/bookings'
     | '/_authenticated/dashboard'
     | '/_authenticated/incidents'
     | '/_authenticated/invoices'
@@ -546,6 +558,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/bookings': {
+      id: '/_authenticated/bookings'
+      path: '/bookings'
+      fullPath: '/bookings'
+      preLoaderRoute: typeof AuthenticatedBookingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/analytics': {
       id: '/_authenticated/analytics'
       path: '/analytics'
@@ -659,6 +678,7 @@ const AuthenticatedPropertiesRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
+  AuthenticatedBookingsRoute: typeof AuthenticatedBookingsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedIncidentsRoute: typeof AuthenticatedIncidentsRoute
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRouteWithChildren
@@ -674,6 +694,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
+  AuthenticatedBookingsRoute: AuthenticatedBookingsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedIncidentsRoute: AuthenticatedIncidentsRoute,
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRouteWithChildren,
