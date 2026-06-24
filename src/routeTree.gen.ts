@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
+import { Route as MarketplaceMapRouteImport } from './routes/marketplace.map'
 import { Route as MarketplaceCountyRouteImport } from './routes/marketplace.$county'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as CountiesSlugRouteImport } from './routes/counties.$slug'
@@ -30,6 +31,7 @@ import { Route as AuthenticatedListingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authenticated/incidents'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedBookingsRouteImport } from './routes/_authenticated/bookings'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authenticated/listings.index'
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
@@ -72,6 +74,11 @@ const IndexRoute = IndexRouteImport.update({
 const MarketplaceIndexRoute = MarketplaceIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => MarketplaceRoute,
+} as any)
+const MarketplaceMapRoute = MarketplaceMapRouteImport.update({
+  id: '/map',
+  path: '/map',
   getParentRoute: () => MarketplaceRoute,
 } as any)
 const MarketplaceCountyRoute = MarketplaceCountyRouteImport.update({
@@ -145,6 +152,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBookingsRoute = AuthenticatedBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -203,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/bookings': typeof AuthenticatedBookingsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
@@ -217,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/counties/$slug': typeof CountiesSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
+  '/marketplace/map': typeof MarketplaceMapRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRoute
@@ -233,6 +247,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/bookings': typeof AuthenticatedBookingsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
@@ -246,6 +261,7 @@ export interface FileRoutesByTo {
   '/counties/$slug': typeof CountiesSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
+  '/marketplace/map': typeof MarketplaceMapRoute
   '/marketplace': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRoute
@@ -265,6 +281,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
+  '/_authenticated/bookings': typeof AuthenticatedBookingsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/incidents': typeof AuthenticatedIncidentsRoute
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRouteWithChildren
@@ -279,6 +296,7 @@ export interface FileRoutesById {
   '/counties/$slug': typeof CountiesSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
+  '/marketplace/map': typeof MarketplaceMapRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRoute
@@ -298,6 +316,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/analytics'
+    | '/bookings'
     | '/dashboard'
     | '/incidents'
     | '/invoices'
@@ -312,6 +331,7 @@ export interface FileRouteTypes {
     | '/counties/$slug'
     | '/invite/$token'
     | '/marketplace/$county'
+    | '/marketplace/map'
     | '/marketplace/'
     | '/invoices/$invoiceId'
     | '/listings/$id'
@@ -328,6 +348,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/analytics'
+    | '/bookings'
     | '/dashboard'
     | '/incidents'
     | '/invoices'
@@ -341,6 +362,7 @@ export interface FileRouteTypes {
     | '/counties/$slug'
     | '/invite/$token'
     | '/marketplace/$county'
+    | '/marketplace/map'
     | '/marketplace'
     | '/invoices/$invoiceId'
     | '/listings/$id'
@@ -359,6 +381,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/sitemap.xml'
     | '/_authenticated/analytics'
+    | '/_authenticated/bookings'
     | '/_authenticated/dashboard'
     | '/_authenticated/incidents'
     | '/_authenticated/invoices'
@@ -373,6 +396,7 @@ export interface FileRouteTypes {
     | '/counties/$slug'
     | '/invite/$token'
     | '/marketplace/$county'
+    | '/marketplace/map'
     | '/marketplace/'
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/listings/$id'
@@ -446,6 +470,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/marketplace/'
       preLoaderRoute: typeof MarketplaceIndexRouteImport
+      parentRoute: typeof MarketplaceRoute
+    }
+    '/marketplace/map': {
+      id: '/marketplace/map'
+      path: '/map'
+      fullPath: '/marketplace/map'
+      preLoaderRoute: typeof MarketplaceMapRouteImport
       parentRoute: typeof MarketplaceRoute
     }
     '/marketplace/$county': {
@@ -544,6 +575,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/bookings': {
+      id: '/_authenticated/bookings'
+      path: '/bookings'
+      fullPath: '/bookings'
+      preLoaderRoute: typeof AuthenticatedBookingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/analytics': {
@@ -659,6 +697,7 @@ const AuthenticatedPropertiesRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
+  AuthenticatedBookingsRoute: typeof AuthenticatedBookingsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedIncidentsRoute: typeof AuthenticatedIncidentsRoute
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRouteWithChildren
@@ -674,6 +713,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
+  AuthenticatedBookingsRoute: AuthenticatedBookingsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedIncidentsRoute: AuthenticatedIncidentsRoute,
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRouteWithChildren,
@@ -692,12 +732,14 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface MarketplaceRouteChildren {
   MarketplaceCountyRoute: typeof MarketplaceCountyRoute
+  MarketplaceMapRoute: typeof MarketplaceMapRoute
   MarketplaceIndexRoute: typeof MarketplaceIndexRoute
   MarketplacePSlugRoute: typeof MarketplacePSlugRoute
 }
 
 const MarketplaceRouteChildren: MarketplaceRouteChildren = {
   MarketplaceCountyRoute: MarketplaceCountyRoute,
+  MarketplaceMapRoute: MarketplaceMapRoute,
   MarketplaceIndexRoute: MarketplaceIndexRoute,
   MarketplacePSlugRoute: MarketplacePSlugRoute,
 }

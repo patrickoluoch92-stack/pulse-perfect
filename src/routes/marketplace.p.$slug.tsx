@@ -1,12 +1,14 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useState } from "react";
-import { MapPin, Phone, Mail, MessageCircle, ExternalLink } from "lucide-react";
+import { MapPin, Phone, Mail, MessageCircle, ExternalLink, Star } from "lucide-react";
 
 import { getPublicProperty } from "@/lib/marketplace.functions";
 import { categoryLabel } from "@/lib/marketplace-constants";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PropertyReviews } from "@/components/PropertyReviews";
+import { BookingDialog } from "@/components/BookingDialog";
 
 const propQuery = (slug: string) =>
   queryOptions({
@@ -128,6 +130,13 @@ function PropertyDetail() {
               {prop.town}, {prop.county?.name}
             </Link>
             {prop.is_featured && <Badge className="bg-yellow-500 hover:bg-yellow-500">Featured</Badge>}
+            {((prop as any).rating_count ?? 0) > 0 && (
+              <span className="flex items-center gap-1 text-sm">
+                <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                <span className="font-medium">{Number((prop as any).rating_avg ?? 0).toFixed(1)}</span>
+                <span className="text-muted-foreground">({(prop as any).rating_count})</span>
+              </span>
+            )}
           </div>
           <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight md:text-4xl">
             {prop.name}
@@ -242,6 +251,17 @@ function PropertyDetail() {
                     : "Currently booked out"}
               </p>
 
+              {prop.availability !== "booked_out" && (
+                <div className="mt-4">
+                  <BookingDialog
+                    propertyId={prop.id}
+                    propertyName={prop.name}
+                    pricePerNight={prop.price_per_night != null ? Number(prop.price_per_night) : null}
+                    currency={prop.currency ?? "KES"}
+                  />
+                </div>
+              )}
+
               <div className="mt-4 space-y-2 border-t pt-4">
                 <h3 className="text-sm font-semibold">Contact host</h3>
                 {prop.contact_phone && (
@@ -277,6 +297,12 @@ function PropertyDetail() {
             </div>
           </aside>
         </div>
+
+        <PropertyReviews
+          propertyId={prop.id}
+          ratingAvg={(prop as any).rating_avg ?? 0}
+          ratingCount={(prop as any).rating_count ?? 0}
+        />
       </article>
     </div>
   );
