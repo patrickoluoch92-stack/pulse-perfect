@@ -189,11 +189,17 @@ function ListingsPage() {
                             </a>
                           </Button>
                         )}
-                        <Button asChild variant="ghost" size="sm">
+                        <Button asChild variant="ghost" size="sm" title="Edit">
                           <Link to="/listings/$id" params={{ id: p.id }}>
                             <Pencil className="h-4 w-4" />
                           </Link>
                         </Button>
+                        <Button asChild variant="ghost" size="sm" title="Availability">
+                          <Link to="/listings/$id/availability" params={{ id: p.id }}>
+                            <Calendar className="h-4 w-4" />
+                          </Link>
+                        </Button>
+
                         {(p.status === "draft" || p.status === "rejected") && (
                           <Button
                             variant="ghost" size="sm"
