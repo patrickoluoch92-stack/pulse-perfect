@@ -134,6 +134,7 @@ function MarketplaceListing() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search by name, town or keyword…"
+                aria-label="Search stays by name, town or keyword"
                 value={draftSearch}
                 onChange={(e) => setDraftSearch(e.target.value)}
                 className="pl-9"
