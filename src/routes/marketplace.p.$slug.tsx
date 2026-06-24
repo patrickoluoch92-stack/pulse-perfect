@@ -130,6 +130,13 @@ function PropertyDetail() {
               {prop.town}, {prop.county?.name}
             </Link>
             {prop.is_featured && <Badge className="bg-yellow-500 hover:bg-yellow-500">Featured</Badge>}
+            {((prop as any).rating_count ?? 0) > 0 && (
+              <span className="flex items-center gap-1 text-sm">
+                <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                <span className="font-medium">{Number((prop as any).rating_avg ?? 0).toFixed(1)}</span>
+                <span className="text-muted-foreground">({(prop as any).rating_count})</span>
+              </span>
+            )}
           </div>
           <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight md:text-4xl">
             {prop.name}
