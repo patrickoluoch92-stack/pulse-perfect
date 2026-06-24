@@ -36,6 +36,7 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authenticated/listings.index'
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
+import { Route as AuthenticatedListingsImportRouteImport } from './routes/_authenticated/listings.import'
 import { Route as AuthenticatedListingsAdminRouteImport } from './routes/_authenticated/listings.admin'
 import { Route as AuthenticatedListingsIdRouteImport } from './routes/_authenticated/listings.$id'
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
@@ -180,6 +181,12 @@ const AuthenticatedPropertiesPropertyIdRoute =
     path: '/$propertyId',
     getParentRoute: () => AuthenticatedPropertiesRoute,
   } as any)
+const AuthenticatedListingsImportRoute =
+  AuthenticatedListingsImportRouteImport.update({
+    id: '/import',
+    path: '/import',
+    getParentRoute: () => AuthenticatedListingsRoute,
+  } as any)
 const AuthenticatedListingsAdminRoute =
   AuthenticatedListingsAdminRouteImport.update({
     id: '/admin',
@@ -242,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/listings/admin': typeof AuthenticatedListingsAdminRoute
+  '/listings/import': typeof AuthenticatedListingsImportRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
@@ -274,6 +282,7 @@ export interface FileRoutesByTo {
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/listings/admin': typeof AuthenticatedListingsAdminRoute
+  '/listings/import': typeof AuthenticatedListingsImportRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
@@ -310,6 +319,7 @@ export interface FileRoutesById {
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/_authenticated/listings/admin': typeof AuthenticatedListingsAdminRoute
+  '/_authenticated/listings/import': typeof AuthenticatedListingsImportRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
@@ -346,6 +356,7 @@ export interface FileRouteTypes {
     | '/invoices/$invoiceId'
     | '/listings/$id'
     | '/listings/admin'
+    | '/listings/import'
     | '/properties/$propertyId'
     | '/marketplace/p/$slug'
     | '/listings/'
@@ -378,6 +389,7 @@ export interface FileRouteTypes {
     | '/invoices/$invoiceId'
     | '/listings/$id'
     | '/listings/admin'
+    | '/listings/import'
     | '/properties/$propertyId'
     | '/marketplace/p/$slug'
     | '/listings'
@@ -413,6 +425,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/listings/$id'
     | '/_authenticated/listings/admin'
+    | '/_authenticated/listings/import'
     | '/_authenticated/properties/$propertyId'
     | '/marketplace/p/$slug'
     | '/_authenticated/listings/'
@@ -625,6 +638,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPropertiesPropertyIdRouteImport
       parentRoute: typeof AuthenticatedPropertiesRoute
     }
+    '/_authenticated/listings/import': {
+      id: '/_authenticated/listings/import'
+      path: '/import'
+      fullPath: '/listings/import'
+      preLoaderRoute: typeof AuthenticatedListingsImportRouteImport
+      parentRoute: typeof AuthenticatedListingsRoute
+    }
     '/_authenticated/listings/admin': {
       id: '/_authenticated/listings/admin'
       path: '/admin'
@@ -701,12 +721,14 @@ const AuthenticatedListingsIdRouteWithChildren =
 interface AuthenticatedListingsRouteChildren {
   AuthenticatedListingsIdRoute: typeof AuthenticatedListingsIdRouteWithChildren
   AuthenticatedListingsAdminRoute: typeof AuthenticatedListingsAdminRoute
+  AuthenticatedListingsImportRoute: typeof AuthenticatedListingsImportRoute
   AuthenticatedListingsIndexRoute: typeof AuthenticatedListingsIndexRoute
 }
 
 const AuthenticatedListingsRouteChildren: AuthenticatedListingsRouteChildren = {
   AuthenticatedListingsIdRoute: AuthenticatedListingsIdRouteWithChildren,
   AuthenticatedListingsAdminRoute: AuthenticatedListingsAdminRoute,
+  AuthenticatedListingsImportRoute: AuthenticatedListingsImportRoute,
   AuthenticatedListingsIndexRoute: AuthenticatedListingsIndexRoute,
 }
 
