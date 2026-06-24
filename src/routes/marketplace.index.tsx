@@ -21,6 +21,7 @@ import {
 import {
   Popover, PopoverContent, PopoverTrigger,
 } from "@/components/ui/popover";
+import { PartnerListingsSection } from "@/components/PartnerListingsSection";
 
 
 export const Route = createFileRoute("/marketplace/")({
@@ -280,6 +281,8 @@ function MarketplaceListing() {
           </div>
         )}
       </section>
+
+      <PartnerListingsSection countyCode={county === "all" ? undefined : county} />
 
       <section className="border-t bg-muted/30">
         <div className="mx-auto max-w-6xl px-4 py-10">
