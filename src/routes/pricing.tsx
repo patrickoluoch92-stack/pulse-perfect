@@ -22,18 +22,32 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:type", content: "product" },
     ],
     links: [{ rel: "canonical", href: "/pricing" }],
-    scripts: [{
-      type: "application/ld+json",
-      children: JSON.stringify({
-        "@context": "https://schema.org", "@type": "Product", name: "HostPulse",
-        description: "Hospitality operations platform — reservations, housekeeping, billing, analytics, and tours.",
-        offers: [
-          { "@type": "Offer", name: "Starter", price: "0", priceCurrency: "USD" },
-          { "@type": "Offer", name: "Professional", price: "49", priceCurrency: "USD" },
-          { "@type": "Offer", name: "Business", price: "149", priceCurrency: "USD" },
-        ],
-      }),
-    }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org", "@type": "Product", name: "HostPulse",
+          description: "Hospitality operations platform — reservations, housekeeping, billing, analytics, and tours.",
+          offers: [
+            { "@type": "Offer", name: "Starter", price: "0", priceCurrency: "USD" },
+            { "@type": "Offer", name: "Professional", price: "49", priceCurrency: "USD" },
+            { "@type": "Offer", name: "Business", price: "149", priceCurrency: "USD" },
+          ],
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }),
+      },
+    ],
   }),
   component: PricingPage,
 });
