@@ -163,7 +163,7 @@ function MarketplaceListing() {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="md:w-52"><SelectValue placeholder="Category" /></SelectTrigger>
+              <SelectTrigger className="md:w-52" aria-label="Filter by property category"><SelectValue placeholder="Category" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All categories</SelectItem>
                 {PROPERTY_CATEGORIES.map((c) => (
