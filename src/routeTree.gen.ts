@@ -33,6 +33,8 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authenticated/listings.index'
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
+import { Route as AuthenticatedListingsAdminRouteImport } from './routes/_authenticated/listings.admin'
+import { Route as AuthenticatedListingsIdRouteImport } from './routes/_authenticated/listings.$id'
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
@@ -159,6 +161,17 @@ const AuthenticatedPropertiesPropertyIdRoute =
     path: '/$propertyId',
     getParentRoute: () => AuthenticatedPropertiesRoute,
   } as any)
+const AuthenticatedListingsAdminRoute =
+  AuthenticatedListingsAdminRouteImport.update({
+    id: '/admin',
+    path: '/admin',
+    getParentRoute: () => AuthenticatedListingsRoute,
+  } as any)
+const AuthenticatedListingsIdRoute = AuthenticatedListingsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedListingsRoute,
+} as any)
 const AuthenticatedInvoicesInvoiceIdRoute =
   AuthenticatedInvoicesInvoiceIdRouteImport.update({
     id: '/$invoiceId',
@@ -199,6 +212,8 @@ export interface FileRoutesByFullPath {
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
+  '/listings/$id': typeof AuthenticatedListingsIdRoute
+  '/listings/admin': typeof AuthenticatedListingsAdminRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
@@ -225,6 +240,8 @@ export interface FileRoutesByTo {
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
+  '/listings/$id': typeof AuthenticatedListingsIdRoute
+  '/listings/admin': typeof AuthenticatedListingsAdminRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
@@ -255,6 +272,8 @@ export interface FileRoutesById {
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
+  '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRoute
+  '/_authenticated/listings/admin': typeof AuthenticatedListingsAdminRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
@@ -285,6 +304,8 @@ export interface FileRouteTypes {
     | '/marketplace/$county'
     | '/marketplace/'
     | '/invoices/$invoiceId'
+    | '/listings/$id'
+    | '/listings/admin'
     | '/properties/$propertyId'
     | '/marketplace/p/$slug'
     | '/listings/'
@@ -311,6 +332,8 @@ export interface FileRouteTypes {
     | '/marketplace/$county'
     | '/marketplace'
     | '/invoices/$invoiceId'
+    | '/listings/$id'
+    | '/listings/admin'
     | '/properties/$propertyId'
     | '/marketplace/p/$slug'
     | '/listings'
@@ -340,6 +363,8 @@ export interface FileRouteTypes {
     | '/marketplace/$county'
     | '/marketplace/'
     | '/_authenticated/invoices/$invoiceId'
+    | '/_authenticated/listings/$id'
+    | '/_authenticated/listings/admin'
     | '/_authenticated/properties/$propertyId'
     | '/marketplace/p/$slug'
     | '/_authenticated/listings/'
@@ -529,6 +554,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPropertiesPropertyIdRouteImport
       parentRoute: typeof AuthenticatedPropertiesRoute
     }
+    '/_authenticated/listings/admin': {
+      id: '/_authenticated/listings/admin'
+      path: '/admin'
+      fullPath: '/listings/admin'
+      preLoaderRoute: typeof AuthenticatedListingsAdminRouteImport
+      parentRoute: typeof AuthenticatedListingsRoute
+    }
+    '/_authenticated/listings/$id': {
+      id: '/_authenticated/listings/$id'
+      path: '/$id'
+      fullPath: '/listings/$id'
+      preLoaderRoute: typeof AuthenticatedListingsIdRouteImport
+      parentRoute: typeof AuthenticatedListingsRoute
+    }
     '/_authenticated/invoices/$invoiceId': {
       id: '/_authenticated/invoices/$invoiceId'
       path: '/$invoiceId'
@@ -567,10 +606,14 @@ const AuthenticatedInvoicesRouteWithChildren =
   )
 
 interface AuthenticatedListingsRouteChildren {
+  AuthenticatedListingsIdRoute: typeof AuthenticatedListingsIdRoute
+  AuthenticatedListingsAdminRoute: typeof AuthenticatedListingsAdminRoute
   AuthenticatedListingsIndexRoute: typeof AuthenticatedListingsIndexRoute
 }
 
 const AuthenticatedListingsRouteChildren: AuthenticatedListingsRouteChildren = {
+  AuthenticatedListingsIdRoute: AuthenticatedListingsIdRoute,
+  AuthenticatedListingsAdminRoute: AuthenticatedListingsAdminRoute,
   AuthenticatedListingsIndexRoute: AuthenticatedListingsIndexRoute,
 }
 
