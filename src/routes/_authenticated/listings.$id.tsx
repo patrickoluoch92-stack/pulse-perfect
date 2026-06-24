@@ -18,6 +18,7 @@ import {
   PROPERTY_CATEGORIES, AVAILABILITY_OPTIONS, COMMON_AMENITIES, MARKETPLACE_BUCKET,
 } from "@/lib/marketplace-constants";
 import { DashboardShell } from "@/components/dashboard-shell";
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -279,6 +280,24 @@ function EditListing() {
 
           <section className="space-y-4 rounded-xl border bg-card p-6">
             <h2 className="text-lg font-semibold">Location</h2>
+            <Field label="Search address (Google Places)">
+              <AddressAutocomplete
+                placeholder="Start typing an address, hotel name or landmark…"
+                onSelect={(p) => {
+                  setForm((f: any) => ({
+                    ...f,
+                    town: p.town || f.town,
+                    latitude: p.latitude ?? f.latitude,
+                    longitude: p.longitude ?? f.longitude,
+                    googleMapsUrl: p.googleMapsUri ?? f.googleMapsUrl,
+                  }));
+                  toast.success("Address details filled from Google Places");
+                }}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Picks a place from Google to auto-fill town and coordinates.
+              </p>
+            </Field>
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Latitude">
                 <Input
