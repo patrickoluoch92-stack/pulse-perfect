@@ -6,6 +6,23 @@ import type { Database } from "@/integrations/supabase/types";
 
 const dateStr = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
+export type PartnerListingRow = {
+  provider: "booking" | "expedia";
+  external_id: string;
+  name: string;
+  town: string | null;
+  county_code: string | null;
+  country_code: string;
+  image_url: string | null;
+  price_per_night: number | null;
+  currency: string | null;
+  rating: number | null;
+  review_count: number | null;
+  deeplink_url: string;
+};
+
+export type PartnerSearchError = { provider: string; message: string };
+
 // Public marketplace read: cached partner listings, anon-readable.
 export const listPartnerListings = createServerFn({ method: "GET" })
   .inputValidator((input) =>
@@ -18,7 +35,7 @@ export const listPartnerListings = createServerFn({ method: "GET" })
       })
       .parse(input ?? {}),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<{ rows: PartnerListingRow[] }> => {
     const supa = createClient<Database>(
       process.env.SUPABASE_URL!,
       process.env.SUPABASE_PUBLISHABLE_KEY!,
@@ -35,7 +52,7 @@ export const listPartnerListings = createServerFn({ method: "GET" })
     if (data.search) q = q.ilike("name", `%${data.search}%`);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return { rows: (rows ?? []) as Array<Record<string, unknown>> };
+    return { rows: (rows ?? []) as PartnerListingRow[] };
   });
 
 // Live search: combines Booking.com + Expedia and persists into the cache.
@@ -51,7 +68,7 @@ export const searchExternalInventory = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<{ count: number; results: PartnerListingRow[]; errors: PartnerSearchError[] }> => {
     const mod = await import("@/lib/external-inventory.server");
     const settle = await Promise.allSettled([
       mod.searchBookingCom(data),
@@ -59,9 +76,15 @@ export const searchExternalInventory = createServerFn({ method: "POST" })
     ]);
     const booking = settle[0].status === "fulfilled" ? settle[0].value : [];
     const expedia = settle[1].status === "fulfilled" ? settle[1].value : [];
-    const errors = settle
-      .map((r, i) => (r.status === "rejected" ? { provider: i === 0 ? "booking" : "expedia", message: String((r as PromiseRejectedResult).reason).slice(0, 200) } : null))
-      .filter(Boolean);
+    const errors: PartnerSearchError[] = [];
+    settle.forEach((r, i) => {
+      if (r.status === "rejected") {
+        errors.push({
+          provider: i === 0 ? "booking" : "expedia",
+          message: String((r as PromiseRejectedResult).reason).slice(0, 200),
+        });
+      }
+    });
     const combined = [...booking, ...expedia];
     if (combined.length > 0) {
       try {
@@ -70,7 +93,21 @@ export const searchExternalInventory = createServerFn({ method: "POST" })
         errors.push({ provider: "cache", message: e instanceof Error ? e.message : String(e) });
       }
     }
-    return { count: combined.length, results: combined, errors };
+    const results: PartnerListingRow[] = combined.map((r) => ({
+      provider: r.provider,
+      external_id: r.external_id,
+      name: r.name,
+      town: r.town,
+      county_code: r.county_code,
+      country_code: r.country_code,
+      image_url: r.image_url,
+      price_per_night: r.price_per_night,
+      currency: r.currency,
+      rating: r.rating,
+      review_count: r.review_count,
+      deeplink_url: r.deeplink_url,
+    }));
+    return { count: results.length, results, errors };
   });
 
 // Admin-only manual sync trigger (also good for cron via a public route later).
