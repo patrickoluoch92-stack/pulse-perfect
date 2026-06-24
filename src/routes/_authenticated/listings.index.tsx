@@ -263,7 +263,7 @@ function CreateDialog({
   orgId: string | null;
   counties: Array<{ code: string; name: string }>;
   onCreated: () => void;
-  createFn: ReturnType<typeof useServerFn<typeof createMarketplaceProperty>>;
+  createFn: (args: { data: any }) => Promise<any>;
 }) {
   const [form, setForm] = useState({
     name: "",
