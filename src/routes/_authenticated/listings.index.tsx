@@ -105,7 +105,7 @@ function ListingsPage() {
               Publish your properties to the Kenya Hospitality Marketplace.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {admin.data?.isAdmin && (
               <Button asChild variant="outline">
                 <Link to="/listings/admin">
@@ -113,10 +113,21 @@ function ListingsPage() {
                 </Link>
               </Button>
             )}
+            <Button asChild variant="outline">
+              <Link to="/listings/analytics">
+                <BarChart3 className="mr-2 h-4 w-4" /> Analytics
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/listings/import">
+                <Upload className="mr-2 h-4 w-4" /> Import CSV
+              </Link>
+            </Button>
             <Button onClick={() => setOpenCreate(true)} disabled={!orgId}>
               <Plus className="mr-2 h-4 w-4" /> New listing
             </Button>
           </div>
+
         </header>
 
         {listings.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
