@@ -26,7 +26,7 @@ import {
 export const Route = createFileRoute("/marketplace/")({
   head: () => ({
     meta: [
-      { title: "Kenya Hospitality Marketplace — Hotels, Lodges, Camps & Villas" },
+      { title: "Kenya Hospitality Marketplace — Hotels & Lodges" },
       {
         name: "description",
         content:
@@ -38,8 +38,26 @@ export const Route = createFileRoute("/marketplace/")({
         content: "Stays across Kenya — from Maasai Mara camps to Mombasa beach resorts.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://hostpulse-perfection.lovable.app/marketplace" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://hostpulse-perfection.lovable.app/marketplace" }],
+    scripts: [{
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: "Kenya Hospitality Marketplace",
+        description:
+          "Directory of verified hotels, resorts, lodges, camps, guest houses, serviced apartments and villas across all 47 counties of Kenya.",
+        url: "https://hostpulse-perfection.lovable.app/marketplace",
+        isPartOf: {
+          "@type": "WebSite",
+          name: "HostPulse",
+          url: "https://hostpulse-perfection.lovable.app",
+        },
+      }),
+    }],
   }),
   component: MarketplaceListing,
 });
@@ -116,6 +134,7 @@ function MarketplaceListing() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search by name, town or keyword…"
+                aria-label="Search stays by name, town or keyword"
                 value={draftSearch}
                 onChange={(e) => setDraftSearch(e.target.value)}
                 className="pl-9"
@@ -129,7 +148,7 @@ function MarketplaceListing() {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="md:w-52"><SelectValue placeholder="County" /></SelectTrigger>
+              <SelectTrigger className="md:w-52" aria-label="Filter by county"><SelectValue placeholder="County" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All counties</SelectItem>
                 {counties.data?.map((c) => (
@@ -144,7 +163,7 @@ function MarketplaceListing() {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="md:w-52"><SelectValue placeholder="Category" /></SelectTrigger>
+              <SelectTrigger className="md:w-52" aria-label="Filter by property category"><SelectValue placeholder="Category" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All categories</SelectItem>
                 {PROPERTY_CATEGORIES.map((c) => (

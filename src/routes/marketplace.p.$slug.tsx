@@ -157,6 +157,9 @@ function PropertyDetail() {
                 {images.slice(0, 4).map((img, i) => (
                   <button
                     key={img.id}
+                    type="button"
+                    aria-label={`Show image ${i + 1}${img.alt_text ? `: ${img.alt_text}` : ""}`}
+                    aria-pressed={activeImage === i}
                     onClick={() => setActiveImage(i)}
                     className={`aspect-square overflow-hidden rounded-lg border-2 transition ${
                       activeImage === i ? "border-primary" : "border-transparent"

@@ -3,8 +3,7 @@ import type {} from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
-// TODO: replace with your project URL once a project name or custom domain is set.
-const BASE_URL = "";
+const BASE_URL = "https://hostpulse-perfection.lovable.app";
 
 interface SitemapEntry {
   path: string;
@@ -21,6 +20,8 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/pricing", changefreq: "monthly", priority: "0.8" },
           { path: "/marketplace", changefreq: "daily", priority: "0.9" },
+          { path: "/auth", changefreq: "monthly", priority: "0.3" },
+          { path: "/guides/hotel-seo", changefreq: "monthly", priority: "0.6" },
         ];
 
         // Pull counties + approved listings via the public anon client.
