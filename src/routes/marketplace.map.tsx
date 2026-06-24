@@ -2,8 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import pkg from "@googlemaps/markerclusterer";
-const { MarkerClusterer } = pkg;
+import * as MarkerClustererPkg from "@googlemaps/markerclusterer";
+const MarkerClusterer =
+  (MarkerClustererPkg as { MarkerClusterer?: typeof MarkerClustererPkg.MarkerClusterer }).MarkerClusterer ??
+  (MarkerClustererPkg as unknown as { default: { MarkerClusterer: typeof MarkerClustererPkg.MarkerClusterer } }).default.MarkerClusterer;
 type MarkerClusterer = InstanceType<typeof MarkerClusterer>;
 
 import { listMapProperties } from "@/lib/marketplace-extra.functions";
