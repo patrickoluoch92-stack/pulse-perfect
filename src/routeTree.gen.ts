@@ -21,6 +21,7 @@ import { Route as AuthenticatedSyncRouteImport } from './routes/_authenticated/s
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedReservationsRouteImport } from './routes/_authenticated/reservations'
 import { Route as AuthenticatedPropertiesRouteImport } from './routes/_authenticated/properties'
+import { Route as AuthenticatedMpesaRouteImport } from './routes/_authenticated/mpesa'
 import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authenticated/incidents'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -28,7 +29,6 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
-import { Route as ApiPublicMpesaCallbackRouteImport } from './routes/api/public/mpesa/callback'
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -91,6 +91,11 @@ const AuthenticatedPropertiesRoute = AuthenticatedPropertiesRouteImport.update({
   path: '/properties',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMpesaRoute = AuthenticatedMpesaRouteImport.update({
+  id: '/mpesa',
+  path: '/mpesa',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedInvoicesRoute = AuthenticatedInvoicesRouteImport.update({
   id: '/invoices',
   path: '/invoices',
@@ -129,11 +134,6 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicMpesaCallbackRoute = ApiPublicMpesaCallbackRouteImport.update({
-  id: '/api/public/mpesa/callback',
-  path: '/api/public/mpesa/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicIcalTokenRoute = ApiPublicIcalTokenRouteImport.update({
   id: '/api/public/ical/$token',
   path: '/api/public/ical/$token',
@@ -149,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
+  '/mpesa': typeof AuthenticatedMpesaRoute
   '/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/reservations': typeof AuthenticatedReservationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -159,7 +160,6 @@ export interface FileRoutesByFullPath {
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
-  '/api/public/mpesa/callback': typeof ApiPublicMpesaCallbackRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -171,6 +171,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
+  '/mpesa': typeof AuthenticatedMpesaRoute
   '/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/reservations': typeof AuthenticatedReservationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -181,7 +182,6 @@ export interface FileRoutesByTo {
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
-  '/api/public/mpesa/callback': typeof ApiPublicMpesaCallbackRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -195,6 +195,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/incidents': typeof AuthenticatedIncidentsRoute
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRouteWithChildren
+  '/_authenticated/mpesa': typeof AuthenticatedMpesaRoute
   '/_authenticated/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/_authenticated/reservations': typeof AuthenticatedReservationsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -205,7 +206,6 @@ export interface FileRoutesById {
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
-  '/api/public/mpesa/callback': typeof ApiPublicMpesaCallbackRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -219,6 +219,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/incidents'
     | '/invoices'
+    | '/mpesa'
     | '/properties'
     | '/reservations'
     | '/settings'
@@ -229,7 +230,6 @@ export interface FileRouteTypes {
     | '/invoices/$invoiceId'
     | '/properties/$propertyId'
     | '/api/public/ical/$token'
-    | '/api/public/mpesa/callback'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -241,6 +241,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/incidents'
     | '/invoices'
+    | '/mpesa'
     | '/properties'
     | '/reservations'
     | '/settings'
@@ -251,7 +252,6 @@ export interface FileRouteTypes {
     | '/invoices/$invoiceId'
     | '/properties/$propertyId'
     | '/api/public/ical/$token'
-    | '/api/public/mpesa/callback'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -264,6 +264,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/incidents'
     | '/_authenticated/invoices'
+    | '/_authenticated/mpesa'
     | '/_authenticated/properties'
     | '/_authenticated/reservations'
     | '/_authenticated/settings'
@@ -274,7 +275,6 @@ export interface FileRouteTypes {
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/properties/$propertyId'
     | '/api/public/ical/$token'
-    | '/api/public/mpesa/callback'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -286,7 +286,6 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   InviteTokenRoute: typeof InviteTokenRoute
   ApiPublicIcalTokenRoute: typeof ApiPublicIcalTokenRoute
-  ApiPublicMpesaCallbackRoute: typeof ApiPublicMpesaCallbackRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -376,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPropertiesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/mpesa': {
+      id: '/_authenticated/mpesa'
+      path: '/mpesa'
+      fullPath: '/mpesa'
+      preLoaderRoute: typeof AuthenticatedMpesaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/invoices': {
       id: '/_authenticated/invoices'
       path: '/invoices'
@@ -425,13 +431,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/mpesa/callback': {
-      id: '/api/public/mpesa/callback'
-      path: '/api/public/mpesa/callback'
-      fullPath: '/api/public/mpesa/callback'
-      preLoaderRoute: typeof ApiPublicMpesaCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/ical/$token': {
       id: '/api/public/ical/$token'
       path: '/api/public/ical/$token'
@@ -475,6 +474,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedIncidentsRoute: typeof AuthenticatedIncidentsRoute
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRouteWithChildren
+  AuthenticatedMpesaRoute: typeof AuthenticatedMpesaRoute
   AuthenticatedPropertiesRoute: typeof AuthenticatedPropertiesRouteWithChildren
   AuthenticatedReservationsRoute: typeof AuthenticatedReservationsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -488,6 +488,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedIncidentsRoute: AuthenticatedIncidentsRoute,
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRouteWithChildren,
+  AuthenticatedMpesaRoute: AuthenticatedMpesaRoute,
   AuthenticatedPropertiesRoute: AuthenticatedPropertiesRouteWithChildren,
   AuthenticatedReservationsRoute: AuthenticatedReservationsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
@@ -507,7 +508,6 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   InviteTokenRoute: InviteTokenRoute,
   ApiPublicIcalTokenRoute: ApiPublicIcalTokenRoute,
-  ApiPublicMpesaCallbackRoute: ApiPublicMpesaCallbackRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
