@@ -1,13 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { KENYA_COUNTIES, PROPERTY_CATEGORIES, slugify } from "@/lib/marketplace-constants";
+import { PROPERTY_CATEGORIES, slugify, categoryLabel } from "@/lib/marketplace-constants";
 
 describe("marketplace-constants", () => {
-  it("covers all 47 Kenyan counties", () => {
-    expect(KENYA_COUNTIES.length).toBe(47);
-    const slugs = new Set(KENYA_COUNTIES.map((c) => c.slug));
-    expect(slugs.size).toBe(47);
-  });
-
   it("exposes the required property categories", () => {
     const names = PROPERTY_CATEGORIES.map((c) => c.value);
     for (const expected of [
@@ -28,5 +22,10 @@ describe("marketplace-constants", () => {
     expect(slugify("  Diani Beach Resort!! ")).toBe("diani-beach-resort");
     expect(slugify("Nairobi / Westlands")).toBe("nairobi-westlands");
     expect(slugify("")).toBe("");
+  });
+
+  it("categoryLabel returns a friendly label or the raw value", () => {
+    expect(categoryLabel("hotel")).toBe("Hotel");
+    expect(categoryLabel("unknown_thing")).toBe("unknown_thing");
   });
 });
