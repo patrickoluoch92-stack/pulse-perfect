@@ -163,6 +163,16 @@ function EditListing() {
       </DashboardShell>
     );
   }
+  if (!prop) {
+    return (
+      <DashboardShell>
+        <div className="p-12 text-center">
+          <p>Listing not found.</p>
+          <Link to="/listings" className="text-primary underline">Back to listings</Link>
+        </div>
+      </DashboardShell>
+    );
+  }
 
   return (
     <DashboardShell>
