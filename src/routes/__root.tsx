@@ -121,6 +121,16 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    let cancelled = false;
+    import("../lib/perf").then((m) => {
+      if (!cancelled) m.initWebVitals();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
