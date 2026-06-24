@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Send, Undo2, Shield, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2, Send, Undo2, Shield, ExternalLink, Calendar, Upload, BarChart3 } from "lucide-react";
 
 import { authPageMeta } from "@/lib/route-meta";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
