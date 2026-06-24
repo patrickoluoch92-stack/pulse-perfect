@@ -152,8 +152,51 @@ function MarketplaceListing() {
                 ))}
               </SelectContent>
             </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button type="button" variant="outline">
+                  <SlidersHorizontal className="mr-2 h-4 w-4" />
+                  Filters{amenities.length + (priceMin ? 1 : 0) + (priceMax ? 1 : 0) > 0 ? ` (${amenities.length + (priceMin ? 1 : 0) + (priceMax ? 1 : 0)})` : ""}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 space-y-4" align="end">
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-wide">Price per night (KES)</Label>
+                  <div className="flex gap-2">
+                    <Input type="number" min={0} placeholder="Min" value={priceMin} onChange={(e) => { setPriceMin(e.target.value); setPage(1); }} />
+                    <Input type="number" min={0} placeholder="Max" value={priceMax} onChange={(e) => { setPriceMax(e.target.value); setPage(1); }} />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-wide">Amenities</Label>
+                  <div className="grid max-h-56 grid-cols-2 gap-2 overflow-y-auto">
+                    {COMMON_AMENITIES.map((a) => (
+                      <label key={a} className="flex items-center gap-2 text-sm">
+                        <Checkbox
+                          checked={amenities.includes(a)}
+                          onCheckedChange={(checked) => {
+                            setAmenities((cur) => checked ? [...cur, a] : cur.filter((x) => x !== a));
+                            setPage(1);
+                          }}
+                        />
+                        {a}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {(amenities.length > 0 || priceMin || priceMax) && (
+                  <Button
+                    type="button" variant="ghost" size="sm"
+                    onClick={() => { setAmenities([]); setPriceMin(""); setPriceMax(""); setPage(1); }}
+                  >
+                    Clear filters
+                  </Button>
+                )}
+              </PopoverContent>
+            </Popover>
             <Button type="submit">Search</Button>
           </form>
+
         </div>
       </header>
 
