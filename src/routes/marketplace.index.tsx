@@ -2,13 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Search, MapPin, Star } from "lucide-react";
+import { Search, MapPin, Star, SlidersHorizontal } from "lucide-react";
 
 import { listPublicProperties, listCounties } from "@/lib/marketplace.functions";
-import { PROPERTY_CATEGORIES, categoryLabel } from "@/lib/marketplace-constants";
+import { PROPERTY_CATEGORIES, COMMON_AMENITIES, categoryLabel } from "@/lib/marketplace-constants";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -16,6 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover, PopoverContent, PopoverTrigger,
+} from "@/components/ui/popover";
+
 
 export const Route = createFileRoute("/marketplace/")({
   head: () => ({
