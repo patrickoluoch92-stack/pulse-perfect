@@ -23,6 +23,7 @@ const nav = [
   { to: "/incidents", label: "Incidents", icon: ShieldAlert },
   { to: "/mpesa", label: "M-PESA", icon: Smartphone },
   { to: "/listings", label: "Marketplace", icon: Store },
+  { to: "/bookings", label: "My Bookings", icon: Ticket },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
