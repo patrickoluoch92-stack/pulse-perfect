@@ -153,16 +153,32 @@ export function BookingDialog({ propertyId, propertyName, pricePerNight, currenc
               </div>
             </div>
           )}
+
+          {nights > 0 && availability.data && (
+            availability.data.available ? (
+              <p className="flex items-center gap-2 text-xs text-green-700">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Dates are available
+              </p>
+            ) : (
+              <p className="flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                <AlertTriangle className="h-3.5 w-3.5" /> These dates overlap a blocked period. Pick different dates.
+              </p>
+            )
+          )}
         </div>
 
         <DialogFooter>
           <Button
             onClick={() => submit.mutate()}
-            disabled={submit.isPending || !name || !email || nights <= 0}
+            disabled={
+              submit.isPending || !name || !email || nights <= 0 ||
+              (availability.data ? !availability.data.available : false)
+            }
           >
             {submit.isPending ? "Sending…" : "Send booking request"}
           </Button>
         </DialogFooter>
+
       </DialogContent>
     </Dialog>
   );
