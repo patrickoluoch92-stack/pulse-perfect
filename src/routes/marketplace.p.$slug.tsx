@@ -251,7 +251,7 @@ function PropertyDetail() {
                     : "Currently booked out"}
               </p>
 
-              {prop.availability !== "booked" && (
+              {prop.availability !== "booked_out" && (
                 <div className="mt-4">
                   <BookingDialog
                     propertyId={prop.id}
