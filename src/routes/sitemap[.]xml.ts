@@ -9,7 +9,7 @@ const BASE_URL = "";
 interface SitemapEntry {
   path: string;
   lastmod?: string;
-  changefreq?: "weekly" | "monthly" | "yearly";
+  changefreq?: "daily" | "weekly" | "monthly" | "yearly";
   priority?: string;
 }
 
