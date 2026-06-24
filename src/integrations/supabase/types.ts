@@ -172,6 +172,72 @@ export type Database = {
           },
         ]
       }
+      external_listings: {
+        Row: {
+          country_code: string
+          county_code: string | null
+          created_at: string
+          currency: string | null
+          deeplink_url: string
+          external_id: string
+          id: string
+          image_url: string | null
+          last_synced_at: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          price_per_night: number | null
+          provider: string
+          rating: number | null
+          raw: Json
+          review_count: number | null
+          town: string | null
+          updated_at: string
+        }
+        Insert: {
+          country_code?: string
+          county_code?: string | null
+          created_at?: string
+          currency?: string | null
+          deeplink_url: string
+          external_id: string
+          id?: string
+          image_url?: string | null
+          last_synced_at?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          price_per_night?: number | null
+          provider: string
+          rating?: number | null
+          raw?: Json
+          review_count?: number | null
+          town?: string | null
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          county_code?: string | null
+          created_at?: string
+          currency?: string | null
+          deeplink_url?: string
+          external_id?: string
+          id?: string
+          image_url?: string | null
+          last_synced_at?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          price_per_night?: number | null
+          provider?: string
+          rating?: number | null
+          raw?: Json
+          review_count?: number | null
+          town?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       guests: {
         Row: {
           country: string | null
