@@ -1,0 +1,16 @@
+# HostPulse
+
+> Hospitality operations platform and Kenya-wide stays marketplace — reservations, housekeeping, billing, analytics, and a public directory of hotels, lodges, camps and villas across all 47 counties.
+
+## Pages
+
+- [Home](/): Product overview for hosts, hotels, lodges, and tour operators.
+- [Pricing](/pricing): Plans, M-PESA and card billing, FAQs.
+- [Marketplace](/marketplace): Browse verified stays across Kenya.
+- [Map view](/marketplace/map): Search marketplace stays on a clustered map.
+- [Hotel SEO guide](/guides/hotel-seo): Practical SEO playbook for hotels and lodges.
+- [Sign in or sign up](/auth): Access the operator workspace.
+
+## Optional
+
+- [Sitemap](/sitemap.xml): Machine-readable list of all public URLs.
