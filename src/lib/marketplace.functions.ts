@@ -49,6 +49,9 @@ const listInput = z.object({
   page: z.number().int().min(1).max(500).default(1),
   pageSize: z.number().int().min(1).max(48).default(PAGE_SIZE_DEFAULT),
   featuredOnly: z.boolean().optional(),
+  priceMin: z.number().nonnegative().nullable().optional(),
+  priceMax: z.number().nonnegative().nullable().optional(),
+  amenities: z.array(z.string().max(60)).max(20).optional(),
 });
 
 export const listPublicProperties = createServerFn({ method: "GET" })
@@ -61,7 +64,7 @@ export const listPublicProperties = createServerFn({ method: "GET" })
     let query = supabase
       .from("marketplace_properties")
       .select(
-        "id, slug, name, category, county_code, town, description, price_per_night, currency, main_image_path, is_featured, availability",
+        "id, slug, name, category, county_code, town, description, price_per_night, currency, main_image_path, is_featured, availability, rating_avg, rating_count",
         { count: "exact" },
       )
       .eq("status", "approved");
@@ -69,6 +72,11 @@ export const listPublicProperties = createServerFn({ method: "GET" })
     if (data.county) query = query.eq("county_code", data.county);
     if (data.category) query = query.eq("category", data.category as any);
     if (data.featuredOnly) query = query.eq("is_featured", true);
+    if (data.priceMin != null) query = query.gte("price_per_night", data.priceMin);
+    if (data.priceMax != null) query = query.lte("price_per_night", data.priceMax);
+    if (data.amenities && data.amenities.length > 0) {
+      query = query.contains("amenities", data.amenities);
+    }
     if (data.search) {
       const term = `%${data.search.replace(/[%_]/g, "")}%`;
       query = query.or(`name.ilike.${term},town.ilike.${term},description.ilike.${term}`);
@@ -90,6 +98,7 @@ export const listPublicProperties = createServerFn({ method: "GET" })
 
     return { items, total: count ?? 0, page: data.page, pageSize: data.pageSize };
   });
+
 
 export const listCounties = createServerFn({ method: "GET" }).handler(async () => {
   const supabase = publicSupabase();
