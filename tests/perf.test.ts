@@ -22,7 +22,7 @@ describe("lib/perf", () => {
       observe() {}
       disconnect() {}
     };
-    vi.spyOn(globalThis, "addEventListener" as never).mockImplementation(() => undefined as never);
+    (globalThis as unknown as { addEventListener: (...a: unknown[]) => void }).addEventListener = () => {};
   });
 
   afterEach(() => {
