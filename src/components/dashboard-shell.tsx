@@ -22,6 +22,7 @@ const nav = [
   { to: "/sync", label: "Calendar Sync", icon: CalendarSync },
   { to: "/incidents", label: "Incidents", icon: ShieldAlert },
   { to: "/mpesa", label: "M-PESA", icon: Smartphone },
+  { to: "/listings", label: "Marketplace", icon: Store },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
