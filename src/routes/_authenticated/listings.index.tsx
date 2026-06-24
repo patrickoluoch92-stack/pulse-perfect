@@ -34,7 +34,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-export const Route = createFileRoute("/_authenticated/listings")({
+export const Route = createFileRoute("/_authenticated/listings/")({
   head: () => ({
     meta: authPageMeta({
       title: "Marketplace listings",

@@ -25,10 +25,12 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedReservationsRouteImport } from './routes/_authenticated/reservations'
 import { Route as AuthenticatedPropertiesRouteImport } from './routes/_authenticated/properties'
 import { Route as AuthenticatedMpesaRouteImport } from './routes/_authenticated/mpesa'
+import { Route as AuthenticatedListingsRouteImport } from './routes/_authenticated/listings'
 import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authenticated/incidents'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
+import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authenticated/listings.index'
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
@@ -115,6 +117,11 @@ const AuthenticatedMpesaRoute = AuthenticatedMpesaRouteImport.update({
   path: '/mpesa',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedListingsRoute = AuthenticatedListingsRouteImport.update({
+  id: '/listings',
+  path: '/listings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedInvoicesRoute = AuthenticatedInvoicesRouteImport.update({
   id: '/invoices',
   path: '/invoices',
@@ -135,6 +142,12 @@ const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedListingsIndexRoute =
+  AuthenticatedListingsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedListingsRoute,
+  } as any)
 const MarketplacePSlugRoute = MarketplacePSlugRouteImport.update({
   id: '/p/$slug',
   path: '/p/$slug',
@@ -174,6 +187,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
+  '/listings': typeof AuthenticatedListingsRouteWithChildren
   '/mpesa': typeof AuthenticatedMpesaRoute
   '/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/reservations': typeof AuthenticatedReservationsRoute
@@ -187,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
+  '/listings/': typeof AuthenticatedListingsIndexRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -212,6 +227,7 @@ export interface FileRoutesByTo {
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
+  '/listings': typeof AuthenticatedListingsIndexRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -227,6 +243,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/incidents': typeof AuthenticatedIncidentsRoute
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRouteWithChildren
+  '/_authenticated/listings': typeof AuthenticatedListingsRouteWithChildren
   '/_authenticated/mpesa': typeof AuthenticatedMpesaRoute
   '/_authenticated/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/_authenticated/reservations': typeof AuthenticatedReservationsRoute
@@ -240,6 +257,7 @@ export interface FileRoutesById {
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
+  '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -255,6 +273,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/incidents'
     | '/invoices'
+    | '/listings'
     | '/mpesa'
     | '/properties'
     | '/reservations'
@@ -268,6 +287,7 @@ export interface FileRouteTypes {
     | '/invoices/$invoiceId'
     | '/properties/$propertyId'
     | '/marketplace/p/$slug'
+    | '/listings/'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -293,6 +313,7 @@ export interface FileRouteTypes {
     | '/invoices/$invoiceId'
     | '/properties/$propertyId'
     | '/marketplace/p/$slug'
+    | '/listings'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   id:
@@ -307,6 +328,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/incidents'
     | '/_authenticated/invoices'
+    | '/_authenticated/listings'
     | '/_authenticated/mpesa'
     | '/_authenticated/properties'
     | '/_authenticated/reservations'
@@ -320,6 +342,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/properties/$propertyId'
     | '/marketplace/p/$slug'
+    | '/_authenticated/listings/'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -450,6 +473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMpesaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/listings': {
+      id: '/_authenticated/listings'
+      path: '/listings'
+      fullPath: '/listings'
+      preLoaderRoute: typeof AuthenticatedListingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/invoices': {
       id: '/_authenticated/invoices'
       path: '/invoices'
@@ -477,6 +507,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/analytics'
       preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/listings/': {
+      id: '/_authenticated/listings/'
+      path: '/'
+      fullPath: '/listings/'
+      preLoaderRoute: typeof AuthenticatedListingsIndexRouteImport
+      parentRoute: typeof AuthenticatedListingsRoute
     }
     '/marketplace/p/$slug': {
       id: '/marketplace/p/$slug'
@@ -529,6 +566,19 @@ const AuthenticatedInvoicesRouteWithChildren =
     AuthenticatedInvoicesRouteChildren,
   )
 
+interface AuthenticatedListingsRouteChildren {
+  AuthenticatedListingsIndexRoute: typeof AuthenticatedListingsIndexRoute
+}
+
+const AuthenticatedListingsRouteChildren: AuthenticatedListingsRouteChildren = {
+  AuthenticatedListingsIndexRoute: AuthenticatedListingsIndexRoute,
+}
+
+const AuthenticatedListingsRouteWithChildren =
+  AuthenticatedListingsRoute._addFileChildren(
+    AuthenticatedListingsRouteChildren,
+  )
+
 interface AuthenticatedPropertiesRouteChildren {
   AuthenticatedPropertiesPropertyIdRoute: typeof AuthenticatedPropertiesPropertyIdRoute
 }
@@ -549,6 +599,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedIncidentsRoute: typeof AuthenticatedIncidentsRoute
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRouteWithChildren
+  AuthenticatedListingsRoute: typeof AuthenticatedListingsRouteWithChildren
   AuthenticatedMpesaRoute: typeof AuthenticatedMpesaRoute
   AuthenticatedPropertiesRoute: typeof AuthenticatedPropertiesRouteWithChildren
   AuthenticatedReservationsRoute: typeof AuthenticatedReservationsRoute
@@ -563,6 +614,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedIncidentsRoute: AuthenticatedIncidentsRoute,
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRouteWithChildren,
+  AuthenticatedListingsRoute: AuthenticatedListingsRouteWithChildren,
   AuthenticatedMpesaRoute: AuthenticatedMpesaRoute,
   AuthenticatedPropertiesRoute: AuthenticatedPropertiesRouteWithChildren,
   AuthenticatedReservationsRoute: AuthenticatedReservationsRoute,
