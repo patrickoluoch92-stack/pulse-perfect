@@ -49,6 +49,9 @@ function MarketplaceListing() {
   const [draftSearch, setDraftSearch] = useState("");
   const [county, setCounty] = useState<string>("all");
   const [category, setCategory] = useState<string>("all");
+  const [priceMin, setPriceMin] = useState<string>("");
+  const [priceMax, setPriceMax] = useState<string>("");
+  const [amenities, setAmenities] = useState<string[]>([]);
   const [page, setPage] = useState(1);
 
   const listFn = useServerFn(listPublicProperties);
@@ -57,18 +60,22 @@ function MarketplaceListing() {
   const counties = useQuery({ queryKey: ["mkt-counties"], queryFn: () => countiesFn() });
 
   const properties = useQuery({
-    queryKey: ["mkt-list", { search, county, category, page }],
+    queryKey: ["mkt-list", { search, county, category, priceMin, priceMax, amenities, page }],
     queryFn: () =>
       listFn({
         data: {
           search: search || undefined,
           county: county === "all" ? undefined : county,
           category: (category === "all" ? undefined : category) as any,
+          priceMin: priceMin === "" ? null : Number(priceMin),
+          priceMax: priceMax === "" ? null : Number(priceMax),
+          amenities: amenities.length > 0 ? amenities : undefined,
           page,
           pageSize: 12,
         },
       }),
   });
+
 
   const featured = useQuery({
     queryKey: ["mkt-featured"],
