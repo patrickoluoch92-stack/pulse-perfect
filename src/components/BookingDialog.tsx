@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useRouter, useNavigate } from "@tanstack/react-router";
-import { CalendarDays, Users } from "lucide-react";
+import { CalendarDays, Users, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -20,6 +20,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { createBooking } from "@/lib/marketplace-extra.functions";
+import { checkAvailability } from "@/lib/marketplace-ops.functions";
+
 
 interface Props {
   propertyId: string;
@@ -39,6 +41,7 @@ export function BookingDialog({ propertyId, propertyName, pricePerNight, currenc
   const router = useRouter();
   const navigate = useNavigate();
   const create = useServerFn(createBooking);
+  const checkFn = useServerFn(checkAvailability);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -56,6 +59,13 @@ export function BookingDialog({ propertyId, propertyName, pricePerNight, currenc
     ),
   );
   const total = (pricePerNight ?? 0) * nights;
+
+  const availability = useQuery({
+    queryKey: ["mkt-availability", propertyId, checkIn, checkOut],
+    queryFn: () => checkFn({ data: { propertyId, checkIn, checkOut } }),
+    enabled: open && nights > 0,
+  });
+
 
   const submit = useMutation({
     mutationFn: async () => {
@@ -143,16 +153,32 @@ export function BookingDialog({ propertyId, propertyName, pricePerNight, currenc
               </div>
             </div>
           )}
+
+          {nights > 0 && availability.data && (
+            availability.data.available ? (
+              <p className="flex items-center gap-2 text-xs text-green-700">
+                <CheckCircle2 className="h-3.5 w-3.5" /> Dates are available
+              </p>
+            ) : (
+              <p className="flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                <AlertTriangle className="h-3.5 w-3.5" /> These dates overlap a blocked period. Pick different dates.
+              </p>
+            )
+          )}
         </div>
 
         <DialogFooter>
           <Button
             onClick={() => submit.mutate()}
-            disabled={submit.isPending || !name || !email || nights <= 0}
+            disabled={
+              submit.isPending || !name || !email || nights <= 0 ||
+              (availability.data ? !availability.data.available : false)
+            }
           >
             {submit.isPending ? "Sending…" : "Send booking request"}
           </Button>
         </DialogFooter>
+
       </DialogContent>
     </Dialog>
   );

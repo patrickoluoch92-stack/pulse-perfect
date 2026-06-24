@@ -721,6 +721,44 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_availability_blocks: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_date: string
+          id: string
+          property_id: string
+          reason: string | null
+          start_date: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_date: string
+          id?: string
+          property_id: string
+          reason?: string | null
+          start_date: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string
+          id?: string
+          property_id?: string
+          reason?: string | null
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_availability_blocks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketplace_bookings: {
         Row: {
           check_in: string

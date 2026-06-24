@@ -2,13 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Search, MapPin, Star } from "lucide-react";
+import { Search, MapPin, Star, SlidersHorizontal } from "lucide-react";
 
 import { listPublicProperties, listCounties } from "@/lib/marketplace.functions";
-import { PROPERTY_CATEGORIES, categoryLabel } from "@/lib/marketplace-constants";
+import { PROPERTY_CATEGORIES, COMMON_AMENITIES, categoryLabel } from "@/lib/marketplace-constants";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -16,6 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover, PopoverContent, PopoverTrigger,
+} from "@/components/ui/popover";
+
 
 export const Route = createFileRoute("/marketplace/")({
   head: () => ({
@@ -43,6 +49,9 @@ function MarketplaceListing() {
   const [draftSearch, setDraftSearch] = useState("");
   const [county, setCounty] = useState<string>("all");
   const [category, setCategory] = useState<string>("all");
+  const [priceMin, setPriceMin] = useState<string>("");
+  const [priceMax, setPriceMax] = useState<string>("");
+  const [amenities, setAmenities] = useState<string[]>([]);
   const [page, setPage] = useState(1);
 
   const listFn = useServerFn(listPublicProperties);
@@ -51,18 +60,22 @@ function MarketplaceListing() {
   const counties = useQuery({ queryKey: ["mkt-counties"], queryFn: () => countiesFn() });
 
   const properties = useQuery({
-    queryKey: ["mkt-list", { search, county, category, page }],
+    queryKey: ["mkt-list", { search, county, category, priceMin, priceMax, amenities, page }],
     queryFn: () =>
       listFn({
         data: {
           search: search || undefined,
           county: county === "all" ? undefined : county,
           category: (category === "all" ? undefined : category) as any,
+          priceMin: priceMin === "" ? null : Number(priceMin),
+          priceMax: priceMax === "" ? null : Number(priceMax),
+          amenities: amenities.length > 0 ? amenities : undefined,
           page,
           pageSize: 12,
         },
       }),
   });
+
 
   const featured = useQuery({
     queryKey: ["mkt-featured"],
@@ -139,8 +152,51 @@ function MarketplaceListing() {
                 ))}
               </SelectContent>
             </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button type="button" variant="outline">
+                  <SlidersHorizontal className="mr-2 h-4 w-4" />
+                  Filters{amenities.length + (priceMin ? 1 : 0) + (priceMax ? 1 : 0) > 0 ? ` (${amenities.length + (priceMin ? 1 : 0) + (priceMax ? 1 : 0)})` : ""}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 space-y-4" align="end">
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-wide">Price per night (KES)</Label>
+                  <div className="flex gap-2">
+                    <Input type="number" min={0} placeholder="Min" value={priceMin} onChange={(e) => { setPriceMin(e.target.value); setPage(1); }} />
+                    <Input type="number" min={0} placeholder="Max" value={priceMax} onChange={(e) => { setPriceMax(e.target.value); setPage(1); }} />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-wide">Amenities</Label>
+                  <div className="grid max-h-56 grid-cols-2 gap-2 overflow-y-auto">
+                    {COMMON_AMENITIES.map((a) => (
+                      <label key={a} className="flex items-center gap-2 text-sm">
+                        <Checkbox
+                          checked={amenities.includes(a)}
+                          onCheckedChange={(checked) => {
+                            setAmenities((cur) => checked ? [...cur, a] : cur.filter((x) => x !== a));
+                            setPage(1);
+                          }}
+                        />
+                        {a}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {(amenities.length > 0 || priceMin || priceMax) && (
+                  <Button
+                    type="button" variant="ghost" size="sm"
+                    onClick={() => { setAmenities([]); setPriceMin(""); setPriceMax(""); setPage(1); }}
+                  >
+                    Clear filters
+                  </Button>
+                )}
+              </PopoverContent>
+            </Popover>
             <Button type="submit">Search</Button>
           </form>
+
         </div>
       </header>
 

@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Send, Undo2, Shield, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2, Send, Undo2, Shield, ExternalLink, Calendar, Upload, BarChart3 } from "lucide-react";
 
 import { authPageMeta } from "@/lib/route-meta";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
@@ -105,7 +105,7 @@ function ListingsPage() {
               Publish your properties to the Kenya Hospitality Marketplace.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {admin.data?.isAdmin && (
               <Button asChild variant="outline">
                 <Link to="/listings/admin">
@@ -113,10 +113,21 @@ function ListingsPage() {
                 </Link>
               </Button>
             )}
+            <Button asChild variant="outline">
+              <Link to="/listings/analytics">
+                <BarChart3 className="mr-2 h-4 w-4" /> Analytics
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/listings/import">
+                <Upload className="mr-2 h-4 w-4" /> Import CSV
+              </Link>
+            </Button>
             <Button onClick={() => setOpenCreate(true)} disabled={!orgId}>
               <Plus className="mr-2 h-4 w-4" /> New listing
             </Button>
           </div>
+
         </header>
 
         {listings.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
@@ -178,11 +189,17 @@ function ListingsPage() {
                             </a>
                           </Button>
                         )}
-                        <Button asChild variant="ghost" size="sm">
+                        <Button asChild variant="ghost" size="sm" title="Edit">
                           <Link to="/listings/$id" params={{ id: p.id }}>
                             <Pencil className="h-4 w-4" />
                           </Link>
                         </Button>
+                        <Button asChild variant="ghost" size="sm" title="Availability">
+                          <Link to="/listings/$id/availability" params={{ id: p.id }}>
+                            <Calendar className="h-4 w-4" />
+                          </Link>
+                        </Button>
+
                         {(p.status === "draft" || p.status === "rejected") && (
                           <Button
                             variant="ghost" size="sm"

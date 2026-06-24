@@ -125,11 +125,13 @@ function EditListing() {
     if (!prop) return;
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+      const { compressImage } = await import("@/lib/image-compress");
+      const compressed = await compressImage(file, { maxDim: 1920, quality: 0.82 });
+      const ext = (compressed.type === "image/jpeg" ? "jpg" : compressed.name.split(".").pop()?.toLowerCase()) ?? "jpg";
       const path = `${prop.org_id}/${prop.id}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage
         .from(MARKETPLACE_BUCKET)
-        .upload(path, file, { contentType: file.type, upsert: false });
+        .upload(path, compressed, { contentType: compressed.type, upsert: false });
       if (error) throw error;
       if (asMain) {
         setForm((f: any) => ({ ...f, mainImagePath: path }));
@@ -146,6 +148,7 @@ function EditListing() {
       setUploading(false);
     }
   }
+
 
   const removeGalleryImage = useMutation({
     mutationFn: (imgId: string) => delImgFn({ data: { id: imgId } }),
