@@ -11,9 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
+import { Route as MarketplaceCountyRouteImport } from './routes/marketplace.$county'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as AuthenticatedToursRouteImport } from './routes/_authenticated/tours'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
@@ -26,6 +29,7 @@ import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authenticated/incidents'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
+import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -41,6 +45,11 @@ const PricingRoute = PricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketplaceRoute = MarketplaceRouteImport.update({
+  id: '/marketplace',
+  path: '/marketplace',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -54,6 +63,16 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const MarketplaceIndexRoute = MarketplaceIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MarketplaceRoute,
+} as any)
+const MarketplaceCountyRoute = MarketplaceCountyRouteImport.update({
+  id: '/$county',
+  path: '/$county',
+  getParentRoute: () => MarketplaceRoute,
 } as any)
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
@@ -116,6 +135,11 @@ const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const MarketplacePSlugRoute = MarketplacePSlugRouteImport.update({
+  id: '/p/$slug',
+  path: '/p/$slug',
+  getParentRoute: () => MarketplaceRoute,
+} as any)
 const AuthenticatedPropertiesPropertyIdRoute =
   AuthenticatedPropertiesPropertyIdRouteImport.update({
     id: '/$propertyId',
@@ -143,6 +167,7 @@ const ApiPublicIcalTokenRoute = ApiPublicIcalTokenRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/marketplace': typeof MarketplaceRouteWithChildren
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -157,8 +182,11 @@ export interface FileRoutesByFullPath {
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/marketplace/$county': typeof MarketplaceCountyRoute
+  '/marketplace/': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
+  '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -179,8 +207,11 @@ export interface FileRoutesByTo {
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/marketplace/$county': typeof MarketplaceCountyRoute
+  '/marketplace': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
+  '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -189,6 +220,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/marketplace': typeof MarketplaceRouteWithChildren
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
@@ -203,8 +235,11 @@ export interface FileRoutesById {
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/tours': typeof AuthenticatedToursRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/marketplace/$county': typeof MarketplaceCountyRoute
+  '/marketplace/': typeof MarketplaceIndexRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
+  '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -213,6 +248,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/marketplace'
     | '/pricing'
     | '/sitemap.xml'
     | '/analytics'
@@ -227,8 +263,11 @@ export interface FileRouteTypes {
     | '/team'
     | '/tours'
     | '/invite/$token'
+    | '/marketplace/$county'
+    | '/marketplace/'
     | '/invoices/$invoiceId'
     | '/properties/$propertyId'
+    | '/marketplace/p/$slug'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -249,8 +288,11 @@ export interface FileRouteTypes {
     | '/team'
     | '/tours'
     | '/invite/$token'
+    | '/marketplace/$county'
+    | '/marketplace'
     | '/invoices/$invoiceId'
     | '/properties/$propertyId'
+    | '/marketplace/p/$slug'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   id:
@@ -258,6 +300,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/marketplace'
     | '/pricing'
     | '/sitemap.xml'
     | '/_authenticated/analytics'
@@ -272,8 +315,11 @@ export interface FileRouteTypes {
     | '/_authenticated/team'
     | '/_authenticated/tours'
     | '/invite/$token'
+    | '/marketplace/$county'
+    | '/marketplace/'
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/properties/$propertyId'
+    | '/marketplace/p/$slug'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -282,6 +328,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  MarketplaceRoute: typeof MarketplaceRouteWithChildren
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   InviteTokenRoute: typeof InviteTokenRoute
@@ -305,6 +352,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marketplace': {
+      id: '/marketplace'
+      path: '/marketplace'
+      fullPath: '/marketplace'
+      preLoaderRoute: typeof MarketplaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -325,6 +379,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/marketplace/': {
+      id: '/marketplace/'
+      path: '/'
+      fullPath: '/marketplace/'
+      preLoaderRoute: typeof MarketplaceIndexRouteImport
+      parentRoute: typeof MarketplaceRoute
+    }
+    '/marketplace/$county': {
+      id: '/marketplace/$county'
+      path: '/$county'
+      fullPath: '/marketplace/$county'
+      preLoaderRoute: typeof MarketplaceCountyRouteImport
+      parentRoute: typeof MarketplaceRoute
     }
     '/invite/$token': {
       id: '/invite/$token'
@@ -409,6 +477,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/analytics'
       preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/marketplace/p/$slug': {
+      id: '/marketplace/p/$slug'
+      path: '/p/$slug'
+      fullPath: '/marketplace/p/$slug'
+      preLoaderRoute: typeof MarketplacePSlugRouteImport
+      parentRoute: typeof MarketplaceRoute
     }
     '/_authenticated/properties/$propertyId': {
       id: '/_authenticated/properties/$propertyId'
@@ -500,10 +575,27 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface MarketplaceRouteChildren {
+  MarketplaceCountyRoute: typeof MarketplaceCountyRoute
+  MarketplaceIndexRoute: typeof MarketplaceIndexRoute
+  MarketplacePSlugRoute: typeof MarketplacePSlugRoute
+}
+
+const MarketplaceRouteChildren: MarketplaceRouteChildren = {
+  MarketplaceCountyRoute: MarketplaceCountyRoute,
+  MarketplaceIndexRoute: MarketplaceIndexRoute,
+  MarketplacePSlugRoute: MarketplacePSlugRoute,
+}
+
+const MarketplaceRouteWithChildren = MarketplaceRoute._addFileChildren(
+  MarketplaceRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  MarketplaceRoute: MarketplaceRouteWithChildren,
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   InviteTokenRoute: InviteTokenRoute,
