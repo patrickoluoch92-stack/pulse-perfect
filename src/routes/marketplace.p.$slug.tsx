@@ -251,6 +251,17 @@ function PropertyDetail() {
                     : "Currently booked out"}
               </p>
 
+              {prop.availability !== "booked" && (
+                <div className="mt-4">
+                  <BookingDialog
+                    propertyId={prop.id}
+                    propertyName={prop.name}
+                    pricePerNight={prop.price_per_night != null ? Number(prop.price_per_night) : null}
+                    currency={prop.currency ?? "KES"}
+                  />
+                </div>
+              )}
+
               <div className="mt-4 space-y-2 border-t pt-4">
                 <h3 className="text-sm font-semibold">Contact host</h3>
                 {prop.contact_phone && (
@@ -286,6 +297,12 @@ function PropertyDetail() {
             </div>
           </aside>
         </div>
+
+        <PropertyReviews
+          propertyId={prop.id}
+          ratingAvg={(prop as any).rating_avg ?? 0}
+          ratingCount={(prop as any).rating_count ?? 0}
+        />
       </article>
     </div>
   );
