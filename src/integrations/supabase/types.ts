@@ -721,6 +721,78 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_bookings: {
+        Row: {
+          check_in: string
+          check_out: string
+          created_at: string
+          currency: string
+          guest_email: string
+          guest_id: string | null
+          guest_name: string
+          guest_phone: string | null
+          guests_count: number
+          id: string
+          mpesa_transaction_id: string | null
+          notes: string | null
+          property_id: string
+          status: Database["public"]["Enums"]["marketplace_booking_status"]
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          check_in: string
+          check_out: string
+          created_at?: string
+          currency?: string
+          guest_email: string
+          guest_id?: string | null
+          guest_name: string
+          guest_phone?: string | null
+          guests_count?: number
+          id?: string
+          mpesa_transaction_id?: string | null
+          notes?: string | null
+          property_id: string
+          status?: Database["public"]["Enums"]["marketplace_booking_status"]
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          check_in?: string
+          check_out?: string
+          created_at?: string
+          currency?: string
+          guest_email?: string
+          guest_id?: string | null
+          guest_name?: string
+          guest_phone?: string | null
+          guests_count?: number
+          id?: string
+          mpesa_transaction_id?: string | null
+          notes?: string | null
+          property_id?: string
+          status?: Database["public"]["Enums"]["marketplace_booking_status"]
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_bookings_mpesa_transaction_id_fkey"
+            columns: ["mpesa_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "mpesa_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_bookings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketplace_properties: {
         Row: {
           amenities: string[]
@@ -743,6 +815,8 @@ export type Database = {
           name: string
           org_id: string
           price_per_night: number | null
+          rating_avg: number
+          rating_count: number
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -773,6 +847,8 @@ export type Database = {
           name: string
           org_id: string
           price_per_night?: number | null
+          rating_avg?: number
+          rating_count?: number
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -803,6 +879,8 @@ export type Database = {
           name?: string
           org_id?: string
           price_per_night?: number | null
+          rating_avg?: number
+          rating_count?: number
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -857,6 +935,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "marketplace_property_images_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_property_reviews: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          property_id: string
+          rating: number
+          reviewer_id: string
+          reviewer_name: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          property_id: string
+          rating: number
+          reviewer_id: string
+          reviewer_name: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          property_id?: string
+          rating?: number
+          reviewer_id?: string
+          reviewer_name?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_property_reviews_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "marketplace_properties"
@@ -1770,6 +1892,11 @@ export type Database = {
     Enums: {
       app_role: "admin" | "moderator" | "user"
       invoice_status: "draft" | "sent" | "paid" | "void" | "overdue"
+      marketplace_booking_status:
+        | "pending"
+        | "confirmed"
+        | "cancelled"
+        | "completed"
       mkt_availability: "available" | "limited" | "booked_out"
       mkt_listing_status:
         | "draft"
@@ -1952,6 +2079,12 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user"],
       invoice_status: ["draft", "sent", "paid", "void", "overdue"],
+      marketplace_booking_status: [
+        "pending",
+        "confirmed",
+        "cancelled",
+        "completed",
+      ],
       mkt_availability: ["available", "limited", "booked_out"],
       mkt_listing_status: [
         "draft",
