@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
+import { Route as MarketplaceMapRouteImport } from './routes/marketplace.map'
 import { Route as MarketplaceCountyRouteImport } from './routes/marketplace.$county'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as CountiesSlugRouteImport } from './routes/counties.$slug'
@@ -73,6 +74,11 @@ const IndexRoute = IndexRouteImport.update({
 const MarketplaceIndexRoute = MarketplaceIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => MarketplaceRoute,
+} as any)
+const MarketplaceMapRoute = MarketplaceMapRouteImport.update({
+  id: '/map',
+  path: '/map',
   getParentRoute: () => MarketplaceRoute,
 } as any)
 const MarketplaceCountyRoute = MarketplaceCountyRouteImport.update({
@@ -224,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/counties/$slug': typeof CountiesSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
+  '/marketplace/map': typeof MarketplaceMapRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/counties/$slug': typeof CountiesSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
+  '/marketplace/map': typeof MarketplaceMapRoute
   '/marketplace': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRoute
@@ -288,6 +296,7 @@ export interface FileRoutesById {
   '/counties/$slug': typeof CountiesSlugRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
+  '/marketplace/map': typeof MarketplaceMapRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRoute
@@ -322,6 +331,7 @@ export interface FileRouteTypes {
     | '/counties/$slug'
     | '/invite/$token'
     | '/marketplace/$county'
+    | '/marketplace/map'
     | '/marketplace/'
     | '/invoices/$invoiceId'
     | '/listings/$id'
@@ -352,6 +362,7 @@ export interface FileRouteTypes {
     | '/counties/$slug'
     | '/invite/$token'
     | '/marketplace/$county'
+    | '/marketplace/map'
     | '/marketplace'
     | '/invoices/$invoiceId'
     | '/listings/$id'
@@ -385,6 +396,7 @@ export interface FileRouteTypes {
     | '/counties/$slug'
     | '/invite/$token'
     | '/marketplace/$county'
+    | '/marketplace/map'
     | '/marketplace/'
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/listings/$id'
@@ -458,6 +470,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/marketplace/'
       preLoaderRoute: typeof MarketplaceIndexRouteImport
+      parentRoute: typeof MarketplaceRoute
+    }
+    '/marketplace/map': {
+      id: '/marketplace/map'
+      path: '/map'
+      fullPath: '/marketplace/map'
+      preLoaderRoute: typeof MarketplaceMapRouteImport
       parentRoute: typeof MarketplaceRoute
     }
     '/marketplace/$county': {
@@ -713,12 +732,14 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface MarketplaceRouteChildren {
   MarketplaceCountyRoute: typeof MarketplaceCountyRoute
+  MarketplaceMapRoute: typeof MarketplaceMapRoute
   MarketplaceIndexRoute: typeof MarketplaceIndexRoute
   MarketplacePSlugRoute: typeof MarketplacePSlugRoute
 }
 
 const MarketplaceRouteChildren: MarketplaceRouteChildren = {
   MarketplaceCountyRoute: MarketplaceCountyRoute,
+  MarketplaceMapRoute: MarketplaceMapRoute,
   MarketplaceIndexRoute: MarketplaceIndexRoute,
   MarketplacePSlugRoute: MarketplacePSlugRoute,
 }
