@@ -1,12 +1,14 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useState } from "react";
-import { MapPin, Phone, Mail, MessageCircle, ExternalLink } from "lucide-react";
+import { MapPin, Phone, Mail, MessageCircle, ExternalLink, Star } from "lucide-react";
 
 import { getPublicProperty } from "@/lib/marketplace.functions";
 import { categoryLabel } from "@/lib/marketplace-constants";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PropertyReviews } from "@/components/PropertyReviews";
+import { BookingDialog } from "@/components/BookingDialog";
 
 const propQuery = (slug: string) =>
   queryOptions({
