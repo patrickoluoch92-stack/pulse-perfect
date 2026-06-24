@@ -67,7 +67,7 @@ export const listPublicProperties = createServerFn({ method: "GET" })
       .eq("status", "approved");
 
     if (data.county) query = query.eq("county_code", data.county);
-    if (data.category) query = query.eq("category", data.category);
+    if (data.category) query = query.eq("category", data.category as any);
     if (data.featuredOnly) query = query.eq("is_featured", true);
     if (data.search) {
       const term = `%${data.search.replace(/[%_]/g, "")}%`;
@@ -309,7 +309,7 @@ export const updateMarketplaceProperty = createServerFn({ method: "POST" })
 
     const { error } = await supabase
       .from("marketplace_properties")
-      .update(patch)
+      .update(patch as any)
       .eq("id", id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -478,9 +478,9 @@ export const listAdminProperties = createServerFn({ method: "GET" })
         { count: "exact" },
       );
 
-    if (data.status) query = query.eq("status", data.status);
+    if (data.status) query = query.eq("status", data.status as any);
     if (data.county) query = query.eq("county_code", data.county);
-    if (data.category) query = query.eq("category", data.category);
+    if (data.category) query = query.eq("category", data.category as any);
     if (data.search) {
       const term = `%${data.search.replace(/[%_]/g, "")}%`;
       query = query.or(`name.ilike.${term},town.ilike.${term}`);
@@ -514,7 +514,7 @@ export const adminSetPropertyStatus = createServerFn({ method: "POST" })
     if (data.status === "approved") patch.rejection_reason = null;
     const { error } = await supabase
       .from("marketplace_properties")
-      .update(patch)
+      .update(patch as any)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
