@@ -253,10 +253,27 @@ function InvoiceEditorPage() {
 
       <div className="flex justify-end gap-2">
         <Button variant="ghost" onClick={() => navigate({ to: "/invoices" })}>Cancel</Button>
+        {!isNew && existing.data && existing.data.invoice.status !== "paid" && (
+          <Button variant="outline" onClick={() => setMpesaOpen(true)}>
+            <Smartphone className="mr-2 h-4 w-4" /> Collect via M-PESA
+          </Button>
+        )}
         <Button onClick={submit} disabled={saveMut.isPending}>
           {saveMut.isPending ? "Saving…" : isNew ? "Create invoice" : "Save changes"}
         </Button>
       </div>
+
+      {!isNew && existing.data && (
+        <InvoiceMpesaDialog
+          open={mpesaOpen}
+          onOpenChange={setMpesaOpen}
+          invoiceId={existing.data.invoice.id}
+          invoiceNumber={existing.data.invoice.number}
+          amount={Number(existing.data.invoice.total)}
+          currency={existing.data.invoice.currency}
+          onPaid={() => existing.refetch()}
+        />
+      )}
     </div>
   );
 }
