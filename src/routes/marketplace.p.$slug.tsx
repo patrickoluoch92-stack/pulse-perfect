@@ -190,11 +190,33 @@ function PropertyDetail() {
                 <p className="mt-2 text-sm text-muted-foreground">
                   {prop.town}, {prop.county?.name} county
                 </p>
+                {prop.latitude && prop.longitude && import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY ? (
+                  <div className="mt-3 overflow-hidden rounded-lg border">
+                    <iframe
+                      title={`Map of ${prop.name}`}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      className="h-72 w-full"
+                      src={`https://www.google.com/maps/embed/v1/place?key=${import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY}&q=${prop.latitude},${prop.longitude}&zoom=14`}
+                    />
+                  </div>
+                ) : null}
                 {prop.google_maps_url && (
                   <Button asChild variant="outline" className="mt-3">
                     <a href={prop.google_maps_url} target="_blank" rel="noopener noreferrer">
                       <MapPin className="mr-2 h-4 w-4" /> Open in Google Maps
                       <ExternalLink className="ml-2 h-3 w-3" />
+                    </a>
+                  </Button>
+                )}
+                {prop.latitude && prop.longitude && (
+                  <Button asChild variant="outline" className="mt-3 ml-2">
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${prop.latitude},${prop.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MapPin className="mr-2 h-4 w-4" /> Get directions
                     </a>
                   </Button>
                 )}
