@@ -21,6 +21,7 @@ import { Route as AuthenticatedSyncRouteImport } from './routes/_authenticated/s
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedReservationsRouteImport } from './routes/_authenticated/reservations'
 import { Route as AuthenticatedPropertiesRouteImport } from './routes/_authenticated/properties'
+import { Route as AuthenticatedMpesaRouteImport } from './routes/_authenticated/mpesa'
 import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authenticated/incidents'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -90,6 +91,11 @@ const AuthenticatedPropertiesRoute = AuthenticatedPropertiesRouteImport.update({
   path: '/properties',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMpesaRoute = AuthenticatedMpesaRouteImport.update({
+  id: '/mpesa',
+  path: '/mpesa',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedInvoicesRoute = AuthenticatedInvoicesRouteImport.update({
   id: '/invoices',
   path: '/invoices',
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
+  '/mpesa': typeof AuthenticatedMpesaRoute
   '/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/reservations': typeof AuthenticatedReservationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
+  '/mpesa': typeof AuthenticatedMpesaRoute
   '/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/reservations': typeof AuthenticatedReservationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/incidents': typeof AuthenticatedIncidentsRoute
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRouteWithChildren
+  '/_authenticated/mpesa': typeof AuthenticatedMpesaRoute
   '/_authenticated/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/_authenticated/reservations': typeof AuthenticatedReservationsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/incidents'
     | '/invoices'
+    | '/mpesa'
     | '/properties'
     | '/reservations'
     | '/settings'
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/incidents'
     | '/invoices'
+    | '/mpesa'
     | '/properties'
     | '/reservations'
     | '/settings'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/incidents'
     | '/_authenticated/invoices'
+    | '/_authenticated/mpesa'
     | '/_authenticated/properties'
     | '/_authenticated/reservations'
     | '/_authenticated/settings'
@@ -363,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPropertiesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/mpesa': {
+      id: '/_authenticated/mpesa'
+      path: '/mpesa'
+      fullPath: '/mpesa'
+      preLoaderRoute: typeof AuthenticatedMpesaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/invoices': {
       id: '/_authenticated/invoices'
       path: '/invoices'
@@ -455,6 +474,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedIncidentsRoute: typeof AuthenticatedIncidentsRoute
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRouteWithChildren
+  AuthenticatedMpesaRoute: typeof AuthenticatedMpesaRoute
   AuthenticatedPropertiesRoute: typeof AuthenticatedPropertiesRouteWithChildren
   AuthenticatedReservationsRoute: typeof AuthenticatedReservationsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -468,6 +488,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedIncidentsRoute: AuthenticatedIncidentsRoute,
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRouteWithChildren,
+  AuthenticatedMpesaRoute: AuthenticatedMpesaRoute,
   AuthenticatedPropertiesRoute: AuthenticatedPropertiesRouteWithChildren,
   AuthenticatedReservationsRoute: AuthenticatedReservationsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
