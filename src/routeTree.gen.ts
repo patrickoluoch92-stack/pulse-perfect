@@ -45,6 +45,7 @@ import { Route as AuthenticatedListingsIdRouteImport } from './routes/_authentic
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
+import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/public/hooks/partner-sync'
 import { Route as AuthenticatedListingsIdAvailabilityRouteImport } from './routes/_authenticated/listings.$id.availability'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -234,6 +235,12 @@ const ApiPublicIcalTokenRoute = ApiPublicIcalTokenRouteImport.update({
   path: '/api/public/ical/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksPartnerSyncRoute =
+  ApiPublicHooksPartnerSyncRouteImport.update({
+    id: '/api/public/hooks/partner-sync',
+    path: '/api/public/hooks/partner-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedListingsIdAvailabilityRoute =
   AuthenticatedListingsIdAvailabilityRouteImport.update({
     id: '/availability',
@@ -276,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -312,6 +320,7 @@ export interface FileRoutesByTo {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -352,6 +361,7 @@ export interface FileRoutesById {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -392,6 +402,7 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/listings/'
     | '/listings/$id/availability'
+    | '/api/public/hooks/partner-sync'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -428,6 +439,7 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/listings'
     | '/listings/$id/availability'
+    | '/api/public/hooks/partner-sync'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   id:
@@ -467,6 +479,7 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/_authenticated/listings/'
     | '/_authenticated/listings/$id/availability'
+    | '/api/public/hooks/partner-sync'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -482,6 +495,7 @@ export interface RootRouteChildren {
   GuidesHotelSeoRoute: typeof GuidesHotelSeoRoute
   InviteTokenRoute: typeof InviteTokenRoute
   ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
+  ApiPublicHooksPartnerSyncRoute: typeof ApiPublicHooksPartnerSyncRoute
   ApiPublicIcalTokenRoute: typeof ApiPublicIcalTokenRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -740,6 +754,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIcalTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/partner-sync': {
+      id: '/api/public/hooks/partner-sync'
+      path: '/api/public/hooks/partner-sync'
+      fullPath: '/api/public/hooks/partner-sync'
+      preLoaderRoute: typeof ApiPublicHooksPartnerSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/listings/$id/availability': {
       id: '/_authenticated/listings/$id/availability'
       path: '/availability'
@@ -878,6 +899,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesHotelSeoRoute: GuidesHotelSeoRoute,
   InviteTokenRoute: InviteTokenRoute,
   ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
+  ApiPublicHooksPartnerSyncRoute: ApiPublicHooksPartnerSyncRoute,
   ApiPublicIcalTokenRoute: ApiPublicIcalTokenRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
