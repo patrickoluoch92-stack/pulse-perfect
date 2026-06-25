@@ -21,9 +21,31 @@ export type PartnerListingRow = {
   deeplink_url: string;
 };
 
-export type PartnerSearchError = { provider: string; message: string };
+export type PartnerSyncRow = {
+  id: string;
+  provider: "booking" | "expedia";
+  destination: string | null;
+  mode: "live" | "mock";
+  status: "pending" | "success" | "failed" | "skipped";
+  items_found: number;
+  items_upserted: number;
+  error_message: string | null;
+  started_at: string;
+  finished_at: string | null;
+};
 
-// Public marketplace read: cached partner listings, anon-readable.
+export type PartnerSummary = {
+  provider: "booking" | "expedia";
+  destination: string;
+  mode: "live" | "mock" | "disabled";
+  status: "success" | "failed" | "skipped";
+  itemsFound: number;
+  itemsUpserted: number;
+  error?: string;
+};
+
+// ---------- Public reads ----------
+
 export const listPartnerListings = createServerFn({ method: "GET" })
   .inputValidator((input) =>
     z
@@ -55,7 +77,8 @@ export const listPartnerListings = createServerFn({ method: "GET" })
     return { rows: (rows ?? []) as PartnerListingRow[] };
   });
 
-// Live search: combines Booking.com + Expedia and persists into the cache.
+// ---------- Live search (used by the marketplace search bar) ----------
+
 export const searchExternalInventory = createServerFn({ method: "POST" })
   .inputValidator((input) =>
     z
@@ -68,79 +91,123 @@ export const searchExternalInventory = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data }): Promise<{ count: number; results: PartnerListingRow[]; errors: PartnerSearchError[] }> => {
+  .handler(async ({ data }): Promise<{
+    results: PartnerListingRow[];
+    summary: PartnerSummary[];
+    totalUpserted: number;
+  }> => {
     const mod = await import("@/lib/external-inventory.server");
-    const settle = await Promise.allSettled([
-      mod.searchBookingCom(data),
-      mod.searchExpedia(data),
-    ]);
-    const booking = settle[0].status === "fulfilled" ? settle[0].value : [];
-    const expedia = settle[1].status === "fulfilled" ? settle[1].value : [];
-    const errors: PartnerSearchError[] = [];
-    settle.forEach((r, i) => {
-      if (r.status === "rejected") {
-        errors.push({
-          provider: i === 0 ? "booking" : "expedia",
-          message: String((r as PromiseRejectedResult).reason).slice(0, 200),
-        });
-      }
+    const { totalUpserted, summary } = await mod.syncDestinations({
+      destinations: [data.destination],
+      perDestinationLimit: data.limit,
     });
-    const combined = [...booking, ...expedia];
-    if (combined.length > 0) {
-      try {
-        await mod.upsertExternalListings(combined);
-      } catch (e) {
-        errors.push({ provider: "cache", message: e instanceof Error ? e.message : String(e) });
-      }
-    }
-    const results: PartnerListingRow[] = combined.map((r) => ({
-      provider: r.provider,
-      external_id: r.external_id,
-      name: r.name,
-      town: r.town,
-      county_code: r.county_code,
-      country_code: r.country_code,
-      image_url: r.image_url,
-      price_per_night: r.price_per_night,
-      currency: r.currency,
-      rating: r.rating,
-      review_count: r.review_count,
-      deeplink_url: r.deeplink_url,
-    }));
-    return { count: results.length, results, errors };
+    // Read the freshly upserted slice from cache so the UI gets DB-shaped rows.
+    const supa = createClient<Database>(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_PUBLISHABLE_KEY!,
+      { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
+    );
+    const { data: rows } = await (supa.from("external_listings" as never) as any)
+      .select(
+        "provider,external_id,name,town,county_code,country_code,image_url,price_per_night,currency,rating,review_count,deeplink_url",
+      )
+      .ilike("town", `%${data.destination}%`)
+      .order("rating", { ascending: false, nullsFirst: false })
+      .limit(data.limit);
+    return { results: (rows ?? []) as PartnerListingRow[], summary, totalUpserted };
   });
 
-// Admin-only manual sync trigger (also good for cron via a public route later).
-export const triggerExternalSync = createServerFn({ method: "POST" })
+// ---------- Admin (signed-in user must be admin) ----------
+
+export const getPartnerStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{
+    booking: { mode: "live" | "mock" | "disabled"; hasCredentials: boolean };
+    expedia: { mode: "live" | "mock" | "disabled"; hasCredentials: boolean };
+    forceMock: boolean;
+    totals: { listings: number; bookingCount: number; expediaCount: number };
+  }> => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId, _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+    const mod = await import("@/lib/external-inventory.server");
+    const status = mod.getPartnerStatus();
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [{ count: listings }, { count: bookingCount }, { count: expediaCount }] = await Promise.all([
+      supabaseAdmin.from("external_listings" as never).select("*", { count: "exact", head: true }),
+      supabaseAdmin.from("external_listings" as never).select("*", { count: "exact", head: true }).eq("provider", "booking"),
+      supabaseAdmin.from("external_listings" as never).select("*", { count: "exact", head: true }).eq("provider", "expedia"),
+    ]);
+    return {
+      ...status,
+      totals: {
+        listings: listings ?? 0,
+        bookingCount: bookingCount ?? 0,
+        expediaCount: expediaCount ?? 0,
+      },
+    };
+  });
+
+export const listSyncRuns = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({ limit: z.number().int().min(1).max(200).default(50) }).parse(input ?? {}),
+  )
+  .handler(async ({ data, context }): Promise<{ runs: PartnerSyncRow[] }> => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId, _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+    const { data: runs, error } = await (context.supabase.from("external_sync_runs" as never) as any)
+      .select("id,provider,destination,mode,status,items_found,items_upserted,error_message,started_at,finished_at")
+      .order("started_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    return { runs: (runs ?? []) as PartnerSyncRow[] };
+  });
+
+export const triggerPartnerSync = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
     z
       .object({
-        destinations: z.array(z.string().min(2).max(80)).min(1).max(20),
+        destinations: z.array(z.string().min(2).max(80)).min(1).max(30),
+        perDestinationLimit: z.number().int().min(1).max(50).default(20),
       })
       .parse(input),
   )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<{
+    totalUpserted: number;
+    summary: PartnerSummary[];
+  }> => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin",
+      _user_id: context.userId, _role: "admin",
     });
     if (!isAdmin) throw new Error("Forbidden");
     const mod = await import("@/lib/external-inventory.server");
-    let total = 0;
-    for (const dest of data.destinations) {
-      const [b, e] = await Promise.allSettled([
-        mod.searchBookingCom({ destination: dest, limit: 25 }),
-        mod.searchExpedia({ destination: dest, limit: 25 }),
-      ]);
-      const rows = [
-        ...(b.status === "fulfilled" ? b.value : []),
-        ...(e.status === "fulfilled" ? e.value : []),
-      ];
-      if (rows.length) {
-        const r = await mod.upsertExternalListings(rows);
-        total += r.count;
-      }
-    }
-    return { upserted: total };
+    return mod.syncDestinations({
+      destinations: data.destinations,
+      perDestinationLimit: data.perDestinationLimit,
+      triggeredBy: context.userId,
+    });
+  });
+
+export const deletePartnerListings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({ provider: z.enum(["booking", "expedia"]).optional() }).parse(input ?? {}),
+  )
+  .handler(async ({ data, context }): Promise<{ deleted: number }> => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId, _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let q = (supabaseAdmin.from("external_listings" as never) as any).delete({ count: "exact" });
+    if (data.provider) q = q.eq("provider", data.provider);
+    else q = q.neq("id", "00000000-0000-0000-0000-000000000000");
+    const { error, count } = await q;
+    if (error) throw new Error(error.message);
+    return { deleted: count ?? 0 };
   });

@@ -238,6 +238,51 @@ export type Database = {
         }
         Relationships: []
       }
+      external_sync_runs: {
+        Row: {
+          created_at: string
+          destination: string | null
+          error_message: string | null
+          finished_at: string | null
+          id: string
+          items_found: number
+          items_upserted: number
+          mode: string
+          provider: string
+          started_at: string
+          status: string
+          triggered_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          destination?: string | null
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          items_found?: number
+          items_upserted?: number
+          mode?: string
+          provider: string
+          started_at?: string
+          status: string
+          triggered_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          destination?: string | null
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          items_found?: number
+          items_upserted?: number
+          mode?: string
+          provider?: string
+          started_at?: string
+          status?: string
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
       guests: {
         Row: {
           country: string | null
