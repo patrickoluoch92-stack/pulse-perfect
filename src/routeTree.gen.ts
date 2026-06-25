@@ -38,6 +38,7 @@ import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authen
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
 import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-vitals'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
+import { Route as AuthenticatedListingsPartnersRouteImport } from './routes/_authenticated/listings.partners'
 import { Route as AuthenticatedListingsImportRouteImport } from './routes/_authenticated/listings.import'
 import { Route as AuthenticatedListingsAnalyticsRouteImport } from './routes/_authenticated/listings.analytics'
 import { Route as AuthenticatedListingsAdminRouteImport } from './routes/_authenticated/listings.admin'
@@ -195,6 +196,12 @@ const AuthenticatedPropertiesPropertyIdRoute =
     path: '/$propertyId',
     getParentRoute: () => AuthenticatedPropertiesRoute,
   } as any)
+const AuthenticatedListingsPartnersRoute =
+  AuthenticatedListingsPartnersRouteImport.update({
+    id: '/partners',
+    path: '/partners',
+    getParentRoute: () => AuthenticatedListingsRoute,
+  } as any)
 const AuthenticatedListingsImportRoute =
   AuthenticatedListingsImportRouteImport.update({
     id: '/import',
@@ -278,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/listings/admin': typeof AuthenticatedListingsAdminRoute
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
+  '/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
@@ -315,6 +323,7 @@ export interface FileRoutesByTo {
   '/listings/admin': typeof AuthenticatedListingsAdminRoute
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
+  '/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
@@ -356,6 +365,7 @@ export interface FileRoutesById {
   '/_authenticated/listings/admin': typeof AuthenticatedListingsAdminRoute
   '/_authenticated/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/_authenticated/listings/import': typeof AuthenticatedListingsImportRoute
+  '/_authenticated/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
@@ -397,6 +407,7 @@ export interface FileRouteTypes {
     | '/listings/admin'
     | '/listings/analytics'
     | '/listings/import'
+    | '/listings/partners'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
     | '/marketplace/p/$slug'
@@ -434,6 +445,7 @@ export interface FileRouteTypes {
     | '/listings/admin'
     | '/listings/analytics'
     | '/listings/import'
+    | '/listings/partners'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
     | '/marketplace/p/$slug'
@@ -474,6 +486,7 @@ export interface FileRouteTypes {
     | '/_authenticated/listings/admin'
     | '/_authenticated/listings/analytics'
     | '/_authenticated/listings/import'
+    | '/_authenticated/listings/partners'
     | '/_authenticated/properties/$propertyId'
     | '/api/public/web-vitals'
     | '/marketplace/p/$slug'
@@ -705,6 +718,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPropertiesPropertyIdRouteImport
       parentRoute: typeof AuthenticatedPropertiesRoute
     }
+    '/_authenticated/listings/partners': {
+      id: '/_authenticated/listings/partners'
+      path: '/partners'
+      fullPath: '/listings/partners'
+      preLoaderRoute: typeof AuthenticatedListingsPartnersRouteImport
+      parentRoute: typeof AuthenticatedListingsRoute
+    }
     '/_authenticated/listings/import': {
       id: '/_authenticated/listings/import'
       path: '/import'
@@ -804,6 +824,7 @@ interface AuthenticatedListingsRouteChildren {
   AuthenticatedListingsAdminRoute: typeof AuthenticatedListingsAdminRoute
   AuthenticatedListingsAnalyticsRoute: typeof AuthenticatedListingsAnalyticsRoute
   AuthenticatedListingsImportRoute: typeof AuthenticatedListingsImportRoute
+  AuthenticatedListingsPartnersRoute: typeof AuthenticatedListingsPartnersRoute
   AuthenticatedListingsIndexRoute: typeof AuthenticatedListingsIndexRoute
 }
 
@@ -812,6 +833,7 @@ const AuthenticatedListingsRouteChildren: AuthenticatedListingsRouteChildren = {
   AuthenticatedListingsAdminRoute: AuthenticatedListingsAdminRoute,
   AuthenticatedListingsAnalyticsRoute: AuthenticatedListingsAnalyticsRoute,
   AuthenticatedListingsImportRoute: AuthenticatedListingsImportRoute,
+  AuthenticatedListingsPartnersRoute: AuthenticatedListingsPartnersRoute,
   AuthenticatedListingsIndexRoute: AuthenticatedListingsIndexRoute,
 }
 
