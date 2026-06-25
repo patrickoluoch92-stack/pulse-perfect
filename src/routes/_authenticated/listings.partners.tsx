@@ -22,7 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_authenticated/listings/partners")({
-  head: () => authPageMeta("Partner Sync"),
+  head: () => ({ meta: authPageMeta({ title: "Partner Sync", description: "Sync inbound inventory from Booking.com and Expedia EPS Rapid." }) }),
   component: PartnersAdminPage,
 });
 
