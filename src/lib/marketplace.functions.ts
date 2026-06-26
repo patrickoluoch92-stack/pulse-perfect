@@ -119,7 +119,10 @@ export const getPublicProperty = createServerFn({ method: "GET" })
     const { data: prop, error } = await supabase
       .from("marketplace_properties")
       .select(
-        "id, slug, name, category, county_code, town, description, amenities, price_per_night, currency, latitude, longitude, google_maps_url, main_image_path, contact_email, contact_phone, contact_whatsapp, availability, is_featured, created_at",
+        // Contact PII (contact_email, contact_phone, contact_whatsapp) is intentionally
+        // omitted from the public/anon read path; signed-in users fetch them via
+        // getPropertyContact() which runs with their authenticated session.
+        "id, slug, name, category, county_code, town, description, amenities, price_per_night, currency, latitude, longitude, google_maps_url, main_image_path, availability, is_featured, created_at",
       )
       .eq("slug", data.slug)
       .eq("status", "approved")
