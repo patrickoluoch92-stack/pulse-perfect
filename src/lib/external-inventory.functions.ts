@@ -128,10 +128,7 @@ export const getPartnerStatus = createServerFn({ method: "GET" })
     forceMock: boolean;
     totals: { listings: number; bookingCount: number; expediaCount: number };
   }> => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId, _role: "admin",
-    });
-    if (!isAdmin) throw new Error("Forbidden");
+    if (!(await isPlatformAdmin(context.supabase, context.userId))) throw new Error("Forbidden");
     const mod = await import("@/lib/external-inventory.server");
     const status = mod.getPartnerStatus();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -156,10 +153,7 @@ export const listSyncRuns = createServerFn({ method: "GET" })
     z.object({ limit: z.number().int().min(1).max(200).default(50) }).parse(input ?? {}),
   )
   .handler(async ({ data, context }): Promise<{ runs: PartnerSyncRow[] }> => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId, _role: "admin",
-    });
-    if (!isAdmin) throw new Error("Forbidden");
+    if (!(await isPlatformAdmin(context.supabase, context.userId))) throw new Error("Forbidden");
     const { data: runs, error } = await (context.supabase.from("external_sync_runs" as never) as any)
       .select("id,provider,destination,mode,status,items_found,items_upserted,error_message,started_at,finished_at")
       .order("started_at", { ascending: false })
@@ -182,10 +176,7 @@ export const triggerPartnerSync = createServerFn({ method: "POST" })
     totalUpserted: number;
     summary: PartnerSummary[];
   }> => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId, _role: "admin",
-    });
-    if (!isAdmin) throw new Error("Forbidden");
+    if (!(await isPlatformAdmin(context.supabase, context.userId))) throw new Error("Forbidden");
     const mod = await import("@/lib/external-inventory.server");
     return mod.syncDestinations({
       destinations: data.destinations,
@@ -200,10 +191,7 @@ export const deletePartnerListings = createServerFn({ method: "POST" })
     z.object({ provider: z.enum(["booking", "expedia"]).optional() }).parse(input ?? {}),
   )
   .handler(async ({ data, context }): Promise<{ deleted: number }> => {
-    const { data: isAdmin } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId, _role: "admin",
-    });
-    if (!isAdmin) throw new Error("Forbidden");
+    if (!(await isPlatformAdmin(context.supabase, context.userId))) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = (supabaseAdmin.from("external_listings" as never) as any).delete({ count: "exact" });
     if (data.provider) q = q.eq("provider", data.provider);
