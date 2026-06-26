@@ -453,12 +453,8 @@ export const deletePropertyImage = createServerFn({ method: "POST" })
 export const checkPlatformAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin" as any,
-    });
-    if (error) throw new Error(error.message);
-    return { isAdmin: Boolean(data) };
+    const isAdmin = await isPlatformAdmin(context.supabase, context.userId);
+    return { isAdmin };
   });
 
 const adminListInput = z.object({
