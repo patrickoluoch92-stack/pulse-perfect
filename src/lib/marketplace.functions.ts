@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isPlatformAdmin } from "@/lib/access";
 import type { Database } from "@/integrations/supabase/types";
 import {
   MARKETPLACE_BUCKET,
