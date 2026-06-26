@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useState } from "react";
-import { MapPin, Phone, Mail, MessageCircle, ExternalLink, Star } from "lucide-react";
+import { MapPin, ExternalLink, Star } from "lucide-react";
 
 import { getPublicProperty } from "@/lib/marketplace.functions";
 import { categoryLabel } from "@/lib/marketplace-constants";
