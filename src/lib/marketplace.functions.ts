@@ -509,11 +509,7 @@ export const adminSetPropertyStatus = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => setStatusInput.parse(data))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { data: isAdmin } = await supabase.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin" as any,
-    });
-    if (!isAdmin) throw new Error("Forbidden");
+    if (!(await isPlatformAdmin(supabase, userId))) throw new Error("Forbidden");
     const patch: Record<string, unknown> = { status: data.status };
     if (data.status === "rejected") patch.rejection_reason = data.rejectionReason ?? null;
     if (data.status === "approved") patch.rejection_reason = null;
