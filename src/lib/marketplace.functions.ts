@@ -471,11 +471,7 @@ export const listAdminProperties = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => adminListInput.parse(data ?? {}))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { data: isAdmin } = await supabase.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin" as any,
-    });
-    if (!isAdmin) throw new Error("Forbidden");
+    if (!(await isPlatformAdmin(supabase, userId))) throw new Error("Forbidden");
 
     const from = (data.page - 1) * data.pageSize;
     const to = from + data.pageSize - 1;
