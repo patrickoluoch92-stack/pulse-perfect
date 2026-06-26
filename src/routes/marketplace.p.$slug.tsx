@@ -267,35 +267,9 @@ function PropertyDetail() {
 
               <div className="mt-4 space-y-2 border-t pt-4">
                 <h3 className="text-sm font-semibold">Contact host</h3>
-                {prop.contact_phone && (
-                  <a
-                    href={`tel:${prop.contact_phone}`}
-                    className="flex items-center gap-2 text-sm hover:text-primary"
-                  >
-                    <Phone className="h-4 w-4" /> {prop.contact_phone}
-                  </a>
-                )}
-                {prop.contact_email && (
-                  <a
-                    href={`mailto:${prop.contact_email}`}
-                    className="flex items-center gap-2 text-sm hover:text-primary"
-                  >
-                    <Mail className="h-4 w-4" /> {prop.contact_email}
-                  </a>
-                )}
-                {prop.contact_whatsapp && (
-                  <a
-                    href={`https://wa.me/${prop.contact_whatsapp.replace(/\D/g, "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm hover:text-primary"
-                  >
-                    <MessageCircle className="h-4 w-4" /> WhatsApp
-                  </a>
-                )}
-                {!prop.contact_phone && !prop.contact_email && !prop.contact_whatsapp && (
-                  <p className="text-sm text-muted-foreground">No contact details published.</p>
-                )}
+                <p className="text-sm text-muted-foreground">
+                  Send a booking request to share contact details with the host.
+                </p>
               </div>
             </div>
           </aside>
