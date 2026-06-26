@@ -60,13 +60,15 @@ async function assertOrgRole(
   userId: string,
   roles: readonly string[] = LOG_ROLES,
 ) {
-  const { data: ok, error } = await supabase.rpc("has_org_role", {
-    _user_id: userId,
-    _org_id: orgId,
-    _roles: roles as unknown as string[],
-  });
+  const { data, error } = await supabase
+    .from("organization_members")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("org_id", orgId)
+    .in("role", roles as string[])
+    .maybeSingle();
   if (error) throw new Error(error.message);
-  if (!ok) throw new Error("You don't have permission for this action");
+  if (!data) throw new Error("You don't have permission for this action");
 }
 
 async function assertCanManageUnit(
