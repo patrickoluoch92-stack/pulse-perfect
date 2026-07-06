@@ -958,11 +958,14 @@ export type Database = {
           google_maps_url: string | null
           id: string
           is_featured: boolean
+          is_verified: boolean
+          landmarks: Json
           latitude: number | null
           longitude: number | null
           main_image_path: string | null
           name: string
           org_id: string
+          postal_address: string | null
           price_per_night: number | null
           rating_avg: number
           rating_count: number
@@ -974,6 +977,9 @@ export type Database = {
           submitted_at: string | null
           town: string
           updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+          ward: string | null
         }
         Insert: {
           amenities?: string[]
@@ -990,11 +996,14 @@ export type Database = {
           google_maps_url?: string | null
           id?: string
           is_featured?: boolean
+          is_verified?: boolean
+          landmarks?: Json
           latitude?: number | null
           longitude?: number | null
           main_image_path?: string | null
           name: string
           org_id: string
+          postal_address?: string | null
           price_per_night?: number | null
           rating_avg?: number
           rating_count?: number
@@ -1006,6 +1015,9 @@ export type Database = {
           submitted_at?: string | null
           town: string
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          ward?: string | null
         }
         Update: {
           amenities?: string[]
@@ -1022,11 +1034,14 @@ export type Database = {
           google_maps_url?: string | null
           id?: string
           is_featured?: boolean
+          is_verified?: boolean
+          landmarks?: Json
           latitude?: number | null
           longitude?: number | null
           main_image_path?: string | null
           name?: string
           org_id?: string
+          postal_address?: string | null
           price_per_night?: number | null
           rating_avg?: number
           rating_count?: number
@@ -1038,6 +1053,9 @@ export type Database = {
           submitted_at?: string | null
           town?: string
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          ward?: string | null
         }
         Relationships: [
           {
@@ -1059,6 +1077,7 @@ export type Database = {
       marketplace_property_images: {
         Row: {
           alt_text: string | null
+          content_hash: string | null
           created_at: string
           id: string
           property_id: string
@@ -1067,6 +1086,7 @@ export type Database = {
         }
         Insert: {
           alt_text?: string | null
+          content_hash?: string | null
           created_at?: string
           id?: string
           property_id: string
@@ -1075,6 +1095,7 @@ export type Database = {
         }
         Update: {
           alt_text?: string | null
+          content_hash?: string | null
           created_at?: string
           id?: string
           property_id?: string
@@ -1220,6 +1241,54 @@ export type Database = {
             columns: ["subscription_id"]
             isOneToOne: false
             referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_drafts: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          payload: Json
+          property_id: string | null
+          step: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          payload?: Json
+          property_id?: string | null
+          step?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          payload?: Json
+          property_id?: string | null
+          step?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_drafts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_drafts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
             referencedColumns: ["id"]
           },
         ]
@@ -1909,6 +1978,50 @@ export type Database = {
           },
         ]
       }
+      unit_seasonal_rates: {
+        Row: {
+          created_at: string
+          currency: string
+          end_date: string
+          id: string
+          label: string
+          price: number
+          start_date: string
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          end_date: string
+          id?: string
+          label: string
+          price: number
+          start_date: string
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          end_date?: string
+          id?: string
+          label?: string
+          price?: number
+          start_date?: string
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unit_seasonal_rates_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       units: {
         Row: {
           base_price: number
@@ -2037,6 +2150,8 @@ export type Database = {
         Args: { _org_id: string }
         Returns: boolean
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
