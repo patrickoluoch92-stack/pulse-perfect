@@ -67,6 +67,7 @@ export const placesAutocomplete = createServerFn({ method: "POST" })
   });
 
 export const placeDetails = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
     z.object({
       placeId: z.string().min(1).max(200),
