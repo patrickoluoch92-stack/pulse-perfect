@@ -1,0 +1,1 @@
+REVOKE SELECT (contact_email, contact_phone, contact_whatsapp) ON public.marketplace_properties FROM authenticated;
