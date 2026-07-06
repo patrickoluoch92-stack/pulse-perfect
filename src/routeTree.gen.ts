@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
+import { Route as ConciergeRouteImport } from './routes/concierge'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -27,6 +28,7 @@ import { Route as AuthenticatedToursRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedSyncRouteImport } from './routes/_authenticated/sync'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedRevenueRouteImport } from './routes/_authenticated/revenue'
 import { Route as AuthenticatedReservationsRouteImport } from './routes/_authenticated/reservations'
 import { Route as AuthenticatedPropertiesRouteImport } from './routes/_authenticated/properties'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
@@ -68,6 +70,11 @@ const PricingRoute = PricingRouteImport.update({
 const MarketplaceRoute = MarketplaceRouteImport.update({
   id: '/marketplace',
   path: '/marketplace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConciergeRoute = ConciergeRouteImport.update({
+  id: '/concierge',
+  path: '/concierge',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -142,6 +149,11 @@ const AuthenticatedSyncRoute = AuthenticatedSyncRouteImport.update({
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRevenueRoute = AuthenticatedRevenueRouteImport.update({
+  id: '/revenue',
+  path: '/revenue',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedReservationsRoute =
@@ -297,6 +309,7 @@ const AuthenticatedListingsIdAvailabilityRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/concierge': typeof ConciergeRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -310,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/reservations': typeof AuthenticatedReservationsRoute
+  '/revenue': typeof AuthenticatedRevenueRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/sync': typeof AuthenticatedSyncRoute
   '/team': typeof AuthenticatedTeamRoute
@@ -343,6 +357,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/concierge': typeof ConciergeRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -354,6 +369,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/reservations': typeof AuthenticatedReservationsRoute
+  '/revenue': typeof AuthenticatedRevenueRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/sync': typeof AuthenticatedSyncRoute
   '/team': typeof AuthenticatedTeamRoute
@@ -389,6 +405,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/concierge': typeof ConciergeRoute
   '/marketplace': typeof MarketplaceRouteWithChildren
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -402,6 +419,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/_authenticated/reservations': typeof AuthenticatedReservationsRoute
+  '/_authenticated/revenue': typeof AuthenticatedRevenueRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/sync': typeof AuthenticatedSyncRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
@@ -437,6 +455,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/concierge'
     | '/marketplace'
     | '/pricing'
     | '/sitemap.xml'
@@ -450,6 +469,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/properties'
     | '/reservations'
+    | '/revenue'
     | '/settings'
     | '/sync'
     | '/team'
@@ -483,6 +503,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/concierge'
     | '/pricing'
     | '/sitemap.xml'
     | '/analytics'
@@ -494,6 +515,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/properties'
     | '/reservations'
+    | '/revenue'
     | '/settings'
     | '/sync'
     | '/team'
@@ -528,6 +550,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/concierge'
     | '/marketplace'
     | '/pricing'
     | '/sitemap.xml'
@@ -541,6 +564,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/properties'
     | '/_authenticated/reservations'
+    | '/_authenticated/revenue'
     | '/_authenticated/settings'
     | '/_authenticated/sync'
     | '/_authenticated/team'
@@ -576,6 +600,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ConciergeRoute: typeof ConciergeRoute
   MarketplaceRoute: typeof MarketplaceRouteWithChildren
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -613,6 +638,13 @@ declare module '@tanstack/react-router' {
       path: '/marketplace'
       fullPath: '/marketplace'
       preLoaderRoute: typeof MarketplaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/concierge': {
+      id: '/concierge'
+      path: '/concierge'
+      fullPath: '/concierge'
+      preLoaderRoute: typeof ConciergeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -718,6 +750,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/revenue': {
+      id: '/_authenticated/revenue'
+      path: '/revenue'
+      fullPath: '/revenue'
+      preLoaderRoute: typeof AuthenticatedRevenueRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/reservations': {
@@ -1004,6 +1043,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPropertiesRoute: typeof AuthenticatedPropertiesRouteWithChildren
   AuthenticatedReservationsRoute: typeof AuthenticatedReservationsRoute
+  AuthenticatedRevenueRoute: typeof AuthenticatedRevenueRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSyncRoute: typeof AuthenticatedSyncRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
@@ -1021,6 +1061,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPropertiesRoute: AuthenticatedPropertiesRouteWithChildren,
   AuthenticatedReservationsRoute: AuthenticatedReservationsRoute,
+  AuthenticatedRevenueRoute: AuthenticatedRevenueRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSyncRoute: AuthenticatedSyncRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
@@ -1052,6 +1093,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ConciergeRoute: ConciergeRoute,
   MarketplaceRoute: MarketplaceRouteWithChildren,
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
