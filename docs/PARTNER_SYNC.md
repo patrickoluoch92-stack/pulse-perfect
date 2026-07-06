@@ -29,7 +29,7 @@ The app automatically flips each provider from `mock` to `live` as soon as the m
 ## Scheduling
 
 Cron-callable endpoint: `POST /api/public/hooks/partner-sync`
-Auth: send `apikey: <SUPABASE_PUBLISHABLE_KEY>` header.
+Auth: send `Authorization: Bearer <PARTNER_SYNC_CRON_SECRET>` (or `x-cron-secret: <PARTNER_SYNC_CRON_SECRET>`) header. The secret is stored server-side only and must never be shipped to the browser.
 
 Example pg_cron + pg_net schedule:
 
@@ -41,7 +41,7 @@ select cron.schedule(
        url := 'https://<host>/api/public/hooks/partner-sync',
        headers := jsonb_build_object(
          'Content-Type','application/json',
-         'apikey', current_setting('app.settings.supabase_anon_key')
+         'Authorization', 'Bearer ' || current_setting('app.settings.partner_sync_cron_secret')
        ),
        body := '{}'::jsonb
   ); $$

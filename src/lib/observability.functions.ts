@@ -26,10 +26,14 @@ const reportSchema = z.object({
 });
 
 export const reportAppError = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((data) => reportSchema.parse(data))
-  .handler(async ({ data }) => {
-    let userId: string | null = data.userId ?? null;
-    let orgId: string | null = data.tenantId ?? null;
+  .handler(async ({ data, context }) => {
+    // Derive identity strictly from the authenticated session — never trust
+    // client-supplied userId / tenantId (would allow log-poisoning of other orgs).
+    const authedId = context.userId;
+    let userId: string | null = authedId;
+    let orgId: string | null = null;
     let inboundCorrelation: string | null = data.correlationId ?? null;
 
     try {
@@ -38,30 +42,20 @@ export const reportAppError = createServerFn({ method: "POST" })
       if (req) {
         inboundCorrelation = inboundCorrelation ?? req.headers.get("x-correlation-id");
       }
-      const auth = req?.headers.get("authorization") ?? "";
-      if (auth.startsWith("Bearer ")) {
-        const { data: u } = await supabaseAdmin.auth.getUser(auth.slice(7));
-        const authedId = u.user?.id ?? null;
-        if (authedId) {
-          userId = userId ?? authedId;
-          if (!orgId) {
-            const { data: profile } = await supabaseAdmin
-              .from("profiles")
-              .select("current_org_id")
-              .eq("id", authedId)
-              .maybeSingle();
-            orgId = profile?.current_org_id ?? null;
-          }
-        }
-      }
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("current_org_id")
+        .eq("id", authedId)
+        .maybeSingle();
+      orgId = profile?.current_org_id ?? null;
     } catch {
       // ignore — never block error reporting
     }
 
-    const context = JSON.parse(JSON.stringify(data.context ?? {})) as Record<string, unknown>;
-    if (inboundCorrelation) context.correlationId = inboundCorrelation;
-    if (data.action) context.action = data.action;
-    if (data.breadcrumbs?.length) context.breadcrumbs = data.breadcrumbs;
+    const ctx = JSON.parse(JSON.stringify(data.context ?? {})) as Record<string, unknown>;
+    if (inboundCorrelation) ctx.correlationId = inboundCorrelation;
+    if (data.action) ctx.action = data.action;
+    if (data.breadcrumbs?.length) ctx.breadcrumbs = data.breadcrumbs;
 
     await supabaseAdmin.from("app_errors").insert({
       user_id: userId,
@@ -73,7 +67,7 @@ export const reportAppError = createServerFn({ method: "POST" })
       url: data.url ?? null,
       action: data.action ?? null,
       correlation_id: inboundCorrelation,
-      context: context as never,
+      context: ctx as never,
     });
 
     return { ok: true };
