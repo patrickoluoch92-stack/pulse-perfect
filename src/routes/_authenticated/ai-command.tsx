@@ -54,7 +54,7 @@ function AICommandPage() {
             icon={<Compass className="h-4 w-4" />}
             title="Discovery Engine"
             main={disc.data ? `${disc.data.total ?? 0}` : "—"}
-            sub={disc.data ? `${disc.data.approved ?? 0} approved · ${disc.data.pending ?? 0} pending` : "loading"}
+            sub={disc.data ? `${disc.data.statusCounts?.approved ?? 0} approved · ${disc.data.statusCounts?.pending ?? 0} pending` : "loading"}
           />
           <MetricCard
             icon={<TrendingUp className="h-4 w-4" />}
@@ -76,13 +76,13 @@ function AICommandPage() {
             {disc.data ? (
               <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
                 <StatLine label="Total discovered" value={disc.data.total ?? 0} />
-                <StatLine label="Pending review" value={disc.data.pending ?? 0} />
-                <StatLine label="Approved" value={disc.data.approved ?? 0} />
-                <StatLine label="Claimed" value={disc.data.claimed ?? 0} />
-                <StatLine label="Rejected" value={disc.data.rejected ?? 0} />
-                <StatLine label="Duplicates" value={disc.data.duplicates ?? 0} />
-                <StatLine label="Counties covered" value={disc.data.counties ?? 0} />
-                <StatLine label="Sources active" value={disc.data.sources ?? 0} />
+                <StatLine label="Pending review" value={disc.data.statusCounts?.pending ?? 0} />
+                <StatLine label="Approved" value={disc.data.statusCounts?.approved ?? 0} />
+                <StatLine label="Claimed" value={disc.data.statusCounts?.claimed ?? 0} />
+                <StatLine label="Rejected" value={disc.data.statusCounts?.rejected ?? 0} />
+                <StatLine label="Merged" value={disc.data.statusCounts?.merged ?? 0} />
+                <StatLine label="Counties covered" value={Object.keys(disc.data.countyCounts ?? {}).length} />
+                <StatLine label="Recent runs" value={disc.data.recentRuns?.length ?? 0} />
               </div>
             ) : <p className="text-sm text-muted-foreground">Loading…</p>}
           </CardContent>

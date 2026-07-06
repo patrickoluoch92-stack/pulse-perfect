@@ -39,6 +39,7 @@ import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBookingsRouteImport } from './routes/_authenticated/bookings'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
+import { Route as AuthenticatedAiCommandRouteImport } from './routes/_authenticated/ai-command'
 import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authenticated/listings.index'
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
 import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-vitals'
@@ -207,6 +208,11 @@ const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAiCommandRoute = AuthenticatedAiCommandRouteImport.update({
+  id: '/ai-command',
+  path: '/ai-command',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedListingsIndexRoute =
   AuthenticatedListingsIndexRouteImport.update({
     id: '/',
@@ -313,6 +319,7 @@ export interface FileRoutesByFullPath {
   '/marketplace': typeof MarketplaceRouteWithChildren
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/ai-command': typeof AuthenticatedAiCommandRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/bookings': typeof AuthenticatedBookingsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -360,6 +367,7 @@ export interface FileRoutesByTo {
   '/concierge': typeof ConciergeRoute
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/ai-command': typeof AuthenticatedAiCommandRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/bookings': typeof AuthenticatedBookingsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -409,6 +417,7 @@ export interface FileRoutesById {
   '/marketplace': typeof MarketplaceRouteWithChildren
   '/pricing': typeof PricingRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_authenticated/ai-command': typeof AuthenticatedAiCommandRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/bookings': typeof AuthenticatedBookingsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -459,6 +468,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/pricing'
     | '/sitemap.xml'
+    | '/ai-command'
     | '/analytics'
     | '/bookings'
     | '/dashboard'
@@ -506,6 +516,7 @@ export interface FileRouteTypes {
     | '/concierge'
     | '/pricing'
     | '/sitemap.xml'
+    | '/ai-command'
     | '/analytics'
     | '/bookings'
     | '/dashboard'
@@ -554,6 +565,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/pricing'
     | '/sitemap.xml'
+    | '/_authenticated/ai-command'
     | '/_authenticated/analytics'
     | '/_authenticated/bookings'
     | '/_authenticated/dashboard'
@@ -829,6 +841,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/ai-command': {
+      id: '/_authenticated/ai-command'
+      path: '/ai-command'
+      fullPath: '/ai-command'
+      preLoaderRoute: typeof AuthenticatedAiCommandRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/listings/': {
       id: '/_authenticated/listings/'
       path: '/'
@@ -1033,6 +1052,7 @@ const AuthenticatedPropertiesRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAiCommandRoute: typeof AuthenticatedAiCommandRoute
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedBookingsRoute: typeof AuthenticatedBookingsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -1051,6 +1071,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAiCommandRoute: AuthenticatedAiCommandRoute,
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedBookingsRoute: AuthenticatedBookingsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
