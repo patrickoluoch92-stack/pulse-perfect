@@ -81,6 +81,7 @@ export const listPartnerListings = createServerFn({ method: "GET" })
 // ---------- Live search (used by the marketplace search bar) ----------
 
 export const searchExternalInventory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
     z
       .object({
