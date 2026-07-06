@@ -30,9 +30,9 @@ type GroundingRow = {
   name: string;
   slug: string;
   town: string | null;
-  county: string | null;
+  county_code: string | null;
   category: string;
-  short_description: string | null;
+  description: string | null;
 };
 
 async function retrieveContext(query: string, county?: string): Promise<GroundingRow[]> {
@@ -40,13 +40,13 @@ async function retrieveContext(query: string, county?: string): Promise<Groundin
   const q = query.slice(0, 40).replace(/[%_]/g, " ");
   const { data } = await supabase
     .from("marketplace_properties")
-    .select("name, slug, town, county, category, short_description")
+    .select("name, slug, town, county_code, category, description")
     .eq("status", "approved")
-    .or(`name.ilike.%${q}%,short_description.ilike.%${q}%,town.ilike.%${q}%,county.ilike.%${q}%`)
+    .or(`name.ilike.%${q}%,description.ilike.%${q}%,town.ilike.%${q}%,county_code.ilike.%${q}%`)
     .limit(8);
-  const rows = (data ?? []) as GroundingRow[];
+  const rows = (data ?? []) as unknown as GroundingRow[];
   if (county) {
-    return rows.filter((r) => (r.county ?? "").toLowerCase().includes(county.toLowerCase()));
+    return rows.filter((r) => (r.county_code ?? "").toLowerCase().includes(county.toLowerCase()));
   }
   return rows;
 }
@@ -60,7 +60,7 @@ export const askConcierge = createServerFn({ method: "POST" })
       ? `Known HostPulse properties relevant to the query:\n${context
           .map(
             (c) =>
-              `- ${c.name} (${c.category}) in ${c.town ?? "?"}, ${c.county ?? "?"} — ${c.short_description ?? ""} [/marketplace/p/${c.slug}]`,
+              `- ${c.name} (${c.category}) in ${c.town ?? "?"}, ${c.county_code ?? "?"} — ${(c.description ?? "").slice(0, 160)} [/marketplace/p/${c.slug}]`,
           )
           .join("\n")}`
       : "No matching HostPulse properties were found in the index for this query.";
@@ -84,7 +84,7 @@ export const askConcierge = createServerFn({ method: "POST" })
         name: c.name,
         slug: c.slug,
         town: c.town,
-        county: c.county,
+        county: c.county_code,
         category: c.category,
       })),
     };
