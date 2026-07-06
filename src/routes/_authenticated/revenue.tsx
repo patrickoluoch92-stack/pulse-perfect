@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { listProperties } from "@/lib/properties.functions";
-import { listUnitsForProperty } from "@/lib/units.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { listUnits } from "@/lib/units.functions";
 import {
   recommendPricing,
   forecastOccupancy,
@@ -25,8 +25,7 @@ export const Route = createFileRoute("/_authenticated/revenue")({
 });
 
 function RevenuePage() {
-  const props = useServerFn(listProperties);
-  const units = useServerFn(listUnitsForProperty);
+  const units = useServerFn(listUnits);
   const price = useServerFn(recommendPricing);
   const forecast = useServerFn(forecastOccupancy);
   const insights = useServerFn(generateRevenueInsights);
@@ -34,7 +33,14 @@ function RevenuePage() {
   const [propertyId, setPropertyId] = useState<string>("");
   const [unitId, setUnitId] = useState<string>("");
 
-  const properties = useQuery({ queryKey: ["rev-props"], queryFn: () => props() });
+  const properties = useQuery({
+    queryKey: ["rev-props"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("properties").select("id, name").order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
   const unitsQ = useQuery({
     queryKey: ["rev-units", propertyId],
     queryFn: () => units({ data: { propertyId } }),
