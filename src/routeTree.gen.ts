@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
+import { Route as DiscoverIndexRouteImport } from './routes/discover.index'
 import { Route as MarketplaceMapRouteImport } from './routes/marketplace.map'
 import { Route as MarketplaceCountyRouteImport } from './routes/marketplace.$county'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
@@ -85,6 +86,11 @@ const MarketplaceIndexRoute = MarketplaceIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MarketplaceRoute,
+} as any)
+const DiscoverIndexRoute = DiscoverIndexRouteImport.update({
+  id: '/discover/',
+  path: '/discover/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const MarketplaceMapRoute = MarketplaceMapRouteImport.update({
   id: '/map',
@@ -300,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
@@ -341,6 +348,7 @@ export interface FileRoutesByTo {
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
@@ -386,6 +394,7 @@ export interface FileRoutesById {
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
@@ -431,6 +440,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/discover/'
     | '/marketplace/'
     | '/invoices/$invoiceId'
     | '/listings/$id'
@@ -472,6 +482,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/discover'
     | '/marketplace'
     | '/invoices/$invoiceId'
     | '/listings/$id'
@@ -516,6 +527,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/discover/'
     | '/marketplace/'
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/listings/$id'
@@ -545,6 +557,7 @@ export interface RootRouteChildren {
   CountiesSlugRoute: typeof CountiesSlugRoute
   GuidesHotelSeoRoute: typeof GuidesHotelSeoRoute
   InviteTokenRoute: typeof InviteTokenRoute
+  DiscoverIndexRoute: typeof DiscoverIndexRoute
   ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
   ApiPublicHooksDiscoveryRescoreRoute: typeof ApiPublicHooksDiscoveryRescoreRoute
   ApiPublicHooksDiscoveryTickRoute: typeof ApiPublicHooksDiscoveryTickRoute
@@ -603,6 +616,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/marketplace/'
       preLoaderRoute: typeof MarketplaceIndexRouteImport
       parentRoute: typeof MarketplaceRoute
+    }
+    '/discover/': {
+      id: '/discover/'
+      path: '/discover'
+      fullPath: '/discover/'
+      preLoaderRoute: typeof DiscoverIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/marketplace/map': {
       id: '/marketplace/map'
@@ -983,6 +1003,7 @@ const rootRouteChildren: RootRouteChildren = {
   CountiesSlugRoute: CountiesSlugRoute,
   GuidesHotelSeoRoute: GuidesHotelSeoRoute,
   InviteTokenRoute: InviteTokenRoute,
+  DiscoverIndexRoute: DiscoverIndexRoute,
   ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
   ApiPublicHooksDiscoveryRescoreRoute: ApiPublicHooksDiscoveryRescoreRoute,
   ApiPublicHooksDiscoveryTickRoute: ApiPublicHooksDiscoveryTickRoute,
