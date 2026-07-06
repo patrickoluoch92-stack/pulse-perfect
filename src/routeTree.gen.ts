@@ -21,6 +21,7 @@ import { Route as MarketplaceMapRouteImport } from './routes/marketplace.map'
 import { Route as MarketplaceCountyRouteImport } from './routes/marketplace.$county'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as GuidesHotelSeoRouteImport } from './routes/guides.hotel-seo'
+import { Route as DiscoverSlugRouteImport } from './routes/discover.$slug'
 import { Route as CountiesSlugRouteImport } from './routes/counties.$slug'
 import { Route as AuthenticatedToursRouteImport } from './routes/_authenticated/tours'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
@@ -110,6 +111,11 @@ const InviteTokenRoute = InviteTokenRouteImport.update({
 const GuidesHotelSeoRoute = GuidesHotelSeoRouteImport.update({
   id: '/guides/hotel-seo',
   path: '/guides/hotel-seo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverSlugRoute = DiscoverSlugRouteImport.update({
+  id: '/discover/$slug',
+  path: '/discover/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CountiesSlugRoute = CountiesSlugRouteImport.update({
@@ -302,6 +308,7 @@ export interface FileRoutesByFullPath {
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
   '/counties/$slug': typeof CountiesSlugRoute
+  '/discover/$slug': typeof DiscoverSlugRoute
   '/guides/hotel-seo': typeof GuidesHotelSeoRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
@@ -344,6 +351,7 @@ export interface FileRoutesByTo {
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
   '/counties/$slug': typeof CountiesSlugRoute
+  '/discover/$slug': typeof DiscoverSlugRoute
   '/guides/hotel-seo': typeof GuidesHotelSeoRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
@@ -390,6 +398,7 @@ export interface FileRoutesById {
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/tours': typeof AuthenticatedToursRoute
   '/counties/$slug': typeof CountiesSlugRoute
+  '/discover/$slug': typeof DiscoverSlugRoute
   '/guides/hotel-seo': typeof GuidesHotelSeoRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
@@ -436,6 +445,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/tours'
     | '/counties/$slug'
+    | '/discover/$slug'
     | '/guides/hotel-seo'
     | '/invite/$token'
     | '/marketplace/$county'
@@ -478,6 +488,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/tours'
     | '/counties/$slug'
+    | '/discover/$slug'
     | '/guides/hotel-seo'
     | '/invite/$token'
     | '/marketplace/$county'
@@ -523,6 +534,7 @@ export interface FileRouteTypes {
     | '/_authenticated/team'
     | '/_authenticated/tours'
     | '/counties/$slug'
+    | '/discover/$slug'
     | '/guides/hotel-seo'
     | '/invite/$token'
     | '/marketplace/$county'
@@ -555,6 +567,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CountiesSlugRoute: typeof CountiesSlugRoute
+  DiscoverSlugRoute: typeof DiscoverSlugRoute
   GuidesHotelSeoRoute: typeof GuidesHotelSeoRoute
   InviteTokenRoute: typeof InviteTokenRoute
   DiscoverIndexRoute: typeof DiscoverIndexRoute
@@ -650,6 +663,13 @@ declare module '@tanstack/react-router' {
       path: '/guides/hotel-seo'
       fullPath: '/guides/hotel-seo'
       preLoaderRoute: typeof GuidesHotelSeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover/$slug': {
+      id: '/discover/$slug'
+      path: '/discover/$slug'
+      fullPath: '/discover/$slug'
+      preLoaderRoute: typeof DiscoverSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/counties/$slug': {
@@ -1001,6 +1021,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   CountiesSlugRoute: CountiesSlugRoute,
+  DiscoverSlugRoute: DiscoverSlugRoute,
   GuidesHotelSeoRoute: GuidesHotelSeoRoute,
   InviteTokenRoute: InviteTokenRoute,
   DiscoverIndexRoute: DiscoverIndexRoute,
