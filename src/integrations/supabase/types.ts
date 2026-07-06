@@ -172,6 +172,262 @@ export type Database = {
           },
         ]
       }
+      discovered_properties: {
+        Row: {
+          address: string | null
+          ai_confidence: Json
+          ai_description: string | null
+          amenities: string[]
+          county_code: string | null
+          created_at: string
+          dedupe_fingerprint: string | null
+          email: string | null
+          id: string
+          keywords: string[]
+          latitude: number | null
+          longitude: number | null
+          merged_into: string | null
+          name: string
+          phone: string | null
+          promoted_property_id: string | null
+          property_type: string | null
+          quality_score: number
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          slug: string | null
+          socials: Json
+          source_id: string | null
+          source_url: string | null
+          status: string
+          tags: string[]
+          town: string | null
+          updated_at: string
+          ward: string | null
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          ai_confidence?: Json
+          ai_description?: string | null
+          amenities?: string[]
+          county_code?: string | null
+          created_at?: string
+          dedupe_fingerprint?: string | null
+          email?: string | null
+          id?: string
+          keywords?: string[]
+          latitude?: number | null
+          longitude?: number | null
+          merged_into?: string | null
+          name: string
+          phone?: string | null
+          promoted_property_id?: string | null
+          property_type?: string | null
+          quality_score?: number
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slug?: string | null
+          socials?: Json
+          source_id?: string | null
+          source_url?: string | null
+          status?: string
+          tags?: string[]
+          town?: string | null
+          updated_at?: string
+          ward?: string | null
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          ai_confidence?: Json
+          ai_description?: string | null
+          amenities?: string[]
+          county_code?: string | null
+          created_at?: string
+          dedupe_fingerprint?: string | null
+          email?: string | null
+          id?: string
+          keywords?: string[]
+          latitude?: number | null
+          longitude?: number | null
+          merged_into?: string | null
+          name?: string
+          phone?: string | null
+          promoted_property_id?: string | null
+          property_type?: string | null
+          quality_score?: number
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          slug?: string | null
+          socials?: Json
+          source_id?: string | null
+          source_url?: string | null
+          status?: string
+          tags?: string[]
+          town?: string | null
+          updated_at?: string
+          ward?: string | null
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovered_properties_merged_into_fkey"
+            columns: ["merged_into"]
+            isOneToOne: false
+            referencedRelation: "discovered_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovered_properties_merged_into_fkey"
+            columns: ["merged_into"]
+            isOneToOne: false
+            referencedRelation: "public_discovered_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovered_properties_promoted_property_id_fkey"
+            columns: ["promoted_property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovered_properties_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "discovery_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discovery_feedback: {
+        Row: {
+          after_value: Json | null
+          before_value: Json | null
+          discovered_id: string | null
+          edited_at: string
+          editor_id: string | null
+          field: string
+          id: string
+        }
+        Insert: {
+          after_value?: Json | null
+          before_value?: Json | null
+          discovered_id?: string | null
+          edited_at?: string
+          editor_id?: string | null
+          field: string
+          id?: string
+        }
+        Update: {
+          after_value?: Json | null
+          before_value?: Json | null
+          discovered_id?: string | null
+          edited_at?: string
+          editor_id?: string | null
+          field?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_feedback_discovered_id_fkey"
+            columns: ["discovered_id"]
+            isOneToOne: false
+            referencedRelation: "discovered_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovery_feedback_discovered_id_fkey"
+            columns: ["discovered_id"]
+            isOneToOne: false
+            referencedRelation: "public_discovered_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discovery_runs: {
+        Row: {
+          error: string | null
+          finished_at: string | null
+          id: string
+          kind: string
+          ok: boolean | null
+          source_id: string | null
+          started_at: string
+          stats: Json
+        }
+        Insert: {
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          kind?: string
+          ok?: boolean | null
+          source_id?: string | null
+          started_at?: string
+          stats?: Json
+        }
+        Update: {
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          kind?: string
+          ok?: boolean | null
+          source_id?: string | null
+          started_at?: string
+          stats?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_runs_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "discovery_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discovery_sources: {
+        Row: {
+          county_code: string | null
+          created_at: string
+          enabled: boolean
+          id: string
+          kind: string
+          label: string | null
+          last_crawled_at: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          county_code?: string | null
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind: string
+          label?: string | null
+          last_crawled_at?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          county_code?: string | null
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind?: string
+          label?: string | null
+          last_crawled_at?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       external_listings: {
         Row: {
           country_code: string
@@ -1519,6 +1775,128 @@ export type Database = {
           },
         ]
       }
+      property_claims: {
+        Row: {
+          claimant_email: string
+          claimant_id: string | null
+          claimant_phone: string | null
+          created_at: string
+          discovered_id: string
+          id: string
+          proof_notes: string | null
+          status: string
+          updated_at: string
+          verification_attempts: number
+          verification_code_hash: string | null
+          verification_expires_at: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          claimant_email: string
+          claimant_id?: string | null
+          claimant_phone?: string | null
+          created_at?: string
+          discovered_id: string
+          id?: string
+          proof_notes?: string | null
+          status?: string
+          updated_at?: string
+          verification_attempts?: number
+          verification_code_hash?: string | null
+          verification_expires_at?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          claimant_email?: string
+          claimant_id?: string | null
+          claimant_phone?: string | null
+          created_at?: string
+          discovered_id?: string
+          id?: string
+          proof_notes?: string | null
+          status?: string
+          updated_at?: string
+          verification_attempts?: number
+          verification_code_hash?: string | null
+          verification_expires_at?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_claims_discovered_id_fkey"
+            columns: ["discovered_id"]
+            isOneToOne: false
+            referencedRelation: "discovered_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_claims_discovered_id_fkey"
+            columns: ["discovered_id"]
+            isOneToOne: false
+            referencedRelation: "public_discovered_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_merge_audit: {
+        Row: {
+          created_at: string
+          diff: Json
+          duplicate_id: string | null
+          id: string
+          performed_by: string | null
+          primary_id: string | null
+          reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          diff?: Json
+          duplicate_id?: string | null
+          id?: string
+          performed_by?: string | null
+          primary_id?: string | null
+          reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          diff?: Json
+          duplicate_id?: string | null
+          id?: string
+          performed_by?: string | null
+          primary_id?: string | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_merge_audit_duplicate_id_fkey"
+            columns: ["duplicate_id"]
+            isOneToOne: false
+            referencedRelation: "discovered_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_merge_audit_duplicate_id_fkey"
+            columns: ["duplicate_id"]
+            isOneToOne: false
+            referencedRelation: "public_discovered_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_merge_audit_primary_id_fkey"
+            columns: ["primary_id"]
+            isOneToOne: false
+            referencedRelation: "discovered_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_merge_audit_primary_id_fkey"
+            columns: ["primary_id"]
+            isOneToOne: false
+            referencedRelation: "public_discovered_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_limit_events: {
         Row: {
           bucket: string
@@ -2108,7 +2486,72 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_discovered_properties: {
+        Row: {
+          address: string | null
+          ai_description: string | null
+          amenities: string[] | null
+          county_code: string | null
+          created_at: string | null
+          id: string | null
+          keywords: string[] | null
+          latitude: number | null
+          longitude: number | null
+          name: string | null
+          property_type: string | null
+          quality_score: number | null
+          slug: string | null
+          status: string | null
+          tags: string[] | null
+          town: string | null
+          updated_at: string | null
+          ward: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          ai_description?: string | null
+          amenities?: string[] | null
+          county_code?: string | null
+          created_at?: string | null
+          id?: string | null
+          keywords?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          property_type?: string | null
+          quality_score?: number | null
+          slug?: string | null
+          status?: string | null
+          tags?: string[] | null
+          town?: string | null
+          updated_at?: string | null
+          ward?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          ai_description?: string | null
+          amenities?: string[] | null
+          county_code?: string | null
+          created_at?: string | null
+          id?: string | null
+          keywords?: string[] | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          property_type?: string | null
+          quality_score?: number | null
+          slug?: string | null
+          status?: string | null
+          tags?: string[] | null
+          town?: string | null
+          updated_at?: string | null
+          ward?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_organization_invitation: {

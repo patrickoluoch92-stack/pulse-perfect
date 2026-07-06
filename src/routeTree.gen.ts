@@ -16,10 +16,12 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
+import { Route as DiscoverIndexRouteImport } from './routes/discover.index'
 import { Route as MarketplaceMapRouteImport } from './routes/marketplace.map'
 import { Route as MarketplaceCountyRouteImport } from './routes/marketplace.$county'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as GuidesHotelSeoRouteImport } from './routes/guides.hotel-seo'
+import { Route as DiscoverSlugRouteImport } from './routes/discover.$slug'
 import { Route as CountiesSlugRouteImport } from './routes/counties.$slug'
 import { Route as AuthenticatedToursRouteImport } from './routes/_authenticated/tours'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
@@ -48,6 +50,9 @@ import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_au
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
 import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/public/hooks/partner-sync'
+import { Route as ApiPublicHooksDiscoveryTickRouteImport } from './routes/api/public/hooks/discovery-tick'
+import { Route as ApiPublicHooksDiscoveryRescoreRouteImport } from './routes/api/public/hooks/discovery-rescore'
+import { Route as AuthenticatedListingsAdminDiscoveryRouteImport } from './routes/_authenticated/listings.admin.discovery'
 import { Route as AuthenticatedListingsIdAvailabilityRouteImport } from './routes/_authenticated/listings.$id.availability'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -84,6 +89,11 @@ const MarketplaceIndexRoute = MarketplaceIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MarketplaceRoute,
 } as any)
+const DiscoverIndexRoute = DiscoverIndexRouteImport.update({
+  id: '/discover/',
+  path: '/discover/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketplaceMapRoute = MarketplaceMapRouteImport.update({
   id: '/map',
   path: '/map',
@@ -102,6 +112,11 @@ const InviteTokenRoute = InviteTokenRouteImport.update({
 const GuidesHotelSeoRoute = GuidesHotelSeoRouteImport.update({
   id: '/guides/hotel-seo',
   path: '/guides/hotel-seo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverSlugRoute = DiscoverSlugRouteImport.update({
+  id: '/discover/$slug',
+  path: '/discover/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CountiesSlugRoute = CountiesSlugRouteImport.update({
@@ -254,6 +269,24 @@ const ApiPublicHooksPartnerSyncRoute =
     path: '/api/public/hooks/partner-sync',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksDiscoveryTickRoute =
+  ApiPublicHooksDiscoveryTickRouteImport.update({
+    id: '/api/public/hooks/discovery-tick',
+    path: '/api/public/hooks/discovery-tick',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksDiscoveryRescoreRoute =
+  ApiPublicHooksDiscoveryRescoreRouteImport.update({
+    id: '/api/public/hooks/discovery-rescore',
+    path: '/api/public/hooks/discovery-rescore',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedListingsAdminDiscoveryRoute =
+  AuthenticatedListingsAdminDiscoveryRouteImport.update({
+    id: '/discovery',
+    path: '/discovery',
+    getParentRoute: () => AuthenticatedListingsAdminRoute,
+  } as any)
 const AuthenticatedListingsIdAvailabilityRoute =
   AuthenticatedListingsIdAvailabilityRouteImport.update({
     id: '/availability',
@@ -282,14 +315,16 @@ export interface FileRoutesByFullPath {
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
   '/counties/$slug': typeof CountiesSlugRoute
+  '/discover/$slug': typeof DiscoverSlugRoute
   '/guides/hotel-seo': typeof GuidesHotelSeoRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
-  '/listings/admin': typeof AuthenticatedListingsAdminRoute
+  '/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
@@ -298,6 +333,9 @@ export interface FileRoutesByFullPath {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
+  '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
+  '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -321,14 +359,16 @@ export interface FileRoutesByTo {
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
   '/counties/$slug': typeof CountiesSlugRoute
+  '/discover/$slug': typeof DiscoverSlugRoute
   '/guides/hotel-seo': typeof GuidesHotelSeoRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
-  '/listings/admin': typeof AuthenticatedListingsAdminRoute
+  '/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
@@ -337,6 +377,9 @@ export interface FileRoutesByTo {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
+  '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
+  '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -364,14 +407,16 @@ export interface FileRoutesById {
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/tours': typeof AuthenticatedToursRoute
   '/counties/$slug': typeof CountiesSlugRoute
+  '/discover/$slug': typeof DiscoverSlugRoute
   '/guides/hotel-seo': typeof GuidesHotelSeoRoute
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
-  '/_authenticated/listings/admin': typeof AuthenticatedListingsAdminRoute
+  '/_authenticated/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
   '/_authenticated/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/_authenticated/listings/import': typeof AuthenticatedListingsImportRoute
   '/_authenticated/listings/partners': typeof AuthenticatedListingsPartnersRoute
@@ -380,6 +425,9 @@ export interface FileRoutesById {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/_authenticated/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
+  '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
+  '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -407,10 +455,12 @@ export interface FileRouteTypes {
     | '/team'
     | '/tours'
     | '/counties/$slug'
+    | '/discover/$slug'
     | '/guides/hotel-seo'
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/discover/'
     | '/marketplace/'
     | '/invoices/$invoiceId'
     | '/listings/$id'
@@ -423,6 +473,9 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/listings/'
     | '/listings/$id/availability'
+    | '/listings/admin/discovery'
+    | '/api/public/hooks/discovery-rescore'
+    | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/partner-sync'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
@@ -446,10 +499,12 @@ export interface FileRouteTypes {
     | '/team'
     | '/tours'
     | '/counties/$slug'
+    | '/discover/$slug'
     | '/guides/hotel-seo'
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/discover'
     | '/marketplace'
     | '/invoices/$invoiceId'
     | '/listings/$id'
@@ -462,6 +517,9 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/listings'
     | '/listings/$id/availability'
+    | '/listings/admin/discovery'
+    | '/api/public/hooks/discovery-rescore'
+    | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/partner-sync'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
@@ -488,10 +546,12 @@ export interface FileRouteTypes {
     | '/_authenticated/team'
     | '/_authenticated/tours'
     | '/counties/$slug'
+    | '/discover/$slug'
     | '/guides/hotel-seo'
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/discover/'
     | '/marketplace/'
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/listings/$id'
@@ -504,6 +564,9 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/_authenticated/listings/'
     | '/_authenticated/listings/$id/availability'
+    | '/_authenticated/listings/admin/discovery'
+    | '/api/public/hooks/discovery-rescore'
+    | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/partner-sync'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
@@ -517,9 +580,13 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CountiesSlugRoute: typeof CountiesSlugRoute
+  DiscoverSlugRoute: typeof DiscoverSlugRoute
   GuidesHotelSeoRoute: typeof GuidesHotelSeoRoute
   InviteTokenRoute: typeof InviteTokenRoute
+  DiscoverIndexRoute: typeof DiscoverIndexRoute
   ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
+  ApiPublicHooksDiscoveryRescoreRoute: typeof ApiPublicHooksDiscoveryRescoreRoute
+  ApiPublicHooksDiscoveryTickRoute: typeof ApiPublicHooksDiscoveryTickRoute
   ApiPublicHooksPartnerSyncRoute: typeof ApiPublicHooksPartnerSyncRoute
   ApiPublicIcalTokenRoute: typeof ApiPublicIcalTokenRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -576,6 +643,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketplaceIndexRouteImport
       parentRoute: typeof MarketplaceRoute
     }
+    '/discover/': {
+      id: '/discover/'
+      path: '/discover'
+      fullPath: '/discover/'
+      preLoaderRoute: typeof DiscoverIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketplace/map': {
       id: '/marketplace/map'
       path: '/map'
@@ -602,6 +676,13 @@ declare module '@tanstack/react-router' {
       path: '/guides/hotel-seo'
       fullPath: '/guides/hotel-seo'
       preLoaderRoute: typeof GuidesHotelSeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover/$slug': {
+      id: '/discover/$slug'
+      path: '/discover/$slug'
+      fullPath: '/discover/$slug'
+      preLoaderRoute: typeof DiscoverSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/counties/$slug': {
@@ -800,6 +881,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksPartnerSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/discovery-tick': {
+      id: '/api/public/hooks/discovery-tick'
+      path: '/api/public/hooks/discovery-tick'
+      fullPath: '/api/public/hooks/discovery-tick'
+      preLoaderRoute: typeof ApiPublicHooksDiscoveryTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/discovery-rescore': {
+      id: '/api/public/hooks/discovery-rescore'
+      path: '/api/public/hooks/discovery-rescore'
+      fullPath: '/api/public/hooks/discovery-rescore'
+      preLoaderRoute: typeof ApiPublicHooksDiscoveryRescoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/listings/admin/discovery': {
+      id: '/_authenticated/listings/admin/discovery'
+      path: '/discovery'
+      fullPath: '/listings/admin/discovery'
+      preLoaderRoute: typeof AuthenticatedListingsAdminDiscoveryRouteImport
+      parentRoute: typeof AuthenticatedListingsAdminRoute
+    }
     '/_authenticated/listings/$id/availability': {
       id: '/_authenticated/listings/$id/availability'
       path: '/availability'
@@ -838,9 +940,24 @@ const AuthenticatedListingsIdRouteWithChildren =
     AuthenticatedListingsIdRouteChildren,
   )
 
+interface AuthenticatedListingsAdminRouteChildren {
+  AuthenticatedListingsAdminDiscoveryRoute: typeof AuthenticatedListingsAdminDiscoveryRoute
+}
+
+const AuthenticatedListingsAdminRouteChildren: AuthenticatedListingsAdminRouteChildren =
+  {
+    AuthenticatedListingsAdminDiscoveryRoute:
+      AuthenticatedListingsAdminDiscoveryRoute,
+  }
+
+const AuthenticatedListingsAdminRouteWithChildren =
+  AuthenticatedListingsAdminRoute._addFileChildren(
+    AuthenticatedListingsAdminRouteChildren,
+  )
+
 interface AuthenticatedListingsRouteChildren {
   AuthenticatedListingsIdRoute: typeof AuthenticatedListingsIdRouteWithChildren
-  AuthenticatedListingsAdminRoute: typeof AuthenticatedListingsAdminRoute
+  AuthenticatedListingsAdminRoute: typeof AuthenticatedListingsAdminRouteWithChildren
   AuthenticatedListingsAnalyticsRoute: typeof AuthenticatedListingsAnalyticsRoute
   AuthenticatedListingsImportRoute: typeof AuthenticatedListingsImportRoute
   AuthenticatedListingsPartnersRoute: typeof AuthenticatedListingsPartnersRoute
@@ -849,7 +966,7 @@ interface AuthenticatedListingsRouteChildren {
 
 const AuthenticatedListingsRouteChildren: AuthenticatedListingsRouteChildren = {
   AuthenticatedListingsIdRoute: AuthenticatedListingsIdRouteWithChildren,
-  AuthenticatedListingsAdminRoute: AuthenticatedListingsAdminRoute,
+  AuthenticatedListingsAdminRoute: AuthenticatedListingsAdminRouteWithChildren,
   AuthenticatedListingsAnalyticsRoute: AuthenticatedListingsAnalyticsRoute,
   AuthenticatedListingsImportRoute: AuthenticatedListingsImportRoute,
   AuthenticatedListingsPartnersRoute: AuthenticatedListingsPartnersRoute,
@@ -939,9 +1056,13 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   CountiesSlugRoute: CountiesSlugRoute,
+  DiscoverSlugRoute: DiscoverSlugRoute,
   GuidesHotelSeoRoute: GuidesHotelSeoRoute,
   InviteTokenRoute: InviteTokenRoute,
+  DiscoverIndexRoute: DiscoverIndexRoute,
   ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
+  ApiPublicHooksDiscoveryRescoreRoute: ApiPublicHooksDiscoveryRescoreRoute,
+  ApiPublicHooksDiscoveryTickRoute: ApiPublicHooksDiscoveryTickRoute,
   ApiPublicHooksPartnerSyncRoute: ApiPublicHooksPartnerSyncRoute,
   ApiPublicIcalTokenRoute: ApiPublicIcalTokenRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
