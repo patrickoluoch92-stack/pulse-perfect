@@ -17,6 +17,7 @@ function gatewayHeaders(extra: Record<string, string> = {}) {
 }
 
 export const placesAutocomplete = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
     z.object({
       input: z.string().min(1).max(200),
