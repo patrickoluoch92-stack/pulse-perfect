@@ -49,6 +49,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
 import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/public/hooks/partner-sync'
 import { Route as ApiPublicHooksDiscoveryTickRouteImport } from './routes/api/public/hooks/discovery-tick'
+import { Route as ApiPublicHooksDiscoveryRescoreRouteImport } from './routes/api/public/hooks/discovery-rescore'
 import { Route as AuthenticatedListingsIdAvailabilityRouteImport } from './routes/_authenticated/listings.$id.availability'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -261,6 +262,12 @@ const ApiPublicHooksDiscoveryTickRoute =
     path: '/api/public/hooks/discovery-tick',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksDiscoveryRescoreRoute =
+  ApiPublicHooksDiscoveryRescoreRouteImport.update({
+    id: '/api/public/hooks/discovery-rescore',
+    path: '/api/public/hooks/discovery-rescore',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedListingsIdAvailabilityRoute =
   AuthenticatedListingsIdAvailabilityRouteImport.update({
     id: '/availability',
@@ -305,6 +312,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
@@ -345,6 +353,7 @@ export interface FileRoutesByTo {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
@@ -389,6 +398,7 @@ export interface FileRoutesById {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
@@ -433,6 +443,7 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/listings/'
     | '/listings/$id/availability'
+    | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/partner-sync'
     | '/api/public/ical/$token'
@@ -473,6 +484,7 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/listings'
     | '/listings/$id/availability'
+    | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/partner-sync'
     | '/api/public/ical/$token'
@@ -516,6 +528,7 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/_authenticated/listings/'
     | '/_authenticated/listings/$id/availability'
+    | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/partner-sync'
     | '/api/public/ical/$token'
@@ -533,6 +546,7 @@ export interface RootRouteChildren {
   GuidesHotelSeoRoute: typeof GuidesHotelSeoRoute
   InviteTokenRoute: typeof InviteTokenRoute
   ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
+  ApiPublicHooksDiscoveryRescoreRoute: typeof ApiPublicHooksDiscoveryRescoreRoute
   ApiPublicHooksDiscoveryTickRoute: typeof ApiPublicHooksDiscoveryTickRoute
   ApiPublicHooksPartnerSyncRoute: typeof ApiPublicHooksPartnerSyncRoute
   ApiPublicIcalTokenRoute: typeof ApiPublicIcalTokenRoute
@@ -821,6 +835,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksDiscoveryTickRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/discovery-rescore': {
+      id: '/api/public/hooks/discovery-rescore'
+      path: '/api/public/hooks/discovery-rescore'
+      fullPath: '/api/public/hooks/discovery-rescore'
+      preLoaderRoute: typeof ApiPublicHooksDiscoveryRescoreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/listings/$id/availability': {
       id: '/_authenticated/listings/$id/availability'
       path: '/availability'
@@ -963,6 +984,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesHotelSeoRoute: GuidesHotelSeoRoute,
   InviteTokenRoute: InviteTokenRoute,
   ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
+  ApiPublicHooksDiscoveryRescoreRoute: ApiPublicHooksDiscoveryRescoreRoute,
   ApiPublicHooksDiscoveryTickRoute: ApiPublicHooksDiscoveryTickRoute,
   ApiPublicHooksPartnerSyncRoute: ApiPublicHooksPartnerSyncRoute,
   ApiPublicIcalTokenRoute: ApiPublicIcalTokenRoute,
