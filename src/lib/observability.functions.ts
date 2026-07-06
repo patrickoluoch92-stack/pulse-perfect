@@ -52,10 +52,10 @@ export const reportAppError = createServerFn({ method: "POST" })
       // ignore — never block error reporting
     }
 
-    const context = JSON.parse(JSON.stringify(data.context ?? {})) as Record<string, unknown>;
-    if (inboundCorrelation) context.correlationId = inboundCorrelation;
-    if (data.action) context.action = data.action;
-    if (data.breadcrumbs?.length) context.breadcrumbs = data.breadcrumbs;
+    const ctx = JSON.parse(JSON.stringify(data.context ?? {})) as Record<string, unknown>;
+    if (inboundCorrelation) ctx.correlationId = inboundCorrelation;
+    if (data.action) ctx.action = data.action;
+    if (data.breadcrumbs?.length) ctx.breadcrumbs = data.breadcrumbs;
 
     await supabaseAdmin.from("app_errors").insert({
       user_id: userId,
@@ -67,7 +67,7 @@ export const reportAppError = createServerFn({ method: "POST" })
       url: data.url ?? null,
       action: data.action ?? null,
       correlation_id: inboundCorrelation,
-      context: context as never,
+      context: ctx as never,
     });
 
     return { ok: true };
