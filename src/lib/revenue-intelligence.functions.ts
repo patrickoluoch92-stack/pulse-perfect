@@ -28,17 +28,17 @@ export const recommendPricing = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => PriceInput.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    await enforceRateLimit({ userId, action: "revenue.pricing", limit: 60, windowSec: 60 });
+    await enforceRateLimit({ bucket: "revenue.pricing", userId, limit: 60, windowSec: 60 });
 
     const { data: unit, error: uErr } = await supabase
       .from("units")
-      .select("id, name, base_rate, property_id, properties!inner(org_id)")
+      .select("id, name, base_price, property_id")
       .eq("id", data.unitId)
       .maybeSingle();
     if (uErr || !unit) throw new Error("Unit not found");
 
-    const base = Number((unit as { base_rate: number }).base_rate) || 0;
-    if (base <= 0) throw new Error("Set a base rate on this unit first.");
+    const base = Number(unit.base_price) || 0;
+    if (base <= 0) throw new Error("Set a base price on this unit first.");
 
     const today = new Date();
     const start = today.toISOString().slice(0, 10);
@@ -108,7 +108,7 @@ export const recommendPricing = createServerFn({ method: "POST" })
       });
     }
 
-    return { unitId: data.unitId, unitName: (unit as { name: string }).name, base, suggestions };
+    return { unitId: data.unitId, unitName: unit.name, base, suggestions };
   });
 
 // ---------------- Occupancy forecast ----------------
@@ -176,9 +176,9 @@ export const generateRevenueInsights = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ propertyId: z.string().uuid().optional() }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    await enforceRateLimit({ userId, action: "revenue.insights", limit: 20, windowSec: 300 });
+    await enforceRateLimit({ bucket: "revenue.insights", userId, limit: 20, windowSec: 300 });
 
-    let q = supabase.from("units").select("id, name, base_rate, property_id");
+    let q = supabase.from("units").select("id, name, base_price, property_id");
     if (data.propertyId) q = q.eq("property_id", data.propertyId);
     const { data: units } = await q;
     const unitIds = (units ?? []).map((u) => u.id);

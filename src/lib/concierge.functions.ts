@@ -26,27 +26,28 @@ function publicClient() {
   );
 }
 
-async function retrieveContext(query: string, county?: string) {
+type GroundingRow = {
+  name: string;
+  slug: string;
+  town: string | null;
+  county: string | null;
+  category: string;
+  short_description: string | null;
+};
+
+async function retrieveContext(query: string, county?: string): Promise<GroundingRow[]> {
   const supabase = publicClient();
-  const [mkt, disc] = await Promise.all([
-    supabase
-      .from("marketplace_properties")
-      .select("name, slug, town, county, category, short_description")
-      .eq("status", "approved")
-      .ilike("name", `%${query.slice(0, 40)}%`)
-      .limit(6),
-    supabase
-      .from("public_discovered_properties" as never)
-      .select("name, slug, town, county, category, tags")
-      .maybeSingle()
-      .then(() => null)
-      .catch(() => null),
-  ]);
-  const rows = mkt.data ?? [];
+  const q = query.slice(0, 40).replace(/[%_]/g, " ");
+  const { data } = await supabase
+    .from("marketplace_properties")
+    .select("name, slug, town, county, category, short_description")
+    .eq("status", "approved")
+    .or(`name.ilike.%${q}%,short_description.ilike.%${q}%,town.ilike.%${q}%,county.ilike.%${q}%`)
+    .limit(8);
+  const rows = (data ?? []) as GroundingRow[];
   if (county) {
     return rows.filter((r) => (r.county ?? "").toLowerCase().includes(county.toLowerCase()));
   }
-  void disc;
   return rows;
 }
 
