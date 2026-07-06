@@ -52,6 +52,7 @@ import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical
 import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/public/hooks/partner-sync'
 import { Route as ApiPublicHooksDiscoveryTickRouteImport } from './routes/api/public/hooks/discovery-tick'
 import { Route as ApiPublicHooksDiscoveryRescoreRouteImport } from './routes/api/public/hooks/discovery-rescore'
+import { Route as AuthenticatedListingsAdminDiscoveryRouteImport } from './routes/_authenticated/listings.admin.discovery'
 import { Route as AuthenticatedListingsIdAvailabilityRouteImport } from './routes/_authenticated/listings.$id.availability'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -280,6 +281,12 @@ const ApiPublicHooksDiscoveryRescoreRoute =
     path: '/api/public/hooks/discovery-rescore',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedListingsAdminDiscoveryRoute =
+  AuthenticatedListingsAdminDiscoveryRouteImport.update({
+    id: '/discovery',
+    path: '/discovery',
+    getParentRoute: () => AuthenticatedListingsAdminRoute,
+  } as any)
 const AuthenticatedListingsIdAvailabilityRoute =
   AuthenticatedListingsIdAvailabilityRouteImport.update({
     id: '/availability',
@@ -317,7 +324,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
-  '/listings/admin': typeof AuthenticatedListingsAdminRoute
+  '/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
@@ -326,6 +333,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
@@ -360,7 +368,7 @@ export interface FileRoutesByTo {
   '/marketplace': typeof MarketplaceIndexRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
-  '/listings/admin': typeof AuthenticatedListingsAdminRoute
+  '/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
@@ -369,6 +377,7 @@ export interface FileRoutesByTo {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
@@ -407,7 +416,7 @@ export interface FileRoutesById {
   '/marketplace/': typeof MarketplaceIndexRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
-  '/_authenticated/listings/admin': typeof AuthenticatedListingsAdminRoute
+  '/_authenticated/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
   '/_authenticated/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/_authenticated/listings/import': typeof AuthenticatedListingsImportRoute
   '/_authenticated/listings/partners': typeof AuthenticatedListingsPartnersRoute
@@ -416,6 +425,7 @@ export interface FileRoutesById {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/_authenticated/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
@@ -463,6 +473,7 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/listings/'
     | '/listings/$id/availability'
+    | '/listings/admin/discovery'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/partner-sync'
@@ -506,6 +517,7 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/listings'
     | '/listings/$id/availability'
+    | '/listings/admin/discovery'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/partner-sync'
@@ -552,6 +564,7 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/_authenticated/listings/'
     | '/_authenticated/listings/$id/availability'
+    | '/_authenticated/listings/admin/discovery'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/partner-sync'
@@ -882,6 +895,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksDiscoveryRescoreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/listings/admin/discovery': {
+      id: '/_authenticated/listings/admin/discovery'
+      path: '/discovery'
+      fullPath: '/listings/admin/discovery'
+      preLoaderRoute: typeof AuthenticatedListingsAdminDiscoveryRouteImport
+      parentRoute: typeof AuthenticatedListingsAdminRoute
+    }
     '/_authenticated/listings/$id/availability': {
       id: '/_authenticated/listings/$id/availability'
       path: '/availability'
@@ -920,9 +940,24 @@ const AuthenticatedListingsIdRouteWithChildren =
     AuthenticatedListingsIdRouteChildren,
   )
 
+interface AuthenticatedListingsAdminRouteChildren {
+  AuthenticatedListingsAdminDiscoveryRoute: typeof AuthenticatedListingsAdminDiscoveryRoute
+}
+
+const AuthenticatedListingsAdminRouteChildren: AuthenticatedListingsAdminRouteChildren =
+  {
+    AuthenticatedListingsAdminDiscoveryRoute:
+      AuthenticatedListingsAdminDiscoveryRoute,
+  }
+
+const AuthenticatedListingsAdminRouteWithChildren =
+  AuthenticatedListingsAdminRoute._addFileChildren(
+    AuthenticatedListingsAdminRouteChildren,
+  )
+
 interface AuthenticatedListingsRouteChildren {
   AuthenticatedListingsIdRoute: typeof AuthenticatedListingsIdRouteWithChildren
-  AuthenticatedListingsAdminRoute: typeof AuthenticatedListingsAdminRoute
+  AuthenticatedListingsAdminRoute: typeof AuthenticatedListingsAdminRouteWithChildren
   AuthenticatedListingsAnalyticsRoute: typeof AuthenticatedListingsAnalyticsRoute
   AuthenticatedListingsImportRoute: typeof AuthenticatedListingsImportRoute
   AuthenticatedListingsPartnersRoute: typeof AuthenticatedListingsPartnersRoute
@@ -931,7 +966,7 @@ interface AuthenticatedListingsRouteChildren {
 
 const AuthenticatedListingsRouteChildren: AuthenticatedListingsRouteChildren = {
   AuthenticatedListingsIdRoute: AuthenticatedListingsIdRouteWithChildren,
-  AuthenticatedListingsAdminRoute: AuthenticatedListingsAdminRoute,
+  AuthenticatedListingsAdminRoute: AuthenticatedListingsAdminRouteWithChildren,
   AuthenticatedListingsAnalyticsRoute: AuthenticatedListingsAnalyticsRoute,
   AuthenticatedListingsImportRoute: AuthenticatedListingsImportRoute,
   AuthenticatedListingsPartnersRoute: AuthenticatedListingsPartnersRoute,
