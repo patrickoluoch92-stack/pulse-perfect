@@ -174,10 +174,13 @@ export const updateMaintenanceStatus = createServerFn({ method: "POST" })
       .parse(raw),
   )
   .handler(async ({ data, context }) => {
-    const patch: Record<string, unknown> = { status: data.status };
-    if (data.status === "resolved" || data.status === "closed") {
-      patch.resolved_at = new Date().toISOString();
-    }
+    const patch = {
+      status: data.status,
+      resolved_at:
+        data.status === "resolved" || data.status === "closed"
+          ? new Date().toISOString()
+          : null,
+    };
     const { error } = await context.supabase
       .from("maintenance_tickets")
       .update(patch)
