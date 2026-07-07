@@ -111,6 +111,53 @@ function AICommandPage() {
             ) : <p className="text-sm text-muted-foreground">Loading…</p>}
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-4 w-4" /> Knowledge-layer search analytics (14d)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {search.data ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <StatLine label="Total searches" value={search.data.total} />
+                  <StatLine
+                    label="Zero-result rate"
+                    value={`${Math.round(search.data.zeroResultRate * 100)}%`}
+                  />
+                  <StatLine label="Avg latency" value={`${search.data.avgLatencyMs} ms`} />
+                </div>
+                {search.data.topQueries.length > 0 && (
+                  <div className="rounded border">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted">
+                        <tr>
+                          <th className="p-2 text-left">Top query</th>
+                          <th className="p-2 text-right">Count</th>
+                          <th className="p-2 text-right">Zero-result</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {search.data.topQueries.slice(0, 8).map((q) => (
+                          <tr key={q.query} className="border-t">
+                            <td className="p-2 truncate">{q.query || "(empty)"}</td>
+                            <td className="p-2 text-right">{q.count}</td>
+                            <td className="p-2 text-right text-muted-foreground">{q.zero}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">Loading…</p>
+            )}
+          </CardContent>
+        </Card>
+
       </div>
     </DashboardShell>
   );
