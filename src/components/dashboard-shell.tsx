@@ -15,6 +15,8 @@ const nav = [
   { to: "/dashboard", label: "Overview", icon: Home },
   { to: "/properties", label: "Properties", icon: BedDouble },
   { to: "/reservations", label: "Reservations", icon: Calendar },
+  { to: "/housekeeping", label: "Housekeeping", icon: Sprout },
+  { to: "/maintenance", label: "Maintenance", icon: Wrench },
   { to: "/tours", label: "Tours", icon: MapPin },
   { to: "/invoices", label: "Invoices", icon: FileText },
   { to: "/team", label: "Team", icon: Users },
