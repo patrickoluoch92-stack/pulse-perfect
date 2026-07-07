@@ -11,6 +11,30 @@ const PriceInput = z.object({
   horizonDays: z.number().int().min(1).max(120).default(30),
 });
 
+async function persistFact(opts: {
+  propertyId: string;
+  orgId: string | null;
+  scope: "quality" | "bookings" | "search" | "composite";
+  payload: Record<string, unknown>;
+  confidence?: number;
+}) {
+  const { upsertPropertyFact } = await import("./knowledge.functions");
+  try {
+    await upsertPropertyFact({
+      data: {
+        propertyId: opts.propertyId,
+        orgId: opts.orgId,
+        scope: opts.scope,
+        sourceEngine: "revenue",
+        payload: opts.payload,
+        confidence: opts.confidence ?? 1,
+      },
+    });
+  } catch {
+    // knowledge writes are best-effort — never break the caller
+  }
+}
+
 type PricingSuggestion = {
   date: string;
   baseRate: number;
@@ -32,7 +56,7 @@ export const recommendPricing = createServerFn({ method: "POST" })
 
     const { data: unit, error: uErr } = await supabase
       .from("units")
-      .select("id, name, base_price, property_id")
+      .select("id, name, base_price, property_id, org_id")
       .eq("id", data.unitId)
       .maybeSingle();
     if (uErr || !unit) throw new Error("Unit not found");
@@ -108,6 +132,24 @@ export const recommendPricing = createServerFn({ method: "POST" })
       });
     }
 
+    const avgSuggested =
+      suggestions.reduce((s, x) => s + x.suggestedRate, 0) / Math.max(1, suggestions.length);
+    const avgDemand =
+      suggestions.reduce((s, x) => s + x.demandScore, 0) / Math.max(1, suggestions.length);
+    await persistFact({
+      propertyId: unit.property_id,
+      orgId: (unit as any).org_id ?? null,
+      scope: "bookings",
+      payload: {
+        unitId: data.unitId,
+        horizonDays: data.horizonDays,
+        baseRate: base,
+        avgSuggested: Math.round(avgSuggested),
+        avgDemand: Math.round(avgDemand * 100) / 100,
+        bookedNights: bookedDates.size,
+      },
+    });
+
     return { unitId: data.unitId, unitName: unit.name, base, suggestions };
   });
 
@@ -178,10 +220,11 @@ export const generateRevenueInsights = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     await enforceRateLimit({ bucket: "revenue.insights", userId, limit: 20, windowSec: 300 });
 
-    let q = supabase.from("units").select("id, name, base_price, property_id");
+    let q = supabase.from("units").select("id, name, base_price, property_id, org_id");
     if (data.propertyId) q = q.eq("property_id", data.propertyId);
     const { data: units } = await q;
     const unitIds = (units ?? []).map((u) => u.id);
+    const orgId = (units ?? [])[0]?.org_id ?? null;
 
     const today = new Date();
     const start = new Date(today.getTime() - 90 * 86400_000).toISOString().slice(0, 10);
@@ -231,6 +274,15 @@ export const generateRevenueInsights = createServerFn({ method: "POST" })
         },
       },
     });
+
+    if (data.propertyId) {
+      await persistFact({
+        propertyId: data.propertyId,
+        orgId,
+        scope: "composite",
+        payload: { stats, summary: insights.summary },
+      });
+    }
 
     return { stats, insights };
   });
