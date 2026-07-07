@@ -28,6 +28,7 @@ const nav = [
   { to: "/onboarding", label: "List a property", icon: Rocket },
   { to: "/listings/partners", label: "Partner Sync", icon: Plug },
   { to: "/listings/admin/discovery", label: "Discovery AI", icon: Compass },
+  { to: "/listings/admin/coupons", label: "Coupons", icon: Ticket },
   { to: "/revenue", label: "Revenue AI", icon: TrendingUp },
   { to: "/ai-command", label: "AI Command", icon: Brain },
   { to: "/concierge", label: "Concierge", icon: Bot },
