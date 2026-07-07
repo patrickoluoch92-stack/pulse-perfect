@@ -129,13 +129,13 @@ export const fraudSignals = createServerFn({ method: "POST" })
     // M-PESA failures burst
     const { data: mpesa } = await supabase
       .from("mpesa_transactions")
-      .select("id, status, created_at, amount, phone")
+      .select("id, status, created_at, amount, phone_number")
       .gte("created_at", since)
       .limit(1000);
     const failed = (mpesa ?? []).filter((t) => t.status === "failed" || t.status === "cancelled");
     const failByPhone = new Map<string, number>();
     for (const t of failed) {
-      if (t.phone) failByPhone.set(t.phone, (failByPhone.get(t.phone) ?? 0) + 1);
+      if (t.phone_number) failByPhone.set(t.phone_number, (failByPhone.get(t.phone_number) ?? 0) + 1);
     }
     for (const [phone, n] of failByPhone) {
       if (n >= 3) {
