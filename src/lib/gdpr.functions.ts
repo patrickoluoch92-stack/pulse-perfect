@@ -18,8 +18,8 @@ export const exportMyData = createServerFn({ method: "POST" })
       supabase.from("guest_wishlists").select("*").eq("user_id", userId),
       supabase.from("loyalty_accounts").select("*").eq("user_id", userId).maybeSingle(),
       supabase.from("loyalty_ledger").select("*").eq("user_id", userId),
-      supabase.from("marketplace_bookings").select("*").eq("guest_user_id", userId),
-      supabase.from("marketplace_property_reviews").select("*").eq("author_user_id", userId),
+      supabase.from("marketplace_bookings").select("*").eq("guest_id", userId),
+      supabase.from("marketplace_property_reviews").select("*").eq("reviewer_id", userId),
     ]);
 
     return {
