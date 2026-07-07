@@ -47,7 +47,12 @@ const EXTRACT_SCHEMA = {
             amenities: { type: "array", items: { type: "string" } },
             tags: { type: "array", items: { type: "string" } },
             keywords: { type: "array", items: { type: "string" } },
+            secondary_types: { type: "array", items: { type: "string" } },
+            attributes: { type: "array", items: { type: "string" } },
+            activities: { type: "array", items: { type: "string" } },
+            nearby_parks: { type: "array", items: { type: "string" } },
             ai_description: { type: "string" },
+
             confidence: {
               type: "object",
               properties: {
