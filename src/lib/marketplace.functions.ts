@@ -53,6 +53,11 @@ const listInput = z.object({
   priceMin: z.number().nonnegative().nullable().optional(),
   priceMax: z.number().nonnegative().nullable().optional(),
   amenities: z.array(z.string().max(60)).max(20).optional(),
+  // NEW filters — all optional, backward compatible
+  activities: z.array(z.string().max(60)).max(20).optional(),
+  attributes: z.array(z.string().max(40)).max(20).optional(),
+  nearbyParks: z.array(z.string().max(80)).max(10).optional(),
+  minRating: z.number().min(0).max(5).nullable().optional(),
 });
 
 export const listPublicProperties = createServerFn({ method: "GET" })
@@ -65,23 +70,39 @@ export const listPublicProperties = createServerFn({ method: "GET" })
     let query = supabase
       .from("marketplace_properties")
       .select(
-        "id, slug, name, category, county_code, town, description, price_per_night, currency, main_image_path, is_featured, availability, rating_avg, rating_count",
+        "id, slug, name, category, secondary_categories, county_code, town, description, price_per_night, currency, main_image_path, is_featured, availability, rating_avg, rating_count, activities, attributes, nearby_parks",
         { count: "exact" },
       )
       .eq("status", "approved");
 
     if (data.county) query = query.eq("county_code", data.county);
-    if (data.category) query = query.eq("category", data.category as any);
+    if (data.category) {
+      // Match either primary or secondary category so category tags work like facets
+      query = query.or(
+        `category.eq.${data.category},secondary_categories.cs.{${data.category}}`,
+      );
+    }
     if (data.featuredOnly) query = query.eq("is_featured", true);
     if (data.priceMin != null) query = query.gte("price_per_night", data.priceMin);
     if (data.priceMax != null) query = query.lte("price_per_night", data.priceMax);
+    if (data.minRating != null) query = query.gte("rating_avg", data.minRating);
     if (data.amenities && data.amenities.length > 0) {
       query = query.contains("amenities", data.amenities);
+    }
+    if (data.activities && data.activities.length > 0) {
+      query = query.contains("activities", data.activities);
+    }
+    if (data.attributes && data.attributes.length > 0) {
+      query = query.contains("attributes", data.attributes);
+    }
+    if (data.nearbyParks && data.nearbyParks.length > 0) {
+      query = query.contains("nearby_parks", data.nearbyParks);
     }
     if (data.search) {
       const term = `%${data.search.replace(/[%_]/g, "")}%`;
       query = query.or(`name.ilike.${term},town.ilike.${term},description.ilike.${term}`);
     }
+
 
     const { data: rows, error, count } = await query
       .order("is_featured", { ascending: false })

@@ -63,16 +63,28 @@ const EXTRACT_SCHEMA = {
   },
 };
 
-const SYSTEM_PROMPT = `You are an assistant that extracts Kenyan accommodation businesses from public directory text.
+const SYSTEM_PROMPT = `You are an assistant that extracts Kenyan accommodation & travel businesses from public directory text.
 
 RULES:
 - Only extract factual business information (name, type, location, contact) that appears in the source text.
 - Never copy guest reviews, ratings, or copyrighted marketing descriptions verbatim.
 - Write an ORIGINAL 1-2 sentence SEO-friendly description in your own words based only on factual details.
-- Classify property_type as one of: hotel, resort, lodge, guest_house, bnb, serviced_apartment, holiday_home, villa, hostel, camp, safari_camp, eco_lodge, apartment, conference_centre, tour_company, vacation_rental, unknown.
+- Classify property_type (PRIMARY) as one of:
+  hotel, resort, lodge, guest_house, bnb, boutique_hotel, serviced_apartment, holiday_home, villa, hostel,
+  camp, safari_camp, luxury_tented_camp, eco_lodge, campsite, glamping, mountain_lodge, beach_villa,
+  lakefront_property, forest_retreat, conservancy, ranch,
+  conference_centre, wedding_venue, corporate_retreat, team_building_venue, wellness_retreat,
+  apartment, tour_company, vacation_rental, unknown.
+- Also return secondary_types[] with any additional categories from the same list that clearly apply.
+- Return attributes[] using ONLY these tokens when supported by the text:
+  beachfront, lakefront, forest, mountain, family_friendly, pet_friendly, luxury, budget, eco_friendly, accessible, romantic.
+- Return activities[] using ONLY these tokens when clearly offered:
+  wildlife_safari, horse_riding, bird_watching, nature_walks, hiking, camping, photography_safari, cultural_experience, farm_tour, adventure_activities, fishing, boat_excursion, kayaking, diving_snorkelling, cycling, yoga_wellness.
+- Return nearby_parks[] with names of national parks / reserves / conservancies mentioned nearby.
 - Return per-record confidence 0-1.
 - Kenya county codes use 3-digit strings ("001"..."047"); omit if unknown.
-- Only return businesses that clearly offer accommodation. Skip advertisements, booking-site listings, and duplicates.`;
+- Only return businesses that clearly offer accommodation or a bookable travel experience. Skip advertisements, booking-site listings, and duplicates.`;
+
 
 function isHostAllowed(url: string): boolean {
   try {
