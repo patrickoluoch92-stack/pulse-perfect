@@ -44,6 +44,7 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAiCommandRouteImport } from './routes/_authenticated/ai-command'
 import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authenticated/listings.index'
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
+import { Route as DiscoverCountyCountyRouteImport } from './routes/discover.county.$county'
 import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-vitals'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
 import { Route as AuthenticatedListingsPartnersRouteImport } from './routes/_authenticated/listings.partners'
@@ -239,6 +240,11 @@ const MarketplacePSlugRoute = MarketplacePSlugRouteImport.update({
   path: '/p/$slug',
   getParentRoute: () => MarketplaceRoute,
 } as any)
+const DiscoverCountyCountyRoute = DiscoverCountyCountyRouteImport.update({
+  id: '/discover/county/$county',
+  path: '/discover/county/$county',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWebVitalsRoute = ApiPublicWebVitalsRouteImport.update({
   id: '/api/public/web-vitals',
   path: '/api/public/web-vitals',
@@ -374,6 +380,7 @@ export interface FileRoutesByFullPath {
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
+  '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
@@ -424,6 +431,7 @@ export interface FileRoutesByTo {
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
+  '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
@@ -478,6 +486,7 @@ export interface FileRoutesById {
   '/_authenticated/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
+  '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
@@ -532,6 +541,7 @@ export interface FileRouteTypes {
     | '/listings/partners'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
+    | '/discover/county/$county'
     | '/marketplace/p/$slug'
     | '/listings/'
     | '/listings/$id/availability'
@@ -582,6 +592,7 @@ export interface FileRouteTypes {
     | '/listings/partners'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
+    | '/discover/county/$county'
     | '/marketplace/p/$slug'
     | '/listings'
     | '/listings/$id/availability'
@@ -635,6 +646,7 @@ export interface FileRouteTypes {
     | '/_authenticated/listings/partners'
     | '/_authenticated/properties/$propertyId'
     | '/api/public/web-vitals'
+    | '/discover/county/$county'
     | '/marketplace/p/$slug'
     | '/_authenticated/listings/'
     | '/_authenticated/listings/$id/availability'
@@ -661,6 +673,7 @@ export interface RootRouteChildren {
   InviteTokenRoute: typeof InviteTokenRoute
   DiscoverIndexRoute: typeof DiscoverIndexRoute
   ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
+  DiscoverCountyCountyRoute: typeof DiscoverCountyCountyRoute
   ApiPublicHooksDiscoveryRescoreRoute: typeof ApiPublicHooksDiscoveryRescoreRoute
   ApiPublicHooksDiscoveryTickRoute: typeof ApiPublicHooksDiscoveryTickRoute
   ApiPublicHooksPartnerSyncRoute: typeof ApiPublicHooksPartnerSyncRoute
@@ -914,6 +927,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/marketplace/p/$slug'
       preLoaderRoute: typeof MarketplacePSlugRouteImport
       parentRoute: typeof MarketplaceRoute
+    }
+    '/discover/county/$county': {
+      id: '/discover/county/$county'
+      path: '/discover/county/$county'
+      fullPath: '/discover/county/$county'
+      preLoaderRoute: typeof DiscoverCountyCountyRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/web-vitals': {
       id: '/api/public/web-vitals'
@@ -1191,6 +1211,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteTokenRoute: InviteTokenRoute,
   DiscoverIndexRoute: DiscoverIndexRoute,
   ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
+  DiscoverCountyCountyRoute: DiscoverCountyCountyRoute,
   ApiPublicHooksDiscoveryRescoreRoute: ApiPublicHooksDiscoveryRescoreRoute,
   ApiPublicHooksDiscoveryTickRoute: ApiPublicHooksDiscoveryTickRoute,
   ApiPublicHooksPartnerSyncRoute: ApiPublicHooksPartnerSyncRoute,
