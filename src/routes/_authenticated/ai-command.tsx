@@ -5,8 +5,9 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { adminDiscoveryStats } from "@/lib/discovery.functions";
 import { forecastOccupancy } from "@/lib/revenue-intelligence.functions";
+import { getSearchAnalytics } from "@/lib/knowledge.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { Activity, Compass, Sparkles, TrendingUp } from "lucide-react";
+import { Activity, Compass, Search, Sparkles, TrendingUp } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/ai-command")({
   head: () => ({ meta: [{ title: "AI Command Centre — HostPulse" }] }),
