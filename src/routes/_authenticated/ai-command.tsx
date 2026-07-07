@@ -17,9 +17,14 @@ export const Route = createFileRoute("/_authenticated/ai-command")({
 function AICommandPage() {
   const discStats = useServerFn(adminDiscoveryStats);
   const forecast = useServerFn(forecastOccupancy);
+  const searchStats = useServerFn(getSearchAnalytics);
 
   const disc = useQuery({ queryKey: ["ai-disc"], queryFn: () => discStats() });
   const occ = useQuery({ queryKey: ["ai-occ"], queryFn: () => forecast({ data: { days: 30 } }) });
+  const search = useQuery({
+    queryKey: ["ai-search"],
+    queryFn: () => searchStats({ data: { days: 14 } }),
+  });
 
   const platform = useQuery({
     queryKey: ["ai-platform"],
