@@ -77,6 +77,20 @@ export const recommendPricing = createServerFn({ method: "POST" })
       .gte("check_out", start)
       .lte("check_in", end);
 
+    // Pull competitor + event signals affecting this property/region.
+    const { fetchSignals, applySignalsForDate } = await import("./pricing-signals.functions");
+    const { data: propRow } = await supabase
+      .from("marketplace_properties")
+      .select("county_code")
+      .eq("id", unit.property_id)
+      .maybeSingle();
+    const signals = await fetchSignals(supabase, {
+      propertyId: unit.property_id,
+      regionCode: propRow?.county_code ?? null,
+      from: start,
+      to: end,
+    });
+
     const bookedDates = new Set<string>();
     for (const r of reservations ?? []) {
       if (r.status === "cancelled") continue;
