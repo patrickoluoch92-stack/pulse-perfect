@@ -11,6 +11,30 @@ const PriceInput = z.object({
   horizonDays: z.number().int().min(1).max(120).default(30),
 });
 
+async function persistFact(opts: {
+  propertyId: string;
+  orgId: string | null;
+  scope: "quality" | "bookings" | "search" | "composite";
+  payload: Record<string, unknown>;
+  confidence?: number;
+}) {
+  const { upsertPropertyFact } = await import("./knowledge.functions");
+  try {
+    await upsertPropertyFact({
+      data: {
+        propertyId: opts.propertyId,
+        orgId: opts.orgId,
+        scope: opts.scope,
+        sourceEngine: "revenue",
+        payload: opts.payload,
+        confidence: opts.confidence ?? 1,
+      },
+    });
+  } catch {
+    // knowledge writes are best-effort — never break the caller
+  }
+}
+
 type PricingSuggestion = {
   date: string;
   baseRate: number;
