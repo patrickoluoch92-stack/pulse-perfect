@@ -1669,9 +1669,16 @@ export type Database = {
       }
       marketplace_properties: {
         Row: {
+          accessibility_notes: string | null
+          activities: string[]
           amenities: string[]
+          attributes: string[]
           availability: Database["public"]["Enums"]["mkt_availability"]
+          best_seasons: string[]
+          capacity: number | null
           category: Database["public"]["Enums"]["mkt_property_category"]
+          check_in_time: string | null
+          check_out_time: string | null
           contact_email: string | null
           contact_phone: string | null
           contact_whatsapp: string | null
@@ -1689,6 +1696,7 @@ export type Database = {
           longitude: number | null
           main_image_path: string | null
           name: string
+          nearby_parks: string[]
           org_id: string
           postal_address: string | null
           price_per_night: number | null
@@ -1697,9 +1705,11 @@ export type Database = {
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          secondary_categories: string[]
           slug: string
           status: Database["public"]["Enums"]["mkt_listing_status"]
           submitted_at: string | null
+          sustainability_notes: string | null
           town: string
           updated_at: string
           verified_at: string | null
@@ -1707,9 +1717,16 @@ export type Database = {
           ward: string | null
         }
         Insert: {
+          accessibility_notes?: string | null
+          activities?: string[]
           amenities?: string[]
+          attributes?: string[]
           availability?: Database["public"]["Enums"]["mkt_availability"]
+          best_seasons?: string[]
+          capacity?: number | null
           category: Database["public"]["Enums"]["mkt_property_category"]
+          check_in_time?: string | null
+          check_out_time?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           contact_whatsapp?: string | null
@@ -1727,6 +1744,7 @@ export type Database = {
           longitude?: number | null
           main_image_path?: string | null
           name: string
+          nearby_parks?: string[]
           org_id: string
           postal_address?: string | null
           price_per_night?: number | null
@@ -1735,9 +1753,11 @@ export type Database = {
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          secondary_categories?: string[]
           slug: string
           status?: Database["public"]["Enums"]["mkt_listing_status"]
           submitted_at?: string | null
+          sustainability_notes?: string | null
           town: string
           updated_at?: string
           verified_at?: string | null
@@ -1745,9 +1765,16 @@ export type Database = {
           ward?: string | null
         }
         Update: {
+          accessibility_notes?: string | null
+          activities?: string[]
           amenities?: string[]
+          attributes?: string[]
           availability?: Database["public"]["Enums"]["mkt_availability"]
+          best_seasons?: string[]
+          capacity?: number | null
           category?: Database["public"]["Enums"]["mkt_property_category"]
+          check_in_time?: string | null
+          check_out_time?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           contact_whatsapp?: string | null
@@ -1765,6 +1792,7 @@ export type Database = {
           longitude?: number | null
           main_image_path?: string | null
           name?: string
+          nearby_parks?: string[]
           org_id?: string
           postal_address?: string | null
           price_per_night?: number | null
@@ -1773,9 +1801,11 @@ export type Database = {
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          secondary_categories?: string[]
           slug?: string
           status?: Database["public"]["Enums"]["mkt_listing_status"]
           submitted_at?: string | null
+          sustainability_notes?: string | null
           town?: string
           updated_at?: string
           verified_at?: string | null
@@ -3152,6 +3182,26 @@ export type Database = {
         | "serviced_apartment"
         | "airbnb"
         | "villa"
+        | "bnb"
+        | "boutique_hotel"
+        | "holiday_home"
+        | "hostel"
+        | "conservancy"
+        | "ranch"
+        | "safari_camp"
+        | "luxury_tented_camp"
+        | "eco_lodge"
+        | "campsite"
+        | "glamping"
+        | "mountain_lodge"
+        | "beach_villa"
+        | "lakefront_property"
+        | "forest_retreat"
+        | "conference_centre"
+        | "wedding_venue"
+        | "corporate_retreat"
+        | "team_building_venue"
+        | "wellness_retreat"
       org_role: "owner" | "admin" | "manager" | "staff"
       property_type:
         | "hotel"
@@ -3341,6 +3391,26 @@ export const Constants = {
         "serviced_apartment",
         "airbnb",
         "villa",
+        "bnb",
+        "boutique_hotel",
+        "holiday_home",
+        "hostel",
+        "conservancy",
+        "ranch",
+        "safari_camp",
+        "luxury_tented_camp",
+        "eco_lodge",
+        "campsite",
+        "glamping",
+        "mountain_lodge",
+        "beach_villa",
+        "lakefront_property",
+        "forest_retreat",
+        "conference_centre",
+        "wedding_venue",
+        "corporate_retreat",
+        "team_building_venue",
+        "wellness_retreat",
       ],
       org_role: ["owner", "admin", "manager", "staff"],
       property_type: [

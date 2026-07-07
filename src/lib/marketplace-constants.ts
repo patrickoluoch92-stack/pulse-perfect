@@ -1,17 +1,96 @@
 // Shared constants for the Kenya Hospitality Marketplace.
+//
+// NOTE: This taxonomy is additive. Every previously-supported value is kept
+// exactly as-is so existing listings, bookings, filters and API clients
+// continue to work. New categories are appended.
 
 export const PROPERTY_CATEGORIES = [
-  { value: "hotel", label: "Hotel" },
-  { value: "resort", label: "Resort" },
-  { value: "lodge", label: "Lodge" },
-  { value: "camp", label: "Camp" },
-  { value: "guest_house", label: "Guest House" },
-  { value: "serviced_apartment", label: "Serviced Apartment" },
-  { value: "airbnb", label: "Airbnb" },
-  { value: "villa", label: "Villa" },
+  // ----- Accommodation (original 8 preserved first for backward compat) -----
+  { value: "hotel", label: "Hotel", group: "Accommodation" },
+  { value: "resort", label: "Resort", group: "Accommodation" },
+  { value: "lodge", label: "Lodge", group: "Accommodation" },
+  { value: "camp", label: "Camp", group: "Nature & Wildlife" },
+  { value: "guest_house", label: "Guest House", group: "Accommodation" },
+  { value: "serviced_apartment", label: "Serviced Apartment", group: "Accommodation" },
+  { value: "airbnb", label: "Airbnb", group: "Accommodation" },
+  { value: "villa", label: "Villa", group: "Accommodation" },
+  // ----- New accommodation types -----
+  { value: "bnb", label: "Bed & Breakfast", group: "Accommodation" },
+  { value: "boutique_hotel", label: "Boutique Hotel", group: "Accommodation" },
+  { value: "holiday_home", label: "Holiday Home", group: "Accommodation" },
+  { value: "hostel", label: "Hostel", group: "Accommodation" },
+  // ----- Nature & Wildlife -----
+  { value: "conservancy", label: "Conservancy", group: "Nature & Wildlife" },
+  { value: "ranch", label: "Ranch", group: "Nature & Wildlife" },
+  { value: "safari_camp", label: "Safari Camp", group: "Nature & Wildlife" },
+  { value: "luxury_tented_camp", label: "Luxury Tented Camp", group: "Nature & Wildlife" },
+  { value: "eco_lodge", label: "Eco-Lodge", group: "Nature & Wildlife" },
+  { value: "campsite", label: "Campsite", group: "Nature & Wildlife" },
+  { value: "glamping", label: "Glamping Site", group: "Nature & Wildlife" },
+  { value: "mountain_lodge", label: "Mountain Lodge", group: "Nature & Wildlife" },
+  { value: "beach_villa", label: "Beach Villa", group: "Nature & Wildlife" },
+  { value: "lakefront_property", label: "Lakefront Property", group: "Nature & Wildlife" },
+  { value: "forest_retreat", label: "Forest Retreat", group: "Nature & Wildlife" },
+  // ----- Events & Retreats -----
+  { value: "conference_centre", label: "Conference Centre", group: "Events & Retreats" },
+  { value: "wedding_venue", label: "Wedding Venue", group: "Events & Retreats" },
+  { value: "corporate_retreat", label: "Corporate Retreat", group: "Events & Retreats" },
+  { value: "team_building_venue", label: "Team Building Venue", group: "Events & Retreats" },
+  { value: "wellness_retreat", label: "Wellness Retreat", group: "Events & Retreats" },
 ] as const;
 
 export type PropertyCategory = (typeof PROPERTY_CATEGORIES)[number]["value"];
+
+export const CATEGORY_GROUPS = [
+  "Accommodation",
+  "Nature & Wildlife",
+  "Events & Retreats",
+] as const;
+
+// Experiences / activities available AT a property (not property categories themselves).
+export const ACTIVITIES = [
+  "Wildlife safari",
+  "Horse riding",
+  "Bird watching",
+  "Nature walks",
+  "Hiking",
+  "Camping",
+  "Photography safari",
+  "Cultural experience",
+  "Farm tour",
+  "Adventure activities",
+  "Fishing",
+  "Boat excursion",
+  "Kayaking",
+  "Diving / snorkelling",
+  "Cycling",
+  "Yoga & wellness",
+] as const;
+
+// Boolean-style attributes (used for filtering / faceting).
+export const ATTRIBUTES = [
+  { value: "beachfront", label: "Beachfront" },
+  { value: "lakefront", label: "Lakefront" },
+  { value: "forest", label: "Forest" },
+  { value: "mountain", label: "Mountain" },
+  { value: "family_friendly", label: "Family friendly" },
+  { value: "pet_friendly", label: "Pet friendly" },
+  { value: "luxury", label: "Luxury" },
+  { value: "budget", label: "Budget" },
+  { value: "eco_friendly", label: "Eco-friendly" },
+  { value: "accessible", label: "Accessible" },
+  { value: "romantic", label: "Romantic" },
+] as const;
+
+export type PropertyAttribute = (typeof ATTRIBUTES)[number]["value"];
+
+export const BEST_SEASONS = [
+  "Jan-Mar (Dry)",
+  "Apr-May (Long rains)",
+  "Jun-Sep (Cool dry)",
+  "Oct-Nov (Short rains)",
+  "Dec (Peak)",
+] as const;
 
 export const LISTING_STATUSES = [
   { value: "draft", label: "Draft" },
@@ -56,6 +135,10 @@ export function categoryLabel(value: string): string {
 
 export function statusLabel(value: string): string {
   return LISTING_STATUSES.find((s) => s.value === value)?.label ?? value;
+}
+
+export function attributeLabel(value: string): string {
+  return ATTRIBUTES.find((a) => a.value === value)?.label ?? value;
 }
 
 export function slugify(input: string): string {

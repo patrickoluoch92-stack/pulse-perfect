@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Search, MapPin, Star, SlidersHorizontal } from "lucide-react";
 
 import { listPublicProperties, listCounties } from "@/lib/marketplace.functions";
-import { PROPERTY_CATEGORIES, COMMON_AMENITIES, categoryLabel } from "@/lib/marketplace-constants";
+import { PROPERTY_CATEGORIES, COMMON_AMENITIES, ACTIVITIES, ATTRIBUTES, categoryLabel } from "@/lib/marketplace-constants";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -71,6 +71,8 @@ function MarketplaceListing() {
   const [priceMin, setPriceMin] = useState<string>("");
   const [priceMax, setPriceMax] = useState<string>("");
   const [amenities, setAmenities] = useState<string[]>([]);
+  const [activities, setActivities] = useState<string[]>([]);
+  const [attributes, setAttributes] = useState<string[]>([]);
   const [page, setPage] = useState(1);
 
   const listFn = useServerFn(listPublicProperties);
@@ -79,7 +81,7 @@ function MarketplaceListing() {
   const counties = useQuery({ queryKey: ["mkt-counties"], queryFn: () => countiesFn() });
 
   const properties = useQuery({
-    queryKey: ["mkt-list", { search, county, category, priceMin, priceMax, amenities, page }],
+    queryKey: ["mkt-list", { search, county, category, priceMin, priceMax, amenities, activities, attributes, page }],
     queryFn: () =>
       listFn({
         data: {
@@ -89,11 +91,14 @@ function MarketplaceListing() {
           priceMin: priceMin === "" ? null : Number(priceMin),
           priceMax: priceMax === "" ? null : Number(priceMax),
           amenities: amenities.length > 0 ? amenities : undefined,
+          activities: activities.length > 0 ? activities : undefined,
+          attributes: attributes.length > 0 ? attributes : undefined,
           page,
           pageSize: 12,
         },
       }),
   });
+
 
 
   const featured = useQuery({
@@ -204,14 +209,49 @@ function MarketplaceListing() {
                     ))}
                   </div>
                 </div>
-                {(amenities.length > 0 || priceMin || priceMax) && (
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-wide">Property attributes</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {ATTRIBUTES.map((a) => (
+                      <label key={a.value} className="flex items-center gap-2 text-sm">
+                        <Checkbox
+                          checked={attributes.includes(a.value)}
+                          onCheckedChange={(checked) => {
+                            setAttributes((cur) => checked ? [...cur, a.value] : cur.filter((x) => x !== a.value));
+                            setPage(1);
+                          }}
+                        />
+                        {a.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-wide">Activities</Label>
+                  <div className="grid max-h-40 grid-cols-2 gap-2 overflow-y-auto">
+                    {ACTIVITIES.map((a) => (
+                      <label key={a} className="flex items-center gap-2 text-sm">
+                        <Checkbox
+                          checked={activities.includes(a)}
+                          onCheckedChange={(checked) => {
+                            setActivities((cur) => checked ? [...cur, a] : cur.filter((x) => x !== a));
+                            setPage(1);
+                          }}
+                        />
+                        {a}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {(amenities.length > 0 || activities.length > 0 || attributes.length > 0 || priceMin || priceMax) && (
                   <Button
                     type="button" variant="ghost" size="sm"
-                    onClick={() => { setAmenities([]); setPriceMin(""); setPriceMax(""); setPage(1); }}
+                    onClick={() => { setAmenities([]); setActivities([]); setAttributes([]); setPriceMin(""); setPriceMax(""); setPage(1); }}
                   >
                     Clear filters
                   </Button>
                 )}
+
               </PopoverContent>
             </Popover>
             <Button type="submit">Search</Button>
