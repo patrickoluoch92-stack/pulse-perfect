@@ -58,6 +58,7 @@ import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksDiscoveryTickRouteImport } from './routes/api/public/hooks/discovery-tick'
 import { Route as ApiPublicHooksDiscoveryRescoreRouteImport } from './routes/api/public/hooks/discovery-rescore'
 import { Route as AuthenticatedListingsAdminDiscoveryRouteImport } from './routes/_authenticated/listings.admin.discovery'
+import { Route as AuthenticatedListingsAdminCouponsRouteImport } from './routes/_authenticated/listings.admin.coupons'
 import { Route as AuthenticatedListingsIdAvailabilityRouteImport } from './routes/_authenticated/listings.$id.availability'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -319,6 +320,12 @@ const AuthenticatedListingsAdminDiscoveryRoute =
     path: '/discovery',
     getParentRoute: () => AuthenticatedListingsAdminRoute,
   } as any)
+const AuthenticatedListingsAdminCouponsRoute =
+  AuthenticatedListingsAdminCouponsRouteImport.update({
+    id: '/coupons',
+    path: '/coupons',
+    getParentRoute: () => AuthenticatedListingsAdminRoute,
+  } as any)
 const AuthenticatedListingsIdAvailabilityRoute =
   AuthenticatedListingsIdAvailabilityRouteImport.update({
     id: '/availability',
@@ -370,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -419,6 +427,7 @@ export interface FileRoutesByTo {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -472,6 +481,7 @@ export interface FileRoutesById {
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/_authenticated/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/_authenticated/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -525,6 +535,7 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/listings/'
     | '/listings/$id/availability'
+    | '/listings/admin/coupons'
     | '/listings/admin/discovery'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -574,6 +585,7 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/listings'
     | '/listings/$id/availability'
+    | '/listings/admin/coupons'
     | '/listings/admin/discovery'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -626,6 +638,7 @@ export interface FileRouteTypes {
     | '/marketplace/p/$slug'
     | '/_authenticated/listings/'
     | '/_authenticated/listings/$id/availability'
+    | '/_authenticated/listings/admin/coupons'
     | '/_authenticated/listings/admin/discovery'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -1000,6 +1013,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedListingsAdminDiscoveryRouteImport
       parentRoute: typeof AuthenticatedListingsAdminRoute
     }
+    '/_authenticated/listings/admin/coupons': {
+      id: '/_authenticated/listings/admin/coupons'
+      path: '/coupons'
+      fullPath: '/listings/admin/coupons'
+      preLoaderRoute: typeof AuthenticatedListingsAdminCouponsRouteImport
+      parentRoute: typeof AuthenticatedListingsAdminRoute
+    }
     '/_authenticated/listings/$id/availability': {
       id: '/_authenticated/listings/$id/availability'
       path: '/availability'
@@ -1039,11 +1059,14 @@ const AuthenticatedListingsIdRouteWithChildren =
   )
 
 interface AuthenticatedListingsAdminRouteChildren {
+  AuthenticatedListingsAdminCouponsRoute: typeof AuthenticatedListingsAdminCouponsRoute
   AuthenticatedListingsAdminDiscoveryRoute: typeof AuthenticatedListingsAdminDiscoveryRoute
 }
 
 const AuthenticatedListingsAdminRouteChildren: AuthenticatedListingsAdminRouteChildren =
   {
+    AuthenticatedListingsAdminCouponsRoute:
+      AuthenticatedListingsAdminCouponsRoute,
     AuthenticatedListingsAdminDiscoveryRoute:
       AuthenticatedListingsAdminDiscoveryRoute,
   }
