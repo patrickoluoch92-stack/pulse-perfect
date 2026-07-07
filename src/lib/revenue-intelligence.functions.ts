@@ -56,7 +56,7 @@ export const recommendPricing = createServerFn({ method: "POST" })
 
     const { data: unit, error: uErr } = await supabase
       .from("units")
-      .select("id, name, base_price, property_id")
+      .select("id, name, base_price, property_id, org_id")
       .eq("id", data.unitId)
       .maybeSingle();
     if (uErr || !unit) throw new Error("Unit not found");
