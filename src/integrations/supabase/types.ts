@@ -1088,6 +1088,140 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_fact_history: {
+        Row: {
+          archived_at: string
+          computed_at: string
+          confidence: number
+          fact_id: string
+          id: string
+          org_id: string | null
+          payload: Json
+          property_id: string
+          scope: string
+          source_engine: string
+          version: number
+        }
+        Insert: {
+          archived_at?: string
+          computed_at: string
+          confidence: number
+          fact_id: string
+          id?: string
+          org_id?: string | null
+          payload: Json
+          property_id: string
+          scope: string
+          source_engine: string
+          version: number
+        }
+        Update: {
+          archived_at?: string
+          computed_at?: string
+          confidence?: number
+          fact_id?: string
+          id?: string
+          org_id?: string | null
+          payload?: Json
+          property_id?: string
+          scope?: string
+          source_engine?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_fact_history_fact_id_fkey"
+            columns: ["fact_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_property_facts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      knowledge_property_facts: {
+        Row: {
+          computed_at: string
+          confidence: number
+          created_at: string
+          created_by: string | null
+          id: string
+          org_id: string | null
+          payload: Json
+          property_id: string
+          scope: string
+          source_engine: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          computed_at?: string
+          confidence?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id?: string | null
+          payload?: Json
+          property_id: string
+          scope: string
+          source_engine: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          computed_at?: string
+          confidence?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id?: string | null
+          payload?: Json
+          property_id?: string
+          scope?: string
+          source_engine?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      knowledge_search_events: {
+        Row: {
+          created_at: string
+          engine: string
+          filters: Json
+          id: string
+          latency_ms: number | null
+          org_id: string | null
+          query: string
+          result_count: number
+          top_property_ids: string[]
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          engine: string
+          filters?: Json
+          id?: string
+          latency_ms?: number | null
+          org_id?: string | null
+          query: string
+          result_count?: number
+          top_property_ids?: string[]
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          engine?: string
+          filters?: Json
+          id?: string
+          latency_ms?: number | null
+          org_id?: string | null
+          query?: string
+          result_count?: number
+          top_property_ids?: string[]
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       marketplace_availability_blocks: {
         Row: {
           created_at: string
