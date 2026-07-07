@@ -40,7 +40,7 @@ export const recordPricingSignal = createServerFn({ method: "POST" })
         price_amount: data.priceAmount ?? null,
         currency: data.currency ?? "KES",
         weight: data.weight,
-        payload: data.payload,
+        payload: data.payload as any,
         source: data.source ?? null,
       })
       .select()

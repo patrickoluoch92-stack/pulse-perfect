@@ -24,6 +24,7 @@ import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as GuidesHotelSeoRouteImport } from './routes/guides.hotel-seo'
 import { Route as DiscoverSlugRouteImport } from './routes/discover.$slug'
 import { Route as CountiesSlugRouteImport } from './routes/counties.$slug'
+import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticated/wishlist'
 import { Route as AuthenticatedToursRouteImport } from './routes/_authenticated/tours'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedSyncRouteImport } from './routes/_authenticated/sync'
@@ -135,6 +136,11 @@ const CountiesSlugRoute = CountiesSlugRouteImport.update({
   id: '/counties/$slug',
   path: '/counties/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedWishlistRoute = AuthenticatedWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedToursRoute = AuthenticatedToursRouteImport.update({
   id: '/tours',
@@ -364,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/sync': typeof AuthenticatedSyncRoute
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
+  '/wishlist': typeof AuthenticatedWishlistRoute
   '/counties/$slug': typeof CountiesSlugRoute
   '/discover/$slug': typeof DiscoverSlugRoute
   '/guides/hotel-seo': typeof GuidesHotelSeoRoute
@@ -415,6 +422,7 @@ export interface FileRoutesByTo {
   '/sync': typeof AuthenticatedSyncRoute
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
+  '/wishlist': typeof AuthenticatedWishlistRoute
   '/counties/$slug': typeof CountiesSlugRoute
   '/discover/$slug': typeof DiscoverSlugRoute
   '/guides/hotel-seo': typeof GuidesHotelSeoRoute
@@ -470,6 +478,7 @@ export interface FileRoutesById {
   '/_authenticated/sync': typeof AuthenticatedSyncRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/tours': typeof AuthenticatedToursRoute
+  '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/counties/$slug': typeof CountiesSlugRoute
   '/discover/$slug': typeof DiscoverSlugRoute
   '/guides/hotel-seo': typeof GuidesHotelSeoRoute
@@ -525,6 +534,7 @@ export interface FileRouteTypes {
     | '/sync'
     | '/team'
     | '/tours'
+    | '/wishlist'
     | '/counties/$slug'
     | '/discover/$slug'
     | '/guides/hotel-seo'
@@ -576,6 +586,7 @@ export interface FileRouteTypes {
     | '/sync'
     | '/team'
     | '/tours'
+    | '/wishlist'
     | '/counties/$slug'
     | '/discover/$slug'
     | '/guides/hotel-seo'
@@ -630,6 +641,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sync'
     | '/_authenticated/team'
     | '/_authenticated/tours'
+    | '/_authenticated/wishlist'
     | '/counties/$slug'
     | '/discover/$slug'
     | '/guides/hotel-seo'
@@ -787,6 +799,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/counties/$slug'
       preLoaderRoute: typeof CountiesSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/wishlist': {
+      id: '/_authenticated/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof AuthenticatedWishlistRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/tours': {
       id: '/_authenticated/tours'
@@ -1153,6 +1172,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSyncRoute: typeof AuthenticatedSyncRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
   AuthenticatedToursRoute: typeof AuthenticatedToursRoute
+  AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -1174,6 +1194,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSyncRoute: AuthenticatedSyncRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
   AuthenticatedToursRoute: AuthenticatedToursRoute,
+  AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
