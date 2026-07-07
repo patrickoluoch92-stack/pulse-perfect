@@ -172,6 +172,57 @@ export type Database = {
           },
         ]
       }
+      coupons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          max_redemptions: number | null
+          redemptions_count: number
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          discount_type: string
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          max_redemptions?: number | null
+          redemptions_count?: number
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          max_redemptions?: number | null
+          redemptions_count?: number
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       discovered_properties: {
         Row: {
           address: string | null
@@ -579,6 +630,79 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      housekeeping_tasks: {
+        Row: {
+          assignee_id: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          org_id: string
+          priority: string
+          property_id: string | null
+          scheduled_for: string
+          status: string
+          title: string
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          org_id: string
+          priority?: string
+          property_id?: string | null
+          scheduled_for: string
+          status?: string
+          title: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assignee_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          org_id?: string
+          priority?: string
+          property_id?: string | null
+          scheduled_for?: string
+          status?: string
+          title?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "housekeeping_tasks_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "housekeeping_tasks_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "housekeeping_tasks_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
             referencedColumns: ["id"]
           },
         ]
@@ -1221,6 +1345,76 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      maintenance_tickets: {
+        Row: {
+          assignee_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          org_id: string
+          property_id: string | null
+          reported_by: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          org_id: string
+          property_id?: string | null
+          reported_by?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assignee_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          org_id?: string
+          property_id?: string | null
+          reported_by?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_tickets_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_tickets_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       marketplace_availability_blocks: {
         Row: {
