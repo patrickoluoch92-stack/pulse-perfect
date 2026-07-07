@@ -27,6 +27,7 @@ function publicClient() {
 }
 
 type GroundingRow = {
+  id: string;
   name: string;
   slug: string;
   town: string | null;
@@ -40,7 +41,7 @@ async function retrieveContext(query: string, county?: string): Promise<Groundin
   const q = query.slice(0, 40).replace(/[%_]/g, " ");
   const { data } = await supabase
     .from("marketplace_properties")
-    .select("name, slug, town, county_code, category, description")
+    .select("id, name, slug, town, county_code, category, description")
     .eq("status", "approved")
     .or(`name.ilike.%${q}%,description.ilike.%${q}%,town.ilike.%${q}%,county_code.ilike.%${q}%`)
     .limit(8);
@@ -51,17 +52,62 @@ async function retrieveContext(query: string, county?: string): Promise<Groundin
   return rows;
 }
 
+// Best-effort fact enrichment via shared knowledge layer (service role for anon flows).
+async function enrichWithFacts(propertyIds: string[]): Promise<Map<string, any>> {
+  const map = new Map<string, any>();
+  if (!propertyIds.length) return map;
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("knowledge_property_facts" as any)
+      .select("property_id, scope, payload, confidence")
+      .in("property_id", propertyIds)
+      .in("scope", ["quality", "composite"]);
+    for (const row of (data ?? []) as any[]) {
+      const prev = map.get(row.property_id) ?? {};
+      prev[row.scope] = row.payload;
+      map.set(row.property_id, prev);
+    }
+  } catch {
+    /* ignore */
+  }
+  return map;
+}
+
+async function logSearch(query: string, results: GroundingRow[], latencyMs: number) {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("knowledge_search_events" as any).insert({
+      org_id: null,
+      user_id: null,
+      engine: "concierge",
+      query: query.slice(0, 500),
+      filters: {},
+      result_count: results.length,
+      top_property_ids: results.slice(0, 10).map((r) => r.id),
+      latency_ms: latencyMs,
+    });
+  } catch {
+    /* best-effort */
+  }
+}
+
 export const askConcierge = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }) => {
+    const t0 = Date.now();
     const lastUser = [...data.messages].reverse().find((m) => m.role === "user");
-    const context = await retrieveContext(lastUser?.content ?? "", data.county);
+    const query = lastUser?.content ?? "";
+    const context = await retrieveContext(query, data.county);
+    const facts = await enrichWithFacts(context.map((c) => c.id));
+
     const grounding = context.length
       ? `Known HostPulse properties relevant to the query:\n${context
-          .map(
-            (c) =>
-              `- ${c.name} (${c.category}) in ${c.town ?? "?"}, ${c.county_code ?? "?"} — ${(c.description ?? "").slice(0, 160)} [/marketplace/p/${c.slug}]`,
-          )
+          .map((c) => {
+            const f = facts.get(c.id);
+            const q = f?.quality ? ` [quality ${JSON.stringify(f.quality).slice(0, 80)}]` : "";
+            return `- ${c.name} (${c.category}) in ${c.town ?? "?"}, ${c.county_code ?? "?"} — ${(c.description ?? "").slice(0, 160)}${q} [/marketplace/p/${c.slug}]`;
+          })
           .join("\n")}`
       : "No matching HostPulse properties were found in the index for this query.";
 
@@ -78,6 +124,9 @@ export const askConcierge = createServerFn({ method: "POST" })
       ...data.messages,
     ];
     const reply = await aiChat({ messages, model: "openai/gpt-5.5" });
+
+    void logSearch(query, context, Date.now() - t0);
+
     return {
       reply,
       grounding: context.map((c) => ({
