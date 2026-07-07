@@ -402,6 +402,61 @@ export type Database = {
           },
         ]
       }
+      discovery_image_hashes: {
+        Row: {
+          created_at: string
+          discovered_property_id: string | null
+          height: number | null
+          id: string
+          image_url: string
+          phash: string
+          property_id: string | null
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          discovered_property_id?: string | null
+          height?: number | null
+          id?: string
+          image_url: string
+          phash: string
+          property_id?: string | null
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          discovered_property_id?: string | null
+          height?: number | null
+          id?: string
+          image_url?: string
+          phash?: string
+          property_id?: string | null
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_image_hashes_discovered_property_id_fkey"
+            columns: ["discovered_property_id"]
+            isOneToOne: false
+            referencedRelation: "discovered_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovery_image_hashes_discovered_property_id_fkey"
+            columns: ["discovered_property_id"]
+            isOneToOne: false
+            referencedRelation: "public_discovered_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovery_image_hashes_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discovery_runs: {
         Row: {
           error: string | null
@@ -589,6 +644,35 @@ export type Database = {
           triggered_by?: string | null
         }
         Relationships: []
+      }
+      guest_wishlists: {
+        Row: {
+          created_at: string
+          id: string
+          property_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_wishlists_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       guests: {
         Row: {
@@ -1346,6 +1430,63 @@ export type Database = {
         }
         Relationships: []
       }
+      loyalty_accounts: {
+        Row: {
+          created_at: string
+          lifetime_points: number
+          points_balance: number
+          tier: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          lifetime_points?: number
+          points_balance?: number
+          tier?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          lifetime_points?: number
+          points_balance?: number
+          tier?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      loyalty_ledger: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          reason: string
+          reference_id: string | null
+          reference_type: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          reason: string
+          reference_id?: string | null
+          reference_type?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          reason?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       maintenance_tickets: {
         Row: {
           assignee_id: string | null
@@ -2017,6 +2158,69 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      pricing_signals: {
+        Row: {
+          created_at: string
+          currency: string | null
+          id: string
+          observed_on: string
+          org_id: string | null
+          payload: Json
+          price_amount: number | null
+          property_id: string | null
+          region_code: string | null
+          signal_type: string
+          source: string | null
+          valid_until: string | null
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          id?: string
+          observed_on: string
+          org_id?: string | null
+          payload?: Json
+          price_amount?: number | null
+          property_id?: string | null
+          region_code?: string | null
+          signal_type: string
+          source?: string | null
+          valid_until?: string | null
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          id?: string
+          observed_on?: string
+          org_id?: string | null
+          payload?: Json
+          price_amount?: number | null
+          property_id?: string | null
+          region_code?: string | null
+          signal_type?: string
+          source?: string | null
+          valid_until?: string | null
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_signals_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pricing_signals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
