@@ -132,6 +132,24 @@ export const recommendPricing = createServerFn({ method: "POST" })
       });
     }
 
+    const avgSuggested =
+      suggestions.reduce((s, x) => s + x.suggestedRate, 0) / Math.max(1, suggestions.length);
+    const avgDemand =
+      suggestions.reduce((s, x) => s + x.demandScore, 0) / Math.max(1, suggestions.length);
+    await persistFact({
+      propertyId: unit.property_id,
+      orgId: (unit as any).org_id ?? null,
+      scope: "bookings",
+      payload: {
+        unitId: data.unitId,
+        horizonDays: data.horizonDays,
+        baseRate: base,
+        avgSuggested: Math.round(avgSuggested),
+        avgDemand: Math.round(avgDemand * 100) / 100,
+        bookedNights: bookedDates.size,
+      },
+    });
+
     return { unitId: data.unitId, unitName: unit.name, base, suggestions };
   });
 
