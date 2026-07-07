@@ -90,8 +90,10 @@ export const updateHousekeepingStatus = createServerFn({ method: "POST" })
       .parse(raw),
   )
   .handler(async ({ data, context }) => {
-    const patch: Record<string, unknown> = { status: data.status };
-    if (data.status === "done") patch.completed_at = new Date().toISOString();
+    const patch = {
+      status: data.status,
+      completed_at: data.status === "done" ? new Date().toISOString() : null,
+    };
     const { error } = await context.supabase
       .from("housekeeping_tasks")
       .update(patch)
