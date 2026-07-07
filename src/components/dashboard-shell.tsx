@@ -2,7 +2,7 @@ import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  BedDouble, Bot, Brain, Calendar, CalendarSync, ChartBar, Compass, FileText, Home, Lock, LogOut, MapPin, Plug, Rocket, Settings, ShieldAlert, Smartphone, Sparkles, Store, Ticket, TrendingUp, Users,
+  BedDouble, Bot, Brain, Calendar, CalendarSync, ChartBar, Compass, FileText, Home, Lock, LogOut, MapPin, Plug, Rocket, Settings, ShieldAlert, Smartphone, Sparkles, Sprout, Store, Ticket, TrendingUp, Users, Wrench,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,8 @@ const nav = [
   { to: "/dashboard", label: "Overview", icon: Home },
   { to: "/properties", label: "Properties", icon: BedDouble },
   { to: "/reservations", label: "Reservations", icon: Calendar },
+  { to: "/housekeeping", label: "Housekeeping", icon: Sprout },
+  { to: "/maintenance", label: "Maintenance", icon: Wrench },
   { to: "/tours", label: "Tours", icon: MapPin },
   { to: "/invoices", label: "Invoices", icon: FileText },
   { to: "/team", label: "Team", icon: Users },
@@ -26,6 +28,7 @@ const nav = [
   { to: "/onboarding", label: "List a property", icon: Rocket },
   { to: "/listings/partners", label: "Partner Sync", icon: Plug },
   { to: "/listings/admin/discovery", label: "Discovery AI", icon: Compass },
+  { to: "/listings/admin/coupons", label: "Coupons", icon: Ticket },
   { to: "/revenue", label: "Revenue AI", icon: TrendingUp },
   { to: "/ai-command", label: "AI Command", icon: Brain },
   { to: "/concierge", label: "Concierge", icon: Bot },

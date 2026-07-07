@@ -33,15 +33,18 @@ import { Route as AuthenticatedReservationsRouteImport } from './routes/_authent
 import { Route as AuthenticatedPropertiesRouteImport } from './routes/_authenticated/properties'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedMpesaRouteImport } from './routes/_authenticated/mpesa'
+import { Route as AuthenticatedMaintenanceRouteImport } from './routes/_authenticated/maintenance'
 import { Route as AuthenticatedListingsRouteImport } from './routes/_authenticated/listings'
 import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
 import { Route as AuthenticatedIncidentsRouteImport } from './routes/_authenticated/incidents'
+import { Route as AuthenticatedHousekeepingRouteImport } from './routes/_authenticated/housekeeping'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBookingsRouteImport } from './routes/_authenticated/bookings'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedAiCommandRouteImport } from './routes/_authenticated/ai-command'
 import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authenticated/listings.index'
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
+import { Route as DiscoverCountyCountyRouteImport } from './routes/discover.county.$county'
 import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-vitals'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
 import { Route as AuthenticatedListingsPartnersRouteImport } from './routes/_authenticated/listings.partners'
@@ -56,6 +59,7 @@ import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksDiscoveryTickRouteImport } from './routes/api/public/hooks/discovery-tick'
 import { Route as ApiPublicHooksDiscoveryRescoreRouteImport } from './routes/api/public/hooks/discovery-rescore'
 import { Route as AuthenticatedListingsAdminDiscoveryRouteImport } from './routes/_authenticated/listings.admin.discovery'
+import { Route as AuthenticatedListingsAdminCouponsRouteImport } from './routes/_authenticated/listings.admin.coupons'
 import { Route as AuthenticatedListingsIdAvailabilityRouteImport } from './routes/_authenticated/listings.$id.availability'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -178,6 +182,12 @@ const AuthenticatedMpesaRoute = AuthenticatedMpesaRouteImport.update({
   path: '/mpesa',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMaintenanceRoute =
+  AuthenticatedMaintenanceRouteImport.update({
+    id: '/maintenance',
+    path: '/maintenance',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedListingsRoute = AuthenticatedListingsRouteImport.update({
   id: '/listings',
   path: '/listings',
@@ -193,6 +203,12 @@ const AuthenticatedIncidentsRoute = AuthenticatedIncidentsRouteImport.update({
   path: '/incidents',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedHousekeepingRoute =
+  AuthenticatedHousekeepingRouteImport.update({
+    id: '/housekeeping',
+    path: '/housekeeping',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -223,6 +239,11 @@ const MarketplacePSlugRoute = MarketplacePSlugRouteImport.update({
   id: '/p/$slug',
   path: '/p/$slug',
   getParentRoute: () => MarketplaceRoute,
+} as any)
+const DiscoverCountyCountyRoute = DiscoverCountyCountyRouteImport.update({
+  id: '/discover/county/$county',
+  path: '/discover/county/$county',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicWebVitalsRoute = ApiPublicWebVitalsRouteImport.update({
   id: '/api/public/web-vitals',
@@ -305,6 +326,12 @@ const AuthenticatedListingsAdminDiscoveryRoute =
     path: '/discovery',
     getParentRoute: () => AuthenticatedListingsAdminRoute,
   } as any)
+const AuthenticatedListingsAdminCouponsRoute =
+  AuthenticatedListingsAdminCouponsRouteImport.update({
+    id: '/coupons',
+    path: '/coupons',
+    getParentRoute: () => AuthenticatedListingsAdminRoute,
+  } as any)
 const AuthenticatedListingsIdAvailabilityRoute =
   AuthenticatedListingsIdAvailabilityRouteImport.update({
     id: '/availability',
@@ -323,9 +350,11 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/bookings': typeof AuthenticatedBookingsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/housekeeping': typeof AuthenticatedHousekeepingRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/listings': typeof AuthenticatedListingsRouteWithChildren
+  '/maintenance': typeof AuthenticatedMaintenanceRoute
   '/mpesa': typeof AuthenticatedMpesaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/properties': typeof AuthenticatedPropertiesRouteWithChildren
@@ -351,9 +380,11 @@ export interface FileRoutesByFullPath {
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
+  '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -371,8 +402,10 @@ export interface FileRoutesByTo {
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/bookings': typeof AuthenticatedBookingsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/housekeeping': typeof AuthenticatedHousekeepingRoute
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
+  '/maintenance': typeof AuthenticatedMaintenanceRoute
   '/mpesa': typeof AuthenticatedMpesaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/properties': typeof AuthenticatedPropertiesRouteWithChildren
@@ -398,9 +431,11 @@ export interface FileRoutesByTo {
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
+  '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -421,9 +456,11 @@ export interface FileRoutesById {
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/bookings': typeof AuthenticatedBookingsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/housekeeping': typeof AuthenticatedHousekeepingRoute
   '/_authenticated/incidents': typeof AuthenticatedIncidentsRoute
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/_authenticated/listings': typeof AuthenticatedListingsRouteWithChildren
+  '/_authenticated/maintenance': typeof AuthenticatedMaintenanceRoute
   '/_authenticated/mpesa': typeof AuthenticatedMpesaRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/properties': typeof AuthenticatedPropertiesRouteWithChildren
@@ -449,9 +486,11 @@ export interface FileRoutesById {
   '/_authenticated/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
+  '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
+  '/_authenticated/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/_authenticated/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -472,9 +511,11 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/bookings'
     | '/dashboard'
+    | '/housekeeping'
     | '/incidents'
     | '/invoices'
     | '/listings'
+    | '/maintenance'
     | '/mpesa'
     | '/onboarding'
     | '/properties'
@@ -500,9 +541,11 @@ export interface FileRouteTypes {
     | '/listings/partners'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
+    | '/discover/county/$county'
     | '/marketplace/p/$slug'
     | '/listings/'
     | '/listings/$id/availability'
+    | '/listings/admin/coupons'
     | '/listings/admin/discovery'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -520,8 +563,10 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/bookings'
     | '/dashboard'
+    | '/housekeeping'
     | '/incidents'
     | '/invoices'
+    | '/maintenance'
     | '/mpesa'
     | '/onboarding'
     | '/properties'
@@ -547,9 +592,11 @@ export interface FileRouteTypes {
     | '/listings/partners'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
+    | '/discover/county/$county'
     | '/marketplace/p/$slug'
     | '/listings'
     | '/listings/$id/availability'
+    | '/listings/admin/coupons'
     | '/listings/admin/discovery'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -569,9 +616,11 @@ export interface FileRouteTypes {
     | '/_authenticated/analytics'
     | '/_authenticated/bookings'
     | '/_authenticated/dashboard'
+    | '/_authenticated/housekeeping'
     | '/_authenticated/incidents'
     | '/_authenticated/invoices'
     | '/_authenticated/listings'
+    | '/_authenticated/maintenance'
     | '/_authenticated/mpesa'
     | '/_authenticated/onboarding'
     | '/_authenticated/properties'
@@ -597,9 +646,11 @@ export interface FileRouteTypes {
     | '/_authenticated/listings/partners'
     | '/_authenticated/properties/$propertyId'
     | '/api/public/web-vitals'
+    | '/discover/county/$county'
     | '/marketplace/p/$slug'
     | '/_authenticated/listings/'
     | '/_authenticated/listings/$id/availability'
+    | '/_authenticated/listings/admin/coupons'
     | '/_authenticated/listings/admin/discovery'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -622,6 +673,7 @@ export interface RootRouteChildren {
   InviteTokenRoute: typeof InviteTokenRoute
   DiscoverIndexRoute: typeof DiscoverIndexRoute
   ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
+  DiscoverCountyCountyRoute: typeof DiscoverCountyCountyRoute
   ApiPublicHooksDiscoveryRescoreRoute: typeof ApiPublicHooksDiscoveryRescoreRoute
   ApiPublicHooksDiscoveryTickRoute: typeof ApiPublicHooksDiscoveryTickRoute
   ApiPublicHooksPartnerSyncRoute: typeof ApiPublicHooksPartnerSyncRoute
@@ -799,6 +851,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMpesaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/maintenance': {
+      id: '/_authenticated/maintenance'
+      path: '/maintenance'
+      fullPath: '/maintenance'
+      preLoaderRoute: typeof AuthenticatedMaintenanceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/listings': {
       id: '/_authenticated/listings'
       path: '/listings'
@@ -818,6 +877,13 @@ declare module '@tanstack/react-router' {
       path: '/incidents'
       fullPath: '/incidents'
       preLoaderRoute: typeof AuthenticatedIncidentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/housekeeping': {
+      id: '/_authenticated/housekeeping'
+      path: '/housekeeping'
+      fullPath: '/housekeeping'
+      preLoaderRoute: typeof AuthenticatedHousekeepingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -861,6 +927,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/marketplace/p/$slug'
       preLoaderRoute: typeof MarketplacePSlugRouteImport
       parentRoute: typeof MarketplaceRoute
+    }
+    '/discover/county/$county': {
+      id: '/discover/county/$county'
+      path: '/discover/county/$county'
+      fullPath: '/discover/county/$county'
+      preLoaderRoute: typeof DiscoverCountyCountyRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/web-vitals': {
       id: '/api/public/web-vitals'
@@ -960,6 +1033,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedListingsAdminDiscoveryRouteImport
       parentRoute: typeof AuthenticatedListingsAdminRoute
     }
+    '/_authenticated/listings/admin/coupons': {
+      id: '/_authenticated/listings/admin/coupons'
+      path: '/coupons'
+      fullPath: '/listings/admin/coupons'
+      preLoaderRoute: typeof AuthenticatedListingsAdminCouponsRouteImport
+      parentRoute: typeof AuthenticatedListingsAdminRoute
+    }
     '/_authenticated/listings/$id/availability': {
       id: '/_authenticated/listings/$id/availability'
       path: '/availability'
@@ -999,11 +1079,14 @@ const AuthenticatedListingsIdRouteWithChildren =
   )
 
 interface AuthenticatedListingsAdminRouteChildren {
+  AuthenticatedListingsAdminCouponsRoute: typeof AuthenticatedListingsAdminCouponsRoute
   AuthenticatedListingsAdminDiscoveryRoute: typeof AuthenticatedListingsAdminDiscoveryRoute
 }
 
 const AuthenticatedListingsAdminRouteChildren: AuthenticatedListingsAdminRouteChildren =
   {
+    AuthenticatedListingsAdminCouponsRoute:
+      AuthenticatedListingsAdminCouponsRoute,
     AuthenticatedListingsAdminDiscoveryRoute:
       AuthenticatedListingsAdminDiscoveryRoute,
   }
@@ -1056,9 +1139,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedBookingsRoute: typeof AuthenticatedBookingsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedHousekeepingRoute: typeof AuthenticatedHousekeepingRoute
   AuthenticatedIncidentsRoute: typeof AuthenticatedIncidentsRoute
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRouteWithChildren
   AuthenticatedListingsRoute: typeof AuthenticatedListingsRouteWithChildren
+  AuthenticatedMaintenanceRoute: typeof AuthenticatedMaintenanceRoute
   AuthenticatedMpesaRoute: typeof AuthenticatedMpesaRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPropertiesRoute: typeof AuthenticatedPropertiesRouteWithChildren
@@ -1075,9 +1160,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedBookingsRoute: AuthenticatedBookingsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedHousekeepingRoute: AuthenticatedHousekeepingRoute,
   AuthenticatedIncidentsRoute: AuthenticatedIncidentsRoute,
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRouteWithChildren,
   AuthenticatedListingsRoute: AuthenticatedListingsRouteWithChildren,
+  AuthenticatedMaintenanceRoute: AuthenticatedMaintenanceRoute,
   AuthenticatedMpesaRoute: AuthenticatedMpesaRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPropertiesRoute: AuthenticatedPropertiesRouteWithChildren,
@@ -1124,6 +1211,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteTokenRoute: InviteTokenRoute,
   DiscoverIndexRoute: DiscoverIndexRoute,
   ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
+  DiscoverCountyCountyRoute: DiscoverCountyCountyRoute,
   ApiPublicHooksDiscoveryRescoreRoute: ApiPublicHooksDiscoveryRescoreRoute,
   ApiPublicHooksDiscoveryTickRoute: ApiPublicHooksDiscoveryTickRoute,
   ApiPublicHooksPartnerSyncRoute: ApiPublicHooksPartnerSyncRoute,
@@ -1133,13 +1221,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
