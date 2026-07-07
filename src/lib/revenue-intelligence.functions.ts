@@ -275,5 +275,14 @@ export const generateRevenueInsights = createServerFn({ method: "POST" })
       },
     });
 
+    if (data.propertyId) {
+      await persistFact({
+        propertyId: data.propertyId,
+        orgId,
+        scope: "composite",
+        payload: { stats, summary: insights.summary },
+      });
+    }
+
     return { stats, insights };
   });
