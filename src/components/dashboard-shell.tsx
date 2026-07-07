@@ -33,6 +33,7 @@ const nav = [
   { to: "/ai-command", label: "AI Command", icon: Brain },
   { to: "/concierge", label: "Concierge", icon: Bot },
   { to: "/bookings", label: "My Bookings", icon: Ticket },
+  { to: "/wishlist", label: "Wishlist", icon: Sparkles },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
