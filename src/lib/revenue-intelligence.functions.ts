@@ -220,10 +220,11 @@ export const generateRevenueInsights = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     await enforceRateLimit({ bucket: "revenue.insights", userId, limit: 20, windowSec: 300 });
 
-    let q = supabase.from("units").select("id, name, base_price, property_id");
+    let q = supabase.from("units").select("id, name, base_price, property_id, org_id");
     if (data.propertyId) q = q.eq("property_id", data.propertyId);
     const { data: units } = await q;
     const unitIds = (units ?? []).map((u) => u.id);
+    const orgId = (units ?? [])[0]?.org_id ?? null;
 
     const today = new Date();
     const start = new Date(today.getTime() - 90 * 86400_000).toISOString().slice(0, 10);
