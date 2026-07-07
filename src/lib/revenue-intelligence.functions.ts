@@ -136,6 +136,9 @@ export const recommendPricing = createServerFn({ method: "POST" })
         multiplier *= 0.95;
         reasons.push("soft demand");
       }
+      const sig = applySignalsForDate(iso, base, signals as any);
+      multiplier *= sig.multiplier;
+      for (const r of sig.reasons) reasons.push(r);
       const suggested = Math.round(base * multiplier);
       suggestions.push({
         date: iso,
