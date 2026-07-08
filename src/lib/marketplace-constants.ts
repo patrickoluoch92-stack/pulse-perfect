@@ -37,6 +37,54 @@ export const PROPERTY_CATEGORIES = [
   { value: "corporate_retreat", label: "Corporate Retreat", group: "Events & Retreats" },
   { value: "team_building_venue", label: "Team Building Venue", group: "Events & Retreats" },
   { value: "wellness_retreat", label: "Wellness Retreat", group: "Events & Retreats" },
+  // ----- Residential rentals & sales -----
+  { value: "bedsitter", label: "Bedsitter", group: "Residential" },
+  { value: "single_room", label: "Single Room", group: "Residential" },
+  { value: "studio", label: "Studio", group: "Residential" },
+  { value: "one_bedroom", label: "1 Bedroom", group: "Residential" },
+  { value: "two_bedroom", label: "2 Bedroom", group: "Residential" },
+  { value: "three_bedroom", label: "3 Bedroom", group: "Residential" },
+  { value: "four_bedroom", label: "4 Bedroom", group: "Residential" },
+  { value: "apartment", label: "Apartment", group: "Residential" },
+  { value: "flat", label: "Flat", group: "Residential" },
+  { value: "maisonette", label: "Maisonette", group: "Residential" },
+  { value: "townhouse", label: "Townhouse", group: "Residential" },
+  { value: "standalone_house", label: "Stand-alone House", group: "Residential" },
+  { value: "bungalow", label: "Bungalow", group: "Residential" },
+  { value: "duplex", label: "Duplex", group: "Residential" },
+  { value: "penthouse", label: "Penthouse", group: "Residential" },
+  { value: "gated_community_home", label: "Gated Community Home", group: "Residential" },
+  { value: "cottage", label: "Cottage", group: "Residential" },
+  { value: "student_hostel", label: "Student Hostel", group: "Residential" },
+  { value: "staff_housing", label: "Staff Housing", group: "Residential" },
+  { value: "senior_living", label: "Senior Living", group: "Residential" },
+  // ----- Commercial -----
+  { value: "office_space", label: "Office Space", group: "Commercial" },
+  { value: "shop", label: "Shop", group: "Commercial" },
+  { value: "retail_space", label: "Retail Space", group: "Commercial" },
+  { value: "warehouse", label: "Warehouse", group: "Commercial" },
+  { value: "godown", label: "Godown", group: "Commercial" },
+  { value: "industrial_building", label: "Industrial Building", group: "Commercial" },
+  { value: "business_park", label: "Business Park", group: "Commercial" },
+  { value: "coworking_space", label: "Coworking Space", group: "Commercial" },
+  { value: "hotel_for_sale", label: "Hotel for Sale", group: "Commercial" },
+  { value: "restaurant_lease", label: "Restaurant for Lease", group: "Commercial" },
+  // ----- Agricultural -----
+  { value: "farm", label: "Farm", group: "Agricultural" },
+  { value: "agricultural_land", label: "Agricultural Land", group: "Agricultural" },
+  { value: "tea_farm", label: "Tea Farm", group: "Agricultural" },
+  { value: "coffee_farm", label: "Coffee Farm", group: "Agricultural" },
+  { value: "flower_farm", label: "Flower Farm", group: "Agricultural" },
+  { value: "dairy_farm", label: "Dairy Farm", group: "Agricultural" },
+  { value: "poultry_farm", label: "Poultry Farm", group: "Agricultural" },
+  { value: "fish_farm", label: "Fish Farm", group: "Agricultural" },
+  // ----- Land plots -----
+  { value: "residential_plot", label: "Residential Plot", group: "Land" },
+  { value: "commercial_plot", label: "Commercial Plot", group: "Land" },
+  { value: "industrial_plot", label: "Industrial Plot", group: "Land" },
+  { value: "beach_plot", label: "Beach Plot", group: "Land" },
+  { value: "lakefront_plot", label: "Lakefront Plot", group: "Land" },
+  { value: "riverfront_plot", label: "Riverfront Plot", group: "Land" },
 ] as const;
 
 export type PropertyCategory = (typeof PROPERTY_CATEGORIES)[number]["value"];
@@ -45,7 +93,28 @@ export const CATEGORY_GROUPS = [
   "Accommodation",
   "Nature & Wildlife",
   "Events & Retreats",
+  "Residential",
+  "Commercial",
+  "Agricultural",
+  "Land",
 ] as const;
+
+// A listing's commercial intent. Existing hospitality listings default to short_stay.
+export const LISTING_INTENTS = [
+  { value: "short_stay", label: "Short stay / nightly" },
+  { value: "rent", label: "For rent" },
+  { value: "sale", label: "For sale" },
+  { value: "lease", label: "For lease" },
+] as const;
+export type ListingIntent = (typeof LISTING_INTENTS)[number]["value"];
+
+export const OCCUPANCY_STATUSES = [
+  { value: "vacant", label: "Vacant" },
+  { value: "occupied", label: "Occupied" },
+  { value: "coming_soon", label: "Coming soon" },
+  { value: "under_offer", label: "Under offer" },
+] as const;
+
 
 // Experiences / activities available AT a property (not property categories themselves).
 export const ACTIVITIES = [

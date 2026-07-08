@@ -1674,11 +1674,15 @@ export type Database = {
           amenities: string[]
           attributes: string[]
           availability: Database["public"]["Enums"]["mkt_availability"]
+          available_from: string | null
+          bathrooms: number | null
+          bedrooms: number | null
           best_seasons: string[]
           capacity: number | null
           category: Database["public"]["Enums"]["mkt_property_category"]
           check_in_time: string | null
           check_out_time: string | null
+          constituency: string | null
           contact_email: string | null
           contact_phone: string | null
           contact_whatsapp: string | null
@@ -1687,25 +1691,39 @@ export type Database = {
           created_by: string
           currency: string
           description: string
+          estate: string | null
+          furnished: boolean | null
           google_maps_url: string | null
           id: string
           is_featured: boolean
           is_verified: boolean
+          land_size_acres: number | null
           landmarks: Json
           latitude: number | null
+          lease_period_months: number | null
+          listing_intent: string
           longitude: number | null
           main_image_path: string | null
           name: string
           nearby_parks: string[]
+          neighbourhood: string | null
+          occupancy_status: string | null
           org_id: string
+          parking_spaces: number | null
           postal_address: string | null
           price_per_night: number | null
           rating_avg: number
           rating_count: number
           rejection_reason: string | null
+          rent_daily: number | null
+          rent_monthly: number | null
+          rent_weekly: number | null
           reviewed_at: string | null
           reviewed_by: string | null
+          sale_price: number | null
           secondary_categories: string[]
+          security_deposit: number | null
+          service_charge: number | null
           slug: string
           status: Database["public"]["Enums"]["mkt_listing_status"]
           submitted_at: string | null
@@ -1722,11 +1740,15 @@ export type Database = {
           amenities?: string[]
           attributes?: string[]
           availability?: Database["public"]["Enums"]["mkt_availability"]
+          available_from?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
           best_seasons?: string[]
           capacity?: number | null
           category: Database["public"]["Enums"]["mkt_property_category"]
           check_in_time?: string | null
           check_out_time?: string | null
+          constituency?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           contact_whatsapp?: string | null
@@ -1735,25 +1757,39 @@ export type Database = {
           created_by: string
           currency?: string
           description: string
+          estate?: string | null
+          furnished?: boolean | null
           google_maps_url?: string | null
           id?: string
           is_featured?: boolean
           is_verified?: boolean
+          land_size_acres?: number | null
           landmarks?: Json
           latitude?: number | null
+          lease_period_months?: number | null
+          listing_intent?: string
           longitude?: number | null
           main_image_path?: string | null
           name: string
           nearby_parks?: string[]
+          neighbourhood?: string | null
+          occupancy_status?: string | null
           org_id: string
+          parking_spaces?: number | null
           postal_address?: string | null
           price_per_night?: number | null
           rating_avg?: number
           rating_count?: number
           rejection_reason?: string | null
+          rent_daily?: number | null
+          rent_monthly?: number | null
+          rent_weekly?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          sale_price?: number | null
           secondary_categories?: string[]
+          security_deposit?: number | null
+          service_charge?: number | null
           slug: string
           status?: Database["public"]["Enums"]["mkt_listing_status"]
           submitted_at?: string | null
@@ -1770,11 +1806,15 @@ export type Database = {
           amenities?: string[]
           attributes?: string[]
           availability?: Database["public"]["Enums"]["mkt_availability"]
+          available_from?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
           best_seasons?: string[]
           capacity?: number | null
           category?: Database["public"]["Enums"]["mkt_property_category"]
           check_in_time?: string | null
           check_out_time?: string | null
+          constituency?: string | null
           contact_email?: string | null
           contact_phone?: string | null
           contact_whatsapp?: string | null
@@ -1783,25 +1823,39 @@ export type Database = {
           created_by?: string
           currency?: string
           description?: string
+          estate?: string | null
+          furnished?: boolean | null
           google_maps_url?: string | null
           id?: string
           is_featured?: boolean
           is_verified?: boolean
+          land_size_acres?: number | null
           landmarks?: Json
           latitude?: number | null
+          lease_period_months?: number | null
+          listing_intent?: string
           longitude?: number | null
           main_image_path?: string | null
           name?: string
           nearby_parks?: string[]
+          neighbourhood?: string | null
+          occupancy_status?: string | null
           org_id?: string
+          parking_spaces?: number | null
           postal_address?: string | null
           price_per_night?: number | null
           rating_avg?: number
           rating_count?: number
           rejection_reason?: string | null
+          rent_daily?: number | null
+          rent_monthly?: number | null
+          rent_weekly?: number | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          sale_price?: number | null
           secondary_categories?: string[]
+          security_deposit?: number | null
+          service_charge?: number | null
           slug?: string
           status?: Database["public"]["Enums"]["mkt_listing_status"]
           submitted_at?: string | null
@@ -3202,6 +3256,50 @@ export type Database = {
         | "corporate_retreat"
         | "team_building_venue"
         | "wellness_retreat"
+        | "bedsitter"
+        | "single_room"
+        | "studio"
+        | "one_bedroom"
+        | "two_bedroom"
+        | "three_bedroom"
+        | "four_bedroom"
+        | "apartment"
+        | "flat"
+        | "maisonette"
+        | "townhouse"
+        | "standalone_house"
+        | "bungalow"
+        | "duplex"
+        | "penthouse"
+        | "gated_community_home"
+        | "student_hostel"
+        | "staff_housing"
+        | "senior_living"
+        | "cottage"
+        | "office_space"
+        | "shop"
+        | "retail_space"
+        | "warehouse"
+        | "godown"
+        | "industrial_building"
+        | "business_park"
+        | "coworking_space"
+        | "hotel_for_sale"
+        | "restaurant_lease"
+        | "farm"
+        | "agricultural_land"
+        | "tea_farm"
+        | "coffee_farm"
+        | "flower_farm"
+        | "dairy_farm"
+        | "poultry_farm"
+        | "fish_farm"
+        | "residential_plot"
+        | "commercial_plot"
+        | "industrial_plot"
+        | "beach_plot"
+        | "lakefront_plot"
+        | "riverfront_plot"
       org_role: "owner" | "admin" | "manager" | "staff"
       property_type:
         | "hotel"
@@ -3411,6 +3509,50 @@ export const Constants = {
         "corporate_retreat",
         "team_building_venue",
         "wellness_retreat",
+        "bedsitter",
+        "single_room",
+        "studio",
+        "one_bedroom",
+        "two_bedroom",
+        "three_bedroom",
+        "four_bedroom",
+        "apartment",
+        "flat",
+        "maisonette",
+        "townhouse",
+        "standalone_house",
+        "bungalow",
+        "duplex",
+        "penthouse",
+        "gated_community_home",
+        "student_hostel",
+        "staff_housing",
+        "senior_living",
+        "cottage",
+        "office_space",
+        "shop",
+        "retail_space",
+        "warehouse",
+        "godown",
+        "industrial_building",
+        "business_park",
+        "coworking_space",
+        "hotel_for_sale",
+        "restaurant_lease",
+        "farm",
+        "agricultural_land",
+        "tea_farm",
+        "coffee_farm",
+        "flower_farm",
+        "dairy_farm",
+        "poultry_farm",
+        "fish_farm",
+        "residential_plot",
+        "commercial_plot",
+        "industrial_plot",
+        "beach_plot",
+        "lakefront_plot",
+        "riverfront_plot",
       ],
       org_role: ["owner", "admin", "manager", "staff"],
       property_type: [
