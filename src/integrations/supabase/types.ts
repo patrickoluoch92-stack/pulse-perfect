@@ -108,6 +108,122 @@ export type Database = {
           },
         ]
       }
+      booking_commissions: {
+        Row: {
+          booking_id: string
+          commission_amount: number
+          commission_rate: number
+          created_at: string
+          credited_ledger_id: string | null
+          currency: string
+          gross_amount: number
+          id: string
+          levy_amount: number
+          net_owner_amount: number
+          org_id: string
+          property_id: string
+          reversed_ledger_id: string | null
+          rule_id: string | null
+          service_fee_amount: number
+          settled_ledger_id: string | null
+          status: string
+          updated_at: string
+          vat_amount: number
+        }
+        Insert: {
+          booking_id: string
+          commission_amount: number
+          commission_rate: number
+          created_at?: string
+          credited_ledger_id?: string | null
+          currency?: string
+          gross_amount: number
+          id?: string
+          levy_amount?: number
+          net_owner_amount: number
+          org_id: string
+          property_id: string
+          reversed_ledger_id?: string | null
+          rule_id?: string | null
+          service_fee_amount?: number
+          settled_ledger_id?: string | null
+          status?: string
+          updated_at?: string
+          vat_amount?: number
+        }
+        Update: {
+          booking_id?: string
+          commission_amount?: number
+          commission_rate?: number
+          created_at?: string
+          credited_ledger_id?: string | null
+          currency?: string
+          gross_amount?: number
+          id?: string
+          levy_amount?: number
+          net_owner_amount?: number
+          org_id?: string
+          property_id?: string
+          reversed_ledger_id?: string | null
+          rule_id?: string | null
+          service_fee_amount?: number
+          settled_ledger_id?: string | null
+          status?: string
+          updated_at?: string
+          vat_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_commissions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "marketplace_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_commissions_credited_ledger_id_fkey"
+            columns: ["credited_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "wallet_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_commissions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_commissions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_commissions_reversed_ledger_id_fkey"
+            columns: ["reversed_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "wallet_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_commissions_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "commission_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_commissions_settled_ledger_id_fkey"
+            columns: ["settled_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "wallet_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calendar_blocks: {
         Row: {
           created_at: string
@@ -171,6 +287,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      commission_rules: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          effective_to: string | null
+          flat_amount: number
+          id: string
+          name: string
+          notes: string | null
+          priority: number
+          rate_percent: number
+          scope: Database["public"]["Enums"]["commission_scope"]
+          scope_value: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          flat_amount?: number
+          id?: string
+          name: string
+          notes?: string | null
+          priority?: number
+          rate_percent?: number
+          scope?: Database["public"]["Enums"]["commission_scope"]
+          scope_value?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          flat_amount?: number
+          id?: string
+          name?: string
+          notes?: string | null
+          priority?: number
+          rate_percent?: number
+          scope?: Database["public"]["Enums"]["commission_scope"]
+          scope_value?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       coupons: {
         Row: {
@@ -2243,6 +2410,173 @@ export type Database = {
         }
         Relationships: []
       }
+      owner_wallets: {
+        Row: {
+          available_balance: number
+          created_at: string
+          currency: string
+          id: string
+          lifetime_earned: number
+          lifetime_paid_out: number
+          org_id: string
+          payout_destination: Json
+          payout_method: string
+          pending_balance: number
+          updated_at: string
+        }
+        Insert: {
+          available_balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          lifetime_earned?: number
+          lifetime_paid_out?: number
+          org_id: string
+          payout_destination?: Json
+          payout_method?: string
+          pending_balance?: number
+          updated_at?: string
+        }
+        Update: {
+          available_balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          lifetime_earned?: number
+          lifetime_paid_out?: number
+          org_id?: string
+          payout_destination?: Json
+          payout_method?: string
+          pending_balance?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_wallets_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payouts: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          currency: string
+          destination: Json
+          external_reference: string | null
+          failure_reason: string | null
+          id: string
+          method: string
+          notes: string | null
+          org_id: string
+          processed_at: string | null
+          requested_by: string | null
+          status: Database["public"]["Enums"]["payout_status"]
+          updated_at: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          currency?: string
+          destination?: Json
+          external_reference?: string | null
+          failure_reason?: string | null
+          id?: string
+          method?: string
+          notes?: string | null
+          org_id: string
+          processed_at?: string | null
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["payout_status"]
+          updated_at?: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          currency?: string
+          destination?: Json
+          external_reference?: string | null
+          failure_reason?: string | null
+          id?: string
+          method?: string
+          notes?: string | null
+          org_id?: string
+          processed_at?: string | null
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["payout_status"]
+          updated_at?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payouts_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "owner_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_tax_rates: {
+        Row: {
+          active: boolean
+          applies_to: string[]
+          code: string
+          created_at: string
+          effective_from: string
+          effective_to: string | null
+          id: string
+          name: string
+          notes: string | null
+          rate_percent: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          applies_to?: string[]
+          code: string
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          rate_percent?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          applies_to?: string[]
+          code?: string
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          rate_percent?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pricing_signals: {
         Row: {
           created_at: string
@@ -3100,6 +3434,62 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_ledger: {
+        Row: {
+          amount: number
+          available_after: number
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          entry_type: string
+          id: string
+          org_id: string
+          pending_after: number
+          reference_id: string | null
+          reference_type: string | null
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          available_after: number
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_type: string
+          id?: string
+          org_id: string
+          pending_after: number
+          reference_id?: string | null
+          reference_type?: string | null
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          available_after?: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_type?: string
+          id?: string
+          org_id?: string
+          pending_after?: number
+          reference_id?: string | null
+          reference_type?: string | null
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_ledger_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "owner_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       public_discovered_properties: {
@@ -3220,6 +3610,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      commission_scope: "global" | "county" | "category" | "property" | "org"
       invoice_status: "draft" | "sent" | "paid" | "void" | "overdue"
       marketplace_booking_status:
         | "pending"
@@ -3307,6 +3698,13 @@ export type Database = {
         | "lakefront_plot"
         | "riverfront_plot"
       org_role: "owner" | "admin" | "manager" | "staff"
+      payout_status:
+        | "requested"
+        | "approved"
+        | "processing"
+        | "paid"
+        | "failed"
+        | "cancelled"
       property_type:
         | "hotel"
         | "lodge"
@@ -3471,6 +3869,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      commission_scope: ["global", "county", "category", "property", "org"],
       invoice_status: ["draft", "sent", "paid", "void", "overdue"],
       marketplace_booking_status: [
         "pending",
@@ -3561,6 +3960,14 @@ export const Constants = {
         "riverfront_plot",
       ],
       org_role: ["owner", "admin", "manager", "staff"],
+      payout_status: [
+        "requested",
+        "approved",
+        "processing",
+        "paid",
+        "failed",
+        "cancelled",
+      ],
       property_type: [
         "hotel",
         "lodge",

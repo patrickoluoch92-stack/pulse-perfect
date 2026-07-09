@@ -166,11 +166,32 @@ export const setBookingStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => updateBookingStatus.parse(data))
   .handler(async ({ context, data }) => {
+    const { data: prior } = await context.supabase
+      .from("marketplace_bookings").select("status").eq("id", data.id).maybeSingle();
     const { error } = await context.supabase
       .from("marketplace_bookings")
       .update({ status: data.status })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+
+    // Best-effort finance side effects. Failures are logged but do not block
+    // the status update — admins can retry via the finance dashboard.
+    try {
+      const { accrueForBooking, settleForBooking, reverseForBooking } = await import("@/lib/finance.server");
+      const priorStatus = (prior as any)?.status;
+      const becameConfirmedOrCompleted = (data.status === "confirmed" || data.status === "completed")
+        && priorStatus !== "confirmed" && priorStatus !== "completed";
+      if (becameConfirmedOrCompleted) await accrueForBooking(data.id, context.userId);
+      if (data.status === "completed" && priorStatus !== "completed") {
+        await settleForBooking(data.id, context.userId);
+      }
+      if (data.status === "cancelled" && (priorStatus === "confirmed" || priorStatus === "completed")) {
+        await reverseForBooking(data.id, context.userId);
+      }
+    } catch (e) {
+      console.warn("[finance hook]", e instanceof Error ? e.message : e);
+    }
+
     return { ok: true };
   });
 
