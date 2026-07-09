@@ -61,6 +61,7 @@ import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminCommissionsRouteImport } from './routes/_authenticated/admin.commissions'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
+import { Route as ApiPublicHooksSubscriptionRenewalsRouteImport } from './routes/api/public/hooks/subscription-renewals'
 import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/public/hooks/partner-sync'
 import { Route as ApiPublicHooksDiscoveryTickRouteImport } from './routes/api/public/hooks/discovery-tick'
 import { Route as ApiPublicHooksDiscoveryRescoreRouteImport } from './routes/api/public/hooks/discovery-rescore'
@@ -341,6 +342,12 @@ const ApiPublicIcalTokenRoute = ApiPublicIcalTokenRouteImport.update({
   path: '/api/public/ical/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksSubscriptionRenewalsRoute =
+  ApiPublicHooksSubscriptionRenewalsRouteImport.update({
+    id: '/api/public/hooks/subscription-renewals',
+    path: '/api/public/hooks/subscription-renewals',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksPartnerSyncRoute =
   ApiPublicHooksPartnerSyncRouteImport.update({
     id: '/api/public/hooks/partner-sync',
@@ -434,6 +441,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
+  '/api/public/hooks/subscription-renewals': typeof ApiPublicHooksSubscriptionRenewalsRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -491,6 +499,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
+  '/api/public/hooks/subscription-renewals': typeof ApiPublicHooksSubscriptionRenewalsRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -552,6 +561,7 @@ export interface FileRoutesById {
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
+  '/api/public/hooks/subscription-renewals': typeof ApiPublicHooksSubscriptionRenewalsRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -613,6 +623,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/partner-sync'
+    | '/api/public/hooks/subscription-renewals'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -670,6 +681,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/partner-sync'
+    | '/api/public/hooks/subscription-renewals'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   id:
@@ -730,6 +742,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/partner-sync'
+    | '/api/public/hooks/subscription-renewals'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -752,6 +765,7 @@ export interface RootRouteChildren {
   ApiPublicHooksDiscoveryRescoreRoute: typeof ApiPublicHooksDiscoveryRescoreRoute
   ApiPublicHooksDiscoveryTickRoute: typeof ApiPublicHooksDiscoveryTickRoute
   ApiPublicHooksPartnerSyncRoute: typeof ApiPublicHooksPartnerSyncRoute
+  ApiPublicHooksSubscriptionRenewalsRoute: typeof ApiPublicHooksSubscriptionRenewalsRoute
   ApiPublicIcalTokenRoute: typeof ApiPublicIcalTokenRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -1122,6 +1136,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIcalTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/subscription-renewals': {
+      id: '/api/public/hooks/subscription-renewals'
+      path: '/api/public/hooks/subscription-renewals'
+      fullPath: '/api/public/hooks/subscription-renewals'
+      preLoaderRoute: typeof ApiPublicHooksSubscriptionRenewalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/partner-sync': {
       id: '/api/public/hooks/partner-sync'
       path: '/api/public/hooks/partner-sync'
@@ -1344,6 +1365,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksDiscoveryRescoreRoute: ApiPublicHooksDiscoveryRescoreRoute,
   ApiPublicHooksDiscoveryTickRoute: ApiPublicHooksDiscoveryTickRoute,
   ApiPublicHooksPartnerSyncRoute: ApiPublicHooksPartnerSyncRoute,
+  ApiPublicHooksSubscriptionRenewalsRoute:
+    ApiPublicHooksSubscriptionRenewalsRoute,
   ApiPublicIcalTokenRoute: ApiPublicIcalTokenRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
