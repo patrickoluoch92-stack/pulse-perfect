@@ -110,8 +110,8 @@ export const askConcierge = createServerFn({ method: "POST" })
     const contextRows = await retrieveContext(query, data.county);
     const facts = await enrichWithFacts(contextRows.map((c) => c.id));
 
-    const grounding = context.length
-      ? `Known HostPulse properties relevant to the query:\n${context
+    const grounding = contextRows.length
+      ? `Known HostPulse properties relevant to the query:\n${contextRows
           .map((c) => {
             const f = facts.get(c.id);
             const q = f?.quality ? ` [quality ${JSON.stringify(f.quality).slice(0, 80)}]` : "";
@@ -134,11 +134,11 @@ export const askConcierge = createServerFn({ method: "POST" })
     ];
     const reply = await aiChat({ messages, model: "openai/gpt-5.5" });
 
-    void logSearch(query, context, Date.now() - t0);
+    void logSearch(query, contextRows, Date.now() - t0);
 
     return {
       reply,
-      grounding: context.map((c) => ({
+      grounding: contextRows.map((c) => ({
         name: c.name,
         slug: c.slug,
         town: c.town,
