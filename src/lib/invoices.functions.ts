@@ -159,7 +159,7 @@ export const generateFromReservation = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: numRes, error: numErr } = await (supabaseAdmin as any)
-      .rpc("next_invoice_number", { _org_id: r.org_id });
+      .rpc("next_invoice_number", { _org_id: r.org_id, _user_id: context.userId });
     if (numErr) throw new Error(numErr.message);
 
     const desc = `${r.properties?.name ?? "Stay"} — ${r.units?.name ?? ""} (${r.check_in} → ${r.check_out}) · #${r.confirmation_code}`;
