@@ -78,8 +78,9 @@ export const upsertInvoice = createServerFn({ method: "POST" })
 
     let invoiceId = data.id;
     if (!invoiceId) {
-      const { data: numRes, error: numErr } = await (supabase as any)
-        .rpc("next_invoice_number", { _org_id: data.orgId });
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: numRes, error: numErr } = await (supabaseAdmin as any)
+        .rpc("next_invoice_number", { _org_id: data.orgId, _user_id: context.userId });
       if (numErr) throw new Error(numErr.message);
       const { data: row, error } = await supabase.from("invoices").insert({
         org_id: data.orgId,
@@ -156,8 +157,9 @@ export const generateFromReservation = createServerFn({ method: "POST" })
     const total = Number(r.total_amount) || 0;
     const unitPrice = round2(total / nights);
 
-    const { data: numRes, error: numErr } = await (supabase as any)
-      .rpc("next_invoice_number", { _org_id: r.org_id });
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: numRes, error: numErr } = await (supabaseAdmin as any)
+      .rpc("next_invoice_number", { _org_id: r.org_id, _user_id: context.userId });
     if (numErr) throw new Error(numErr.message);
 
     const desc = `${r.properties?.name ?? "Stay"} — ${r.units?.name ?? ""} (${r.check_in} → ${r.check_out}) · #${r.confirmation_code}`;

@@ -3174,6 +3174,10 @@ export type Database = {
         Args: { _token: string }
         Returns: string
       }
+      accept_organization_invitation_for: {
+        Args: { _token: string; _user_id: string }
+        Returns: string
+      }
       get_invitation_by_token: {
         Args: { _token: string }
         Returns: {
@@ -3204,7 +3208,9 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
-      next_invoice_number: { Args: { _org_id: string }; Returns: string }
+      next_invoice_number:
+        | { Args: { _org_id: string }; Returns: string }
+        | { Args: { _org_id: string; _user_id: string }; Returns: string }
       org_has_active_subscription: {
         Args: { _org_id: string }
         Returns: boolean
