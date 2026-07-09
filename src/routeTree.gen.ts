@@ -56,6 +56,7 @@ import { Route as AuthenticatedListingsAnalyticsRouteImport } from './routes/_au
 import { Route as AuthenticatedListingsAdminRouteImport } from './routes/_authenticated/listings.admin'
 import { Route as AuthenticatedListingsIdRouteImport } from './routes/_authenticated/listings.$id'
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
+import { Route as AuthenticatedAdminPlansRouteImport } from './routes/_authenticated/admin.plans'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/admin.finance'
 import { Route as AuthenticatedAdminCommissionsRouteImport } from './routes/_authenticated/admin.commissions'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -312,6 +313,11 @@ const AuthenticatedInvoicesInvoiceIdRoute =
     path: '/$invoiceId',
     getParentRoute: () => AuthenticatedInvoicesRoute,
   } as any)
+const AuthenticatedAdminPlansRoute = AuthenticatedAdminPlansRouteImport.update({
+  id: '/admin/plans',
+  path: '/admin/plans',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminFinanceRoute =
   AuthenticatedAdminFinanceRouteImport.update({
     id: '/admin/finance',
@@ -410,6 +416,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/': typeof MarketplaceIndexRoute
   '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
+  '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
@@ -466,6 +473,7 @@ export interface FileRoutesByTo {
   '/marketplace': typeof MarketplaceIndexRoute
   '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
+  '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
@@ -526,6 +534,7 @@ export interface FileRoutesById {
   '/marketplace/': typeof MarketplaceIndexRoute
   '/_authenticated/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
   '/_authenticated/admin/finance': typeof AuthenticatedAdminFinanceRoute
+  '/_authenticated/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/_authenticated/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
@@ -586,6 +595,7 @@ export interface FileRouteTypes {
     | '/marketplace/'
     | '/admin/commissions'
     | '/admin/finance'
+    | '/admin/plans'
     | '/invoices/$invoiceId'
     | '/listings/$id'
     | '/listings/admin'
@@ -642,6 +652,7 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/admin/commissions'
     | '/admin/finance'
+    | '/admin/plans'
     | '/invoices/$invoiceId'
     | '/listings/$id'
     | '/listings/admin'
@@ -701,6 +712,7 @@ export interface FileRouteTypes {
     | '/marketplace/'
     | '/_authenticated/admin/commissions'
     | '/_authenticated/admin/finance'
+    | '/_authenticated/admin/plans'
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/listings/$id'
     | '/_authenticated/listings/admin'
@@ -1075,6 +1087,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInvoicesInvoiceIdRouteImport
       parentRoute: typeof AuthenticatedInvoicesRoute
     }
+    '/_authenticated/admin/plans': {
+      id: '/_authenticated/admin/plans'
+      path: '/admin/plans'
+      fullPath: '/admin/plans'
+      preLoaderRoute: typeof AuthenticatedAdminPlansRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/finance': {
       id: '/_authenticated/admin/finance'
       path: '/admin/finance'
@@ -1256,6 +1275,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
   AuthenticatedAdminCommissionsRoute: typeof AuthenticatedAdminCommissionsRoute
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
+  AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -1282,6 +1302,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
   AuthenticatedAdminCommissionsRoute: AuthenticatedAdminCommissionsRoute,
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
+  AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
