@@ -19,26 +19,31 @@ async function assertAdmin(supabase: any, userId: string) {
   if (!data) throw new Error("Admin role required");
 }
 
-// Public: validate a coupon code at checkout (respects RLS: only active + unexpired visible)
+// Public: validate a coupon code at checkout. Uses service-role client server-side
+// because the coupons table is no longer publicly readable (prevents scraping).
 export const validateCoupon = createServerFn({ method: "GET" })
   .inputValidator((raw: unknown) =>
     z.object({ code: z.string().min(2).max(60) }).parse(raw),
   )
   .handler(async ({ data }) => {
-    const sb = publicClient();
-    const { data: row, error } = await (sb as any)
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await (supabaseAdmin as any)
       .from("coupons")
-      .select("id, code, description, discount_type, discount_value, currency, starts_at, expires_at, max_redemptions, redemptions_count")
+      .select("id, code, description, discount_type, discount_value, currency, starts_at, expires_at, max_redemptions, redemptions_count, active")
       .eq("code", data.code.trim().toUpperCase())
       .maybeSingle();
     if (error) return { valid: false as const, reason: error.message };
     if (!row) return { valid: false as const, reason: "Unknown code" };
+    if (!row.active) return { valid: false as const, reason: "Inactive" };
+    if (row.expires_at && new Date(row.expires_at) <= new Date())
+      return { valid: false as const, reason: "Expired" };
     if (row.starts_at && new Date(row.starts_at) > new Date())
       return { valid: false as const, reason: "Not yet active" };
     if (row.max_redemptions != null && row.redemptions_count >= row.max_redemptions)
       return { valid: false as const, reason: "Redemption limit reached" };
     return { valid: true as const, coupon: row };
   });
+
 
 export const adminListCoupons = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
