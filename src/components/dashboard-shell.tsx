@@ -2,7 +2,7 @@ import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  BedDouble, Bot, Brain, Calendar, CalendarSync, ChartBar, Compass, Coins, FileText, Home, Landmark, Lock, LogOut, MapPin, Plug, Rocket, Settings, ShieldAlert, Smartphone, Sparkles, Sprout, Store, Ticket, TrendingUp, Users, Wallet, Wrench,
+  BedDouble, Bot, Brain, Calendar, CalendarSync, ChartBar, Compass, Coins, CreditCard, FileText, Home, Landmark, Lock, LogOut, MapPin, Plug, Rocket, Settings, ShieldAlert, Smartphone, Sparkles, Sprout, Store, Ticket, TrendingUp, Users, Wallet, Wrench,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
