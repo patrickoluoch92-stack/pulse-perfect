@@ -125,7 +125,7 @@ function ChildCategoryPage() {
         </div>
 
         {results.isLoading && <p className="text-sm text-muted-foreground">Loading listings…</p>}
-        {results.data?.rows?.length === 0 && (
+        {results.data?.items?.length === 0 && (
           <div className="rounded-lg border border-dashed p-12 text-center">
             <p className="text-muted-foreground">No {node.name.toLowerCase()} listings match your filters yet.</p>
             <Link to="/rentals" className="mt-3 inline-flex items-center gap-1 text-primary underline">
@@ -135,7 +135,7 @@ function ChildCategoryPage() {
         )}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {(results.data?.rows ?? []).map((p: any) => (
+          {(results.data?.items ?? []).map((p: any) => (
             <Link key={p.id} to="/marketplace/p/$slug" params={{ slug: p.slug }}>
               <Card className="h-full transition-shadow hover:shadow-md">
                 {p.main_image_path && (
@@ -160,7 +160,7 @@ function ChildCategoryPage() {
           ))}
         </div>
 
-        <p className="mt-6 text-xs text-muted-foreground">{results.data?.count ?? 0} results</p>
+        <p className="mt-6 text-xs text-muted-foreground">{results.data?.total ?? 0} results</p>
       </section>
     </div>
   );
