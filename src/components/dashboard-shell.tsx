@@ -37,6 +37,8 @@ const nav = [
   { to: "/concierge", label: "Concierge", icon: Bot },
   { to: "/bookings", label: "My Bookings", icon: Ticket },
   { to: "/wishlist", label: "Wishlist", icon: Sparkles },
+  { to: "/subscription", label: "Subscription", icon: CreditCard },
+  { to: "/admin/plans", label: "Plan Admin", icon: Lock },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
