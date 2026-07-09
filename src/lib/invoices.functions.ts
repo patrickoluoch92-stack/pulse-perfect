@@ -157,7 +157,8 @@ export const generateFromReservation = createServerFn({ method: "POST" })
     const total = Number(r.total_amount) || 0;
     const unitPrice = round2(total / nights);
 
-    const { data: numRes, error: numErr } = await (supabase as any)
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: numRes, error: numErr } = await (supabaseAdmin as any)
       .rpc("next_invoice_number", { _org_id: r.org_id });
     if (numErr) throw new Error(numErr.message);
 
