@@ -58,6 +58,7 @@ import { Route as AuthenticatedListingsIdRouteImport } from './routes/_authentic
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
 import { Route as AuthenticatedAdminPlansRouteImport } from './routes/_authenticated/admin.plans'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/admin.finance'
+import { Route as AuthenticatedAdminExecutiveRouteImport } from './routes/_authenticated/admin.executive'
 import { Route as AuthenticatedAdminCommissionsRouteImport } from './routes/_authenticated/admin.commissions'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
@@ -325,6 +326,12 @@ const AuthenticatedAdminFinanceRoute =
     path: '/admin/finance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminExecutiveRoute =
+  AuthenticatedAdminExecutiveRouteImport.update({
+    id: '/admin/executive',
+    path: '/admin/executive',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCommissionsRoute =
   AuthenticatedAdminCommissionsRouteImport.update({
     id: '/admin/commissions',
@@ -422,6 +429,7 @@ export interface FileRoutesByFullPath {
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
+  '/admin/executive': typeof AuthenticatedAdminExecutiveRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
@@ -480,6 +488,7 @@ export interface FileRoutesByTo {
   '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
   '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
+  '/admin/executive': typeof AuthenticatedAdminExecutiveRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
@@ -542,6 +551,7 @@ export interface FileRoutesById {
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/_authenticated/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
+  '/_authenticated/admin/executive': typeof AuthenticatedAdminExecutiveRoute
   '/_authenticated/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/_authenticated/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
@@ -604,6 +614,7 @@ export interface FileRouteTypes {
     | '/discover/'
     | '/marketplace/'
     | '/admin/commissions'
+    | '/admin/executive'
     | '/admin/finance'
     | '/admin/plans'
     | '/invoices/$invoiceId'
@@ -662,6 +673,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/marketplace'
     | '/admin/commissions'
+    | '/admin/executive'
     | '/admin/finance'
     | '/admin/plans'
     | '/invoices/$invoiceId'
@@ -723,6 +735,7 @@ export interface FileRouteTypes {
     | '/discover/'
     | '/marketplace/'
     | '/_authenticated/admin/commissions'
+    | '/_authenticated/admin/executive'
     | '/_authenticated/admin/finance'
     | '/_authenticated/admin/plans'
     | '/_authenticated/invoices/$invoiceId'
@@ -1115,6 +1128,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/executive': {
+      id: '/_authenticated/admin/executive'
+      path: '/admin/executive'
+      fullPath: '/admin/executive'
+      preLoaderRoute: typeof AuthenticatedAdminExecutiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/commissions': {
       id: '/_authenticated/admin/commissions'
       path: '/admin/commissions'
@@ -1295,6 +1315,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
   AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
   AuthenticatedAdminCommissionsRoute: typeof AuthenticatedAdminCommissionsRoute
+  AuthenticatedAdminExecutiveRoute: typeof AuthenticatedAdminExecutiveRoute
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
   AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
 }
@@ -1322,6 +1343,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedWalletRoute: AuthenticatedWalletRoute,
   AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
   AuthenticatedAdminCommissionsRoute: AuthenticatedAdminCommissionsRoute,
+  AuthenticatedAdminExecutiveRoute: AuthenticatedAdminExecutiveRoute,
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
   AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
 }
