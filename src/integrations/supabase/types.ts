@@ -2960,9 +2960,175 @@ export type Database = {
           },
         ]
       }
+      subscription_events: {
+        Row: {
+          actor_user_id: string | null
+          amount_kes: number | null
+          created_at: string
+          event_type: string
+          from_plan: string | null
+          id: string
+          org_id: string
+          payload: Json
+          reason: string | null
+          subscription_id: string | null
+          to_plan: string | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          amount_kes?: number | null
+          created_at?: string
+          event_type: string
+          from_plan?: string | null
+          id?: string
+          org_id: string
+          payload?: Json
+          reason?: string | null
+          subscription_id?: string | null
+          to_plan?: string | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          amount_kes?: number | null
+          created_at?: string
+          event_type?: string
+          from_plan?: string | null
+          id?: string
+          org_id?: string
+          payload?: Json
+          reason?: string | null
+          subscription_id?: string | null
+          to_plan?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_events_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_notices: {
+        Row: {
+          id: string
+          notice_type: string
+          sent_at: string
+          subscription_id: string
+        }
+        Insert: {
+          id?: string
+          notice_type: string
+          sent_at?: string
+          subscription_id: string
+        }
+        Update: {
+          id?: string
+          notice_type?: string
+          sent_at?: string
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_notices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_plans: {
+        Row: {
+          active: boolean
+          ai_calls_per_month: number | null
+          code: string
+          created_at: string
+          feature_flags: Json
+          has_api_access: boolean
+          has_channel_manager: boolean
+          has_dynamic_pricing: boolean
+          has_priority_support: boolean
+          has_promotional_boost: boolean
+          id: string
+          is_contact_sales: boolean
+          name: string
+          photo_limit_per_property: number | null
+          price_monthly_kes: number
+          price_yearly_kes: number
+          property_limit: number | null
+          sort_order: number
+          storage_mb: number | null
+          tagline: string | null
+          team_member_limit: number | null
+          trial_days: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          ai_calls_per_month?: number | null
+          code: string
+          created_at?: string
+          feature_flags?: Json
+          has_api_access?: boolean
+          has_channel_manager?: boolean
+          has_dynamic_pricing?: boolean
+          has_priority_support?: boolean
+          has_promotional_boost?: boolean
+          id?: string
+          is_contact_sales?: boolean
+          name: string
+          photo_limit_per_property?: number | null
+          price_monthly_kes?: number
+          price_yearly_kes?: number
+          property_limit?: number | null
+          sort_order?: number
+          storage_mb?: number | null
+          tagline?: string | null
+          team_member_limit?: number | null
+          trial_days?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          ai_calls_per_month?: number | null
+          code?: string
+          created_at?: string
+          feature_flags?: Json
+          has_api_access?: boolean
+          has_channel_manager?: boolean
+          has_dynamic_pricing?: boolean
+          has_priority_support?: boolean
+          has_promotional_boost?: boolean
+          id?: string
+          is_contact_sales?: boolean
+          name?: string
+          photo_limit_per_property?: number | null
+          price_monthly_kes?: number
+          price_yearly_kes?: number
+          property_limit?: number | null
+          sort_order?: number
+          storage_mb?: number | null
+          tagline?: string | null
+          team_member_limit?: number | null
+          trial_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean
+          cancel_reason: string | null
+          cancelled_at: string | null
           created_at: string
           current_period_end: string | null
           current_period_start: string | null
@@ -2985,6 +3151,8 @@ export type Database = {
         }
         Insert: {
           cancel_at_period_end?: boolean
+          cancel_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
@@ -3007,6 +3175,8 @@ export type Database = {
         }
         Update: {
           cancel_at_period_end?: boolean
+          cancel_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
