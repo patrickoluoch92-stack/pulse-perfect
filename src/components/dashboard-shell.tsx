@@ -2,7 +2,7 @@ import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  BedDouble, Bot, Brain, Calendar, CalendarSync, ChartBar, Compass, FileText, Home, Lock, LogOut, MapPin, Plug, Rocket, Settings, ShieldAlert, Smartphone, Sparkles, Sprout, Store, Ticket, TrendingUp, Users, Wrench,
+  BedDouble, Bot, Brain, Calendar, CalendarSync, ChartBar, Compass, Coins, FileText, Home, Landmark, Lock, LogOut, MapPin, Plug, Rocket, Settings, ShieldAlert, Smartphone, Sparkles, Sprout, Store, Ticket, TrendingUp, Users, Wallet, Wrench,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +29,9 @@ const nav = [
   { to: "/listings/partners", label: "Partner Sync", icon: Plug },
   { to: "/listings/admin/discovery", label: "Discovery AI", icon: Compass },
   { to: "/listings/admin/coupons", label: "Coupons", icon: Ticket },
+  { to: "/wallet", label: "Wallet & Payouts", icon: Wallet },
+  { to: "/admin/finance", label: "Finance Admin", icon: Landmark },
+  { to: "/admin/commissions", label: "Commissions", icon: Coins },
   { to: "/revenue", label: "Revenue AI", icon: TrendingUp },
   { to: "/ai-command", label: "AI Command", icon: Brain },
   { to: "/concierge", label: "Concierge", icon: Bot },

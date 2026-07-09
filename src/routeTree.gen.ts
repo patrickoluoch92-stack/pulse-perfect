@@ -25,6 +25,7 @@ import { Route as GuidesHotelSeoRouteImport } from './routes/guides.hotel-seo'
 import { Route as DiscoverSlugRouteImport } from './routes/discover.$slug'
 import { Route as CountiesSlugRouteImport } from './routes/counties.$slug'
 import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticated/wishlist'
+import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as AuthenticatedToursRouteImport } from './routes/_authenticated/tours'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedSyncRouteImport } from './routes/_authenticated/sync'
@@ -54,6 +55,8 @@ import { Route as AuthenticatedListingsAnalyticsRouteImport } from './routes/_au
 import { Route as AuthenticatedListingsAdminRouteImport } from './routes/_authenticated/listings.admin'
 import { Route as AuthenticatedListingsIdRouteImport } from './routes/_authenticated/listings.$id'
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
+import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/admin.finance'
+import { Route as AuthenticatedAdminCommissionsRouteImport } from './routes/_authenticated/admin.commissions'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
 import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/public/hooks/partner-sync'
@@ -140,6 +143,11 @@ const CountiesSlugRoute = CountiesSlugRouteImport.update({
 const AuthenticatedWishlistRoute = AuthenticatedWishlistRouteImport.update({
   id: '/wishlist',
   path: '/wishlist',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedToursRoute = AuthenticatedToursRouteImport.update({
@@ -297,6 +305,18 @@ const AuthenticatedInvoicesInvoiceIdRoute =
     path: '/$invoiceId',
     getParentRoute: () => AuthenticatedInvoicesRoute,
   } as any)
+const AuthenticatedAdminFinanceRoute =
+  AuthenticatedAdminFinanceRouteImport.update({
+    id: '/admin/finance',
+    path: '/admin/finance',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminCommissionsRoute =
+  AuthenticatedAdminCommissionsRouteImport.update({
+    id: '/admin/commissions',
+    path: '/admin/commissions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -370,6 +390,7 @@ export interface FileRoutesByFullPath {
   '/sync': typeof AuthenticatedSyncRoute
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
+  '/wallet': typeof AuthenticatedWalletRoute
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/counties/$slug': typeof CountiesSlugRoute
   '/discover/$slug': typeof DiscoverSlugRoute
@@ -379,6 +400,8 @@ export interface FileRoutesByFullPath {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
+  '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
+  '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
@@ -422,6 +445,7 @@ export interface FileRoutesByTo {
   '/sync': typeof AuthenticatedSyncRoute
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
+  '/wallet': typeof AuthenticatedWalletRoute
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/counties/$slug': typeof CountiesSlugRoute
   '/discover/$slug': typeof DiscoverSlugRoute
@@ -431,6 +455,8 @@ export interface FileRoutesByTo {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
+  '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
+  '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
@@ -478,6 +504,7 @@ export interface FileRoutesById {
   '/_authenticated/sync': typeof AuthenticatedSyncRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/tours': typeof AuthenticatedToursRoute
+  '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/counties/$slug': typeof CountiesSlugRoute
   '/discover/$slug': typeof DiscoverSlugRoute
@@ -487,6 +514,8 @@ export interface FileRoutesById {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
+  '/_authenticated/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
+  '/_authenticated/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/_authenticated/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
@@ -534,6 +563,7 @@ export interface FileRouteTypes {
     | '/sync'
     | '/team'
     | '/tours'
+    | '/wallet'
     | '/wishlist'
     | '/counties/$slug'
     | '/discover/$slug'
@@ -543,6 +573,8 @@ export interface FileRouteTypes {
     | '/marketplace/map'
     | '/discover/'
     | '/marketplace/'
+    | '/admin/commissions'
+    | '/admin/finance'
     | '/invoices/$invoiceId'
     | '/listings/$id'
     | '/listings/admin'
@@ -586,6 +618,7 @@ export interface FileRouteTypes {
     | '/sync'
     | '/team'
     | '/tours'
+    | '/wallet'
     | '/wishlist'
     | '/counties/$slug'
     | '/discover/$slug'
@@ -595,6 +628,8 @@ export interface FileRouteTypes {
     | '/marketplace/map'
     | '/discover'
     | '/marketplace'
+    | '/admin/commissions'
+    | '/admin/finance'
     | '/invoices/$invoiceId'
     | '/listings/$id'
     | '/listings/admin'
@@ -641,6 +676,7 @@ export interface FileRouteTypes {
     | '/_authenticated/sync'
     | '/_authenticated/team'
     | '/_authenticated/tours'
+    | '/_authenticated/wallet'
     | '/_authenticated/wishlist'
     | '/counties/$slug'
     | '/discover/$slug'
@@ -650,6 +686,8 @@ export interface FileRouteTypes {
     | '/marketplace/map'
     | '/discover/'
     | '/marketplace/'
+    | '/_authenticated/admin/commissions'
+    | '/_authenticated/admin/finance'
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/listings/$id'
     | '/_authenticated/listings/admin'
@@ -805,6 +843,13 @@ declare module '@tanstack/react-router' {
       path: '/wishlist'
       fullPath: '/wishlist'
       preLoaderRoute: typeof AuthenticatedWishlistRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/wallet': {
+      id: '/_authenticated/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof AuthenticatedWalletRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/tours': {
@@ -1010,6 +1055,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInvoicesInvoiceIdRouteImport
       parentRoute: typeof AuthenticatedInvoicesRoute
     }
+    '/_authenticated/admin/finance': {
+      id: '/_authenticated/admin/finance'
+      path: '/admin/finance'
+      fullPath: '/admin/finance'
+      preLoaderRoute: typeof AuthenticatedAdminFinanceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/commissions': {
+      id: '/_authenticated/admin/commissions'
+      path: '/admin/commissions'
+      fullPath: '/admin/commissions'
+      preLoaderRoute: typeof AuthenticatedAdminCommissionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -1172,7 +1231,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSyncRoute: typeof AuthenticatedSyncRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
   AuthenticatedToursRoute: typeof AuthenticatedToursRoute
+  AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
   AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
+  AuthenticatedAdminCommissionsRoute: typeof AuthenticatedAdminCommissionsRoute
+  AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -1194,7 +1256,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSyncRoute: AuthenticatedSyncRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
   AuthenticatedToursRoute: AuthenticatedToursRoute,
+  AuthenticatedWalletRoute: AuthenticatedWalletRoute,
   AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
+  AuthenticatedAdminCommissionsRoute: AuthenticatedAdminCommissionsRoute,
+  AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
