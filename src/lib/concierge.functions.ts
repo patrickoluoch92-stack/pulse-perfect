@@ -95,13 +95,20 @@ async function logSearch(query: string, results: GroundingRow[], latencyMs: numb
 }
 
 export const askConcierge = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => Input.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await enforceRateLimit({
+      bucket: "concierge:ask",
+      userId: context.userId,
+      limit: 30,
+      windowSec: 300,
+    });
     const t0 = Date.now();
     const lastUser = [...data.messages].reverse().find((m) => m.role === "user");
     const query = lastUser?.content ?? "";
-    const context = await retrieveContext(query, data.county);
-    const facts = await enrichWithFacts(context.map((c) => c.id));
+    const contextRows = await retrieveContext(query, data.county);
+    const facts = await enrichWithFacts(contextRows.map((c) => c.id));
 
     const grounding = context.length
       ? `Known HostPulse properties relevant to the query:\n${context
