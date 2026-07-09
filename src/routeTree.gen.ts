@@ -57,9 +57,12 @@ import { Route as AuthenticatedListingsAdminRouteImport } from './routes/_authen
 import { Route as AuthenticatedListingsIdRouteImport } from './routes/_authenticated/listings.$id'
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
 import { Route as AuthenticatedAdminPlansRouteImport } from './routes/_authenticated/admin.plans'
+import { Route as AuthenticatedAdminFraudRouteImport } from './routes/_authenticated/admin.fraud'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/admin.finance'
 import { Route as AuthenticatedAdminExecutiveRouteImport } from './routes/_authenticated/admin.executive'
+import { Route as AuthenticatedAdminDevopsRouteImport } from './routes/_authenticated/admin.devops'
 import { Route as AuthenticatedAdminCommissionsRouteImport } from './routes/_authenticated/admin.commissions'
+import { Route as AuthenticatedAdminCmsRouteImport } from './routes/_authenticated/admin.cms'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
 import { Route as ApiPublicHooksSubscriptionRenewalsRouteImport } from './routes/api/public/hooks/subscription-renewals'
@@ -320,6 +323,11 @@ const AuthenticatedAdminPlansRoute = AuthenticatedAdminPlansRouteImport.update({
   path: '/admin/plans',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminFraudRoute = AuthenticatedAdminFraudRouteImport.update({
+  id: '/admin/fraud',
+  path: '/admin/fraud',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminFinanceRoute =
   AuthenticatedAdminFinanceRouteImport.update({
     id: '/admin/finance',
@@ -332,12 +340,23 @@ const AuthenticatedAdminExecutiveRoute =
     path: '/admin/executive',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminDevopsRoute =
+  AuthenticatedAdminDevopsRouteImport.update({
+    id: '/admin/devops',
+    path: '/admin/devops',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminCommissionsRoute =
   AuthenticatedAdminCommissionsRouteImport.update({
     id: '/admin/commissions',
     path: '/admin/commissions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminCmsRoute = AuthenticatedAdminCmsRouteImport.update({
+  id: '/admin/cms',
+  path: '/admin/cms',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -428,9 +447,12 @@ export interface FileRoutesByFullPath {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
+  '/admin/cms': typeof AuthenticatedAdminCmsRoute
   '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
+  '/admin/devops': typeof AuthenticatedAdminDevopsRoute
   '/admin/executive': typeof AuthenticatedAdminExecutiveRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
+  '/admin/fraud': typeof AuthenticatedAdminFraudRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
@@ -487,9 +509,12 @@ export interface FileRoutesByTo {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
+  '/admin/cms': typeof AuthenticatedAdminCmsRoute
   '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
+  '/admin/devops': typeof AuthenticatedAdminDevopsRoute
   '/admin/executive': typeof AuthenticatedAdminExecutiveRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
+  '/admin/fraud': typeof AuthenticatedAdminFraudRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
@@ -550,9 +575,12 @@ export interface FileRoutesById {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
+  '/_authenticated/admin/cms': typeof AuthenticatedAdminCmsRoute
   '/_authenticated/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
+  '/_authenticated/admin/devops': typeof AuthenticatedAdminDevopsRoute
   '/_authenticated/admin/executive': typeof AuthenticatedAdminExecutiveRoute
   '/_authenticated/admin/finance': typeof AuthenticatedAdminFinanceRoute
+  '/_authenticated/admin/fraud': typeof AuthenticatedAdminFraudRoute
   '/_authenticated/admin/plans': typeof AuthenticatedAdminPlansRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
@@ -613,9 +641,12 @@ export interface FileRouteTypes {
     | '/marketplace/map'
     | '/discover/'
     | '/marketplace/'
+    | '/admin/cms'
     | '/admin/commissions'
+    | '/admin/devops'
     | '/admin/executive'
     | '/admin/finance'
+    | '/admin/fraud'
     | '/admin/plans'
     | '/invoices/$invoiceId'
     | '/listings/$id'
@@ -672,9 +703,12 @@ export interface FileRouteTypes {
     | '/marketplace/map'
     | '/discover'
     | '/marketplace'
+    | '/admin/cms'
     | '/admin/commissions'
+    | '/admin/devops'
     | '/admin/executive'
     | '/admin/finance'
+    | '/admin/fraud'
     | '/admin/plans'
     | '/invoices/$invoiceId'
     | '/listings/$id'
@@ -734,9 +768,12 @@ export interface FileRouteTypes {
     | '/marketplace/map'
     | '/discover/'
     | '/marketplace/'
+    | '/_authenticated/admin/cms'
     | '/_authenticated/admin/commissions'
+    | '/_authenticated/admin/devops'
     | '/_authenticated/admin/executive'
     | '/_authenticated/admin/finance'
+    | '/_authenticated/admin/fraud'
     | '/_authenticated/admin/plans'
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/listings/$id'
@@ -1121,6 +1158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminPlansRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/fraud': {
+      id: '/_authenticated/admin/fraud'
+      path: '/admin/fraud'
+      fullPath: '/admin/fraud'
+      preLoaderRoute: typeof AuthenticatedAdminFraudRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/finance': {
       id: '/_authenticated/admin/finance'
       path: '/admin/finance'
@@ -1135,11 +1179,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExecutiveRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/devops': {
+      id: '/_authenticated/admin/devops'
+      path: '/admin/devops'
+      fullPath: '/admin/devops'
+      preLoaderRoute: typeof AuthenticatedAdminDevopsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/commissions': {
       id: '/_authenticated/admin/commissions'
       path: '/admin/commissions'
       fullPath: '/admin/commissions'
       preLoaderRoute: typeof AuthenticatedAdminCommissionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/cms': {
+      id: '/_authenticated/admin/cms'
+      path: '/admin/cms'
+      fullPath: '/admin/cms'
+      preLoaderRoute: typeof AuthenticatedAdminCmsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/payments/webhook': {
@@ -1314,9 +1372,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedToursRoute: typeof AuthenticatedToursRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
   AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
+  AuthenticatedAdminCmsRoute: typeof AuthenticatedAdminCmsRoute
   AuthenticatedAdminCommissionsRoute: typeof AuthenticatedAdminCommissionsRoute
+  AuthenticatedAdminDevopsRoute: typeof AuthenticatedAdminDevopsRoute
   AuthenticatedAdminExecutiveRoute: typeof AuthenticatedAdminExecutiveRoute
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
+  AuthenticatedAdminFraudRoute: typeof AuthenticatedAdminFraudRoute
   AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
 }
 
@@ -1342,9 +1403,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedToursRoute: AuthenticatedToursRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRoute,
   AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
+  AuthenticatedAdminCmsRoute: AuthenticatedAdminCmsRoute,
   AuthenticatedAdminCommissionsRoute: AuthenticatedAdminCommissionsRoute,
+  AuthenticatedAdminDevopsRoute: AuthenticatedAdminDevopsRoute,
   AuthenticatedAdminExecutiveRoute: AuthenticatedAdminExecutiveRoute,
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
+  AuthenticatedAdminFraudRoute: AuthenticatedAdminFraudRoute,
   AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
 }
 
