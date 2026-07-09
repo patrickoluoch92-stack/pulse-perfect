@@ -56,6 +56,7 @@ import { Route as AuthenticatedListingsAdminRouteImport } from './routes/_authen
 import { Route as AuthenticatedListingsIdRouteImport } from './routes/_authenticated/listings.$id'
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/admin.finance'
+import { Route as AuthenticatedAdminCommissionsRouteImport } from './routes/_authenticated/admin.commissions'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
 import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/public/hooks/partner-sync'
@@ -310,6 +311,12 @@ const AuthenticatedAdminFinanceRoute =
     path: '/admin/finance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminCommissionsRoute =
+  AuthenticatedAdminCommissionsRouteImport.update({
+    id: '/admin/commissions',
+    path: '/admin/commissions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -393,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
+  '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
@@ -447,6 +455,7 @@ export interface FileRoutesByTo {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
+  '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
@@ -505,6 +514,7 @@ export interface FileRoutesById {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
+  '/_authenticated/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
   '/_authenticated/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
@@ -563,6 +573,7 @@ export interface FileRouteTypes {
     | '/marketplace/map'
     | '/discover/'
     | '/marketplace/'
+    | '/admin/commissions'
     | '/admin/finance'
     | '/invoices/$invoiceId'
     | '/listings/$id'
@@ -617,6 +628,7 @@ export interface FileRouteTypes {
     | '/marketplace/map'
     | '/discover'
     | '/marketplace'
+    | '/admin/commissions'
     | '/admin/finance'
     | '/invoices/$invoiceId'
     | '/listings/$id'
@@ -674,6 +686,7 @@ export interface FileRouteTypes {
     | '/marketplace/map'
     | '/discover/'
     | '/marketplace/'
+    | '/_authenticated/admin/commissions'
     | '/_authenticated/admin/finance'
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/listings/$id'
@@ -1049,6 +1062,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFinanceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/commissions': {
+      id: '/_authenticated/admin/commissions'
+      path: '/admin/commissions'
+      fullPath: '/admin/commissions'
+      preLoaderRoute: typeof AuthenticatedAdminCommissionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -1213,6 +1233,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedToursRoute: typeof AuthenticatedToursRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
   AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
+  AuthenticatedAdminCommissionsRoute: typeof AuthenticatedAdminCommissionsRoute
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
 }
 
@@ -1237,6 +1258,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedToursRoute: AuthenticatedToursRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRoute,
   AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
+  AuthenticatedAdminCommissionsRoute: AuthenticatedAdminCommissionsRoute,
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
 }
 
