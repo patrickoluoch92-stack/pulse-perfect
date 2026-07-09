@@ -80,7 +80,7 @@ export const upsertInvoice = createServerFn({ method: "POST" })
     if (!invoiceId) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const { data: numRes, error: numErr } = await (supabaseAdmin as any)
-        .rpc("next_invoice_number", { _org_id: data.orgId });
+        .rpc("next_invoice_number", { _org_id: data.orgId, _user_id: context.userId });
       if (numErr) throw new Error(numErr.message);
       const { data: row, error } = await supabase.from("invoices").insert({
         org_id: data.orgId,
