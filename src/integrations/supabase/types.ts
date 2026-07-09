@@ -1849,6 +1849,7 @@ export type Database = {
           category: Database["public"]["Enums"]["mkt_property_category"]
           check_in_time: string | null
           check_out_time: string | null
+          child_category_slug: string | null
           constituency: string | null
           contact_email: string | null
           contact_phone: string | null
@@ -1876,6 +1877,7 @@ export type Database = {
           neighbourhood: string | null
           occupancy_status: string | null
           org_id: string
+          parent_category_slug: string | null
           parking_spaces: number | null
           postal_address: string | null
           price_per_night: number | null
@@ -1915,6 +1917,7 @@ export type Database = {
           category: Database["public"]["Enums"]["mkt_property_category"]
           check_in_time?: string | null
           check_out_time?: string | null
+          child_category_slug?: string | null
           constituency?: string | null
           contact_email?: string | null
           contact_phone?: string | null
@@ -1942,6 +1945,7 @@ export type Database = {
           neighbourhood?: string | null
           occupancy_status?: string | null
           org_id: string
+          parent_category_slug?: string | null
           parking_spaces?: number | null
           postal_address?: string | null
           price_per_night?: number | null
@@ -1981,6 +1985,7 @@ export type Database = {
           category?: Database["public"]["Enums"]["mkt_property_category"]
           check_in_time?: string | null
           check_out_time?: string | null
+          child_category_slug?: string | null
           constituency?: string | null
           contact_email?: string | null
           contact_phone?: string | null
@@ -2008,6 +2013,7 @@ export type Database = {
           neighbourhood?: string | null
           occupancy_status?: string | null
           org_id?: string
+          parent_category_slug?: string | null
           parking_spaces?: number | null
           postal_address?: string | null
           price_per_night?: number | null
@@ -2721,6 +2727,65 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_category_nodes: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          legacy_category: string | null
+          metadata: Json
+          name: string
+          parent_id: string | null
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          legacy_category?: string | null
+          metadata?: Json
+          name: string
+          parent_id?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          legacy_category?: string | null
+          metadata?: Json
+          name?: string
+          parent_id?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_category_nodes_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "property_category_nodes"
             referencedColumns: ["id"]
           },
         ]

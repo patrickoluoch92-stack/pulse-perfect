@@ -16,8 +16,10 @@ import { Route as ConciergeRouteImport } from './routes/concierge'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RentalsIndexRouteImport } from './routes/rentals.index'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
 import { Route as DiscoverIndexRouteImport } from './routes/discover.index'
+import { Route as RentalsChildRouteImport } from './routes/rentals.$child'
 import { Route as MarketplaceMapRouteImport } from './routes/marketplace.map'
 import { Route as MarketplaceCountyRouteImport } from './routes/marketplace.$county'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
@@ -107,6 +109,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RentalsIndexRoute = RentalsIndexRouteImport.update({
+  id: '/rentals/',
+  path: '/rentals/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketplaceIndexRoute = MarketplaceIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -115,6 +122,11 @@ const MarketplaceIndexRoute = MarketplaceIndexRouteImport.update({
 const DiscoverIndexRoute = DiscoverIndexRouteImport.update({
   id: '/discover/',
   path: '/discover/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RentalsChildRoute = RentalsChildRouteImport.update({
+  id: '/rentals/$child',
+  path: '/rentals/$child',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketplaceMapRoute = MarketplaceMapRouteImport.update({
@@ -445,8 +457,10 @@ export interface FileRoutesByFullPath {
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
+  '/rentals/': typeof RentalsIndexRoute
   '/admin/cms': typeof AuthenticatedAdminCmsRoute
   '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
   '/admin/devops': typeof AuthenticatedAdminDevopsRoute
@@ -507,8 +521,10 @@ export interface FileRoutesByTo {
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/rentals/$child': typeof RentalsChildRoute
   '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
+  '/rentals': typeof RentalsIndexRoute
   '/admin/cms': typeof AuthenticatedAdminCmsRoute
   '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
   '/admin/devops': typeof AuthenticatedAdminDevopsRoute
@@ -573,8 +589,10 @@ export interface FileRoutesById {
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
+  '/rentals/': typeof RentalsIndexRoute
   '/_authenticated/admin/cms': typeof AuthenticatedAdminCmsRoute
   '/_authenticated/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
   '/_authenticated/admin/devops': typeof AuthenticatedAdminDevopsRoute
@@ -639,8 +657,10 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/rentals/$child'
     | '/discover/'
     | '/marketplace/'
+    | '/rentals/'
     | '/admin/cms'
     | '/admin/commissions'
     | '/admin/devops'
@@ -701,8 +721,10 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/rentals/$child'
     | '/discover'
     | '/marketplace'
+    | '/rentals'
     | '/admin/cms'
     | '/admin/commissions'
     | '/admin/devops'
@@ -766,8 +788,10 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/rentals/$child'
     | '/discover/'
     | '/marketplace/'
+    | '/rentals/'
     | '/_authenticated/admin/cms'
     | '/_authenticated/admin/commissions'
     | '/_authenticated/admin/devops'
@@ -809,7 +833,9 @@ export interface RootRouteChildren {
   DiscoverSlugRoute: typeof DiscoverSlugRoute
   GuidesHotelSeoRoute: typeof GuidesHotelSeoRoute
   InviteTokenRoute: typeof InviteTokenRoute
+  RentalsChildRoute: typeof RentalsChildRoute
   DiscoverIndexRoute: typeof DiscoverIndexRoute
+  RentalsIndexRoute: typeof RentalsIndexRoute
   ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
   DiscoverCountyCountyRoute: typeof DiscoverCountyCountyRoute
   ApiPublicHooksDiscoveryRescoreRoute: typeof ApiPublicHooksDiscoveryRescoreRoute
@@ -871,6 +897,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rentals/': {
+      id: '/rentals/'
+      path: '/rentals'
+      fullPath: '/rentals/'
+      preLoaderRoute: typeof RentalsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketplace/': {
       id: '/marketplace/'
       path: '/'
@@ -883,6 +916,13 @@ declare module '@tanstack/react-router' {
       path: '/discover'
       fullPath: '/discover/'
       preLoaderRoute: typeof DiscoverIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rentals/$child': {
+      id: '/rentals/$child'
+      path: '/rentals/$child'
+      fullPath: '/rentals/$child'
+      preLoaderRoute: typeof RentalsChildRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marketplace/map': {
@@ -1445,7 +1485,9 @@ const rootRouteChildren: RootRouteChildren = {
   DiscoverSlugRoute: DiscoverSlugRoute,
   GuidesHotelSeoRoute: GuidesHotelSeoRoute,
   InviteTokenRoute: InviteTokenRoute,
+  RentalsChildRoute: RentalsChildRoute,
   DiscoverIndexRoute: DiscoverIndexRoute,
+  RentalsIndexRoute: RentalsIndexRoute,
   ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
   DiscoverCountyCountyRoute: DiscoverCountyCountyRoute,
   ApiPublicHooksDiscoveryRescoreRoute: ApiPublicHooksDiscoveryRescoreRoute,

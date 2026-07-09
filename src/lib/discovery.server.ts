@@ -94,6 +94,7 @@ RULES:
   # Other
   tour_company, vacation_rental, unknown.
 - Also return secondary_types[] with any additional categories from the same list that clearly apply.
+- Return a hierarchical classification: parent_category_slug (e.g. "commercial-rental-houses") and child_category_slug (e.g. "1-bedroom", "bedsitter", "office-spaces"). Use "commercial-rental-houses" as the parent for any residential rental type OR office_space listing.
 - Return listing_intent as one of: short_stay, rent, sale, lease (omit if unclear).
 - When present, extract numeric fields: bedrooms, bathrooms, parking_spaces, land_size_acres, rent_monthly, rent_weekly, rent_daily, sale_price, security_deposit, service_charge, lease_period_months, available_from (YYYY-MM-DD), furnished (true/false), occupancy_status.
 - Return attributes[] using ONLY these tokens when supported by the text:
