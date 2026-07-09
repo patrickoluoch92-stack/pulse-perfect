@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/subscription")({
 function SubscriptionPage() {
   const ctxFn = useServerFn(getWorkspaceContext);
   const { data: ctx } = useQuery({ queryKey: ["workspace-context"], queryFn: () => ctxFn() });
-  const orgId = ctx?.currentOrgId as string | undefined;
+  const orgId = (ctx?.currentOrg?.id ?? ctx?.organizations?.[0]?.id) as string | undefined;
 
   const subFn = useServerFn(getMySubscription);
   const histFn = useServerFn(listBillingHistory);

@@ -29,6 +29,7 @@ import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedToursRouteImport } from './routes/_authenticated/tours'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedSyncRouteImport } from './routes/_authenticated/sync'
+import { Route as AuthenticatedSubscriptionRouteImport } from './routes/_authenticated/subscription'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRevenueRouteImport } from './routes/_authenticated/revenue'
 import { Route as AuthenticatedReservationsRouteImport } from './routes/_authenticated/reservations'
@@ -165,6 +166,12 @@ const AuthenticatedSyncRoute = AuthenticatedSyncRouteImport.update({
   path: '/sync',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSubscriptionRoute =
+  AuthenticatedSubscriptionRouteImport.update({
+    id: '/subscription',
+    path: '/subscription',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -387,6 +394,7 @@ export interface FileRoutesByFullPath {
   '/reservations': typeof AuthenticatedReservationsRoute
   '/revenue': typeof AuthenticatedRevenueRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/subscription': typeof AuthenticatedSubscriptionRoute
   '/sync': typeof AuthenticatedSyncRoute
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
@@ -442,6 +450,7 @@ export interface FileRoutesByTo {
   '/reservations': typeof AuthenticatedReservationsRoute
   '/revenue': typeof AuthenticatedRevenueRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/subscription': typeof AuthenticatedSubscriptionRoute
   '/sync': typeof AuthenticatedSyncRoute
   '/team': typeof AuthenticatedTeamRoute
   '/tours': typeof AuthenticatedToursRoute
@@ -501,6 +510,7 @@ export interface FileRoutesById {
   '/_authenticated/reservations': typeof AuthenticatedReservationsRoute
   '/_authenticated/revenue': typeof AuthenticatedRevenueRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/subscription': typeof AuthenticatedSubscriptionRoute
   '/_authenticated/sync': typeof AuthenticatedSyncRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/tours': typeof AuthenticatedToursRoute
@@ -560,6 +570,7 @@ export interface FileRouteTypes {
     | '/reservations'
     | '/revenue'
     | '/settings'
+    | '/subscription'
     | '/sync'
     | '/team'
     | '/tours'
@@ -615,6 +626,7 @@ export interface FileRouteTypes {
     | '/reservations'
     | '/revenue'
     | '/settings'
+    | '/subscription'
     | '/sync'
     | '/team'
     | '/tours'
@@ -673,6 +685,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reservations'
     | '/_authenticated/revenue'
     | '/_authenticated/settings'
+    | '/_authenticated/subscription'
     | '/_authenticated/sync'
     | '/_authenticated/team'
     | '/_authenticated/tours'
@@ -871,6 +884,13 @@ declare module '@tanstack/react-router' {
       path: '/sync'
       fullPath: '/sync'
       preLoaderRoute: typeof AuthenticatedSyncRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/subscription': {
+      id: '/_authenticated/subscription'
+      path: '/subscription'
+      fullPath: '/subscription'
+      preLoaderRoute: typeof AuthenticatedSubscriptionRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings': {
@@ -1228,6 +1248,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReservationsRoute: typeof AuthenticatedReservationsRoute
   AuthenticatedRevenueRoute: typeof AuthenticatedRevenueRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSubscriptionRoute: typeof AuthenticatedSubscriptionRoute
   AuthenticatedSyncRoute: typeof AuthenticatedSyncRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
   AuthenticatedToursRoute: typeof AuthenticatedToursRoute
@@ -1253,6 +1274,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedReservationsRoute: AuthenticatedReservationsRoute,
   AuthenticatedRevenueRoute: AuthenticatedRevenueRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSubscriptionRoute: AuthenticatedSubscriptionRoute,
   AuthenticatedSyncRoute: AuthenticatedSyncRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
   AuthenticatedToursRoute: AuthenticatedToursRoute,
