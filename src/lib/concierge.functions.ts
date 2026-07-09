@@ -4,6 +4,8 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { aiChat, type AIChatMessage } from "@/lib/ai.server";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 const Input = z.object({
   messages: z
