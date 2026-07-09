@@ -46,6 +46,8 @@ const availabilityValues = AVAILABILITY_OPTIONS.map((a) => a.value) as [string, 
 const listInput = z.object({
   county: z.string().optional(),
   category: z.enum(categoryValues).optional(),
+  parentSlug: z.string().max(80).optional(),
+  childSlug: z.string().max(80).optional(),
   search: z.string().max(120).optional(),
   page: z.number().int().min(1).max(500).default(1),
   pageSize: z.number().int().min(1).max(48).default(PAGE_SIZE_DEFAULT),
@@ -53,7 +55,6 @@ const listInput = z.object({
   priceMin: z.number().nonnegative().nullable().optional(),
   priceMax: z.number().nonnegative().nullable().optional(),
   amenities: z.array(z.string().max(60)).max(20).optional(),
-  // NEW filters — all optional, backward compatible
   activities: z.array(z.string().max(60)).max(20).optional(),
   attributes: z.array(z.string().max(40)).max(20).optional(),
   nearbyParks: z.array(z.string().max(80)).max(10).optional(),
@@ -76,6 +77,8 @@ export const listPublicProperties = createServerFn({ method: "GET" })
       .eq("status", "approved");
 
     if (data.county) query = query.eq("county_code", data.county);
+    if (data.parentSlug) query = query.eq("parent_category_slug", data.parentSlug);
+    if (data.childSlug) query = query.eq("child_category_slug", data.childSlug);
     if (data.category) {
       // Match either primary or secondary category so category tags work like facets
       query = query.or(
