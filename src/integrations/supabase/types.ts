@@ -3174,6 +3174,10 @@ export type Database = {
         Args: { _token: string }
         Returns: string
       }
+      accept_organization_invitation_for: {
+        Args: { _token: string; _user_id: string }
+        Returns: string
+      }
       get_invitation_by_token: {
         Args: { _token: string }
         Returns: {
