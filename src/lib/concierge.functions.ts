@@ -4,6 +4,8 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { aiChat, type AIChatMessage } from "@/lib/ai.server";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 const Input = z.object({
   messages: z
@@ -93,16 +95,23 @@ async function logSearch(query: string, results: GroundingRow[], latencyMs: numb
 }
 
 export const askConcierge = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => Input.parse(input))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await enforceRateLimit({
+      bucket: "concierge:ask",
+      userId: context.userId,
+      limit: 30,
+      windowSec: 300,
+    });
     const t0 = Date.now();
     const lastUser = [...data.messages].reverse().find((m) => m.role === "user");
     const query = lastUser?.content ?? "";
-    const context = await retrieveContext(query, data.county);
-    const facts = await enrichWithFacts(context.map((c) => c.id));
+    const contextRows = await retrieveContext(query, data.county);
+    const facts = await enrichWithFacts(contextRows.map((c) => c.id));
 
-    const grounding = context.length
-      ? `Known HostPulse properties relevant to the query:\n${context
+    const grounding = contextRows.length
+      ? `Known HostPulse properties relevant to the query:\n${contextRows
           .map((c) => {
             const f = facts.get(c.id);
             const q = f?.quality ? ` [quality ${JSON.stringify(f.quality).slice(0, 80)}]` : "";
@@ -125,11 +134,11 @@ export const askConcierge = createServerFn({ method: "POST" })
     ];
     const reply = await aiChat({ messages, model: "openai/gpt-5.5" });
 
-    void logSearch(query, context, Date.now() - t0);
+    void logSearch(query, contextRows, Date.now() - t0);
 
     return {
       reply,
-      grounding: context.map((c) => ({
+      grounding: contextRows.map((c) => ({
         name: c.name,
         slug: c.slug,
         town: c.town,
