@@ -163,12 +163,20 @@ export async function rollupHeatmapCells() {
     const lng = Math.round(Number(p.longitude) * 10) / 10;
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
     const key = `${lat.toFixed(1)}:${lng.toFixed(1)}`;
-    const cell = cells.get(key) ?? { latBucket: lat, lngBucket: lng, county: p.county ?? null, prices: [], listings: 0, bookings: 0 };
+    const cell = cells.get(key) ?? {
+      latBucket: lat,
+      lngBucket: lng,
+      county: (p.county ?? null) as string | null,
+      prices: [] as number[],
+      listings: 0,
+      bookings: 0,
+    };
     cell.listings += 1;
     if (p.base_price) cell.prices.push(Number(p.base_price));
     cell.bookings += bookingsByProp.get(p.id) ?? 0;
     cells.set(key, cell);
   }
+
 
   let maxIntensity = 1;
   for (const c of cells.values()) maxIntensity = Math.max(maxIntensity, c.listings + c.bookings * 2);
