@@ -7,6 +7,7 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { computeQualityScore } from "./discovery-score.server";
 import { fingerprint, slugify } from "./discovery-dedupe.server";
+import { aiChat } from "./ai.server";
 
 const BLOCKED_HOSTS = [
   "booking.com",
@@ -18,7 +19,6 @@ const BLOCKED_HOSTS = [
   "vrbo.com",
 ];
 
-const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "openai/gpt-5.5";
 
 const EXTRACT_SCHEMA = {
@@ -127,31 +127,16 @@ function stripHtml(html: string): string {
 }
 
 async function callAI(text: string): Promise<{ businesses: any[] }> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("LOVABLE_API_KEY not configured");
-  const res = await fetch(GATEWAY, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: `Extract Kenyan accommodation businesses from this directory page:\n\n${text}` },
-      ],
-      response_format: { type: "json_schema", json_schema: EXTRACT_SCHEMA },
-    }),
+  const content = await aiChat({
+    model: MODEL,
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: `Extract Kenyan accommodation businesses from this directory page:\n\n${text}` },
+    ],
+    jsonSchema: { name: EXTRACT_SCHEMA.name, schema: EXTRACT_SCHEMA.schema as any },
   });
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error(`AI extract failed (${res.status}): ${t.slice(0, 200)}`);
-  }
-  const j = (await res.json()) as any;
-  const content = j?.choices?.[0]?.message?.content ?? "{}";
   try {
-    return JSON.parse(content);
+    return JSON.parse(content || "{}");
   } catch {
     return { businesses: [] };
   }

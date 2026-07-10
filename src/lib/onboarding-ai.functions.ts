@@ -2,9 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { aiChat } from "@/lib/ai.server";
 import { PROPERTY_CATEGORIES } from "./marketplace-constants";
 
-const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "openai/gpt-5.5";
 const categoryValues = PROPERTY_CATEGORIES.map((c) => c.value) as [string, ...string[]];
 
@@ -13,40 +13,17 @@ async function callAI(opts: {
   user: string;
   jsonSchema?: { name: string; schema: any };
 }): Promise<any> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("AI gateway not configured");
-  const body: any = {
+  const content = await aiChat({
     model: MODEL,
     messages: [
       { role: "system", content: opts.system },
       { role: "user", content: opts.user },
     ],
-  };
-  if (opts.jsonSchema) {
-    body.response_format = {
-      type: "json_schema",
-      json_schema: { name: opts.jsonSchema.name, schema: opts.jsonSchema.schema, strict: false },
-    };
-  }
-  const res = await fetch(GATEWAY, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
+    jsonSchema: opts.jsonSchema ? { name: opts.jsonSchema.name, schema: opts.jsonSchema.schema } : undefined,
   });
-  if (!res.ok) {
-    const t = await res.text();
-    if (res.status === 429) throw new Error("AI rate limit — please retry in a moment.");
-    if (res.status === 402) throw new Error("AI credits exhausted for this workspace.");
-    throw new Error(`AI call failed (${res.status}): ${t.slice(0, 200)}`);
-  }
-  const json = (await res.json()) as any;
-  const content = json?.choices?.[0]?.message?.content ?? "";
   if (opts.jsonSchema) {
     try {
-      return JSON.parse(content);
+      return JSON.parse(content || "{}");
     } catch {
       throw new Error("AI returned invalid JSON");
     }
