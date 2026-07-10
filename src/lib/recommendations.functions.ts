@@ -64,8 +64,8 @@ export const recommendForYou = createServerFn({ method: "POST" })
     const { data: sess } = await supabase.auth.getSession();
     const userId = sess.session?.user?.id ?? null;
     const { data: rows, error } = await supabase.rpc("recommend_for_user", {
-      p_user_id: userId,
-      p_session_id: userId ? null : data.sessionId ?? null,
+      p_user_id: userId ?? (undefined as any),
+      p_session_id: (userId ? undefined : data.sessionId) ?? (undefined as any),
       match_count: data.limit ?? 12,
     });
     if (error) return { items: [], error: error.message };
