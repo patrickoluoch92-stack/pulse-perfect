@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import {
-  Bot, Send, Sparkles, Trash2, MapPin, Wallet, Route as RouteIcon, Lightbulb, Loader2,
+  Bot, Send, Sparkles, Trash2, MapPin, Wallet, Route as RouteIcon, Lightbulb, Loader2, Printer,
 } from "lucide-react";
 import {
   generatePlan, chatOnPlan, listPlannerSessions, getPlannerSession, deletePlannerSession,
