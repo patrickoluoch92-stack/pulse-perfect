@@ -347,13 +347,25 @@ function PlannerPage() {
                         <span className="font-medium">{m.role === "user" ? "You" : "AI"}: </span>{m.content}
                       </div>
                     ))}
+                    {chat.isPending && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        <span>AI is thinking…</span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <Input
                       placeholder="Ask a follow-up…"
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && chatInput.trim() && chat.mutate(chatInput.trim())}
+                      disabled={chat.isPending}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey && chatInput.trim() && !chat.isPending) {
+                          e.preventDefault();
+                          chat.mutate(chatInput.trim());
+                        }
+                      }}
                     />
                     <Button
                       size="icon"
