@@ -141,7 +141,7 @@ function PlannerPage() {
         }
       `}</style>
       {/* Sessions */}
-      <aside className="space-y-3">
+      <aside className="space-y-3 no-print">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm">
