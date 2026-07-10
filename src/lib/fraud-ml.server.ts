@@ -12,8 +12,9 @@ export interface RiskItem {
   id: string;
   score: number; // 0..100
   reasons: string[];
-  meta?: Record<string, unknown>;
+  meta?: Record<string, string | number | null | string[]>;
 }
+
 
 function zscore(x: number, mean: number, std: number) {
   if (std <= 0) return 0;
