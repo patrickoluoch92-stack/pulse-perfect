@@ -65,10 +65,12 @@ import { Route as AuthenticatedAdminExecutiveRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminDevopsRouteImport } from './routes/_authenticated/admin.devops'
 import { Route as AuthenticatedAdminCommissionsRouteImport } from './routes/_authenticated/admin.commissions'
 import { Route as AuthenticatedAdminCmsRouteImport } from './routes/_authenticated/admin.cms'
+import { Route as AuthenticatedAdminAiOpsRouteImport } from './routes/_authenticated/admin.ai-ops'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
 import { Route as ApiPublicHooksSubscriptionRenewalsRouteImport } from './routes/api/public/hooks/subscription-renewals'
 import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/public/hooks/partner-sync'
+import { Route as ApiPublicHooksOrchestratorTickRouteImport } from './routes/api/public/hooks/orchestrator-tick'
 import { Route as ApiPublicHooksOpsTickRouteImport } from './routes/api/public/hooks/ops-tick'
 import { Route as ApiPublicHooksMarketTickRouteImport } from './routes/api/public/hooks/market-tick'
 import { Route as ApiPublicHooksMarketStatsTickRouteImport } from './routes/api/public/hooks/market-stats-tick'
@@ -374,6 +376,11 @@ const AuthenticatedAdminCmsRoute = AuthenticatedAdminCmsRouteImport.update({
   path: '/admin/cms',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminAiOpsRoute = AuthenticatedAdminAiOpsRouteImport.update({
+  id: '/admin/ai-ops',
+  path: '/admin/ai-ops',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -395,6 +402,12 @@ const ApiPublicHooksPartnerSyncRoute =
   ApiPublicHooksPartnerSyncRouteImport.update({
     id: '/api/public/hooks/partner-sync',
     path: '/api/public/hooks/partner-sync',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksOrchestratorTickRoute =
+  ApiPublicHooksOrchestratorTickRouteImport.update({
+    id: '/api/public/hooks/orchestrator-tick',
+    path: '/api/public/hooks/orchestrator-tick',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksOpsTickRoute = ApiPublicHooksOpsTickRouteImport.update({
@@ -495,6 +508,7 @@ export interface FileRoutesByFullPath {
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/rentals/': typeof RentalsIndexRoute
+  '/admin/ai-ops': typeof AuthenticatedAdminAiOpsRoute
   '/admin/cms': typeof AuthenticatedAdminCmsRoute
   '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
   '/admin/devops': typeof AuthenticatedAdminDevopsRoute
@@ -523,6 +537,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/market-stats-tick': typeof ApiPublicHooksMarketStatsTickRoute
   '/api/public/hooks/market-tick': typeof ApiPublicHooksMarketTickRoute
   '/api/public/hooks/ops-tick': typeof ApiPublicHooksOpsTickRoute
+  '/api/public/hooks/orchestrator-tick': typeof ApiPublicHooksOrchestratorTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/hooks/subscription-renewals': typeof ApiPublicHooksSubscriptionRenewalsRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
@@ -564,6 +579,7 @@ export interface FileRoutesByTo {
   '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
   '/rentals': typeof RentalsIndexRoute
+  '/admin/ai-ops': typeof AuthenticatedAdminAiOpsRoute
   '/admin/cms': typeof AuthenticatedAdminCmsRoute
   '/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
   '/admin/devops': typeof AuthenticatedAdminDevopsRoute
@@ -592,6 +608,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/market-stats-tick': typeof ApiPublicHooksMarketStatsTickRoute
   '/api/public/hooks/market-tick': typeof ApiPublicHooksMarketTickRoute
   '/api/public/hooks/ops-tick': typeof ApiPublicHooksOpsTickRoute
+  '/api/public/hooks/orchestrator-tick': typeof ApiPublicHooksOrchestratorTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/hooks/subscription-renewals': typeof ApiPublicHooksSubscriptionRenewalsRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
@@ -637,6 +654,7 @@ export interface FileRoutesById {
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/rentals/': typeof RentalsIndexRoute
+  '/_authenticated/admin/ai-ops': typeof AuthenticatedAdminAiOpsRoute
   '/_authenticated/admin/cms': typeof AuthenticatedAdminCmsRoute
   '/_authenticated/admin/commissions': typeof AuthenticatedAdminCommissionsRoute
   '/_authenticated/admin/devops': typeof AuthenticatedAdminDevopsRoute
@@ -665,6 +683,7 @@ export interface FileRoutesById {
   '/api/public/hooks/market-stats-tick': typeof ApiPublicHooksMarketStatsTickRoute
   '/api/public/hooks/market-tick': typeof ApiPublicHooksMarketTickRoute
   '/api/public/hooks/ops-tick': typeof ApiPublicHooksOpsTickRoute
+  '/api/public/hooks/orchestrator-tick': typeof ApiPublicHooksOrchestratorTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/hooks/subscription-renewals': typeof ApiPublicHooksSubscriptionRenewalsRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
@@ -710,6 +729,7 @@ export interface FileRouteTypes {
     | '/discover/'
     | '/marketplace/'
     | '/rentals/'
+    | '/admin/ai-ops'
     | '/admin/cms'
     | '/admin/commissions'
     | '/admin/devops'
@@ -738,6 +758,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/market-stats-tick'
     | '/api/public/hooks/market-tick'
     | '/api/public/hooks/ops-tick'
+    | '/api/public/hooks/orchestrator-tick'
     | '/api/public/hooks/partner-sync'
     | '/api/public/hooks/subscription-renewals'
     | '/api/public/ical/$token'
@@ -779,6 +800,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/marketplace'
     | '/rentals'
+    | '/admin/ai-ops'
     | '/admin/cms'
     | '/admin/commissions'
     | '/admin/devops'
@@ -807,6 +829,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/market-stats-tick'
     | '/api/public/hooks/market-tick'
     | '/api/public/hooks/ops-tick'
+    | '/api/public/hooks/orchestrator-tick'
     | '/api/public/hooks/partner-sync'
     | '/api/public/hooks/subscription-renewals'
     | '/api/public/ical/$token'
@@ -851,6 +874,7 @@ export interface FileRouteTypes {
     | '/discover/'
     | '/marketplace/'
     | '/rentals/'
+    | '/_authenticated/admin/ai-ops'
     | '/_authenticated/admin/cms'
     | '/_authenticated/admin/commissions'
     | '/_authenticated/admin/devops'
@@ -879,6 +903,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/market-stats-tick'
     | '/api/public/hooks/market-tick'
     | '/api/public/hooks/ops-tick'
+    | '/api/public/hooks/orchestrator-tick'
     | '/api/public/hooks/partner-sync'
     | '/api/public/hooks/subscription-renewals'
     | '/api/public/ical/$token'
@@ -909,6 +934,7 @@ export interface RootRouteChildren {
   ApiPublicHooksMarketStatsTickRoute: typeof ApiPublicHooksMarketStatsTickRoute
   ApiPublicHooksMarketTickRoute: typeof ApiPublicHooksMarketTickRoute
   ApiPublicHooksOpsTickRoute: typeof ApiPublicHooksOpsTickRoute
+  ApiPublicHooksOrchestratorTickRoute: typeof ApiPublicHooksOrchestratorTickRoute
   ApiPublicHooksPartnerSyncRoute: typeof ApiPublicHooksPartnerSyncRoute
   ApiPublicHooksSubscriptionRenewalsRoute: typeof ApiPublicHooksSubscriptionRenewalsRoute
   ApiPublicIcalTokenRoute: typeof ApiPublicIcalTokenRoute
@@ -1309,6 +1335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCmsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/ai-ops': {
+      id: '/_authenticated/admin/ai-ops'
+      path: '/admin/ai-ops'
+      fullPath: '/admin/ai-ops'
+      preLoaderRoute: typeof AuthenticatedAdminAiOpsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -1335,6 +1368,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/partner-sync'
       fullPath: '/api/public/hooks/partner-sync'
       preLoaderRoute: typeof ApiPublicHooksPartnerSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/orchestrator-tick': {
+      id: '/api/public/hooks/orchestrator-tick'
+      path: '/api/public/hooks/orchestrator-tick'
+      fullPath: '/api/public/hooks/orchestrator-tick'
+      preLoaderRoute: typeof ApiPublicHooksOrchestratorTickRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/ops-tick': {
@@ -1516,6 +1556,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedToursRoute: typeof AuthenticatedToursRoute
   AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
   AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
+  AuthenticatedAdminAiOpsRoute: typeof AuthenticatedAdminAiOpsRoute
   AuthenticatedAdminCmsRoute: typeof AuthenticatedAdminCmsRoute
   AuthenticatedAdminCommissionsRoute: typeof AuthenticatedAdminCommissionsRoute
   AuthenticatedAdminDevopsRoute: typeof AuthenticatedAdminDevopsRoute
@@ -1547,6 +1588,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedToursRoute: AuthenticatedToursRoute,
   AuthenticatedWalletRoute: AuthenticatedWalletRoute,
   AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
+  AuthenticatedAdminAiOpsRoute: AuthenticatedAdminAiOpsRoute,
   AuthenticatedAdminCmsRoute: AuthenticatedAdminCmsRoute,
   AuthenticatedAdminCommissionsRoute: AuthenticatedAdminCommissionsRoute,
   AuthenticatedAdminDevopsRoute: AuthenticatedAdminDevopsRoute,
@@ -1601,6 +1643,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksMarketStatsTickRoute: ApiPublicHooksMarketStatsTickRoute,
   ApiPublicHooksMarketTickRoute: ApiPublicHooksMarketTickRoute,
   ApiPublicHooksOpsTickRoute: ApiPublicHooksOpsTickRoute,
+  ApiPublicHooksOrchestratorTickRoute: ApiPublicHooksOrchestratorTickRoute,
   ApiPublicHooksPartnerSyncRoute: ApiPublicHooksPartnerSyncRoute,
   ApiPublicHooksSubscriptionRenewalsRoute:
     ApiPublicHooksSubscriptionRenewalsRoute,
