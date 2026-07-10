@@ -226,10 +226,20 @@ export const chatOnPlan = createServerFn({ method: "POST" })
     const history = ((row.messages as any) ?? []) as AIChatMessage[];
     history.push({ role: "user", content: data.message });
 
-    const system = `You are HostPulse Planner AI. The user is refining an existing ${row.module} plan (KES). Current plan JSON: ${JSON.stringify(row.plan).slice(0, 3000)}. Answer clearly and suggest adjustments.`;
-    const answer = await aiChat({
-      messages: [{ role: "system", content: system }, ...history.slice(-12)],
-    });
+    const system = `You are HostPulse Planner AI. The user is refining an existing ${row.module} plan (KES). Current plan JSON: ${JSON.stringify(row.plan).slice(0, 3000)}. Answer clearly and suggest adjustments. Keep replies concise (under 200 words).`;
+    let answer = "";
+    try {
+      answer = await aiChat({
+        model: "google/gemini-2.5-flash",
+        messages: [{ role: "system", content: system }, ...history.slice(-12)],
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "AI call failed";
+      throw new Error(msg);
+    }
+    if (!answer || !answer.trim()) {
+      answer = "I couldn't generate a reply just now — please rephrase or try again in a moment.";
+    }
     history.push({ role: "assistant", content: answer });
     await supabase.from("planner_sessions").update({ messages: history }).eq("id", data.sessionId);
     return { answer, messages: history };
