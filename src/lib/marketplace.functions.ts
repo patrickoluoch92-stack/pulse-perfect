@@ -388,6 +388,26 @@ export const updateMarketplaceProperty = createServerFn({ method: "POST" })
     if (rest.contactPhone !== undefined) patch.contact_phone = rest.contactPhone;
     if (rest.contactWhatsapp !== undefined) patch.contact_whatsapp = rest.contactWhatsapp;
     if (rest.availability !== undefined) patch.availability = rest.availability;
+    if (rest.listingIntent !== undefined) patch.listing_intent = rest.listingIntent;
+    if (rest.occupancyStatus !== undefined) patch.occupancy_status = rest.occupancyStatus;
+    if (rest.rentMonthly !== undefined) patch.rent_monthly = rest.rentMonthly;
+    if (rest.rentWeekly !== undefined) patch.rent_weekly = rest.rentWeekly;
+    if (rest.rentDaily !== undefined) patch.rent_daily = rest.rentDaily;
+    if (rest.salePrice !== undefined) patch.sale_price = rest.salePrice;
+    if (rest.securityDeposit !== undefined) patch.security_deposit = rest.securityDeposit;
+    if (rest.serviceCharge !== undefined) patch.service_charge = rest.serviceCharge;
+    if (rest.leasePeriodMonths !== undefined) patch.lease_period_months = rest.leasePeriodMonths;
+    if (rest.availableFrom !== undefined) patch.available_from = rest.availableFrom;
+    if (rest.bedrooms !== undefined) patch.bedrooms = rest.bedrooms;
+    if (rest.bathrooms !== undefined) patch.bathrooms = rest.bathrooms;
+    if (rest.parkingSpaces !== undefined) patch.parking_spaces = rest.parkingSpaces;
+    if (rest.furnished !== undefined) patch.furnished = rest.furnished;
+    if (rest.landSizeAcres !== undefined) patch.land_size_acres = rest.landSizeAcres;
+    if (rest.ward !== undefined) patch.ward = rest.ward;
+    if (rest.constituency !== undefined) patch.constituency = rest.constituency;
+    if (rest.estate !== undefined) patch.estate = rest.estate;
+    if (rest.neighbourhood !== undefined) patch.neighbourhood = rest.neighbourhood;
+    if (rest.postalAddress !== undefined) patch.postal_address = rest.postalAddress;
 
     const { error } = await supabase
       .from("marketplace_properties")
