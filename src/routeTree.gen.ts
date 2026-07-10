@@ -72,6 +72,7 @@ import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksEmbeddingsBackfillRouteImport } from './routes/api/public/hooks/embeddings-backfill'
 import { Route as ApiPublicHooksDiscoveryTickRouteImport } from './routes/api/public/hooks/discovery-tick'
 import { Route as ApiPublicHooksDiscoveryRescoreRouteImport } from './routes/api/public/hooks/discovery-rescore'
+import { Route as ApiPublicHooksAiEnrichmentRouteImport } from './routes/api/public/hooks/ai-enrichment'
 import { Route as AuthenticatedListingsAdminDiscoveryRouteImport } from './routes/_authenticated/listings.admin.discovery'
 import { Route as AuthenticatedListingsAdminCouponsRouteImport } from './routes/_authenticated/listings.admin.coupons'
 import { Route as AuthenticatedListingsIdAvailabilityRouteImport } from './routes/_authenticated/listings.$id.availability'
@@ -411,6 +412,12 @@ const ApiPublicHooksDiscoveryRescoreRoute =
     path: '/api/public/hooks/discovery-rescore',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksAiEnrichmentRoute =
+  ApiPublicHooksAiEnrichmentRouteImport.update({
+    id: '/api/public/hooks/ai-enrichment',
+    path: '/api/public/hooks/ai-enrichment',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedListingsAdminDiscoveryRoute =
   AuthenticatedListingsAdminDiscoveryRouteImport.update({
     id: '/discovery',
@@ -489,6 +496,7 @@ export interface FileRoutesByFullPath {
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
+  '/api/public/hooks/ai-enrichment': typeof ApiPublicHooksAiEnrichmentRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/embeddings-backfill': typeof ApiPublicHooksEmbeddingsBackfillRoute
@@ -554,6 +562,7 @@ export interface FileRoutesByTo {
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
+  '/api/public/hooks/ai-enrichment': typeof ApiPublicHooksAiEnrichmentRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/embeddings-backfill': typeof ApiPublicHooksEmbeddingsBackfillRoute
@@ -623,6 +632,7 @@ export interface FileRoutesById {
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/_authenticated/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/_authenticated/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
+  '/api/public/hooks/ai-enrichment': typeof ApiPublicHooksAiEnrichmentRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/embeddings-backfill': typeof ApiPublicHooksEmbeddingsBackfillRoute
@@ -692,6 +702,7 @@ export interface FileRouteTypes {
     | '/listings/$id/availability'
     | '/listings/admin/coupons'
     | '/listings/admin/discovery'
+    | '/api/public/hooks/ai-enrichment'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/embeddings-backfill'
@@ -757,6 +768,7 @@ export interface FileRouteTypes {
     | '/listings/$id/availability'
     | '/listings/admin/coupons'
     | '/listings/admin/discovery'
+    | '/api/public/hooks/ai-enrichment'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/embeddings-backfill'
@@ -825,6 +837,7 @@ export interface FileRouteTypes {
     | '/_authenticated/listings/$id/availability'
     | '/_authenticated/listings/admin/coupons'
     | '/_authenticated/listings/admin/discovery'
+    | '/api/public/hooks/ai-enrichment'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/embeddings-backfill'
@@ -851,6 +864,7 @@ export interface RootRouteChildren {
   RentalsIndexRoute: typeof RentalsIndexRoute
   ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
   DiscoverCountyCountyRoute: typeof DiscoverCountyCountyRoute
+  ApiPublicHooksAiEnrichmentRoute: typeof ApiPublicHooksAiEnrichmentRoute
   ApiPublicHooksDiscoveryRescoreRoute: typeof ApiPublicHooksDiscoveryRescoreRoute
   ApiPublicHooksDiscoveryTickRoute: typeof ApiPublicHooksDiscoveryTickRoute
   ApiPublicHooksEmbeddingsBackfillRoute: typeof ApiPublicHooksEmbeddingsBackfillRoute
@@ -1303,6 +1317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksDiscoveryRescoreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/ai-enrichment': {
+      id: '/api/public/hooks/ai-enrichment'
+      path: '/api/public/hooks/ai-enrichment'
+      fullPath: '/api/public/hooks/ai-enrichment'
+      preLoaderRoute: typeof ApiPublicHooksAiEnrichmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/listings/admin/discovery': {
       id: '/_authenticated/listings/admin/discovery'
       path: '/discovery'
@@ -1511,6 +1532,7 @@ const rootRouteChildren: RootRouteChildren = {
   RentalsIndexRoute: RentalsIndexRoute,
   ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
   DiscoverCountyCountyRoute: DiscoverCountyCountyRoute,
+  ApiPublicHooksAiEnrichmentRoute: ApiPublicHooksAiEnrichmentRoute,
   ApiPublicHooksDiscoveryRescoreRoute: ApiPublicHooksDiscoveryRescoreRoute,
   ApiPublicHooksDiscoveryTickRoute: ApiPublicHooksDiscoveryTickRoute,
   ApiPublicHooksEmbeddingsBackfillRoute: ApiPublicHooksEmbeddingsBackfillRoute,
