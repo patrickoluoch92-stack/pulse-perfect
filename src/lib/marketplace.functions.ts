@@ -244,6 +244,9 @@ export const listMyOrgProperties = createServerFn({ method: "GET" })
     );
   });
 
+const listingIntentValues = ["short_stay", "rent", "sale", "lease"] as const;
+const occupancyValues = ["vacant", "occupied", "coming_soon", "under_offer"] as const;
+
 const propertyInput = z.object({
   orgId: z.string().uuid(),
   name: z.string().trim().min(2).max(120),
@@ -262,6 +265,28 @@ const propertyInput = z.object({
   contactPhone: z.string().max(40).nullable().optional(),
   contactWhatsapp: z.string().max(40).nullable().optional(),
   availability: z.enum(availabilityValues).default("available"),
+  // Rental / sale / property-detail fields — used by residential, commercial,
+  // agricultural and land categories. All optional; hospitality listings ignore them.
+  listingIntent: z.enum(listingIntentValues).nullable().optional(),
+  occupancyStatus: z.enum(occupancyValues).nullable().optional(),
+  rentMonthly: z.number().nonnegative().max(1_000_000_000).nullable().optional(),
+  rentWeekly: z.number().nonnegative().max(1_000_000_000).nullable().optional(),
+  rentDaily: z.number().nonnegative().max(1_000_000_000).nullable().optional(),
+  salePrice: z.number().nonnegative().max(1_000_000_000_000).nullable().optional(),
+  securityDeposit: z.number().nonnegative().max(1_000_000_000).nullable().optional(),
+  serviceCharge: z.number().nonnegative().max(1_000_000_000).nullable().optional(),
+  leasePeriodMonths: z.number().int().min(0).max(1200).nullable().optional(),
+  availableFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  bedrooms: z.number().int().min(0).max(200).nullable().optional(),
+  bathrooms: z.number().int().min(0).max(200).nullable().optional(),
+  parkingSpaces: z.number().int().min(0).max(500).nullable().optional(),
+  furnished: z.boolean().nullable().optional(),
+  landSizeAcres: z.number().nonnegative().max(1_000_000).nullable().optional(),
+  ward: z.string().max(80).nullable().optional(),
+  constituency: z.string().max(80).nullable().optional(),
+  estate: z.string().max(80).nullable().optional(),
+  neighbourhood: z.string().max(80).nullable().optional(),
+  postalAddress: z.string().max(200).nullable().optional(),
 });
 
 async function uniqueSlug(
