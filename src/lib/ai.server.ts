@@ -19,6 +19,8 @@ function surfaceGatewayError(status: number, body: string): never {
   throw new Error(`AI call failed (${status}): ${body.slice(0, 200)}`);
 }
 
+export type AIVisionInput = { url: string } | { base64: string; mime: string };
+
 export async function aiChat(opts: {
   model?: string;
   messages: AIChatMessage[];
@@ -43,6 +45,50 @@ export async function aiChat(opts: {
   if (!res.ok) surfaceGatewayError(res.status, await res.text());
   const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
   return json?.choices?.[0]?.message?.content ?? "";
+}
+
+/**
+ * Vision-enabled chat call. Passes an image URL or base64 alongside a text prompt
+ * using the OpenRouter chat-completions multimodal content-block format.
+ */
+export async function aiVisionJSON<T>(opts: {
+  system: string;
+  prompt: string;
+  image: AIVisionInput;
+  schema: { name: string; schema: Record<string, unknown> };
+  model?: string;
+}): Promise<T> {
+  const imageUrl = "url" in opts.image ? opts.image.url : `data:${opts.image.mime};base64,${opts.image.base64}`;
+  const body = {
+    model: opts.model ?? "google/gemini-2.5-flash",
+    messages: [
+      { role: "system", content: opts.system },
+      {
+        role: "user",
+        content: [
+          { type: "text", text: opts.prompt },
+          { type: "image_url", image_url: { url: imageUrl } },
+        ],
+      },
+    ],
+    response_format: {
+      type: "json_schema",
+      json_schema: { name: opts.schema.name, schema: opts.schema.schema, strict: false },
+    },
+  };
+  const res = await fetch(CHAT_URL, {
+    method: "POST",
+    headers: gatewayHeaders(),
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) surfaceGatewayError(res.status, await res.text());
+  const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+  const content = json?.choices?.[0]?.message?.content ?? "";
+  try {
+    return JSON.parse(content) as T;
+  } catch {
+    throw new Error("AI vision returned invalid JSON");
+  }
 }
 
 export async function aiJSON<T>(opts: {
