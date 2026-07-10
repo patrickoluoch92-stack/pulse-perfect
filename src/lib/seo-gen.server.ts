@@ -31,7 +31,23 @@ Include the county and category naturally. No emojis.`;
       amenities: (row.amenities ?? []).slice(0, 8),
       description: (row.description ?? "").slice(0, 400),
     });
-    const out = await aiJSON<SeoOutput>({ system, user, model: "openai/gpt-5.5" });
+    const out = await aiJSON<SeoOutput>({
+      system,
+      user,
+      model: "openai/gpt-5.5",
+      schema: {
+        name: "seo_meta",
+        schema: {
+          type: "object",
+          properties: {
+            seo_title: { type: "string" },
+            seo_description: { type: "string" },
+          },
+          required: ["seo_title", "seo_description"],
+        },
+      },
+    });
+
     if (!out?.seo_title || !out?.seo_description) return null;
     return {
       seo_title: out.seo_title.slice(0, 60),

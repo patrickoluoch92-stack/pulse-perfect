@@ -78,5 +78,19 @@ Use KES for currency. Be specific with numbers. Avoid generic advice.`;
       system,
       user: JSON.stringify(kpi),
       model: "openai/gpt-5.5",
+      schema: {
+        name: "exec_summary",
+        schema: {
+          type: "object",
+          properties: {
+            headline: { type: "string" },
+            wins: { type: "array", items: { type: "string" } },
+            risks: { type: "array", items: { type: "string" } },
+            actions: { type: "array", items: { type: "string" } },
+          },
+          required: ["headline", "wins", "risks", "actions"],
+        },
+      },
     });
+
   });

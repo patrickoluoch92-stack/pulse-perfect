@@ -34,7 +34,18 @@ Return JSON: { "translations": string[] } in the same order.`;
       system,
       user: JSON.stringify(payload),
       model: "openai/gpt-5.5",
+      schema: {
+        name: "translations",
+        schema: {
+          type: "object",
+          properties: {
+            translations: { type: "array", items: { type: "string" } },
+          },
+          required: ["translations"],
+        },
+      },
     });
+
 
     if (!Array.isArray(result?.translations) || result.translations.length !== data.strings.length) {
       throw new Error("Translation output shape mismatch");
