@@ -44,7 +44,7 @@ export const analyzePropertyImages = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v: unknown) => BatchInput.parse(v))
   .handler(async ({ data, context }) => {
-    const isAdmin = await hasRole(context.supabase, context.userId, "admin");
+    const isAdmin = await isPlatformAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     let q = supabaseAdmin
