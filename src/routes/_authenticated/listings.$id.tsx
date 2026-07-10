@@ -90,6 +90,27 @@ function EditListing() {
       contactPhone: prop.contact_phone ?? "",
       contactWhatsapp: prop.contact_whatsapp ?? "",
       availability: prop.availability,
+      // Rental / sale details
+      listingIntent: prop.listing_intent ?? "",
+      occupancyStatus: prop.occupancy_status ?? "",
+      rentMonthly: prop.rent_monthly ?? "",
+      rentWeekly: prop.rent_weekly ?? "",
+      rentDaily: prop.rent_daily ?? "",
+      salePrice: prop.sale_price ?? "",
+      securityDeposit: prop.security_deposit ?? "",
+      serviceCharge: prop.service_charge ?? "",
+      leasePeriodMonths: prop.lease_period_months ?? "",
+      availableFrom: prop.available_from ?? "",
+      bedrooms: prop.bedrooms ?? "",
+      bathrooms: prop.bathrooms ?? "",
+      parkingSpaces: prop.parking_spaces ?? "",
+      furnished: prop.furnished ?? false,
+      landSizeAcres: prop.land_size_acres ?? "",
+      ward: prop.ward ?? "",
+      constituency: prop.constituency ?? "",
+      estate: prop.estate ?? "",
+      neighbourhood: prop.neighbourhood ?? "",
+      postalAddress: prop.postal_address ?? "",
     });
   }
 
