@@ -33,6 +33,7 @@ const nav = [
   { to: "/admin/finance", label: "Finance Admin", icon: Landmark },
   { to: "/admin/commissions", label: "Commissions", icon: Coins },
   { to: "/revenue", label: "Revenue AI", icon: TrendingUp },
+  { to: "/planner", label: "Planner AI", icon: RouteIcon },
   { to: "/ai-command", label: "AI Command", icon: Brain },
   { to: "/concierge", label: "Concierge", icon: Bot },
   { to: "/bookings", label: "My Bookings", icon: Ticket },
