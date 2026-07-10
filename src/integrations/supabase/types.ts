@@ -400,6 +400,10 @@ export type Database = {
           created_at: string
           dedupe_fingerprint: string | null
           email: string | null
+          embedding: string | null
+          embedding_model: string | null
+          embedding_source_hash: string | null
+          embedding_updated_at: string | null
           id: string
           keywords: string[]
           latitude: number | null
@@ -434,6 +438,10 @@ export type Database = {
           created_at?: string
           dedupe_fingerprint?: string | null
           email?: string | null
+          embedding?: string | null
+          embedding_model?: string | null
+          embedding_source_hash?: string | null
+          embedding_updated_at?: string | null
           id?: string
           keywords?: string[]
           latitude?: number | null
@@ -468,6 +476,10 @@ export type Database = {
           created_at?: string
           dedupe_fingerprint?: string | null
           email?: string | null
+          embedding?: string | null
+          embedding_model?: string | null
+          embedding_source_hash?: string | null
+          embedding_updated_at?: string | null
           id?: string
           keywords?: string[]
           latitude?: number | null
@@ -1859,6 +1871,10 @@ export type Database = {
           created_by: string
           currency: string
           description: string
+          embedding: string | null
+          embedding_model: string | null
+          embedding_source_hash: string | null
+          embedding_updated_at: string | null
           estate: string | null
           furnished: boolean | null
           google_maps_url: string | null
@@ -1927,6 +1943,10 @@ export type Database = {
           created_by: string
           currency?: string
           description: string
+          embedding?: string | null
+          embedding_model?: string | null
+          embedding_source_hash?: string | null
+          embedding_updated_at?: string | null
           estate?: string | null
           furnished?: boolean | null
           google_maps_url?: string | null
@@ -1995,6 +2015,10 @@ export type Database = {
           created_by?: string
           currency?: string
           description?: string
+          embedding?: string | null
+          embedding_model?: string | null
+          embedding_source_hash?: string | null
+          embedding_updated_at?: string | null
           estate?: string | null
           furnished?: boolean | null
           google_maps_url?: string | null
@@ -3832,6 +3856,23 @@ export type Database = {
       is_org_member: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
+      }
+      match_marketplace_properties: {
+        Args: {
+          match_count?: number
+          only_approved?: boolean
+          query_embedding: string
+        }
+        Returns: {
+          category: string
+          county_code: string
+          description: string
+          id: string
+          name: string
+          similarity: number
+          slug: string
+          town: string
+        }[]
       }
       next_invoice_number:
         | { Args: { _org_id: string }; Returns: string }
