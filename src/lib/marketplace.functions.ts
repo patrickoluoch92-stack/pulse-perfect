@@ -244,6 +244,9 @@ export const listMyOrgProperties = createServerFn({ method: "GET" })
     );
   });
 
+const listingIntentValues = ["short_stay", "rent", "sale", "lease"] as const;
+const occupancyValues = ["vacant", "occupied", "coming_soon", "under_offer"] as const;
+
 const propertyInput = z.object({
   orgId: z.string().uuid(),
   name: z.string().trim().min(2).max(120),
@@ -262,6 +265,28 @@ const propertyInput = z.object({
   contactPhone: z.string().max(40).nullable().optional(),
   contactWhatsapp: z.string().max(40).nullable().optional(),
   availability: z.enum(availabilityValues).default("available"),
+  // Rental / sale / property-detail fields — used by residential, commercial,
+  // agricultural and land categories. All optional; hospitality listings ignore them.
+  listingIntent: z.enum(listingIntentValues).nullable().optional(),
+  occupancyStatus: z.enum(occupancyValues).nullable().optional(),
+  rentMonthly: z.number().nonnegative().max(1_000_000_000).nullable().optional(),
+  rentWeekly: z.number().nonnegative().max(1_000_000_000).nullable().optional(),
+  rentDaily: z.number().nonnegative().max(1_000_000_000).nullable().optional(),
+  salePrice: z.number().nonnegative().max(1_000_000_000_000).nullable().optional(),
+  securityDeposit: z.number().nonnegative().max(1_000_000_000).nullable().optional(),
+  serviceCharge: z.number().nonnegative().max(1_000_000_000).nullable().optional(),
+  leasePeriodMonths: z.number().int().min(0).max(1200).nullable().optional(),
+  availableFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  bedrooms: z.number().int().min(0).max(200).nullable().optional(),
+  bathrooms: z.number().int().min(0).max(200).nullable().optional(),
+  parkingSpaces: z.number().int().min(0).max(500).nullable().optional(),
+  furnished: z.boolean().nullable().optional(),
+  landSizeAcres: z.number().nonnegative().max(1_000_000).nullable().optional(),
+  ward: z.string().max(80).nullable().optional(),
+  constituency: z.string().max(80).nullable().optional(),
+  estate: z.string().max(80).nullable().optional(),
+  neighbourhood: z.string().max(80).nullable().optional(),
+  postalAddress: z.string().max(200).nullable().optional(),
 });
 
 async function uniqueSlug(
@@ -308,6 +333,26 @@ export const createMarketplaceProperty = createServerFn({ method: "POST" })
         contact_phone: data.contactPhone ?? null,
         contact_whatsapp: data.contactWhatsapp ?? null,
         availability: data.availability as any,
+        listing_intent: data.listingIntent ?? undefined,
+        occupancy_status: data.occupancyStatus ?? undefined,
+        rent_monthly: data.rentMonthly ?? null,
+        rent_weekly: data.rentWeekly ?? null,
+        rent_daily: data.rentDaily ?? null,
+        sale_price: data.salePrice ?? null,
+        security_deposit: data.securityDeposit ?? null,
+        service_charge: data.serviceCharge ?? null,
+        lease_period_months: data.leasePeriodMonths ?? null,
+        available_from: data.availableFrom ?? null,
+        bedrooms: data.bedrooms ?? null,
+        bathrooms: data.bathrooms ?? null,
+        parking_spaces: data.parkingSpaces ?? null,
+        furnished: data.furnished ?? null,
+        land_size_acres: data.landSizeAcres ?? null,
+        ward: data.ward ?? null,
+        constituency: data.constituency ?? null,
+        estate: data.estate ?? null,
+        neighbourhood: data.neighbourhood ?? null,
+        postal_address: data.postalAddress ?? null,
         created_by: userId,
       })
       .select("id, slug")
@@ -343,6 +388,26 @@ export const updateMarketplaceProperty = createServerFn({ method: "POST" })
     if (rest.contactPhone !== undefined) patch.contact_phone = rest.contactPhone;
     if (rest.contactWhatsapp !== undefined) patch.contact_whatsapp = rest.contactWhatsapp;
     if (rest.availability !== undefined) patch.availability = rest.availability;
+    if (rest.listingIntent !== undefined) patch.listing_intent = rest.listingIntent;
+    if (rest.occupancyStatus !== undefined) patch.occupancy_status = rest.occupancyStatus;
+    if (rest.rentMonthly !== undefined) patch.rent_monthly = rest.rentMonthly;
+    if (rest.rentWeekly !== undefined) patch.rent_weekly = rest.rentWeekly;
+    if (rest.rentDaily !== undefined) patch.rent_daily = rest.rentDaily;
+    if (rest.salePrice !== undefined) patch.sale_price = rest.salePrice;
+    if (rest.securityDeposit !== undefined) patch.security_deposit = rest.securityDeposit;
+    if (rest.serviceCharge !== undefined) patch.service_charge = rest.serviceCharge;
+    if (rest.leasePeriodMonths !== undefined) patch.lease_period_months = rest.leasePeriodMonths;
+    if (rest.availableFrom !== undefined) patch.available_from = rest.availableFrom;
+    if (rest.bedrooms !== undefined) patch.bedrooms = rest.bedrooms;
+    if (rest.bathrooms !== undefined) patch.bathrooms = rest.bathrooms;
+    if (rest.parkingSpaces !== undefined) patch.parking_spaces = rest.parkingSpaces;
+    if (rest.furnished !== undefined) patch.furnished = rest.furnished;
+    if (rest.landSizeAcres !== undefined) patch.land_size_acres = rest.landSizeAcres;
+    if (rest.ward !== undefined) patch.ward = rest.ward;
+    if (rest.constituency !== undefined) patch.constituency = rest.constituency;
+    if (rest.estate !== undefined) patch.estate = rest.estate;
+    if (rest.neighbourhood !== undefined) patch.neighbourhood = rest.neighbourhood;
+    if (rest.postalAddress !== undefined) patch.postal_address = rest.postalAddress;
 
     const { error } = await supabase
       .from("marketplace_properties")

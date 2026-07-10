@@ -16,6 +16,7 @@ import {
 } from "@/lib/marketplace.functions";
 import {
   PROPERTY_CATEGORIES, AVAILABILITY_OPTIONS, COMMON_AMENITIES, MARKETPLACE_BUCKET,
+  LISTING_INTENTS, OCCUPANCY_STATUSES,
 } from "@/lib/marketplace-constants";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
@@ -89,6 +90,27 @@ function EditListing() {
       contactPhone: prop.contact_phone ?? "",
       contactWhatsapp: prop.contact_whatsapp ?? "",
       availability: prop.availability,
+      // Rental / sale details
+      listingIntent: prop.listing_intent ?? "",
+      occupancyStatus: prop.occupancy_status ?? "",
+      rentMonthly: prop.rent_monthly ?? "",
+      rentWeekly: prop.rent_weekly ?? "",
+      rentDaily: prop.rent_daily ?? "",
+      salePrice: prop.sale_price ?? "",
+      securityDeposit: prop.security_deposit ?? "",
+      serviceCharge: prop.service_charge ?? "",
+      leasePeriodMonths: prop.lease_period_months ?? "",
+      availableFrom: prop.available_from ?? "",
+      bedrooms: prop.bedrooms ?? "",
+      bathrooms: prop.bathrooms ?? "",
+      parkingSpaces: prop.parking_spaces ?? "",
+      furnished: prop.furnished ?? false,
+      landSizeAcres: prop.land_size_acres ?? "",
+      ward: prop.ward ?? "",
+      constituency: prop.constituency ?? "",
+      estate: prop.estate ?? "",
+      neighbourhood: prop.neighbourhood ?? "",
+      postalAddress: prop.postal_address ?? "",
     });
   }
 
@@ -113,6 +135,26 @@ function EditListing() {
           contactPhone: form.contactPhone || null,
           contactWhatsapp: form.contactWhatsapp || null,
           availability: form.availability,
+          listingIntent: form.listingIntent || null,
+          occupancyStatus: form.occupancyStatus || null,
+          rentMonthly: form.rentMonthly === "" ? null : Number(form.rentMonthly),
+          rentWeekly: form.rentWeekly === "" ? null : Number(form.rentWeekly),
+          rentDaily: form.rentDaily === "" ? null : Number(form.rentDaily),
+          salePrice: form.salePrice === "" ? null : Number(form.salePrice),
+          securityDeposit: form.securityDeposit === "" ? null : Number(form.securityDeposit),
+          serviceCharge: form.serviceCharge === "" ? null : Number(form.serviceCharge),
+          leasePeriodMonths: form.leasePeriodMonths === "" ? null : Number(form.leasePeriodMonths),
+          availableFrom: form.availableFrom || null,
+          bedrooms: form.bedrooms === "" ? null : Number(form.bedrooms),
+          bathrooms: form.bathrooms === "" ? null : Number(form.bathrooms),
+          parkingSpaces: form.parkingSpaces === "" ? null : Number(form.parkingSpaces),
+          furnished: form.furnished ?? null,
+          landSizeAcres: form.landSizeAcres === "" ? null : Number(form.landSizeAcres),
+          ward: form.ward || null,
+          constituency: form.constituency || null,
+          estate: form.estate || null,
+          neighbourhood: form.neighbourhood || null,
+          postalAddress: form.postalAddress || null,
         },
       }),
     onSuccess: () => {
@@ -322,6 +364,123 @@ function EditListing() {
                 onChange={(e) => setForm({ ...form, googleMapsUrl: e.target.value })}
                 maxLength={500}
               />
+            </Field>
+          </section>
+
+          <section className="space-y-4 rounded-xl border bg-card p-6">
+            <div>
+              <h2 className="text-lg font-semibold">Rental, sale & property details</h2>
+              <p className="text-sm text-muted-foreground">
+                Fill the fields that apply. Use these for residential, commercial, agricultural
+                and land listings — rent, sale price, bedrooms, plot size, occupancy and more.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <Field label="Listing intent">
+                <select
+                  className="h-10 rounded-md border bg-background px-2"
+                  value={form.listingIntent}
+                  onChange={(e) => setForm({ ...form, listingIntent: e.target.value })}
+                >
+                  <option value="">— select —</option>
+                  {LISTING_INTENTS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Occupancy">
+                <select
+                  className="h-10 rounded-md border bg-background px-2"
+                  value={form.occupancyStatus}
+                  onChange={(e) => setForm({ ...form, occupancyStatus: e.target.value })}
+                >
+                  <option value="">— select —</option>
+                  {OCCUPANCY_STATUSES.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Available from">
+                <Input type="date" value={form.availableFrom}
+                  onChange={(e) => setForm({ ...form, availableFrom: e.target.value })} />
+              </Field>
+            </div>
+            <div className="grid gap-4 md:grid-cols-4">
+              <Field label={`Monthly rent (${form.currency})`}>
+                <Input type="number" min="0" value={form.rentMonthly}
+                  onChange={(e) => setForm({ ...form, rentMonthly: e.target.value })} />
+              </Field>
+              <Field label={`Weekly rent (${form.currency})`}>
+                <Input type="number" min="0" value={form.rentWeekly}
+                  onChange={(e) => setForm({ ...form, rentWeekly: e.target.value })} />
+              </Field>
+              <Field label={`Daily rent (${form.currency})`}>
+                <Input type="number" min="0" value={form.rentDaily}
+                  onChange={(e) => setForm({ ...form, rentDaily: e.target.value })} />
+              </Field>
+              <Field label={`Sale price (${form.currency})`}>
+                <Input type="number" min="0" value={form.salePrice}
+                  onChange={(e) => setForm({ ...form, salePrice: e.target.value })} />
+              </Field>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <Field label={`Security deposit (${form.currency})`}>
+                <Input type="number" min="0" value={form.securityDeposit}
+                  onChange={(e) => setForm({ ...form, securityDeposit: e.target.value })} />
+              </Field>
+              <Field label={`Service charge (${form.currency})`}>
+                <Input type="number" min="0" value={form.serviceCharge}
+                  onChange={(e) => setForm({ ...form, serviceCharge: e.target.value })} />
+              </Field>
+              <Field label="Lease period (months)">
+                <Input type="number" min="0" value={form.leasePeriodMonths}
+                  onChange={(e) => setForm({ ...form, leasePeriodMonths: e.target.value })} />
+              </Field>
+            </div>
+            <div className="grid gap-4 md:grid-cols-4">
+              <Field label="Bedrooms">
+                <Input type="number" min="0" value={form.bedrooms}
+                  onChange={(e) => setForm({ ...form, bedrooms: e.target.value })} />
+              </Field>
+              <Field label="Bathrooms">
+                <Input type="number" min="0" value={form.bathrooms}
+                  onChange={(e) => setForm({ ...form, bathrooms: e.target.value })} />
+              </Field>
+              <Field label="Parking spaces">
+                <Input type="number" min="0" value={form.parkingSpaces}
+                  onChange={(e) => setForm({ ...form, parkingSpaces: e.target.value })} />
+              </Field>
+              <Field label="Land size (acres)">
+                <Input type="number" min="0" step="0.01" value={form.landSizeAcres}
+                  onChange={(e) => setForm({ ...form, landSizeAcres: e.target.value })} />
+              </Field>
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={!!form.furnished}
+                onChange={(e) => setForm({ ...form, furnished: e.target.checked })} />
+              Furnished
+            </label>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field label="Constituency">
+                <Input value={form.constituency}
+                  onChange={(e) => setForm({ ...form, constituency: e.target.value })} maxLength={80} />
+              </Field>
+              <Field label="Ward">
+                <Input value={form.ward}
+                  onChange={(e) => setForm({ ...form, ward: e.target.value })} maxLength={80} />
+              </Field>
+              <Field label="Estate">
+                <Input value={form.estate}
+                  onChange={(e) => setForm({ ...form, estate: e.target.value })} maxLength={80} />
+              </Field>
+              <Field label="Neighbourhood">
+                <Input value={form.neighbourhood}
+                  onChange={(e) => setForm({ ...form, neighbourhood: e.target.value })} maxLength={80} />
+              </Field>
+            </div>
+            <Field label="Postal address">
+              <Input value={form.postalAddress}
+                onChange={(e) => setForm({ ...form, postalAddress: e.target.value })} maxLength={200} />
             </Field>
           </section>
 
