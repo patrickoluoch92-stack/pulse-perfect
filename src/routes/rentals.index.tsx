@@ -21,7 +21,7 @@ export const Route = createFileRoute("/rentals/")({
 
 function RentalsHub() {
   const fetchTree = useServerFn(listCategoryTree);
-  const { data } = useQuery({ queryKey: ["taxonomy-tree"], queryFn: () => fetchTree() });
+  const { data, isLoading, isError, error } = useQuery({ queryKey: ["taxonomy-tree"], queryFn: () => fetchTree() });
 
   const parent = (data?.tree ?? []).find(n => n.slug === "commercial-rental-houses");
   const children = parent?.children ?? [];
@@ -60,7 +60,13 @@ function RentalsHub() {
               </Card>
             </Link>
           ))}
-          {children.length === 0 && <p className="text-sm text-muted-foreground">Loading categories…</p>}
+          {isLoading && children.length === 0 && <p className="text-sm text-muted-foreground">Loading categories…</p>}
+          {isError && children.length === 0 && (
+            <p className="text-sm text-destructive">{error instanceof Error ? error.message : "Unable to load property categories."}</p>
+          )}
+          {!isLoading && !isError && children.length === 0 && (
+            <p className="text-sm text-muted-foreground">No property types are available yet.</p>
+          )}
         </div>
       </section>
     </div>
