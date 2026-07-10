@@ -351,7 +351,7 @@ function PlannerPage() {
                 </Card>
               )}
 
-              <Card>
+              <Card className="no-print">
                 <CardHeader className="pb-2"><CardTitle className="text-base">Refine with AI</CardTitle></CardHeader>
                 <CardContent className="space-y-2">
                   <div ref={scrollRef} className="max-h-64 space-y-2 overflow-auto rounded-md border bg-muted/30 p-2">
