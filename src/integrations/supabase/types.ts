@@ -1327,6 +1327,63 @@ export type Database = {
           },
         ]
       }
+      image_ai_tags: {
+        Row: {
+          caption: string | null
+          created_at: string
+          dominant_colors: string[]
+          id: string
+          image_id: string
+          labels: string[]
+          model_version: string | null
+          property_id: string
+          quality_score: number | null
+          room_type: string | null
+          safety_flags: string[]
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          dominant_colors?: string[]
+          id?: string
+          image_id: string
+          labels?: string[]
+          model_version?: string | null
+          property_id: string
+          quality_score?: number | null
+          room_type?: string | null
+          safety_flags?: string[]
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          dominant_colors?: string[]
+          id?: string
+          image_id?: string
+          labels?: string[]
+          model_version?: string | null
+          property_id?: string
+          quality_score?: number | null
+          room_type?: string | null
+          safety_flags?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "image_ai_tags_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: true
+            referencedRelation: "marketplace_property_images"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "image_ai_tags_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_items: {
         Row: {
           amount: number
@@ -2120,6 +2177,7 @@ export type Database = {
       }
       marketplace_property_reviews: {
         Row: {
+          aspects: Json | null
           body: string
           created_at: string
           id: string
@@ -2127,10 +2185,12 @@ export type Database = {
           rating: number
           reviewer_id: string
           reviewer_name: string
+          sentiment: number | null
           title: string | null
           updated_at: string
         }
         Insert: {
+          aspects?: Json | null
           body: string
           created_at?: string
           id?: string
@@ -2138,10 +2198,12 @@ export type Database = {
           rating: number
           reviewer_id: string
           reviewer_name: string
+          sentiment?: number | null
           title?: string | null
           updated_at?: string
         }
         Update: {
+          aspects?: Json | null
           body?: string
           created_at?: string
           id?: string
@@ -2149,6 +2211,7 @@ export type Database = {
           rating?: number
           reviewer_id?: string
           reviewer_name?: string
+          sentiment?: number | null
           title?: string | null
           updated_at?: string
         }
@@ -3086,6 +3149,47 @@ export type Database = {
             columns: ["unit_id"]
             isOneToOne: false
             referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_ai_analysis: {
+        Row: {
+          aspects: Json
+          created_at: string
+          id: string
+          model_version: string | null
+          review_id: string
+          risk_flags: string[]
+          sentiment: number
+          summary: string | null
+        }
+        Insert: {
+          aspects?: Json
+          created_at?: string
+          id?: string
+          model_version?: string | null
+          review_id: string
+          risk_flags?: string[]
+          sentiment?: number
+          summary?: string | null
+        }
+        Update: {
+          aspects?: Json
+          created_at?: string
+          id?: string
+          model_version?: string | null
+          review_id?: string
+          risk_flags?: string[]
+          sentiment?: number
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_ai_analysis_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: true
+            referencedRelation: "marketplace_property_reviews"
             referencedColumns: ["id"]
           },
         ]
