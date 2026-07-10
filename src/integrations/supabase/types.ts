@@ -339,6 +339,66 @@ export type Database = {
         }
         Relationships: []
       }
+      county_market_stats: {
+        Row: {
+          avg_nightly_rate: number | null
+          bookings_30d: number
+          category: string | null
+          county: string
+          created_at: string
+          demand_index: number | null
+          discovered_count: number
+          gmv_30d: number
+          hotspot_score: number | null
+          id: string
+          listing_count: number
+          median_nightly_rate: number | null
+          occupancy_proxy: number | null
+          payload: Json
+          rollup_date: string
+          supply_index: number | null
+          updated_at: string
+        }
+        Insert: {
+          avg_nightly_rate?: number | null
+          bookings_30d?: number
+          category?: string | null
+          county: string
+          created_at?: string
+          demand_index?: number | null
+          discovered_count?: number
+          gmv_30d?: number
+          hotspot_score?: number | null
+          id?: string
+          listing_count?: number
+          median_nightly_rate?: number | null
+          occupancy_proxy?: number | null
+          payload?: Json
+          rollup_date: string
+          supply_index?: number | null
+          updated_at?: string
+        }
+        Update: {
+          avg_nightly_rate?: number | null
+          bookings_30d?: number
+          category?: string | null
+          county?: string
+          created_at?: string
+          demand_index?: number | null
+          discovered_count?: number
+          gmv_30d?: number
+          hotspot_score?: number | null
+          id?: string
+          listing_count?: number
+          median_nightly_rate?: number | null
+          occupancy_proxy?: number | null
+          payload?: Json
+          rollup_date?: string
+          supply_index?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coupons: {
         Row: {
           active: boolean
@@ -896,6 +956,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      heatmap_cells: {
+        Row: {
+          avg_nightly_rate: number | null
+          bookings_30d: number
+          cell_key: string
+          county: string | null
+          created_at: string
+          id: string
+          intensity: number | null
+          lat_bucket: number
+          listing_count: number
+          lng_bucket: number
+          rollup_date: string
+          updated_at: string
+        }
+        Insert: {
+          avg_nightly_rate?: number | null
+          bookings_30d?: number
+          cell_key: string
+          county?: string | null
+          created_at?: string
+          id?: string
+          intensity?: number | null
+          lat_bucket: number
+          listing_count?: number
+          lng_bucket: number
+          rollup_date: string
+          updated_at?: string
+        }
+        Update: {
+          avg_nightly_rate?: number | null
+          bookings_30d?: number
+          cell_key?: string
+          county?: string | null
+          created_at?: string
+          id?: string
+          intensity?: number | null
+          lat_bucket?: number
+          listing_count?: number
+          lng_bucket?: number
+          rollup_date?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       housekeeping_tasks: {
         Row: {
