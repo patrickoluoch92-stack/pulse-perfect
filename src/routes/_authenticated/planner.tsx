@@ -187,7 +187,7 @@ function PlannerPage() {
         </header>
 
         {/* Composer */}
-        <Card>
+        <Card className="no-print">
           <CardContent className="space-y-3 pt-4">
             <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_10rem_10rem]">
               <Select value={module} onValueChange={(v) => setModule(v as PlannerModule)}>
