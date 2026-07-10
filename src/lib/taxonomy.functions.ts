@@ -5,14 +5,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
-function publicSupabase() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
-}
-
 export interface CategoryNode {
   id: string;
   slug: string;
@@ -28,13 +20,17 @@ export interface CategoryNode {
 }
 
 export const listCategoryTree = createServerFn({ method: "GET" }).handler(async () => {
-  const s = publicSupabase();
+  const s = createClient<Database>(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_PUBLISHABLE_KEY!,
+    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
+  );
   const { data, error } = await s
     .from("property_category_nodes" as any)
     .select("id, slug, name, parent_id, legacy_category, description, icon, display_order, seo_title, seo_description")
     .eq("active", true)
     .order("display_order");
-  if (error) return { tree: [] as CategoryNode[], flat: [] as CategoryNode[] };
+  if (error) throw new Error(`Unable to load property categories: ${error.message}`);
 
   const flat = (data ?? []) as unknown as CategoryNode[];
   const byParent = new Map<string | null, CategoryNode[]>();
@@ -57,13 +53,18 @@ export const listCategoryTree = createServerFn({ method: "GET" }).handler(async 
 export const getCategoryBySlug = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => data as { slug: string })
   .handler(async ({ data }) => {
-    const s = publicSupabase();
-    const { data: node } = await s
+    const s = createClient<Database>(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_PUBLISHABLE_KEY!,
+      { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
+    );
+    const { data: node, error } = await s
       .from("property_category_nodes" as any)
       .select("id, slug, name, parent_id, legacy_category, description, icon, seo_title, seo_description")
       .eq("slug", data.slug)
       .eq("active", true)
       .maybeSingle();
+    if (error) throw new Error(`Unable to load property category: ${error.message}`);
     if (!node) return null;
     const n = node as any;
     let parent: any = null;
