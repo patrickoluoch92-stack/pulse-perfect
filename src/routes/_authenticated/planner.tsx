@@ -131,7 +131,15 @@ function PlannerPage() {
   const selectedHint = MODULES.find((m) => m.id === module)?.hint ?? "";
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-4 p-4 md:grid-cols-[16rem_1fr] md:p-8">
+    <div className="mx-auto grid max-w-7xl gap-4 p-4 md:grid-cols-[16rem_1fr] md:p-8 planner-root">
+      <style>{`
+        @media print {
+          body * { visibility: hidden !important; }
+          #planner-print, #planner-print * { visibility: visible !important; }
+          #planner-print { position: absolute; left: 0; top: 0; width: 100%; padding: 24px; }
+          .no-print { display: none !important; }
+        }
+      `}</style>
       {/* Sessions */}
       <aside className="space-y-3">
         <Card>
