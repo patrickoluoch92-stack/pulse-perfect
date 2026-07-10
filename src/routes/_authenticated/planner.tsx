@@ -81,11 +81,37 @@ function PlannerPage() {
 
   const chat = useMutation({
     mutationFn: (msg: string) => chatFn({ data: { sessionId: activeId!, message: msg } }),
-    onSuccess: () => {
+    onMutate: (msg: string) => {
+      const key = ["planner", "session", activeId] as const;
+      const prev = qc.getQueryData<any>(key);
+      if (prev?.session) {
+        qc.setQueryData(key, {
+          ...prev,
+          session: {
+            ...prev.session,
+            messages: [...(prev.session.messages ?? []), { role: "user", content: msg }],
+          },
+        });
+      }
       setChatInput("");
+      return { prev };
+    },
+    onSuccess: (res) => {
+      const key = ["planner", "session", activeId] as const;
+      const prev = qc.getQueryData<any>(key);
+      if (prev?.session && res?.messages) {
+        qc.setQueryData(key, {
+          ...prev,
+          session: { ...prev.session, messages: res.messages },
+        });
+      }
       qc.invalidateQueries({ queryKey: ["planner", "session", activeId] });
     },
-    onError: (e: any) => toast.error(e?.message ?? "Chat failed"),
+    onError: (e: any, _msg, ctx: any) => {
+      const key = ["planner", "session", activeId] as const;
+      if (ctx?.prev) qc.setQueryData(key, ctx.prev);
+      toast.error(e?.message ?? "Chat failed");
+    },
   });
 
   const del = useMutation({
