@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { aiVisionJSON } from "@/lib/ai.server";
-import { hasRole } from "@/lib/access";
+import { isPlatformAdmin } from "@/lib/access";
 
 const ROOM_TYPES = [
   "bedroom","bathroom","kitchen","living_room","dining","exterior","pool",
