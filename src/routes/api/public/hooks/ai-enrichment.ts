@@ -22,13 +22,15 @@ export const Route = createFileRoute("/api/public/hooks/ai-enrichment")({
           return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
         }
         try {
-          const [{ runVisionTick }, { runReviewNlpTick }] = await Promise.all([
+          const [{ runVisionTick, runReviewNlpTick }, { runSeoGenTick }] = await Promise.all([
             import("@/lib/enrichment-tick.server"),
-            import("@/lib/enrichment-tick.server"),
+            import("@/lib/seo-gen.server"),
           ]);
           const vision = await runVisionTick(10);
           const reviews = await runReviewNlpTick(20);
-          return Response.json({ vision, reviews });
+          const seo = await runSeoGenTick(10);
+          return Response.json({ vision, reviews, seo });
+
         } catch (err) {
           const message = err instanceof Error ? err.message : "unknown error";
           return new Response(JSON.stringify({ error: message }), { status: 500 });
