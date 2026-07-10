@@ -81,11 +81,37 @@ function PlannerPage() {
 
   const chat = useMutation({
     mutationFn: (msg: string) => chatFn({ data: { sessionId: activeId!, message: msg } }),
-    onSuccess: () => {
+    onMutate: (msg: string) => {
+      const key = ["planner", "session", activeId] as const;
+      const prev = qc.getQueryData<any>(key);
+      if (prev?.session) {
+        qc.setQueryData(key, {
+          ...prev,
+          session: {
+            ...prev.session,
+            messages: [...(prev.session.messages ?? []), { role: "user", content: msg }],
+          },
+        });
+      }
       setChatInput("");
+      return { prev };
+    },
+    onSuccess: (res) => {
+      const key = ["planner", "session", activeId] as const;
+      const prev = qc.getQueryData<any>(key);
+      if (prev?.session && res?.messages) {
+        qc.setQueryData(key, {
+          ...prev,
+          session: { ...prev.session, messages: res.messages },
+        });
+      }
       qc.invalidateQueries({ queryKey: ["planner", "session", activeId] });
     },
-    onError: (e: any) => toast.error(e?.message ?? "Chat failed"),
+    onError: (e: any, _msg, ctx: any) => {
+      const key = ["planner", "session", activeId] as const;
+      if (ctx?.prev) qc.setQueryData(key, ctx.prev);
+      toast.error(e?.message ?? "Chat failed");
+    },
   });
 
   const del = useMutation({
@@ -321,13 +347,25 @@ function PlannerPage() {
                         <span className="font-medium">{m.role === "user" ? "You" : "AI"}: </span>{m.content}
                       </div>
                     ))}
+                    {chat.isPending && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        <span>AI is thinking…</span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <Input
                       placeholder="Ask a follow-up…"
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && chatInput.trim() && chat.mutate(chatInput.trim())}
+                      disabled={chat.isPending}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey && chatInput.trim() && !chat.isPending) {
+                          e.preventDefault();
+                          chat.mutate(chatInput.trim());
+                        }
+                      }}
                     />
                     <Button
                       size="icon"
