@@ -128,7 +128,11 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const env = (new URL(request.url).searchParams.get("env") || "sandbox") as PaddleEnv;
+        // Derive the Paddle environment server-side ONLY. Never trust the
+        // request URL — an attacker who knows the sandbox webhook secret
+        // could otherwise forge subscription events against production by
+        // POSTing with ?env=sandbox.
+        const env: PaddleEnv = process.env.PADDLE_ENV === "live" ? "live" : "sandbox";
         try {
           await handleWebhook(request, env);
           return Response.json({ received: true });
