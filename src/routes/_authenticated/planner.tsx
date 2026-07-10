@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import {
-  Bot, Send, Sparkles, Trash2, MapPin, Wallet, Route as RouteIcon, Lightbulb, Loader2,
+  Bot, Send, Sparkles, Trash2, MapPin, Wallet, Route as RouteIcon, Lightbulb, Loader2, Printer,
 } from "lucide-react";
 import {
   generatePlan, chatOnPlan, listPlannerSessions, getPlannerSession, deletePlannerSession,
@@ -131,9 +131,17 @@ function PlannerPage() {
   const selectedHint = MODULES.find((m) => m.id === module)?.hint ?? "";
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-4 p-4 md:grid-cols-[16rem_1fr] md:p-8">
+    <div className="mx-auto grid max-w-7xl gap-4 p-4 md:grid-cols-[16rem_1fr] md:p-8 planner-root">
+      <style>{`
+        @media print {
+          body * { visibility: hidden !important; }
+          #planner-print, #planner-print * { visibility: visible !important; }
+          #planner-print { position: absolute; left: 0; top: 0; width: 100%; padding: 24px; }
+          .no-print { display: none !important; }
+        }
+      `}</style>
       {/* Sessions */}
-      <aside className="space-y-3">
+      <aside className="space-y-3 no-print">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm">
@@ -179,7 +187,7 @@ function PlannerPage() {
         </header>
 
         {/* Composer */}
-        <Card>
+        <Card className="no-print">
           <CardContent className="space-y-3 pt-4">
             <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_10rem_10rem]">
               <Select value={module} onValueChange={(v) => setModule(v as PlannerModule)}>
@@ -221,11 +229,16 @@ function PlannerPage() {
 
         {/* Plan */}
         {session.data?.session && (
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-3" id="planner-print">
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bot className="h-5 w-5 text-primary" /> {plan.title ?? "Your plan"}
+                <CardTitle className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2">
+                    <Bot className="h-5 w-5 text-primary" /> {plan.title ?? "Your plan"}
+                  </span>
+                  <Button size="sm" variant="outline" className="no-print" onClick={() => window.print()}>
+                    <Printer className="mr-1 h-4 w-4" /> Print
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -338,7 +351,7 @@ function PlannerPage() {
                 </Card>
               )}
 
-              <Card>
+              <Card className="no-print">
                 <CardHeader className="pb-2"><CardTitle className="text-base">Refine with AI</CardTitle></CardHeader>
                 <CardContent className="space-y-2">
                   <div ref={scrollRef} className="max-h-64 space-y-2 overflow-auto rounded-md border bg-muted/30 p-2">
