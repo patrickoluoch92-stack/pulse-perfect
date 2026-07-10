@@ -229,11 +229,16 @@ function PlannerPage() {
 
         {/* Plan */}
         {session.data?.session && (
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-3" id="planner-print">
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bot className="h-5 w-5 text-primary" /> {plan.title ?? "Your plan"}
+                <CardTitle className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2">
+                    <Bot className="h-5 w-5 text-primary" /> {plan.title ?? "Your plan"}
+                  </span>
+                  <Button size="sm" variant="outline" className="no-print" onClick={() => window.print()}>
+                    <Printer className="mr-1 h-4 w-4" /> Print
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
