@@ -16,6 +16,7 @@ import {
 } from "@/lib/marketplace.functions";
 import {
   PROPERTY_CATEGORIES, AVAILABILITY_OPTIONS, COMMON_AMENITIES, MARKETPLACE_BUCKET,
+  LISTING_INTENTS, OCCUPANCY_STATUSES,
 } from "@/lib/marketplace-constants";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
