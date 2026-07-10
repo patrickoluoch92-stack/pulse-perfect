@@ -146,8 +146,8 @@ export const startClaim = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    // In production, email the code. For now surface it via server logs.
-    console.info(`[claim ${claim.id}] verification code emailed to ${data.email}: ${code}`);
+    // Codes are delivered via the email channel only — never log plaintext codes.
+    console.info(`[claim ${claim.id}] verification code dispatched to ${data.email}`);
     return { ok: true, claimId: claim.id, devCodeHint: process.env.NODE_ENV !== "production" ? code : undefined };
   });
 
