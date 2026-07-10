@@ -36,6 +36,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedRevenueRouteImport } from './routes/_authenticated/revenue'
 import { Route as AuthenticatedReservationsRouteImport } from './routes/_authenticated/reservations'
 import { Route as AuthenticatedPropertiesRouteImport } from './routes/_authenticated/properties'
+import { Route as AuthenticatedPlannerRouteImport } from './routes/_authenticated/planner'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedMpesaRouteImport } from './routes/_authenticated/mpesa'
 import { Route as AuthenticatedMaintenanceRouteImport } from './routes/_authenticated/maintenance'
@@ -216,6 +217,11 @@ const AuthenticatedReservationsRoute =
 const AuthenticatedPropertiesRoute = AuthenticatedPropertiesRouteImport.update({
   id: '/properties',
   path: '/properties',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlannerRoute = AuthenticatedPlannerRouteImport.update({
+  id: '/planner',
+  path: '/planner',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
@@ -488,6 +494,7 @@ export interface FileRoutesByFullPath {
   '/maintenance': typeof AuthenticatedMaintenanceRoute
   '/mpesa': typeof AuthenticatedMpesaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/planner': typeof AuthenticatedPlannerRoute
   '/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/reservations': typeof AuthenticatedReservationsRoute
   '/revenue': typeof AuthenticatedRevenueRoute
@@ -559,6 +566,7 @@ export interface FileRoutesByTo {
   '/maintenance': typeof AuthenticatedMaintenanceRoute
   '/mpesa': typeof AuthenticatedMpesaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/planner': typeof AuthenticatedPlannerRoute
   '/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/reservations': typeof AuthenticatedReservationsRoute
   '/revenue': typeof AuthenticatedRevenueRoute
@@ -634,6 +642,7 @@ export interface FileRoutesById {
   '/_authenticated/maintenance': typeof AuthenticatedMaintenanceRoute
   '/_authenticated/mpesa': typeof AuthenticatedMpesaRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/planner': typeof AuthenticatedPlannerRoute
   '/_authenticated/properties': typeof AuthenticatedPropertiesRouteWithChildren
   '/_authenticated/reservations': typeof AuthenticatedReservationsRoute
   '/_authenticated/revenue': typeof AuthenticatedRevenueRoute
@@ -709,6 +718,7 @@ export interface FileRouteTypes {
     | '/maintenance'
     | '/mpesa'
     | '/onboarding'
+    | '/planner'
     | '/properties'
     | '/reservations'
     | '/revenue'
@@ -780,6 +790,7 @@ export interface FileRouteTypes {
     | '/maintenance'
     | '/mpesa'
     | '/onboarding'
+    | '/planner'
     | '/properties'
     | '/reservations'
     | '/revenue'
@@ -854,6 +865,7 @@ export interface FileRouteTypes {
     | '/_authenticated/maintenance'
     | '/_authenticated/mpesa'
     | '/_authenticated/onboarding'
+    | '/_authenticated/planner'
     | '/_authenticated/properties'
     | '/_authenticated/reservations'
     | '/_authenticated/revenue'
@@ -1130,6 +1142,13 @@ declare module '@tanstack/react-router' {
       path: '/properties'
       fullPath: '/properties'
       preLoaderRoute: typeof AuthenticatedPropertiesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/planner': {
+      id: '/_authenticated/planner'
+      path: '/planner'
+      fullPath: '/planner'
+      preLoaderRoute: typeof AuthenticatedPlannerRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding': {
@@ -1546,6 +1565,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMaintenanceRoute: typeof AuthenticatedMaintenanceRoute
   AuthenticatedMpesaRoute: typeof AuthenticatedMpesaRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedPlannerRoute: typeof AuthenticatedPlannerRoute
   AuthenticatedPropertiesRoute: typeof AuthenticatedPropertiesRouteWithChildren
   AuthenticatedReservationsRoute: typeof AuthenticatedReservationsRoute
   AuthenticatedRevenueRoute: typeof AuthenticatedRevenueRoute
@@ -1578,6 +1598,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMaintenanceRoute: AuthenticatedMaintenanceRoute,
   AuthenticatedMpesaRoute: AuthenticatedMpesaRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedPlannerRoute: AuthenticatedPlannerRoute,
   AuthenticatedPropertiesRoute: AuthenticatedPropertiesRouteWithChildren,
   AuthenticatedReservationsRoute: AuthenticatedReservationsRoute,
   AuthenticatedRevenueRoute: AuthenticatedRevenueRoute,
