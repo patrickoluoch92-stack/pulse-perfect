@@ -1,4 +1,4 @@
-// Cron-triggered AI enrichment: image vision tagging + review NLP.
+// Cron-triggered market stats rollup: county_market_stats + heatmap_cells.
 // Secured by PARTNER_SYNC_CRON_SECRET.
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -14,7 +14,7 @@ async function verify(request: Request): Promise<boolean> {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-export const Route = createFileRoute("/api/public/hooks/ai-enrichment")({
+export const Route = createFileRoute("/api/public/hooks/market-stats-tick")({
   server: {
     handlers: {
       POST: async ({ request }) => {
@@ -22,15 +22,9 @@ export const Route = createFileRoute("/api/public/hooks/ai-enrichment")({
           return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
         }
         try {
-          const [{ runVisionTick, runReviewNlpTick }, { runSeoGenTick }] = await Promise.all([
-            import("@/lib/enrichment-tick.server"),
-            import("@/lib/seo-gen.server"),
-          ]);
-          const vision = await runVisionTick(10);
-          const reviews = await runReviewNlpTick(20);
-          const seo = await runSeoGenTick(10);
-          return Response.json({ vision, reviews, seo });
-
+          const { runMarketStatsTick } = await import("@/lib/market-stats.server");
+          const result = await runMarketStatsTick();
+          return Response.json(result);
         } catch (err) {
           const message = err instanceof Error ? err.message : "unknown error";
           return new Response(JSON.stringify({ error: message }), { status: 500 });

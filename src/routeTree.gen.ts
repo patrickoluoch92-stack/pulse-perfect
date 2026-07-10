@@ -71,6 +71,7 @@ import { Route as ApiPublicHooksSubscriptionRenewalsRouteImport } from './routes
 import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/public/hooks/partner-sync'
 import { Route as ApiPublicHooksOpsTickRouteImport } from './routes/api/public/hooks/ops-tick'
 import { Route as ApiPublicHooksMarketTickRouteImport } from './routes/api/public/hooks/market-tick'
+import { Route as ApiPublicHooksMarketStatsTickRouteImport } from './routes/api/public/hooks/market-stats-tick'
 import { Route as ApiPublicHooksEmbeddingsBackfillRouteImport } from './routes/api/public/hooks/embeddings-backfill'
 import { Route as ApiPublicHooksDiscoveryTickRouteImport } from './routes/api/public/hooks/discovery-tick'
 import { Route as ApiPublicHooksDiscoveryRescoreRouteImport } from './routes/api/public/hooks/discovery-rescore'
@@ -407,6 +408,12 @@ const ApiPublicHooksMarketTickRoute =
     path: '/api/public/hooks/market-tick',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksMarketStatsTickRoute =
+  ApiPublicHooksMarketStatsTickRouteImport.update({
+    id: '/api/public/hooks/market-stats-tick',
+    path: '/api/public/hooks/market-stats-tick',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksEmbeddingsBackfillRoute =
   ApiPublicHooksEmbeddingsBackfillRouteImport.update({
     id: '/api/public/hooks/embeddings-backfill',
@@ -513,6 +520,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/embeddings-backfill': typeof ApiPublicHooksEmbeddingsBackfillRoute
+  '/api/public/hooks/market-stats-tick': typeof ApiPublicHooksMarketStatsTickRoute
   '/api/public/hooks/market-tick': typeof ApiPublicHooksMarketTickRoute
   '/api/public/hooks/ops-tick': typeof ApiPublicHooksOpsTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
@@ -581,6 +589,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/embeddings-backfill': typeof ApiPublicHooksEmbeddingsBackfillRoute
+  '/api/public/hooks/market-stats-tick': typeof ApiPublicHooksMarketStatsTickRoute
   '/api/public/hooks/market-tick': typeof ApiPublicHooksMarketTickRoute
   '/api/public/hooks/ops-tick': typeof ApiPublicHooksOpsTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
@@ -653,6 +662,7 @@ export interface FileRoutesById {
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
   '/api/public/hooks/embeddings-backfill': typeof ApiPublicHooksEmbeddingsBackfillRoute
+  '/api/public/hooks/market-stats-tick': typeof ApiPublicHooksMarketStatsTickRoute
   '/api/public/hooks/market-tick': typeof ApiPublicHooksMarketTickRoute
   '/api/public/hooks/ops-tick': typeof ApiPublicHooksOpsTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
@@ -725,6 +735,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/embeddings-backfill'
+    | '/api/public/hooks/market-stats-tick'
     | '/api/public/hooks/market-tick'
     | '/api/public/hooks/ops-tick'
     | '/api/public/hooks/partner-sync'
@@ -793,6 +804,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/embeddings-backfill'
+    | '/api/public/hooks/market-stats-tick'
     | '/api/public/hooks/market-tick'
     | '/api/public/hooks/ops-tick'
     | '/api/public/hooks/partner-sync'
@@ -864,6 +876,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
     | '/api/public/hooks/embeddings-backfill'
+    | '/api/public/hooks/market-stats-tick'
     | '/api/public/hooks/market-tick'
     | '/api/public/hooks/ops-tick'
     | '/api/public/hooks/partner-sync'
@@ -893,6 +906,7 @@ export interface RootRouteChildren {
   ApiPublicHooksDiscoveryRescoreRoute: typeof ApiPublicHooksDiscoveryRescoreRoute
   ApiPublicHooksDiscoveryTickRoute: typeof ApiPublicHooksDiscoveryTickRoute
   ApiPublicHooksEmbeddingsBackfillRoute: typeof ApiPublicHooksEmbeddingsBackfillRoute
+  ApiPublicHooksMarketStatsTickRoute: typeof ApiPublicHooksMarketStatsTickRoute
   ApiPublicHooksMarketTickRoute: typeof ApiPublicHooksMarketTickRoute
   ApiPublicHooksOpsTickRoute: typeof ApiPublicHooksOpsTickRoute
   ApiPublicHooksPartnerSyncRoute: typeof ApiPublicHooksPartnerSyncRoute
@@ -1337,6 +1351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksMarketTickRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/market-stats-tick': {
+      id: '/api/public/hooks/market-stats-tick'
+      path: '/api/public/hooks/market-stats-tick'
+      fullPath: '/api/public/hooks/market-stats-tick'
+      preLoaderRoute: typeof ApiPublicHooksMarketStatsTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/embeddings-backfill': {
       id: '/api/public/hooks/embeddings-backfill'
       path: '/api/public/hooks/embeddings-backfill'
@@ -1577,6 +1598,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksDiscoveryRescoreRoute: ApiPublicHooksDiscoveryRescoreRoute,
   ApiPublicHooksDiscoveryTickRoute: ApiPublicHooksDiscoveryTickRoute,
   ApiPublicHooksEmbeddingsBackfillRoute: ApiPublicHooksEmbeddingsBackfillRoute,
+  ApiPublicHooksMarketStatsTickRoute: ApiPublicHooksMarketStatsTickRoute,
   ApiPublicHooksMarketTickRoute: ApiPublicHooksMarketTickRoute,
   ApiPublicHooksOpsTickRoute: ApiPublicHooksOpsTickRoute,
   ApiPublicHooksPartnerSyncRoute: ApiPublicHooksPartnerSyncRoute,
