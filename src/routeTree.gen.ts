@@ -69,6 +69,7 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
 import { Route as ApiPublicHooksSubscriptionRenewalsRouteImport } from './routes/api/public/hooks/subscription-renewals'
 import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/public/hooks/partner-sync'
+import { Route as ApiPublicHooksEmbeddingsBackfillRouteImport } from './routes/api/public/hooks/embeddings-backfill'
 import { Route as ApiPublicHooksDiscoveryTickRouteImport } from './routes/api/public/hooks/discovery-tick'
 import { Route as ApiPublicHooksDiscoveryRescoreRouteImport } from './routes/api/public/hooks/discovery-rescore'
 import { Route as AuthenticatedListingsAdminDiscoveryRouteImport } from './routes/_authenticated/listings.admin.discovery'
@@ -392,6 +393,12 @@ const ApiPublicHooksPartnerSyncRoute =
     path: '/api/public/hooks/partner-sync',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksEmbeddingsBackfillRoute =
+  ApiPublicHooksEmbeddingsBackfillRouteImport.update({
+    id: '/api/public/hooks/embeddings-backfill',
+    path: '/api/public/hooks/embeddings-backfill',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksDiscoveryTickRoute =
   ApiPublicHooksDiscoveryTickRouteImport.update({
     id: '/api/public/hooks/discovery-tick',
@@ -484,6 +491,7 @@ export interface FileRoutesByFullPath {
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
+  '/api/public/hooks/embeddings-backfill': typeof ApiPublicHooksEmbeddingsBackfillRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/hooks/subscription-renewals': typeof ApiPublicHooksSubscriptionRenewalsRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
@@ -548,6 +556,7 @@ export interface FileRoutesByTo {
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
+  '/api/public/hooks/embeddings-backfill': typeof ApiPublicHooksEmbeddingsBackfillRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/hooks/subscription-renewals': typeof ApiPublicHooksSubscriptionRenewalsRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
@@ -616,6 +625,7 @@ export interface FileRoutesById {
   '/_authenticated/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
+  '/api/public/hooks/embeddings-backfill': typeof ApiPublicHooksEmbeddingsBackfillRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
   '/api/public/hooks/subscription-renewals': typeof ApiPublicHooksSubscriptionRenewalsRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
@@ -684,6 +694,7 @@ export interface FileRouteTypes {
     | '/listings/admin/discovery'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
+    | '/api/public/hooks/embeddings-backfill'
     | '/api/public/hooks/partner-sync'
     | '/api/public/hooks/subscription-renewals'
     | '/api/public/ical/$token'
@@ -748,6 +759,7 @@ export interface FileRouteTypes {
     | '/listings/admin/discovery'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
+    | '/api/public/hooks/embeddings-backfill'
     | '/api/public/hooks/partner-sync'
     | '/api/public/hooks/subscription-renewals'
     | '/api/public/ical/$token'
@@ -815,6 +827,7 @@ export interface FileRouteTypes {
     | '/_authenticated/listings/admin/discovery'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
+    | '/api/public/hooks/embeddings-backfill'
     | '/api/public/hooks/partner-sync'
     | '/api/public/hooks/subscription-renewals'
     | '/api/public/ical/$token'
@@ -840,6 +853,7 @@ export interface RootRouteChildren {
   DiscoverCountyCountyRoute: typeof DiscoverCountyCountyRoute
   ApiPublicHooksDiscoveryRescoreRoute: typeof ApiPublicHooksDiscoveryRescoreRoute
   ApiPublicHooksDiscoveryTickRoute: typeof ApiPublicHooksDiscoveryTickRoute
+  ApiPublicHooksEmbeddingsBackfillRoute: typeof ApiPublicHooksEmbeddingsBackfillRoute
   ApiPublicHooksPartnerSyncRoute: typeof ApiPublicHooksPartnerSyncRoute
   ApiPublicHooksSubscriptionRenewalsRoute: typeof ApiPublicHooksSubscriptionRenewalsRoute
   ApiPublicIcalTokenRoute: typeof ApiPublicIcalTokenRoute
@@ -1268,6 +1282,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksPartnerSyncRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/embeddings-backfill': {
+      id: '/api/public/hooks/embeddings-backfill'
+      path: '/api/public/hooks/embeddings-backfill'
+      fullPath: '/api/public/hooks/embeddings-backfill'
+      preLoaderRoute: typeof ApiPublicHooksEmbeddingsBackfillRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/discovery-tick': {
       id: '/api/public/hooks/discovery-tick'
       path: '/api/public/hooks/discovery-tick'
@@ -1492,6 +1513,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiscoverCountyCountyRoute: DiscoverCountyCountyRoute,
   ApiPublicHooksDiscoveryRescoreRoute: ApiPublicHooksDiscoveryRescoreRoute,
   ApiPublicHooksDiscoveryTickRoute: ApiPublicHooksDiscoveryTickRoute,
+  ApiPublicHooksEmbeddingsBackfillRoute: ApiPublicHooksEmbeddingsBackfillRoute,
   ApiPublicHooksPartnerSyncRoute: ApiPublicHooksPartnerSyncRoute,
   ApiPublicHooksSubscriptionRenewalsRoute:
     ApiPublicHooksSubscriptionRenewalsRoute,

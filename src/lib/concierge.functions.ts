@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { aiChat, type AIChatMessage } from "@/lib/ai.server";
+import { aiChat, aiEmbed, type AIChatMessage } from "@/lib/ai.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { enforceRateLimit } from "@/lib/rate-limit";
 
@@ -40,6 +40,27 @@ type GroundingRow = {
 
 async function retrieveContext(query: string, county?: string): Promise<GroundingRow[]> {
   const supabase = publicClient();
+
+  // Vector-first: embed the query and rank by cosine similarity.
+  try {
+    const vec = await aiEmbed(query);
+    const { data, error } = await supabase.rpc("match_marketplace_properties", {
+      query_embedding: vec as any,
+      match_count: 12,
+      only_approved: true,
+    });
+    if (!error && Array.isArray(data) && data.length) {
+      const rows = data as unknown as GroundingRow[];
+      const filtered = county
+        ? rows.filter((r) => (r.county_code ?? "").toLowerCase().includes(county.toLowerCase()))
+        : rows;
+      if (filtered.length) return filtered.slice(0, 8);
+    }
+  } catch {
+    // fall through to keyword search
+  }
+
+  // Keyword fallback (also handles zero-embedding cold start).
   const q = query.slice(0, 40).replace(/[%_]/g, " ");
   const { data } = await supabase
     .from("marketplace_properties")
