@@ -14,6 +14,205 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_agent_decisions: {
+        Row: {
+          action: string
+          agent_slug: string
+          confidence: number | null
+          created_at: string
+          id: string
+          inputs: Json
+          outputs: Json
+          rationale: string | null
+          run_id: string | null
+          subject_id: string | null
+          subject_type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          agent_slug: string
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          inputs?: Json
+          outputs?: Json
+          rationale?: string | null
+          run_id?: string | null
+          subject_id?: string | null
+          subject_type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          agent_slug?: string
+          confidence?: number | null
+          created_at?: string
+          id?: string
+          inputs?: Json
+          outputs?: Json
+          rationale?: string | null
+          run_id?: string | null
+          subject_id?: string | null
+          subject_type?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_decisions_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agent_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_jobs: {
+        Row: {
+          agent_slug: string
+          attempts: number
+          claimed_at: string | null
+          created_at: string
+          dedupe_key: string | null
+          finished_at: string | null
+          id: string
+          last_error: string | null
+          max_attempts: number
+          next_run_at: string
+          payload: Json
+          priority: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_slug: string
+          attempts?: number
+          claimed_at?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          finished_at?: string | null
+          id?: string
+          last_error?: string | null
+          max_attempts?: number
+          next_run_at?: string
+          payload?: Json
+          priority?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_slug?: string
+          attempts?: number
+          claimed_at?: string | null
+          created_at?: string
+          dedupe_key?: string | null
+          finished_at?: string | null
+          id?: string
+          last_error?: string | null
+          max_attempts?: number
+          next_run_at?: string
+          payload?: Json
+          priority?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_agent_runs: {
+        Row: {
+          agent_slug: string
+          cost_usd: number | null
+          created_at: string
+          error: string | null
+          id: string
+          job_id: string | null
+          latency_ms: number | null
+          metadata: Json
+          model: string | null
+          status: string
+          tokens_input: number | null
+          tokens_output: number | null
+        }
+        Insert: {
+          agent_slug: string
+          cost_usd?: number | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          job_id?: string | null
+          latency_ms?: number | null
+          metadata?: Json
+          model?: string | null
+          status: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+        }
+        Update: {
+          agent_slug?: string
+          cost_usd?: number | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          job_id?: string | null
+          latency_ms?: number | null
+          metadata?: Json
+          model?: string | null
+          status?: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_runs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agent_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agents: {
+        Row: {
+          concurrency_cap: number
+          config: Json
+          created_at: string
+          description: string | null
+          display_name: string
+          enabled: boolean
+          hourly_cost_budget_usd: number
+          id: string
+          paused: boolean
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          concurrency_cap?: number
+          config?: Json
+          created_at?: string
+          description?: string | null
+          display_name: string
+          enabled?: boolean
+          hourly_cost_budget_usd?: number
+          id?: string
+          paused?: boolean
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          concurrency_cap?: number
+          config?: Json
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          enabled?: boolean
+          hourly_cost_budget_usd?: number
+          id?: string
+          paused?: boolean
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       app_errors: {
         Row: {
           action: string | null
@@ -3921,6 +4120,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_preference_vectors: {
+        Row: {
+          embedding: string | null
+          signals: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          embedding?: string | null
+          signals?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          embedding?: string | null
+          signals?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
