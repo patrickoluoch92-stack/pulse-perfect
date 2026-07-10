@@ -2960,6 +2960,47 @@ export type Database = {
         }
         Relationships: []
       }
+      recommendation_events: {
+        Row: {
+          context: Json
+          created_at: string
+          event_type: string
+          id: string
+          property_id: string
+          session_id: string | null
+          user_id: string | null
+          weight: number
+        }
+        Insert: {
+          context?: Json
+          created_at?: string
+          event_type: string
+          id?: string
+          property_id: string
+          session_id?: string | null
+          user_id?: string | null
+          weight?: number
+        }
+        Update: {
+          context?: Json
+          created_at?: string
+          event_type?: string
+          id?: string
+          property_id?: string
+          session_id?: string | null
+          user_id?: string | null
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendation_events_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reservations: {
         Row: {
           adults: number
@@ -3881,8 +3922,34 @@ export type Database = {
         Args: { _org_id: string }
         Returns: boolean
       }
+      recommend_for_user: {
+        Args: { match_count?: number; p_session_id?: string; p_user_id: string }
+        Returns: {
+          category: string
+          county_code: string
+          description: string
+          id: string
+          name: string
+          similarity: number
+          slug: string
+          town: string
+        }[]
+      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      similar_properties: {
+        Args: { match_count?: number; p_property_id: string }
+        Returns: {
+          category: string
+          county_code: string
+          description: string
+          id: string
+          name: string
+          similarity: number
+          slug: string
+          town: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
