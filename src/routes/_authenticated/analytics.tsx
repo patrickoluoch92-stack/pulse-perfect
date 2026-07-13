@@ -240,8 +240,10 @@ function Kpi({ icon: Icon, label, value, hint }: { icon: LucideIcon; label: stri
 
 function EmptyChart({ loading }: { loading: boolean }) {
   return (
-    <div className="grid h-full place-items-center text-sm text-muted-foreground">
-      {loading ? "Loading…" : "No data for this period yet."}
+    <div className="grid h-full place-items-center">
+      {loading
+        ? <LoadingState label="Loading chart…" />
+        : <EmptyState title="No data yet" description="No data for this period yet." />}
     </div>
   );
 }
