@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { LoadingState } from "@/components/ui/states";
 import { listUnits } from "@/lib/units.functions";
 import {
   recommendPricing,
@@ -113,7 +114,7 @@ function RevenuePage() {
                   ))}
                 </div>
               </div>
-            ) : <p className="text-sm text-muted-foreground">Loading forecast…</p>}
+            ) : <LoadingState label="Loading forecast…" />}
           </CardContent>
         </Card>
 

@@ -11,6 +11,7 @@ import {
   getMySubscription, listBillingHistory, cancelSubscription, resumeSubscription,
 } from "@/lib/subscription.functions";
 import { formatKES } from "@/lib/format";
+import { EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/subscription")({
   head: () => ({ meta: [{ title: "Subscription — HostPulse" }] }),
@@ -112,7 +113,7 @@ function SubscriptionPage() {
         <CardHeader><CardTitle className="text-lg">Billing history</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           {(histQ.data?.transactions ?? []).length === 0 && (
-            <p className="text-sm text-muted-foreground">No payments yet.</p>
+            <EmptyState title="No payments yet" />
           )}
           {(histQ.data?.transactions ?? []).map((tx: any) => (
             <div key={tx.id} className="flex items-center justify-between rounded-md border p-3 text-sm">
@@ -132,7 +133,7 @@ function SubscriptionPage() {
         <CardHeader><CardTitle className="text-lg">Activity</CardTitle></CardHeader>
         <CardContent className="space-y-2 text-sm">
           {(histQ.data?.events ?? []).length === 0 && (
-            <p className="text-muted-foreground">No activity yet.</p>
+            <EmptyState title="No activity yet" />
           )}
           {(histQ.data?.events ?? []).map((ev: any) => (
             <div key={ev.id} className="flex justify-between border-b py-2 last:border-b-0">

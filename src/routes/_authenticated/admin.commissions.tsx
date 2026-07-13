@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/states";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -72,7 +73,7 @@ function CommissionsAdmin() {
 
           <Card>
             <CardContent className="p-0">
-              {rules.data?.rows?.length === 0 && <p className="p-6 text-sm text-muted-foreground">No rules yet.</p>}
+              {rules.data?.rows?.length === 0 && <EmptyState title="No rules yet" />}
               <ul className="divide-y">
                 {rules.data?.rows?.map((r: any) => (
                   <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 p-4">

@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { EmptyState } from "@/components/ui/states";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
@@ -183,7 +184,7 @@ function WalletPage() {
         <CardHeader><CardTitle>Payout history</CardTitle></CardHeader>
         <CardContent className="p-0">
           {payouts.data?.rows?.length === 0 && (
-            <p className="p-6 text-sm text-muted-foreground">No payouts yet.</p>
+            <EmptyState title="No payouts yet" />
           )}
           <ul className="divide-y">
             {payouts.data?.rows?.map((p: any) => (
@@ -217,7 +218,7 @@ function WalletPage() {
         <CardHeader><CardTitle>Recent wallet activity</CardTitle></CardHeader>
         <CardContent className="p-0">
           {ledger.data?.rows?.length === 0 && (
-            <p className="p-6 text-sm text-muted-foreground">No activity yet.</p>
+            <EmptyState title="No activity yet" />
           )}
           <ul className="divide-y">
             {ledger.data?.rows?.map((e: any) => (

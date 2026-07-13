@@ -122,7 +122,7 @@ function WishlistPage() {
           </CardHeader>
           <CardContent>
             {(loyaltyQ.data?.ledger ?? []).length === 0 ? (
-              <p className="text-muted-foreground">No points activity yet.</p>
+              <EmptyState title="No points activity yet" />
             ) : (
               <ul className="divide-y">
                 {loyaltyQ.data!.ledger.map((e: any) => (

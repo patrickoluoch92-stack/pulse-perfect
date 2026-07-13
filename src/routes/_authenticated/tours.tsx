@@ -345,9 +345,7 @@ function GuidesTab({ orgId }: { orgId: string }) {
       </div>
 
       {q.data && q.data.length === 0 && (
-        <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No guides yet.
-        </p>
+        <EmptyState title="No guides yet" />
       )}
 
       <div className="grid gap-3 md:grid-cols-2">
@@ -540,9 +538,7 @@ function SchedulesTab({ orgId }: { orgId: string }) {
       )}
 
       {q.data && q.data.length === 0 && pkgs.data?.length ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No departures scheduled yet.
-        </p>
+        <EmptyState title="No departures scheduled yet" />
       ) : null}
 
       <div className="space-y-2">
@@ -791,9 +787,7 @@ function BookingsTab({ orgId }: { orgId: string }) {
       )}
 
       {q.data && q.data.length === 0 && upcomingDeps.length ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No bookings yet.
-        </p>
+        <EmptyState title="No bookings yet" />
       ) : null}
 
       <div className="overflow-x-auto rounded-lg border">
