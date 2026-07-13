@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { formatKES } from "@/lib/format";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
@@ -82,7 +83,7 @@ function CommissionsAdmin() {
                         <Badge variant="outline" className="capitalize">{r.scope}{r.scope_value ? `: ${r.scope_value}` : ""}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        <Percent className="inline h-3 w-3" /> {r.rate_percent}% + KES {r.flat_amount} · priority {r.priority}
+                        <Percent className="inline h-3 w-3" /> {r.rate_percent}% + {formatKES(Number(r.flat_amount ?? 0))} · priority {r.priority}
                       </p>
                       {r.notes && <p className="text-xs text-muted-foreground">{r.notes}</p>}
                     </div>

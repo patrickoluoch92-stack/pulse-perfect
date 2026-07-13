@@ -10,6 +10,7 @@ import { getWorkspaceContext } from "@/lib/workspace.functions";
 import {
   getMySubscription, listBillingHistory, cancelSubscription, resumeSubscription,
 } from "@/lib/subscription.functions";
+import { formatKES } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/subscription")({
   head: () => ({ meta: [{ title: "Subscription — HostPulse" }] }),
@@ -116,7 +117,7 @@ function SubscriptionPage() {
           {(histQ.data?.transactions ?? []).map((tx: any) => (
             <div key={tx.id} className="flex items-center justify-between rounded-md border p-3 text-sm">
               <div>
-                <div className="font-medium">KES {Number(tx.amount ?? 0).toLocaleString()}</div>
+                <div className="font-medium">{formatKES(Number(tx.amount ?? 0))}</div>
                 <div className="text-xs text-muted-foreground">
                   {tx.mpesa_receipt_number ?? tx.status} · {new Date(tx.transaction_date ?? tx.created_at).toLocaleString()}
                 </div>

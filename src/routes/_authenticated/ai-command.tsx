@@ -8,6 +8,7 @@ import { forecastOccupancy } from "@/lib/revenue-intelligence.functions";
 import { getSearchAnalytics } from "@/lib/knowledge.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Activity, Compass, Search, Sparkles, TrendingUp } from "lucide-react";
+import { LoadingState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/ai-command")({
   head: () => ({ meta: [{ title: "AI Command Centre — HostPulse" }] }),
@@ -90,7 +91,7 @@ function AICommandPage() {
                 <StatLine label="Counties covered" value={Object.keys(disc.data.countyCounts ?? {}).length} />
                 <StatLine label="Recent runs" value={disc.data.recentRuns?.length ?? 0} />
               </div>
-            ) : <p className="text-sm text-muted-foreground">Loading…</p>}
+            ) : <LoadingState label="Loading…" />}
           </CardContent>
         </Card>
 
@@ -108,7 +109,7 @@ function AICommandPage() {
                   />
                 ))}
               </div>
-            ) : <p className="text-sm text-muted-foreground">Loading…</p>}
+            ) : <LoadingState label="Loading…" />}
           </CardContent>
         </Card>
 
@@ -153,7 +154,7 @@ function AICommandPage() {
                 )}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">Loading…</p>
+              <LoadingState label="Loading…" />
             )}
           </CardContent>
         </Card>

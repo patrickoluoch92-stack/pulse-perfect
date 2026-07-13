@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { adminListAllPlans, adminUpsertPlan, adminSetPlanActive } from "@/lib/subscription.functions";
+import { formatKES } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin/plans")({
   head: () => ({ meta: [{ title: "Plan admin — HostPulse" }] }),
@@ -66,7 +67,7 @@ function PlansAdmin() {
                   {!p.active && <span className="text-xs text-destructive">inactive</span>}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  KES {p.price_monthly_kes.toLocaleString()}/mo · KES {p.price_yearly_kes.toLocaleString()}/yr
+                  {formatKES(p.price_monthly_kes)}/mo · {formatKES(p.price_yearly_kes)}/yr
                   {" · "}Properties: {p.property_limit ?? "∞"} · Team: {p.team_member_limit ?? "∞"}
                 </div>
               </div>

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/admin/ai-ops")({
   head: () => ({
@@ -69,6 +70,10 @@ function AiOpsPage() {
       </header>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {overview.isLoading && <div className="md:col-span-2 xl:col-span-3"><LoadingState label="Loading agents…" /></div>}
+        {!overview.isLoading && agents.length === 0 && (
+          <div className="md:col-span-2 xl:col-span-3"><EmptyState title="No agents registered" description="Register agents in the ai_agents table to see them here." /></div>
+        )}
         {agents.map((a: any) => (
           <Card key={a.slug}>
             <CardHeader className="pb-2">
@@ -117,6 +122,10 @@ function AiOpsPage() {
           <CardHeader><CardTitle className="text-base">Recent runs</CardTitle></CardHeader>
           <CardContent className="text-xs">
             <div className="space-y-1 max-h-[420px] overflow-auto">
+              {runs.isLoading && <LoadingState label="Loading runs…" />}
+              {!runs.isLoading && ((runs.data as any)?.runs ?? []).length === 0 && (
+                <EmptyState title="No recent runs" description="Agent runs will appear here as jobs execute." />
+              )}
               {((runs.data as any)?.runs ?? []).map((r: any) => (
                 <div key={r.id} className="flex justify-between border-b py-1">
                   <span>
@@ -135,6 +144,10 @@ function AiOpsPage() {
           <CardHeader><CardTitle className="text-base">Recent decisions</CardTitle></CardHeader>
           <CardContent className="text-xs">
             <div className="space-y-1 max-h-[420px] overflow-auto">
+              {decisions.isLoading && <LoadingState label="Loading decisions…" />}
+              {!decisions.isLoading && ((decisions.data as any)?.decisions ?? []).length === 0 && (
+                <EmptyState title="No decisions logged" description="Agent decisions will appear here." />
+              )}
               {((decisions.data as any)?.decisions ?? []).map((d: any) => (
                 <div key={d.id} className="border-b py-1">
                   <div className="flex justify-between">

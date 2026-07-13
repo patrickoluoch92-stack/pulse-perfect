@@ -11,6 +11,8 @@ import {
   CreditCard, DollarSign, Gauge, HeartHandshake, Landmark, LifeBuoy, Megaphone,
   ShieldCheck, Sparkles, Star, TrendingUp, Users, Wallet, Zap,
 } from "lucide-react";
+import { LoadingState, EmptyState } from "@/components/ui/states";
+import { formatKES } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin/executive")({
   head: () => ({
@@ -22,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/admin/executive")({
   component: ExecutiveCenter,
 });
 
-const KES = (v: number) => `KES ${Math.round(Number(v ?? 0)).toLocaleString()}`;
+const KES = (v: number) => formatKES(Number(v ?? 0));
 
 function ExecutiveCenter() {
   const fn = useServerFn(getExecutiveOverview);
@@ -32,8 +34,8 @@ function ExecutiveCenter() {
     refetchInterval: 60_000,
   });
 
-  if (q.isLoading) return <div className="p-8 text-muted-foreground">Loading executive overview…</div>;
-  if (q.error) return <div className="p-8 text-destructive">Access denied or overview unavailable.</div>;
+  if (q.isLoading) return <div className="p-8"><LoadingState label="Loading executive overview…" /></div>;
+  if (q.error) return <div className="p-8"><EmptyState title="Access denied" description="Executive overview unavailable." /></div>;
   const d = q.data!;
 
   return (
