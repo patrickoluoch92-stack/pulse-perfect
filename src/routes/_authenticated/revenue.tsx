@@ -114,7 +114,7 @@ function RevenuePage() {
                   ))}
                 </div>
               </div>
-            ) : <p className="text-sm text-muted-foreground">Loading forecast…</p>}
+            ) : <LoadingState label="Loading forecast…" />}
           </CardContent>
         </Card>
 
