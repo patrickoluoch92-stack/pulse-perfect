@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlanWithAI } from "@/components/plan-with-ai";
+import { formatCurrency } from "@/lib/format";
 
 export const Route = createFileRoute("/rentals/$child")({
   loader: async ({ params }) => {
@@ -156,7 +157,7 @@ function ChildCategoryPage() {
                     <MapPin className="h-3 w-3" /> {p.town} · {p.county_code}
                   </p>
                   <div className="mt-2 flex items-center justify-between text-sm">
-                    <span className="font-medium">{p.currency} {Number(p.price_per_night).toLocaleString()}</span>
+                    <span className="font-medium">{formatCurrency(Number(p.price_per_night), p.currency)}</span>
                     {p.rating_avg > 0 && (
                       <span className="flex items-center gap-1 text-xs">
                         <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {Number(p.rating_avg).toFixed(1)}

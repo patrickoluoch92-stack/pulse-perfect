@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { PropertyReviews } from "@/components/PropertyReviews";
 import { BookingDialog } from "@/components/BookingDialog";
 import { PlanWithAI } from "@/components/plan-with-ai";
+import { formatCurrency } from "@/lib/format";
 
 const propQuery = (slug: string) =>
   queryOptions({
@@ -253,7 +254,7 @@ function PropertyDetail() {
               {prop.price_per_night != null && (
                 <p className="text-lg">
                   <span className="text-2xl font-semibold">
-                    {prop.currency} {Number(prop.price_per_night).toLocaleString()}
+                    {formatCurrency(Number(prop.price_per_night), prop.currency)}
                   </span>
                   <span className="ml-1 text-muted-foreground">/ night</span>
                 </p>
