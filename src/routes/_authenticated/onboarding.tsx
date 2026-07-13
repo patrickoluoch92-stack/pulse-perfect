@@ -136,11 +136,12 @@ function OnboardingWizard() {
   }
 
   if (!ws.data || !loaded) {
-    return <DashboardShell><div className="p-8 text-muted-foreground">Loading…</div></DashboardShell>;
+    return <DashboardShell><LoadingState label="Loading onboarding…" /></DashboardShell>;
   }
   if (!orgId) {
-    return <DashboardShell><div className="p-8">No workspace found.</div></DashboardShell>;
+    return <DashboardShell><EmptyState icon={Building2} title="No workspace found" description="Create or join an organization to start onboarding a property." /></DashboardShell>;
   }
+
 
   return (
     <DashboardShell>
