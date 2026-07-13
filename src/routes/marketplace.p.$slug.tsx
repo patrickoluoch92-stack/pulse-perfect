@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PropertyReviews } from "@/components/PropertyReviews";
 import { BookingDialog } from "@/components/BookingDialog";
+import { PlanWithAI } from "@/components/plan-with-ai";
 
 const propQuery = (slug: string) =>
   queryOptions({
