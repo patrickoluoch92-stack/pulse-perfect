@@ -980,9 +980,9 @@ function SyncPage() {
                 )}
               </div>
             </div>
-            {deliveries.isLoading && <p className="text-xs text-muted-foreground">Loading…</p>}
+            {deliveries.isLoading && <LoadingState label="Loading deliveries…" />}
             {deliveries.data && deliveries.data.rows.length === 0 && (
-              <p className="rounded-lg border border-dashed p-4 text-center text-xs text-muted-foreground">No deliveries yet.</p>
+              <EmptyState title="No deliveries yet" />
             )}
             {deliveries.data && deliveries.data.rows.length > 0 && (
               <ul className="divide-y rounded-lg border text-sm">
