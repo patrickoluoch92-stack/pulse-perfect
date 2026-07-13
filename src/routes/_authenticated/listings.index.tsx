@@ -131,15 +131,21 @@ function ListingsPage() {
 
         </header>
 
-        {listings.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+        {listings.isLoading && <LoadingState label="Loading your listings…" />}
 
         {listings.data && listings.data.length === 0 && (
-          <div className="rounded-xl border bg-card p-12 text-center">
-            <p className="text-muted-foreground">
-              No listings yet. Create one and submit it for admin review.
-            </p>
-          </div>
+          <EmptyState
+            title="No listings yet"
+            description="Create your first property listing and submit it for admin review to reach travellers and renters."
+            icon={Building2}
+            action={
+              <Button onClick={() => setOpenCreate(true)} disabled={!orgId}>
+                <Plus className="mr-2 h-4 w-4" aria-hidden /> New listing
+              </Button>
+            }
+          />
         )}
+
 
         {listings.data && listings.data.length > 0 && (
           <div className="overflow-hidden rounded-xl border bg-card">
