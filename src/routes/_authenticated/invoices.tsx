@@ -155,7 +155,7 @@ function InvoicesPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right tabular-nums">
-                    {i.currency} {Number(i.total).toFixed(2)}
+                    {formatCurrency(Number(i.total), i.currency)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Button size="icon" variant="ghost" onClick={() => setDeleting({ id: i.id, number: i.number })} aria-label="Delete">
