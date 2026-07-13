@@ -113,7 +113,7 @@ function SubscriptionPage() {
         <CardHeader><CardTitle className="text-lg">Billing history</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           {(histQ.data?.transactions ?? []).length === 0 && (
-            <p className="text-sm text-muted-foreground">No payments yet.</p>
+            <EmptyState title="No payments yet" />
           )}
           {(histQ.data?.transactions ?? []).map((tx: any) => (
             <div key={tx.id} className="flex items-center justify-between rounded-md border p-3 text-sm">
