@@ -148,6 +148,7 @@ function AiOpsPage() {
               {!decisions.isLoading && ((decisions.data as any)?.decisions ?? []).length === 0 && (
                 <EmptyState title="No decisions logged" description="Agent decisions will appear here." />
               )}
+              {((decisions.data as any)?.decisions ?? []).map((d: any) => (
                 <div key={d.id} className="border-b py-1">
                   <div className="flex justify-between">
                     <span><Badge className="mr-2">{d.agent_slug}</Badge>{d.action}</span>
