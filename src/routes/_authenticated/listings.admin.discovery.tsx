@@ -135,7 +135,7 @@ function DiscoveryAdmin() {
               </Card>
             ))}
             {!rows.isLoading && (rows.data?.rows?.length ?? 0) === 0 && (
-              <p className="text-sm text-muted-foreground">Nothing in this queue.</p>
+              <EmptyState title="Nothing in this queue" description="Discovered properties in this state will appear here." />
             )}
           </TabsContent>
         </Tabs>
