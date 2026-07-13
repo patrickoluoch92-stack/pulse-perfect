@@ -74,9 +74,9 @@ function CommandCenter() {
         <Card className="border-amber-500/40 bg-amber-500/5">
           <CardContent className="space-y-2 pt-4">
             {d.alerts.map((a, i) => (
-              <Link key={i} to={a.href ?? "/dashboard"} className="flex items-center justify-between gap-3 rounded-md p-2 hover:bg-muted/50">
+              <Link key={i} to={a.href ?? "/dashboard"} aria-label={`Alert: ${a.message}`} className="flex items-center justify-between gap-3 rounded-md p-2 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <div className="flex min-w-0 items-center gap-2 text-sm">
-                  <AlertTriangle className={`h-4 w-4 shrink-0 ${
+                  <AlertTriangle aria-hidden className={`h-4 w-4 shrink-0 ${
                     a.level === "error" ? "text-destructive" : a.level === "warn" ? "text-amber-500" : "text-muted-foreground"
                   }`} />
                   <span className="truncate">{a.message}</span>
