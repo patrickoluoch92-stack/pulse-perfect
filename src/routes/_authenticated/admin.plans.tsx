@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { adminListAllPlans, adminUpsertPlan, adminSetPlanActive } from "@/lib/subscription.functions";
+import { formatKES } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin/plans")({
   head: () => ({ meta: [{ title: "Plan admin — HostPulse" }] }),
