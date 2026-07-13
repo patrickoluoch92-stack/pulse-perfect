@@ -114,9 +114,11 @@ function AvailabilityPage() {
           <header className="border-b px-6 py-4">
             <h2 className="text-lg font-semibold">Blocked dates</h2>
           </header>
-          {blocks.isLoading && <p className="p-6 text-sm text-muted-foreground">Loading…</p>}
+          {blocks.isLoading && <LoadingState label="Loading blocks…" />}
           {blocks.data && blocks.data.length === 0 && (
-            <p className="p-6 text-sm text-muted-foreground">No blocks yet — the property is fully open.</p>
+            <div className="p-6">
+              <EmptyState icon={CalendarIcon} title="No blocks yet" description="The property is fully open for bookings." />
+            </div>
           )}
           {blocks.data && blocks.data.length > 0 && (
             <ul className="divide-y">
