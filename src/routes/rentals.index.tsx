@@ -4,6 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { Building2, ArrowRight } from "lucide-react";
 import { listCategoryTree } from "@/lib/taxonomy.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlanWithAI } from "@/components/plan-with-ai";
+import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/rentals/")({
   head: () => ({
