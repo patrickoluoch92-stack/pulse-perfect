@@ -8,6 +8,7 @@ import { forecastOccupancy } from "@/lib/revenue-intelligence.functions";
 import { getSearchAnalytics } from "@/lib/knowledge.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Activity, Compass, Search, Sparkles, TrendingUp } from "lucide-react";
+import { LoadingState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/ai-command")({
   head: () => ({ meta: [{ title: "AI Command Centre — HostPulse" }] }),
