@@ -11,6 +11,7 @@ import { getAnalytics } from "@/lib/analytics.functions";
 import { planAllows, PLAN_LABEL, type Plan } from "@/lib/plans";
 import { BedDouble, DollarSign, TrendingUp, CalendarCheck, Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 import type { LucideIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/analytics")({
