@@ -11,11 +11,21 @@ import { planAllows, type Plan } from "@/lib/plans";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import { usePermissions, type Permission } from "@/hooks/use-permissions";
+
 type NavItem = {
   to: string;
   label: string;
   icon: ComponentType<{ className?: string }>;
   feature?: "analytics.basic";
+  permission?: Permission;
+};
+
+type NavGroup = {
+  id: string;
+  label: string;
+  adminOnly?: boolean;
+  items: NavItem[];
 };
 
 type NavGroup = {
