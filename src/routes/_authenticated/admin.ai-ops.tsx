@@ -70,6 +70,10 @@ function AiOpsPage() {
       </header>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {overview.isLoading && <div className="md:col-span-2 xl:col-span-3"><LoadingState label="Loading agents…" /></div>}
+        {!overview.isLoading && agents.length === 0 && (
+          <div className="md:col-span-2 xl:col-span-3"><EmptyState title="No agents registered" description="Register agents in the ai_agents table to see them here." /></div>
+        )}
         {agents.map((a: any) => (
           <Card key={a.slug}>
             <CardHeader className="pb-2">
