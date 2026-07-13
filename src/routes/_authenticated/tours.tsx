@@ -61,7 +61,7 @@ function ToursPage() {
   const orgId = ctx.data?.currentOrg?.id;
 
   if (!orgId) {
-    return <div className="p-8 text-sm text-muted-foreground">Loading workspace…</div>;
+    return <LoadingState label="Loading workspace…" />;
   }
 
   return (
