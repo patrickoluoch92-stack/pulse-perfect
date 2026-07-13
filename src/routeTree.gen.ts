@@ -17,9 +17,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RentalsIndexRouteImport } from './routes/rentals.index'
+import { Route as MobilityIndexRouteImport } from './routes/mobility.index'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
 import { Route as DiscoverIndexRouteImport } from './routes/discover.index'
 import { Route as RentalsChildRouteImport } from './routes/rentals.$child'
+import { Route as MobilityCategoryRouteImport } from './routes/mobility.$category'
 import { Route as MarketplaceMapRouteImport } from './routes/marketplace.map'
 import { Route as MarketplaceCountyRouteImport } from './routes/marketplace.$county'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
@@ -39,6 +41,7 @@ import { Route as AuthenticatedPropertiesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPlannerRouteImport } from './routes/_authenticated/planner'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedMpesaRouteImport } from './routes/_authenticated/mpesa'
+import { Route as AuthenticatedMobilityRouteImport } from './routes/_authenticated/mobility'
 import { Route as AuthenticatedMaintenanceRouteImport } from './routes/_authenticated/maintenance'
 import { Route as AuthenticatedListingsRouteImport } from './routes/_authenticated/listings'
 import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
@@ -49,6 +52,7 @@ import { Route as AuthenticatedBookingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedAiCommandRouteImport } from './routes/_authenticated/ai-command'
 import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authenticated/listings.index'
+import { Route as MobilityVSlugRouteImport } from './routes/mobility.v.$slug'
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
 import { Route as DiscoverCountyCountyRouteImport } from './routes/discover.county.$county'
 import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-vitals'
@@ -122,6 +126,11 @@ const RentalsIndexRoute = RentalsIndexRouteImport.update({
   path: '/rentals/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MobilityIndexRoute = MobilityIndexRouteImport.update({
+  id: '/mobility/',
+  path: '/mobility/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketplaceIndexRoute = MarketplaceIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -135,6 +144,11 @@ const DiscoverIndexRoute = DiscoverIndexRouteImport.update({
 const RentalsChildRoute = RentalsChildRouteImport.update({
   id: '/rentals/$child',
   path: '/rentals/$child',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MobilityCategoryRoute = MobilityCategoryRouteImport.update({
+  id: '/mobility/$category',
+  path: '/mobility/$category',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketplaceMapRoute = MarketplaceMapRouteImport.update({
@@ -234,6 +248,11 @@ const AuthenticatedMpesaRoute = AuthenticatedMpesaRouteImport.update({
   path: '/mpesa',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMobilityRoute = AuthenticatedMobilityRouteImport.update({
+  id: '/mobility',
+  path: '/mobility',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMaintenanceRoute =
   AuthenticatedMaintenanceRouteImport.update({
     id: '/maintenance',
@@ -287,6 +306,11 @@ const AuthenticatedListingsIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedListingsRoute,
   } as any)
+const MobilityVSlugRoute = MobilityVSlugRouteImport.update({
+  id: '/mobility/v/$slug',
+  path: '/mobility/v/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketplacePSlugRoute = MarketplacePSlugRouteImport.update({
   id: '/p/$slug',
   path: '/p/$slug',
@@ -492,6 +516,7 @@ export interface FileRoutesByFullPath {
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/listings': typeof AuthenticatedListingsRouteWithChildren
   '/maintenance': typeof AuthenticatedMaintenanceRoute
+  '/mobility': typeof AuthenticatedMobilityRoute
   '/mpesa': typeof AuthenticatedMpesaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/planner': typeof AuthenticatedPlannerRoute
@@ -511,9 +536,11 @@ export interface FileRoutesByFullPath {
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/mobility/$category': typeof MobilityCategoryRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
+  '/mobility/': typeof MobilityIndexRoute
   '/rentals/': typeof RentalsIndexRoute
   '/admin/ai-ops': typeof AuthenticatedAdminAiOpsRoute
   '/admin/cms': typeof AuthenticatedAdminCmsRoute
@@ -533,6 +560,7 @@ export interface FileRoutesByFullPath {
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
+  '/mobility/v/$slug': typeof MobilityVSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
@@ -564,6 +592,7 @@ export interface FileRoutesByTo {
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/maintenance': typeof AuthenticatedMaintenanceRoute
+  '/mobility': typeof MobilityIndexRoute
   '/mpesa': typeof AuthenticatedMpesaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/planner': typeof AuthenticatedPlannerRoute
@@ -583,6 +612,7 @@ export interface FileRoutesByTo {
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/mobility/$category': typeof MobilityCategoryRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
@@ -605,6 +635,7 @@ export interface FileRoutesByTo {
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
+  '/mobility/v/$slug': typeof MobilityVSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
@@ -640,6 +671,7 @@ export interface FileRoutesById {
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/_authenticated/listings': typeof AuthenticatedListingsRouteWithChildren
   '/_authenticated/maintenance': typeof AuthenticatedMaintenanceRoute
+  '/_authenticated/mobility': typeof AuthenticatedMobilityRoute
   '/_authenticated/mpesa': typeof AuthenticatedMpesaRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/planner': typeof AuthenticatedPlannerRoute
@@ -659,9 +691,11 @@ export interface FileRoutesById {
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/mobility/$category': typeof MobilityCategoryRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
+  '/mobility/': typeof MobilityIndexRoute
   '/rentals/': typeof RentalsIndexRoute
   '/_authenticated/admin/ai-ops': typeof AuthenticatedAdminAiOpsRoute
   '/_authenticated/admin/cms': typeof AuthenticatedAdminCmsRoute
@@ -681,6 +715,7 @@ export interface FileRoutesById {
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
+  '/mobility/v/$slug': typeof MobilityVSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/_authenticated/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
@@ -716,6 +751,7 @@ export interface FileRouteTypes {
     | '/invoices'
     | '/listings'
     | '/maintenance'
+    | '/mobility'
     | '/mpesa'
     | '/onboarding'
     | '/planner'
@@ -735,9 +771,11 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/mobility/$category'
     | '/rentals/$child'
     | '/discover/'
     | '/marketplace/'
+    | '/mobility/'
     | '/rentals/'
     | '/admin/ai-ops'
     | '/admin/cms'
@@ -757,6 +795,7 @@ export interface FileRouteTypes {
     | '/api/public/web-vitals'
     | '/discover/county/$county'
     | '/marketplace/p/$slug'
+    | '/mobility/v/$slug'
     | '/listings/'
     | '/listings/$id/availability'
     | '/listings/admin/coupons'
@@ -788,6 +827,7 @@ export interface FileRouteTypes {
     | '/incidents'
     | '/invoices'
     | '/maintenance'
+    | '/mobility'
     | '/mpesa'
     | '/onboarding'
     | '/planner'
@@ -807,6 +847,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/mobility/$category'
     | '/rentals/$child'
     | '/discover'
     | '/marketplace'
@@ -829,6 +870,7 @@ export interface FileRouteTypes {
     | '/api/public/web-vitals'
     | '/discover/county/$county'
     | '/marketplace/p/$slug'
+    | '/mobility/v/$slug'
     | '/listings'
     | '/listings/$id/availability'
     | '/listings/admin/coupons'
@@ -863,6 +905,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invoices'
     | '/_authenticated/listings'
     | '/_authenticated/maintenance'
+    | '/_authenticated/mobility'
     | '/_authenticated/mpesa'
     | '/_authenticated/onboarding'
     | '/_authenticated/planner'
@@ -882,9 +925,11 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/mobility/$category'
     | '/rentals/$child'
     | '/discover/'
     | '/marketplace/'
+    | '/mobility/'
     | '/rentals/'
     | '/_authenticated/admin/ai-ops'
     | '/_authenticated/admin/cms'
@@ -904,6 +949,7 @@ export interface FileRouteTypes {
     | '/api/public/web-vitals'
     | '/discover/county/$county'
     | '/marketplace/p/$slug'
+    | '/mobility/v/$slug'
     | '/_authenticated/listings/'
     | '/_authenticated/listings/$id/availability'
     | '/_authenticated/listings/admin/coupons'
@@ -934,11 +980,14 @@ export interface RootRouteChildren {
   DiscoverSlugRoute: typeof DiscoverSlugRoute
   GuidesHotelSeoRoute: typeof GuidesHotelSeoRoute
   InviteTokenRoute: typeof InviteTokenRoute
+  MobilityCategoryRoute: typeof MobilityCategoryRoute
   RentalsChildRoute: typeof RentalsChildRoute
   DiscoverIndexRoute: typeof DiscoverIndexRoute
+  MobilityIndexRoute: typeof MobilityIndexRoute
   RentalsIndexRoute: typeof RentalsIndexRoute
   ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
   DiscoverCountyCountyRoute: typeof DiscoverCountyCountyRoute
+  MobilityVSlugRoute: typeof MobilityVSlugRoute
   ApiPublicHooksAiEnrichmentRoute: typeof ApiPublicHooksAiEnrichmentRoute
   ApiPublicHooksDiscoveryRescoreRoute: typeof ApiPublicHooksDiscoveryRescoreRoute
   ApiPublicHooksDiscoveryTickRoute: typeof ApiPublicHooksDiscoveryTickRoute
@@ -1011,6 +1060,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RentalsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mobility/': {
+      id: '/mobility/'
+      path: '/mobility'
+      fullPath: '/mobility/'
+      preLoaderRoute: typeof MobilityIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketplace/': {
       id: '/marketplace/'
       path: '/'
@@ -1030,6 +1086,13 @@ declare module '@tanstack/react-router' {
       path: '/rentals/$child'
       fullPath: '/rentals/$child'
       preLoaderRoute: typeof RentalsChildRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mobility/$category': {
+      id: '/mobility/$category'
+      path: '/mobility/$category'
+      fullPath: '/mobility/$category'
+      preLoaderRoute: typeof MobilityCategoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marketplace/map': {
@@ -1165,6 +1228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMpesaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/mobility': {
+      id: '/_authenticated/mobility'
+      path: '/mobility'
+      fullPath: '/mobility'
+      preLoaderRoute: typeof AuthenticatedMobilityRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/maintenance': {
       id: '/_authenticated/maintenance'
       path: '/maintenance'
@@ -1234,6 +1304,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/listings/'
       preLoaderRoute: typeof AuthenticatedListingsIndexRouteImport
       parentRoute: typeof AuthenticatedListingsRoute
+    }
+    '/mobility/v/$slug': {
+      id: '/mobility/v/$slug'
+      path: '/mobility/v/$slug'
+      fullPath: '/mobility/v/$slug'
+      preLoaderRoute: typeof MobilityVSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/marketplace/p/$slug': {
       id: '/marketplace/p/$slug'
@@ -1563,6 +1640,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRouteWithChildren
   AuthenticatedListingsRoute: typeof AuthenticatedListingsRouteWithChildren
   AuthenticatedMaintenanceRoute: typeof AuthenticatedMaintenanceRoute
+  AuthenticatedMobilityRoute: typeof AuthenticatedMobilityRoute
   AuthenticatedMpesaRoute: typeof AuthenticatedMpesaRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPlannerRoute: typeof AuthenticatedPlannerRoute
@@ -1596,6 +1674,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRouteWithChildren,
   AuthenticatedListingsRoute: AuthenticatedListingsRouteWithChildren,
   AuthenticatedMaintenanceRoute: AuthenticatedMaintenanceRoute,
+  AuthenticatedMobilityRoute: AuthenticatedMobilityRoute,
   AuthenticatedMpesaRoute: AuthenticatedMpesaRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPlannerRoute: AuthenticatedPlannerRoute,
@@ -1652,11 +1731,14 @@ const rootRouteChildren: RootRouteChildren = {
   DiscoverSlugRoute: DiscoverSlugRoute,
   GuidesHotelSeoRoute: GuidesHotelSeoRoute,
   InviteTokenRoute: InviteTokenRoute,
+  MobilityCategoryRoute: MobilityCategoryRoute,
   RentalsChildRoute: RentalsChildRoute,
   DiscoverIndexRoute: DiscoverIndexRoute,
+  MobilityIndexRoute: MobilityIndexRoute,
   RentalsIndexRoute: RentalsIndexRoute,
   ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
   DiscoverCountyCountyRoute: DiscoverCountyCountyRoute,
+  MobilityVSlugRoute: MobilityVSlugRoute,
   ApiPublicHooksAiEnrichmentRoute: ApiPublicHooksAiEnrichmentRoute,
   ApiPublicHooksDiscoveryRescoreRoute: ApiPublicHooksDiscoveryRescoreRoute,
   ApiPublicHooksDiscoveryTickRoute: ApiPublicHooksDiscoveryTickRoute,
@@ -1674,13 +1756,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

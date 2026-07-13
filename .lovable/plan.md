@@ -1,97 +1,93 @@
-## HostPulse RBAC Overhaul — Plan
+# HostPulse Mobility & Car Rental Integration — Implementation Plan
 
-### Current state (audit findings)
-- **Platform role**: `user_roles` table with `app_role` enum (`admin`, `moderator`, `user`) + `has_role()` SECURITY DEFINER. Used for platform-admin gate (`isPlatformAdmin` in `workspace.functions.ts`, `access.ts::isPlatformAdmin`).
-- **Org role**: `organization_members.role` (owner / admin / manager / staff / guest — used ad-hoc). `has_org_role()` SECURITY DEFINER used across RLS. Roles used inconsistently (`marketplace_bookings` allows `admin/owner/manager`; other tables mix `staff`).
-- **Customer role**: implicit — any authenticated user without an org membership.
-- **Gaps**:
-  1. No "super admin" vs "moderator" distinction — single `admin` enum value.
-  2. No **Enterprise** tier — orgs are flat; no parent-org / multi-branch.
-  3. No **granular staff permissions** — role name is the only signal; a Receptionist and a Finance clerk both fall under `staff`.
-  4. `dashboard-shell.tsx` nav is gated only by `isPlatformAdmin`; no per-feature permission checks.
-  5. Audit logging exists (`audit_logs`) but is not written for privileged actions consistently.
-  6. Duplicate role logic: `has_role` RPC + inline `access.ts` + scattered `.rpc("has_role")` calls in `fraud-ml.functions.ts` etc.
-  7. Session security: MFA helper exists (`requireMfa`) but is only used in a few places.
+Deliver a fully integrated Car Hire & Mobility module that plugs into the existing Tours & Travel ecosystem (marketplace, bookings, payments, reviews, notifications, analytics, AI Recs, Property Intelligence, Planner AI) — not as a standalone silo.
 
-### Target model
+## 1. Data model (single migration)
 
-**Platform tier** (`app_role` enum extension)
-- `super_admin` — full platform control (billing, integrations, secrets rotation, DevOps, all orgs)
-- `admin` — existing behavior (kept for back-compat; behaves as super_admin during transition)
-- `moderator` — content moderation, fraud queue, CMS; no finance/DevOps
-- `support` — read-only + guest-support actions (refunds ≤ threshold, view bookings)
+New tables in `public` (each with `authenticated` + `service_role` GRANTs, RLS, and org-scoped policies mirroring `marketplace_properties`):
 
-**Organization tier** (`organization_members.role` — keep values, add semantics)
-- `owner` — org billing, delete org, invite admins
-- `enterprise_admin` *(new)* — manages multiple properties/branches within org, team, reports
-- `admin` — property/business admin (existing behavior)
-- `manager` — property manager (operational)
-- `staff` — baseline; needs granular permissions to do anything sensitive
-- `guest` — customer/booker (read-own)
+- `mobility_providers` — verified car-hire companies. Fields: `org_id`, `name`, `slug`, `logo_url`, `bio`, `contact_*`, `verification_status`, `rating_avg`, `rating_count`, `service_areas jsonb`.
+- `mobility_vehicles` — one row per vehicle/fleet unit. Fields: `provider_id`, `org_id`, `slug`, `category` (enum: `self_drive`, `chauffeur`, `airport_transfer`, `executive`, `tour_van`, `safari_4x4`, `luxury`, `wedding`, `shuttle`, `bus`, `motorcycle`, `bicycle`, `boat`), `make`, `model`, `year`, `transmission` (auto/manual), `fuel_type`, `seats`, `luggage`, `has_ac`, `has_gps`, `insurance_info jsonb`, `security_deposit_kes`, `pickup_locations jsonb`, `dropoff_locations jsonb`, `county_code`, `town`, `status` (draft/pending/approved/rejected), `is_featured`, `description`, `embedding vector(3072)`.
+- `mobility_vehicle_rates` — pricing tiers: `vehicle_id`, `unit` (hour/day/week/month), `price_kes`, `min_units`, `included_km`, `extra_km_kes`.
+- `mobility_vehicle_images` — `vehicle_id`, `url`, `sort_order`, `alt`.
+- `mobility_availability_blocks` — `vehicle_id`, `start_at`, `end_at`, `reason`, `booking_id`.
+- `mobility_bookings` — `vehicle_id`, `provider_id`, `org_id`, `guest_user_id`, `pickup_at`, `dropoff_at`, `pickup_location`, `dropoff_location`, `driver_option` (self/chauffeur), `total_kes`, `deposit_kes`, `status` (pending/confirmed/in_progress/completed/cancelled), `payment_status`, `payment_ref`. Reuses booking status machinery.
+- `mobility_reviews` — mirrors `marketplace_property_reviews` shape (rating + comment, moderation).
 
-**Granular staff permissions** (new `organization_member_permissions` table)
-- Permission strings: `bookings.read`, `bookings.write`, `bookings.refund`, `pricing.write`, `availability.write`, `reviews.moderate`, `finance.read`, `finance.payout`, `marketing.write`, `guests.pii.read`, `team.invite`, `reports.read`
-- Server-side check: `has_permission(user, org, permission)` — SECURITY DEFINER, evaluates role defaults + explicit grants.
+RLS pattern: public `SELECT` on approved vehicles/providers (safe columns only, contact PII revoked at column grant); org members manage their own fleet via `is_org_member`; guests see their own bookings; admins bypass via `has_role`.
 
-### Deliverables
+Extend `mkt_property_category` — not needed; mobility uses its own enum. But add `mobility` scope to search facets and Planner grounding.
 
-1. **Migration** `rbac_v2`:
-   - Extend `app_role` enum: `super_admin`, `moderator`, `support`.
-   - Create `permission` enum + `organization_member_permissions(org_id, user_id, permission, granted_by, granted_at)`.
-   - Add `role_permission_defaults(role, permission)` seed table for role → default permissions mapping.
-   - `has_permission(_user, _org, _permission)` SECURITY DEFINER function that evaluates defaults ∪ explicit grants ∪ platform-role overrides.
-   - `has_platform_role(_user, _role)` wrapper that treats `super_admin` as satisfying `admin` checks (back-compat).
-   - GRANTS + tighten RLS on the new tables (least privilege — only self-read + admin-manage).
-   - Backfill: existing `admin` → also mark `super_admin`; existing org `owner`/`admin` get all permission defaults.
-   - Extend `audit_logs` triggers on: role changes, permission grants, payout approvals, member removals, security setting changes.
+## 2. Server functions (`src/lib/mobility.functions.ts` + `mobility.server.ts`)
 
-2. **Server-side helpers** (`src/lib/rbac.ts` — replaces `access.ts` and inline `.rpc("has_role")` calls):
-   - `requirePlatformRole(ctx, roles[])`, `requireOrgRole(ctx, orgId, roles[])`, `requirePermission(ctx, orgId, permission)`.
-   - All throw structured `ForbiddenError` and write to `audit_logs` on denial (rate-limited).
-   - Uses the authenticated `context.supabase` (RLS-respecting) — no service role for authz checks.
+All authenticated via `requireSupabaseAuth`, org-scoped via `requireOrgRole`/`requirePermission`:
 
-3. **Refactor sweep** — replace ad-hoc admin checks:
-   - `fraud-ml.functions.ts::assertAdmin` → `requirePlatformRole(ctx, ["admin","super_admin","moderator"])`.
-   - `executive.functions.ts`, `admin-ops.functions.ts`, `finance.functions.ts` payout approval, `subscription.server.ts` → use `requirePlatformRole` / `requirePermission`.
-   - `command-center.functions.ts` guest PII columns → gate behind `guests.pii.read`.
-   - Booking refund/cancel flows in `marketplace.functions.ts` → `requirePermission("bookings.refund")`.
-   - Remove duplicate helpers; keep a single source in `rbac.ts`.
+- Provider CRUD: `upsertProvider`, `getProvider`, `listMyProviders`.
+- Vehicle CRUD: `upsertVehicle` (Zod schema for all listing fields), `submitVehicleForReview`, `listMyVehicles`, `getVehicle`.
+- Rates: `setVehicleRates`.
+- Images: `addVehicleImage`, `reorderVehicleImages`, `deleteVehicleImage`.
+- Availability: `blockVehicleDates`, `unblockVehicleDates`, `getVehicleAvailability`.
+- Public search (server publishable client, `anon` SELECT policy): `searchVehicles({ category?, county?, town?, seats?, transmission?, priceMax?, pickupDate?, dropoffDate?, query? })`, `getPublicVehicle(slug)`.
+- Bookings: `quoteVehicleBooking`, `createVehicleBooking`, `confirmVehicleBooking`, `cancelVehicleBooking`, `listVehicleBookings`.
+- Reviews: `submitVehicleReview`, `moderateVehicleReview`.
+- Analytics: `getProviderAnalytics` (revenue, occupancy, top vehicles, review score).
 
-4. **Client**:
-   - `src/hooks/use-permissions.ts` — reads `workspace-context` + a new `getMyPermissions` server fn.
-   - `dashboard-shell.tsx` — nav gated per permission (Finance items → `finance.read`; Team → `team.invite`; Admin group → platform role tiers, split "Executive HQ / Finance Admin" (super_admin) from "Fraud / CMS" (moderator)).
-   - `<Can permission="…">` component for inline UI gating.
-   - Server-side is authoritative — client hiding is UX only.
+Payments: reuse existing M-Pesa + Paddle server flows — call `finance.server.ts` commission logic (`booking_commissions`) with `source='mobility'`.
 
-5. **Team/settings UI** (`_authenticated/team.tsx`):
-   - Role picker updated with new roles + tooltip descriptions.
-   - Per-member permission matrix (checkbox grid) for `staff`; other roles show read-only default matrix.
-   - Invite dialog gets role + optional initial permissions.
+## 3. Public routes
 
-6. **MFA elevation** — enforce `requireMfa()` for: role changes, permission grants, payout approval, secret rotation, org deletion, member removal at admin+ tier.
+- `src/routes/mobility.index.tsx` — hub landing (categories grid, hero, Plan-with-AI CTA seeded `module=travel, need=transport`).
+- `src/routes/mobility.$category.tsx` — category listing (e.g. `/mobility/safari-4x4`).
+- `src/routes/mobility.v.$slug.tsx` — vehicle detail (gallery, specs, rates, availability calendar, reviews, book CTA).
+- `src/routes/mobility.county.$county.tsx` — county-scoped listings for SEO.
+- Each route with proper `head()` (title/description/og:title/og:description; og:image only on leaf with real vehicle photo).
+- Sitemap: extend `src/routes/sitemap[.]xml.ts` to include approved vehicles.
 
-7. **Audit log surface** — extend `admin.executive.tsx` (Activity feed already there) to filter by category: `authz`, `role_change`, `payout`, `security`; export CSV.
+## 4. Authenticated dashboard routes
 
-8. **Docs** — `docs/RBAC.md` documenting tiers, permissions, and the check matrix; update `docs/EXCELLENCE_AUDIT.md` cross-refs.
+- `src/routes/_authenticated/mobility.tsx` — provider dashboard hub (fleet overview, bookings, revenue KPIs).
+- `src/routes/_authenticated/mobility.fleet.tsx` — vehicle list + add.
+- `src/routes/_authenticated/mobility.fleet.$id.tsx` — edit vehicle (specs, images, rates, availability, pickup/dropoff).
+- `src/routes/_authenticated/mobility.bookings.tsx` — inbound bookings queue.
+- `src/routes/_authenticated/mobility.analytics.tsx` — revenue, occupancy, top vehicles.
+- `src/routes/_authenticated/admin.mobility.tsx` — moderation queue (approve/reject vehicles + providers).
 
-### Technical details
+Nav: add "Mobility" section to `src/components/dashboard-shell.tsx`, gated by a new `mobility.manage` RBAC permission (seeded to `owner`, `enterprise_admin`, `admin`, `manager`).
 
-- **Least privilege on new tables**: `organization_member_permissions` — `SELECT` policy: self (`user_id = auth.uid()`) OR org admin (`has_org_role`); `INSERT/UPDATE/DELETE`: org admin + `has_permission(caller, org, 'team.invite')` + MFA.
-- **Back-compat**: `has_role(_user, 'admin')` continues to return true for both `admin` and `super_admin` so existing RLS policies keep working. Old `access.ts` re-exports from `rbac.ts` with a `@deprecated` JSDoc for gradual code migration.
-- **No breaking DB drops**: no columns removed, no roles removed; enum values only added.
-- **Testing**: extend `tests/security.test.ts` with permission-matrix unit tests and add `tests/rbac.test.ts` covering role→permission resolution + escalation attempts.
+## 5. Integration points
 
-### Out of scope (call out to user)
-- Multi-tenant "enterprise parent org / child branches" tree (would require reshaping `organizations`; propose separately if wanted).
-- Custom user-defined roles beyond the enum + per-member permission overrides (the permission grid already covers this without needing a role-definition UI).
-- SSO group→role mapping (Supabase SAML SSO wiring; add if requested).
+- **Planner AI** (`src/lib/planner.functions.ts`): in `fetchProperties`, also fetch relevant `mobility_vehicles` via a new `fetchMobilityForPlan(query, county, module)`. Extend `PlanSchema` with `recommendedVehicles` (slug list). Update system prompt: "Recommend suitable vehicles alongside accommodation for travel/safari/wedding/business/weekend modules — reference by slug." Enrich response with real vehicle lookups.
+- **Property Intelligence / Recommendations**: emit `recommendation_events` on view/book. Add `recommend_vehicles_for_user` RPC mirroring `recommend_for_user`.
+- **Search**: add a Mobility tab on `src/routes/marketplace.index.tsx` that routes to `mobility.index`. Cross-link on property detail page ("Getting there — vehicles near this property").
+- **Maps**: reuse existing map component; add vehicle pickup markers on `mobility.map` (optional deferred).
+- **Reviews**: reuse `PropertyReviews` shape with a `mobility` variant.
+- **Notifications**: reuse existing booking notification path (guest + provider) keyed on `mobility_bookings`.
+- **Analytics/Executive**: add mobility KPIs to `getExecutiveOverview` (GMV, active vehicles, top providers).
+- **Finance**: commission rules extended to include a `mobility` scope; wire `booking_commissions.source='mobility'`.
+- **AI Ops**: add `mobility.enrichment.agent` (image tagging + embedding backfill) reusing `enrichment-tick.server.ts`.
+- **SEO**: `discover`/`sitemap`/JSON-LD (`Product` + `Vehicle` schema) on vehicle detail.
 
-### Rollout order (single build session)
-1. Migration + RLS + backfill.
-2. `rbac.ts` + refactor server functions.
-3. Client hook + shell nav gating + `<Can>` component.
-4. Team UI permission matrix.
-5. MFA hardening + audit sweep.
-6. Docs + tests.
+## 6. Ordering & delivery
 
-Confirm and I'll ship it — or tell me to drop/adjust any of the tiers, permissions, or out-of-scope items.
+Batches (each a small, verifiable step):
+
+1. Migration (tables, enums, RLS, GRANTs, RPC helpers, permission seed).
+2. Server functions + Zod schemas.
+3. Provider dashboard (fleet CRUD + images + rates + availability).
+4. Public routes (hub, category, detail, county) + SEO.
+5. Booking flow (quote → create → payment → confirm) + reviews.
+6. Planner AI integration (grounding, schema field, UI card for recommended vehicles on `planner.tsx`).
+7. Cross-surface integration (marketplace tab, property detail cross-link, executive KPIs, sitemap, discover).
+8. Admin moderation route + analytics + notifications wiring.
+
+No changes to auto-generated files (`types.ts`, `client.ts`, `routeTree.gen.ts`). Types regenerate after the migration is approved.
+
+## Technical notes
+
+- All server-only helpers live in `mobility.server.ts` (imported inside handlers only).
+- Column-level `REVOKE SELECT` on `mobility_providers.contact_email/phone` from `anon`; expose only through booking flow.
+- `mobility_bookings` guest PII gated by role (guest, provider org roles, admin) — same pattern used for `marketplace_bookings`.
+- Availability collision check enforced by an exclusion constraint on `mobility_availability_blocks` (using `btree_gist` already present) `EXCLUDE USING gist (vehicle_id WITH =, tstzrange(start_at, end_at) WITH &&)`.
+- Extend `sitemap.xml`, `llms.txt`, and JSON-LD.
+
+Ready to start with Batch 1 (migration) on approval.
