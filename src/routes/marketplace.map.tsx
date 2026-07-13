@@ -154,7 +154,7 @@ function MapView() {
   }, [properties, mapsReady]);
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-dvh flex-col">
       <header className="border-b bg-card">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3">
           <Link to="/marketplace" className="text-sm text-muted-foreground hover:text-foreground">

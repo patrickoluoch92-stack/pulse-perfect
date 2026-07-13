@@ -95,7 +95,7 @@ function DiscoverDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <div className="mx-auto max-w-4xl px-6 py-10">
         <Link to="/discover" className="text-sm text-muted-foreground hover:underline">
           ← All discoveries

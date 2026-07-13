@@ -40,7 +40,7 @@ function CountyFacet() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <div className="mx-auto max-w-6xl px-6 py-10">
         <Link to="/discover" className="text-sm text-muted-foreground hover:underline">← All discoveries</Link>
         <h1 className="mt-3 flex items-center gap-2 text-3xl font-semibold tracking-tight">
