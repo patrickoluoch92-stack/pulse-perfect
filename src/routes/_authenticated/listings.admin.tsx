@@ -89,7 +89,7 @@ function AdminPanel() {
   });
 
   if (admin.isLoading) {
-    return <DashboardShell><div className="p-6 text-muted-foreground">Checking access…</div></DashboardShell>;
+    return <DashboardShell><LoadingState label="Checking access…" /></DashboardShell>;
   }
   if (!admin.data?.isAdmin) {
     return (
