@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Landmark, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
 import { authPageMeta } from "@/lib/route-meta";
+import { formatCurrency } from "@/lib/format";
 import {
   adminFinancialOverview, adminListPayouts,
   adminApprovePayout, adminMarkPayoutPaid, adminMarkPayoutFailed,
