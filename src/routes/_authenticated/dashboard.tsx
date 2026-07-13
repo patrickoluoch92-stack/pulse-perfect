@@ -12,6 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { LoadingState, EmptyState } from "@/components/ui/states";
+import { PlanWithAI } from "@/components/plan-with-ai";
+import { formatKES } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -23,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: CommandCenter,
 });
 
-const KES = (v: number) => `KES ${Math.round(v).toLocaleString()}`;
+const KES = (v: number) => formatKES(v);
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
 function CommandCenter() {
