@@ -96,7 +96,7 @@ function DevOpsPage() {
                     <span className="text-xs text-muted-foreground">{new Date(r.started_at).toLocaleString()}</span>
                   </li>
                 ))}
-                {(data?.syncs.recent ?? []).length === 0 && <li className="p-4 text-sm text-muted-foreground">No sync runs.</li>}
+                {(data?.syncs.recent ?? []).length === 0 && !isLoading && <li className="p-4"><EmptyState title="No sync runs" description="Background syncs will appear once triggered." /></li>}
               </ul>
             </CardContent>
           </Card>
