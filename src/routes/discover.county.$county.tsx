@@ -50,9 +50,9 @@ function CountyFacet() {
           Verified and AI-discovered accommodations in this county.
         </p>
 
-        {q.isLoading && <p className="mt-8 text-sm text-muted-foreground">Loading…</p>}
-        {q.data?.rows?.length === 0 && (
-          <p className="mt-8 text-sm text-muted-foreground">No properties found yet — we're still crawling.</p>
+        {q.isLoading && <div className="mt-8"><LoadingState label="Loading discoveries…" /></div>}
+        {!q.isLoading && q.data?.rows?.length === 0 && (
+          <div className="mt-8"><EmptyState title="No properties found yet" description="We're still crawling this county — check back soon." /></div>
         )}
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
