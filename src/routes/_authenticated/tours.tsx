@@ -177,11 +177,13 @@ function PackagesTab({ orgId }: { orgId: string }) {
         <Button size="sm" onClick={openCreate}><Plus className="h-4 w-4" /> New package</Button>
       </div>
 
-      {q.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {q.isLoading && <LoadingState label="Loading packages…" />}
       {q.data && q.data.length === 0 && (
-        <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No packages yet. Create your first tour package to start scheduling departures.
-        </p>
+        <EmptyState
+          title="No packages yet"
+          description="Create your first tour package to start scheduling departures."
+          icon={Ticket}
+        />
       )}
 
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
