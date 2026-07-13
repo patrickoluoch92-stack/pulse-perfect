@@ -48,14 +48,17 @@ function MyBookings() {
         </p>
       </div>
 
-      {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isLoading && <LoadingState label="Loading bookings…" />}
       {!isLoading && data.length === 0 && (
-        <Card className="p-8 text-center">
-          <p className="text-muted-foreground">No bookings yet.</p>
-          <Button asChild className="mt-4">
-            <Link to="/marketplace">Browse marketplace</Link>
-          </Button>
-        </Card>
+        <EmptyState
+          title="No bookings yet"
+          description="Your marketplace stays will appear here once you book."
+          action={
+            <Button asChild>
+              <Link to="/marketplace">Browse marketplace</Link>
+            </Button>
+          }
+        />
       )}
 
       <div className="space-y-3">
