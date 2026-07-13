@@ -16,6 +16,7 @@ import {
 } from "@/lib/revenue-intelligence.functions";
 import { toast } from "sonner";
 import { Sparkles, TrendingUp } from "lucide-react";
+import { formatKES } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/revenue")({
   head: () => ({
