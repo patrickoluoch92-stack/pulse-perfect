@@ -41,6 +41,7 @@ const groups: NavGroup[] = [
       { to: "/housekeeping", label: "Housekeeping", icon: Sprout },
       { to: "/maintenance", label: "Maintenance", icon: Wrench },
       { to: "/tours", label: "Tours", icon: MapPin },
+      { to: "/mobility", label: "Car Hire & Mobility", icon: RouteIcon },
       { to: "/sync", label: "Calendar Sync", icon: CalendarSync, permission: "availability.write" },
       { to: "/incidents", label: "Incidents", icon: ShieldAlert },
     ],

@@ -2529,6 +2529,438 @@ export type Database = {
           },
         ]
       }
+      mobility_availability_blocks: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          end_at: string
+          id: string
+          reason: string | null
+          start_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          end_at: string
+          id?: string
+          reason?: string | null
+          start_at: string
+          vehicle_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          end_at?: string
+          id?: string
+          reason?: string | null
+          start_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_availability_blocks_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobility_bookings: {
+        Row: {
+          created_at: string
+          deposit_kes: number
+          driver_option: Database["public"]["Enums"]["mobility_driver_option"]
+          dropoff_at: string
+          dropoff_location: string | null
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          guest_user_id: string | null
+          id: string
+          notes: string | null
+          org_id: string
+          payment_ref: string | null
+          payment_status: string
+          pickup_at: string
+          pickup_location: string | null
+          provider_id: string
+          status: Database["public"]["Enums"]["mobility_booking_status"]
+          total_kes: number
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          deposit_kes?: number
+          driver_option?: Database["public"]["Enums"]["mobility_driver_option"]
+          dropoff_at: string
+          dropoff_location?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          guest_user_id?: string | null
+          id?: string
+          notes?: string | null
+          org_id: string
+          payment_ref?: string | null
+          payment_status?: string
+          pickup_at: string
+          pickup_location?: string | null
+          provider_id: string
+          status?: Database["public"]["Enums"]["mobility_booking_status"]
+          total_kes: number
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          deposit_kes?: number
+          driver_option?: Database["public"]["Enums"]["mobility_driver_option"]
+          dropoff_at?: string
+          dropoff_location?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          guest_user_id?: string | null
+          id?: string
+          notes?: string | null
+          org_id?: string
+          payment_ref?: string | null
+          payment_status?: string
+          pickup_at?: string
+          pickup_location?: string | null
+          provider_id?: string
+          status?: Database["public"]["Enums"]["mobility_booking_status"]
+          total_kes?: number
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_bookings_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobility_bookings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobility_bookings_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobility_providers: {
+        Row: {
+          bio: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          org_id: string
+          rating_avg: number | null
+          rating_count: number
+          service_areas: Json
+          slug: string
+          updated_at: string
+          verification_status: Database["public"]["Enums"]["mobility_status"]
+          website: string | null
+        }
+        Insert: {
+          bio?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          org_id: string
+          rating_avg?: number | null
+          rating_count?: number
+          service_areas?: Json
+          slug: string
+          updated_at?: string
+          verification_status?: Database["public"]["Enums"]["mobility_status"]
+          website?: string | null
+        }
+        Update: {
+          bio?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          org_id?: string
+          rating_avg?: number | null
+          rating_count?: number
+          service_areas?: Json
+          slug?: string
+          updated_at?: string
+          verification_status?: Database["public"]["Enums"]["mobility_status"]
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_providers_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobility_reviews: {
+        Row: {
+          author_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          provider_id: string
+          rating: number
+          status: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          author_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          provider_id: string
+          rating: number
+          status?: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          author_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          provider_id?: string
+          rating?: number
+          status?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_reviews_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobility_reviews_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobility_vehicle_images: {
+        Row: {
+          alt: string | null
+          created_at: string
+          id: string
+          sort_order: number
+          url: string
+          vehicle_id: string
+        }
+        Insert: {
+          alt?: string | null
+          created_at?: string
+          id?: string
+          sort_order?: number
+          url: string
+          vehicle_id: string
+        }
+        Update: {
+          alt?: string | null
+          created_at?: string
+          id?: string
+          sort_order?: number
+          url?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_vehicle_images_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobility_vehicle_rates: {
+        Row: {
+          created_at: string
+          extra_km_kes: number | null
+          id: string
+          included_km: number | null
+          min_units: number
+          price_kes: number
+          unit: Database["public"]["Enums"]["mobility_rate_unit"]
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          extra_km_kes?: number | null
+          id?: string
+          included_km?: number | null
+          min_units?: number
+          price_kes: number
+          unit: Database["public"]["Enums"]["mobility_rate_unit"]
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          extra_km_kes?: number | null
+          id?: string
+          included_km?: number | null
+          min_units?: number
+          price_kes?: number
+          unit?: Database["public"]["Enums"]["mobility_rate_unit"]
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_vehicle_rates_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobility_vehicles: {
+        Row: {
+          category: Database["public"]["Enums"]["mobility_category"]
+          county_code: string | null
+          created_at: string
+          description: string | null
+          dropoff_locations: Json
+          embedding: string | null
+          fuel_type: string | null
+          has_ac: boolean
+          has_gps: boolean
+          id: string
+          insurance_info: Json
+          is_featured: boolean
+          luggage: number | null
+          make: string
+          model: string
+          org_id: string
+          pickup_locations: Json
+          provider_id: string
+          rating_avg: number | null
+          rating_count: number
+          seats: number | null
+          security_deposit_kes: number | null
+          slug: string
+          status: Database["public"]["Enums"]["mobility_status"]
+          town: string | null
+          transmission: string | null
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["mobility_category"]
+          county_code?: string | null
+          created_at?: string
+          description?: string | null
+          dropoff_locations?: Json
+          embedding?: string | null
+          fuel_type?: string | null
+          has_ac?: boolean
+          has_gps?: boolean
+          id?: string
+          insurance_info?: Json
+          is_featured?: boolean
+          luggage?: number | null
+          make: string
+          model: string
+          org_id: string
+          pickup_locations?: Json
+          provider_id: string
+          rating_avg?: number | null
+          rating_count?: number
+          seats?: number | null
+          security_deposit_kes?: number | null
+          slug: string
+          status?: Database["public"]["Enums"]["mobility_status"]
+          town?: string | null
+          transmission?: string | null
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["mobility_category"]
+          county_code?: string | null
+          created_at?: string
+          description?: string | null
+          dropoff_locations?: Json
+          embedding?: string | null
+          fuel_type?: string | null
+          has_ac?: boolean
+          has_gps?: boolean
+          id?: string
+          insurance_info?: Json
+          is_featured?: boolean
+          luggage?: number | null
+          make?: string
+          model?: string
+          org_id?: string
+          pickup_locations?: Json
+          provider_id?: string
+          rating_avg?: number | null
+          rating_count?: number
+          seats?: number | null
+          security_deposit_kes?: number | null
+          slug?: string
+          status?: Database["public"]["Enums"]["mobility_status"]
+          town?: string | null
+          transmission?: string | null
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_vehicles_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobility_vehicles_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mpesa_transactions: {
         Row: {
           amount: number | null
@@ -4604,6 +5036,35 @@ export type Database = {
         | "beach_plot"
         | "lakefront_plot"
         | "riverfront_plot"
+      mobility_booking_status:
+        | "pending"
+        | "confirmed"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+        | "refunded"
+      mobility_category:
+        | "self_drive"
+        | "chauffeur"
+        | "airport_transfer"
+        | "executive"
+        | "tour_van"
+        | "safari_4x4"
+        | "luxury"
+        | "wedding"
+        | "shuttle"
+        | "bus"
+        | "motorcycle"
+        | "bicycle"
+        | "boat"
+      mobility_driver_option: "self" | "chauffeur"
+      mobility_rate_unit: "hour" | "day" | "week" | "month"
+      mobility_status:
+        | "draft"
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "archived"
       org_role:
         | "owner"
         | "admin"
@@ -4872,6 +5333,32 @@ export const Constants = {
         "lakefront_plot",
         "riverfront_plot",
       ],
+      mobility_booking_status: [
+        "pending",
+        "confirmed",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "refunded",
+      ],
+      mobility_category: [
+        "self_drive",
+        "chauffeur",
+        "airport_transfer",
+        "executive",
+        "tour_van",
+        "safari_4x4",
+        "luxury",
+        "wedding",
+        "shuttle",
+        "bus",
+        "motorcycle",
+        "bicycle",
+        "boat",
+      ],
+      mobility_driver_option: ["self", "chauffeur"],
+      mobility_rate_unit: ["hour", "day", "week", "month"],
+      mobility_status: ["draft", "pending", "approved", "rejected", "archived"],
       org_role: [
         "owner",
         "admin",

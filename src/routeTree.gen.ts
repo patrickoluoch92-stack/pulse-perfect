@@ -17,9 +17,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RentalsIndexRouteImport } from './routes/rentals.index'
+import { Route as MobilityIndexRouteImport } from './routes/mobility.index'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
 import { Route as DiscoverIndexRouteImport } from './routes/discover.index'
 import { Route as RentalsChildRouteImport } from './routes/rentals.$child'
+import { Route as MobilityCategoryRouteImport } from './routes/mobility.$category'
 import { Route as MarketplaceMapRouteImport } from './routes/marketplace.map'
 import { Route as MarketplaceCountyRouteImport } from './routes/marketplace.$county'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
@@ -122,6 +124,11 @@ const RentalsIndexRoute = RentalsIndexRouteImport.update({
   path: '/rentals/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MobilityIndexRoute = MobilityIndexRouteImport.update({
+  id: '/mobility/',
+  path: '/mobility/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketplaceIndexRoute = MarketplaceIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -135,6 +142,11 @@ const DiscoverIndexRoute = DiscoverIndexRouteImport.update({
 const RentalsChildRoute = RentalsChildRouteImport.update({
   id: '/rentals/$child',
   path: '/rentals/$child',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MobilityCategoryRoute = MobilityCategoryRouteImport.update({
+  id: '/mobility/$category',
+  path: '/mobility/$category',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketplaceMapRoute = MarketplaceMapRouteImport.update({
@@ -511,9 +523,11 @@ export interface FileRoutesByFullPath {
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/mobility/$category': typeof MobilityCategoryRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
+  '/mobility/': typeof MobilityIndexRoute
   '/rentals/': typeof RentalsIndexRoute
   '/admin/ai-ops': typeof AuthenticatedAdminAiOpsRoute
   '/admin/cms': typeof AuthenticatedAdminCmsRoute
@@ -583,9 +597,11 @@ export interface FileRoutesByTo {
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/mobility/$category': typeof MobilityCategoryRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
+  '/mobility': typeof MobilityIndexRoute
   '/rentals': typeof RentalsIndexRoute
   '/admin/ai-ops': typeof AuthenticatedAdminAiOpsRoute
   '/admin/cms': typeof AuthenticatedAdminCmsRoute
@@ -659,9 +675,11 @@ export interface FileRoutesById {
   '/invite/$token': typeof InviteTokenRoute
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
+  '/mobility/$category': typeof MobilityCategoryRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
+  '/mobility/': typeof MobilityIndexRoute
   '/rentals/': typeof RentalsIndexRoute
   '/_authenticated/admin/ai-ops': typeof AuthenticatedAdminAiOpsRoute
   '/_authenticated/admin/cms': typeof AuthenticatedAdminCmsRoute
@@ -735,9 +753,11 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/mobility/$category'
     | '/rentals/$child'
     | '/discover/'
     | '/marketplace/'
+    | '/mobility/'
     | '/rentals/'
     | '/admin/ai-ops'
     | '/admin/cms'
@@ -807,9 +827,11 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/mobility/$category'
     | '/rentals/$child'
     | '/discover'
     | '/marketplace'
+    | '/mobility'
     | '/rentals'
     | '/admin/ai-ops'
     | '/admin/cms'
@@ -882,9 +904,11 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/marketplace/$county'
     | '/marketplace/map'
+    | '/mobility/$category'
     | '/rentals/$child'
     | '/discover/'
     | '/marketplace/'
+    | '/mobility/'
     | '/rentals/'
     | '/_authenticated/admin/ai-ops'
     | '/_authenticated/admin/cms'
@@ -934,8 +958,10 @@ export interface RootRouteChildren {
   DiscoverSlugRoute: typeof DiscoverSlugRoute
   GuidesHotelSeoRoute: typeof GuidesHotelSeoRoute
   InviteTokenRoute: typeof InviteTokenRoute
+  MobilityCategoryRoute: typeof MobilityCategoryRoute
   RentalsChildRoute: typeof RentalsChildRoute
   DiscoverIndexRoute: typeof DiscoverIndexRoute
+  MobilityIndexRoute: typeof MobilityIndexRoute
   RentalsIndexRoute: typeof RentalsIndexRoute
   ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
   DiscoverCountyCountyRoute: typeof DiscoverCountyCountyRoute
@@ -1011,6 +1037,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RentalsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mobility/': {
+      id: '/mobility/'
+      path: '/mobility'
+      fullPath: '/mobility/'
+      preLoaderRoute: typeof MobilityIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketplace/': {
       id: '/marketplace/'
       path: '/'
@@ -1030,6 +1063,13 @@ declare module '@tanstack/react-router' {
       path: '/rentals/$child'
       fullPath: '/rentals/$child'
       preLoaderRoute: typeof RentalsChildRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mobility/$category': {
+      id: '/mobility/$category'
+      path: '/mobility/$category'
+      fullPath: '/mobility/$category'
+      preLoaderRoute: typeof MobilityCategoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marketplace/map': {
@@ -1652,8 +1692,10 @@ const rootRouteChildren: RootRouteChildren = {
   DiscoverSlugRoute: DiscoverSlugRoute,
   GuidesHotelSeoRoute: GuidesHotelSeoRoute,
   InviteTokenRoute: InviteTokenRoute,
+  MobilityCategoryRoute: MobilityCategoryRoute,
   RentalsChildRoute: RentalsChildRoute,
   DiscoverIndexRoute: DiscoverIndexRoute,
+  MobilityIndexRoute: MobilityIndexRoute,
   RentalsIndexRoute: RentalsIndexRoute,
   ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
   DiscoverCountyCountyRoute: DiscoverCountyCountyRoute,
@@ -1674,13 +1716,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

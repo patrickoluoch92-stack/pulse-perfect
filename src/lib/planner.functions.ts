@@ -90,6 +90,7 @@ const PlanSchema = {
         },
       },
       recommendedProperties: { type: "array", items: { type: "string" } },
+      recommendedVehicles: { type: "array", items: { type: "string" } },
       savingsTips: { type: "array", items: { type: "string" } },
       alternatives: { type: "array", items: { type: "string" } },
       scores: {
@@ -138,14 +139,21 @@ export const generatePlan = createServerFn({ method: "POST" })
 
     messages.push({ role: "user", content: data.prompt });
 
-    // Ground with HostPulse properties
-    const props = await fetchProperties(`${data.module} ${data.prompt}`, data.county);
+    // Ground with HostPulse properties + mobility vehicles
+    const { fetchMobilityForPlan } = await import("@/lib/mobility.functions");
+    const [props, vehicles] = await Promise.all([
+      fetchProperties(`${data.module} ${data.prompt}`, data.county),
+      fetchMobilityForPlan(`${data.module} ${data.prompt}`, data.county, 4).catch(() => []),
+    ]);
     const grounding = props
       .map((p: any) => `- ${p.name} (${p.category}) — ${p.town ?? ""}, ${p.county_code ?? ""} [slug: ${p.slug}]`)
       .join("\n");
+    const vehicleGrounding = (vehicles as any[])
+      .map((v) => `- ${v.make} ${v.model} (${v.category}, ${v.seats ?? "?"} seats) — ${v.town ?? ""}, ${v.county_code ?? ""} [slug: ${v.slug}]`)
+      .join("\n");
 
-    const system = `You are HostPulse Planner AI, a Kenyan travel, accommodation, rental, and event planning assistant. Currency: KES. Module: ${data.module} — ${MODULE_HINTS[data.module]}
-Always produce a realistic budget breakdown, actionable itinerary items, and clear savings tips. Reference HostPulse properties by slug when relevant. Assume Kenyan cost norms. Keep tone warm, practical, concise.`;
+    const system = `You are HostPulse Planner AI, a Kenyan travel, accommodation, rental, mobility, and event planning assistant. Currency: KES. Module: ${data.module} — ${MODULE_HINTS[data.module]}
+Always produce a realistic budget breakdown, actionable itinerary items, and clear savings tips. Reference HostPulse properties AND vehicles by slug when relevant. Include transport in every travel/safari/wedding/business/weekend plan. Assume Kenyan cost norms. Keep tone warm, practical, concise.`;
 
     const userMsg = `User request: ${data.prompt}
 ${data.county ? `Preferred county: ${data.county}` : ""}
@@ -154,7 +162,10 @@ ${Object.keys(existingInputs).length ? `Known preferences: ${JSON.stringify(exis
 Relevant HostPulse properties:
 ${grounding || "(none matched — recommend generic categories)"}
 
-Return a complete plan JSON. Set scores 0-100. Use KES amounts.`;
+Available HostPulse mobility (car hire / transport):
+${vehicleGrounding || "(none matched — suggest generic categories: self-drive, chauffeur, airport transfer, safari 4x4, shuttle)"}
+
+Return a complete plan JSON. Populate recommendedVehicles with vehicle slugs when a trip needs transport. Set scores 0-100. Use KES amounts.`;
 
     const plan = await aiJSON<any>({
       system,
@@ -190,7 +201,7 @@ Return a complete plan JSON. Set scores 0-100. Use KES amounts.`;
       sessionId = ins!.id;
     }
 
-    // Enrich recommended properties with lookup rows
+    // Enrich recommended properties + vehicles
     const slugs: string[] = Array.isArray(plan.recommendedProperties)
       ? plan.recommendedProperties.slice(0, 10)
       : [];
@@ -203,7 +214,19 @@ Return a complete plan JSON. Set scores 0-100. Use KES amounts.`;
       recProps = rows ?? [];
     }
 
-    return { sessionId, plan, messages, recommendedProperties: recProps };
+    const vehicleSlugs: string[] = Array.isArray(plan.recommendedVehicles)
+      ? plan.recommendedVehicles.slice(0, 8)
+      : [];
+    let recVehicles: any[] = [];
+    if (vehicleSlugs.length) {
+      const { data: rows } = await (publicSb() as any)
+        .from("mobility_vehicles")
+        .select("id, slug, make, model, category, seats, transmission, town, county_code")
+        .in("slug", vehicleSlugs);
+      recVehicles = rows ?? [];
+    }
+
+    return { sessionId, plan, messages, recommendedProperties: recProps, recommendedVehicles: recVehicles };
   });
 
 // ---------- Chat continuation (free-form Q&A on a plan) ----------
