@@ -92,7 +92,7 @@ function CmsPage() {
                 <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</span>
               </li>
             ))}
-            {(data?.recentReviews ?? []).length === 0 && <li className="p-4 text-sm text-muted-foreground">No reviews.</li>}
+            {(data?.recentReviews ?? []).length === 0 && !isLoading && <li className="p-4"><EmptyState title="No reviews yet" description="Guest reviews will appear here once submitted." /></li>}
           </ul>
         </CardContent>
       </Card>
