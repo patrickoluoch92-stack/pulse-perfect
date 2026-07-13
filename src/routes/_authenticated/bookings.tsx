@@ -7,6 +7,7 @@ import { listMyBookings, setBookingStatus } from "@/lib/marketplace-extra.functi
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/bookings")({
   component: MyBookings,
