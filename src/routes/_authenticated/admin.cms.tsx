@@ -62,7 +62,7 @@ function CmsPage() {
                   </span>
                 </li>
               ))}
-              {(data?.sources ?? []).length === 0 && <li className="p-4 text-sm text-muted-foreground">No sources configured.</li>}
+              {(data?.sources ?? []).length === 0 && !isLoading && <li className="p-4"><EmptyState title="No sources configured" description="Add a discovery source to start crawling listings." /></li>}
             </ul>
           </CardContent>
         </Card>
