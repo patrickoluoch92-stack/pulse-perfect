@@ -28,6 +28,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
