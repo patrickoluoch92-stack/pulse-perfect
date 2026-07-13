@@ -67,7 +67,7 @@ function PlansAdmin() {
                   {!p.active && <span className="text-xs text-destructive">inactive</span>}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  KES {p.price_monthly_kes.toLocaleString()}/mo · KES {p.price_yearly_kes.toLocaleString()}/yr
+                  {formatKES(p.price_monthly_kes)}/mo · {formatKES(p.price_yearly_kes)}/yr
                   {" · "}Properties: {p.property_limit ?? "∞"} · Team: {p.team_member_limit ?? "∞"}
                 </div>
               </div>
