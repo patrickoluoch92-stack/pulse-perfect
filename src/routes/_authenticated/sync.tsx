@@ -25,6 +25,7 @@ import {
 
 
 import { Button } from "@/components/ui/button";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -979,9 +980,9 @@ function SyncPage() {
                 )}
               </div>
             </div>
-            {deliveries.isLoading && <p className="text-xs text-muted-foreground">Loading…</p>}
+            {deliveries.isLoading && <LoadingState label="Loading deliveries…" />}
             {deliveries.data && deliveries.data.rows.length === 0 && (
-              <p className="rounded-lg border border-dashed p-4 text-center text-xs text-muted-foreground">No deliveries yet.</p>
+              <EmptyState title="No deliveries yet" />
             )}
             {deliveries.data && deliveries.data.rows.length > 0 && (
               <ul className="divide-y rounded-lg border text-sm">
@@ -1343,9 +1344,9 @@ function SyncPage() {
             <DialogDescription>{auditFor?.title}</DialogDescription>
           </DialogHeader>
           <div className="max-h-[60vh] space-y-2 overflow-y-auto">
-            {audit.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+            {audit.isLoading && <LoadingState label="Loading audit trail…" />}
             {audit.data && audit.data.length === 0 && (
-              <p className="text-sm text-muted-foreground">No audit entries yet.</p>
+              <EmptyState title="No audit entries yet" />
             )}
             <ul className="divide-y">
               {(audit.data ?? []).map((a) => (
