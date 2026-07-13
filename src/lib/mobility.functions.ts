@@ -64,6 +64,23 @@ const ProviderInput = z.object({
   contactPhone: z.string().max(40).optional(),
   website: z.string().url().optional(),
   serviceAreas: z.array(z.string()).max(50).optional(),
+  businessRegNumber: z.string().max(80).optional(),
+  licenseNumber: z.string().max(80).optional(),
+  taxPin: z.string().max(40).optional(),
+  address: z.string().max(300).optional(),
+  countyCode: z.string().max(10).optional(),
+  town: z.string().max(80).optional(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+  operatingHours: z.record(z.string(), z.any()).optional(),
+  emergencyContact: z.string().max(80).optional(),
+  socialLinks: z.record(z.string(), z.string()).optional(),
+  policies: z.string().max(6000).optional(),
+  terms: z.string().max(6000).optional(),
+  verificationDocs: z.array(z.object({
+    label: z.string().max(120),
+    url: z.string().url(),
+  })).max(20).optional(),
 });
 
 export const upsertMobilityProvider = createServerFn({ method: "POST" })
@@ -80,6 +97,20 @@ export const upsertMobilityProvider = createServerFn({ method: "POST" })
       contact_phone: data.contactPhone ?? null,
       website: data.website ?? null,
       service_areas: data.serviceAreas ?? [],
+      business_reg_number: data.businessRegNumber ?? null,
+      license_number: data.licenseNumber ?? null,
+      tax_pin: data.taxPin ?? null,
+      address: data.address ?? null,
+      county_code: data.countyCode ?? null,
+      town: data.town ?? null,
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
+      operating_hours: data.operatingHours ?? {},
+      emergency_contact: data.emergencyContact ?? null,
+      social_links: data.socialLinks ?? {},
+      policies: data.policies ?? null,
+      terms: data.terms ?? null,
+      verification_docs: data.verificationDocs ?? [],
     };
     if (data.id) {
       const { data: row, error } = await sb.from("mobility_providers")
@@ -103,6 +134,17 @@ export const listMyMobilityProviders = createServerFn({ method: "GET" })
     return { providers: data ?? [] };
   });
 
+export const submitMobilityProviderForVerification = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const { error } = await sb.from("mobility_providers")
+      .update({ verification_status: "pending" }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 // ---------- VEHICLE ----------
 const VehicleInput = z.object({
   id: z.string().uuid().optional(),
@@ -118,6 +160,19 @@ const VehicleInput = z.object({
   luggage: z.number().int().min(0).max(30).optional(),
   hasAc: z.boolean().optional(),
   hasGps: z.boolean().optional(),
+  hasBluetooth: z.boolean().optional(),
+  hasChildSeat: z.boolean().optional(),
+  driveType: z.enum(["2wd", "4wd", "awd"]).optional(),
+  engineSize: z.string().max(20).optional(),
+  doors: z.number().int().min(1).max(8).optional(),
+  features: z.array(z.string().max(60)).max(30).optional(),
+  accessibility: z.array(z.string().max(60)).max(10).optional(),
+  mileagePolicy: z.string().max(400).optional(),
+  minDriverAge: z.number().int().min(16).max(80).optional(),
+  licenseRequirements: z.string().max(400).optional(),
+  fuelPolicy: z.string().max(400).optional(),
+  registrationPlate: z.string().max(20).optional(),
+  mainImageUrl: z.string().url().optional(),
   insuranceInfo: z.record(z.string(), z.any()).optional(),
   securityDepositKes: z.number().nonnegative().optional(),
   pickupLocations: z.array(z.string()).max(20).optional(),
@@ -145,6 +200,19 @@ export const upsertMobilityVehicle = createServerFn({ method: "POST" })
       luggage: data.luggage ?? null,
       has_ac: data.hasAc ?? false,
       has_gps: data.hasGps ?? false,
+      has_bluetooth: data.hasBluetooth ?? false,
+      has_child_seat: data.hasChildSeat ?? false,
+      drive_type: data.driveType ?? null,
+      engine_size: data.engineSize ?? null,
+      doors: data.doors ?? null,
+      features: data.features ?? [],
+      accessibility: data.accessibility ?? [],
+      mileage_policy: data.mileagePolicy ?? null,
+      min_driver_age: data.minDriverAge ?? null,
+      license_requirements: data.licenseRequirements ?? null,
+      fuel_policy: data.fuelPolicy ?? null,
+      registration_plate: data.registrationPlate ?? null,
+      main_image_url: data.mainImageUrl ?? null,
       insurance_info: data.insuranceInfo ?? {},
       security_deposit_kes: data.securityDepositKes ?? null,
       pickup_locations: data.pickupLocations ?? [],
@@ -194,17 +262,19 @@ export const getMyMobilityVehicle = createServerFn({ method: "POST" })
   .inputValidator((v: unknown) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const [vehicle, rates, images, blocks] = await Promise.all([
+    const [vehicle, rates, images, blocks, seasonal] = await Promise.all([
       sb.from("mobility_vehicles").select("*").eq("id", data.id).maybeSingle(),
       sb.from("mobility_vehicle_rates").select("*").eq("vehicle_id", data.id).order("unit"),
       sb.from("mobility_vehicle_images").select("*").eq("vehicle_id", data.id).order("sort_order"),
       sb.from("mobility_availability_blocks").select("*").eq("vehicle_id", data.id).order("start_at"),
+      sb.from("mobility_seasonal_rates").select("*").eq("vehicle_id", data.id).order("starts_on"),
     ]);
     return {
       vehicle: vehicle.data,
       rates: rates.data ?? [],
       images: images.data ?? [],
       blocks: blocks.data ?? [],
+      seasonalRates: seasonal.data ?? [],
     };
   });
 
@@ -239,6 +309,52 @@ export const setMobilityVehicleRates = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
+// ---------- SEASONAL / PROMOTIONAL RATES ----------
+const SeasonalRateInput = z.object({
+  vehicleId: z.string().uuid(),
+  label: z.string().min(1).max(120),
+  startsOn: z.string(),
+  endsOn: z.string(),
+  unit: z.enum(["hour", "day", "week", "month"]),
+  priceKes: z.number().nonnegative(),
+  promoCode: z.string().max(40).optional(),
+});
+
+export const upsertMobilitySeasonalRate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => SeasonalRateInput.extend({ id: z.string().uuid().optional() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const payload = {
+      vehicle_id: data.vehicleId,
+      label: data.label,
+      starts_on: data.startsOn,
+      ends_on: data.endsOn,
+      unit: data.unit,
+      price_kes: data.priceKes,
+      promo_code: data.promoCode ?? null,
+    };
+    if (data.id) {
+      const { error } = await sb.from("mobility_seasonal_rates").update(payload).eq("id", data.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await sb.from("mobility_seasonal_rates").insert(payload);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+export const deleteMobilitySeasonalRate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    await sb.from("mobility_seasonal_rates").delete().eq("id", data.id);
+    return { ok: true };
+  });
+
+
 
 // ---------- IMAGES ----------
 export const addMobilityVehicleImage = createServerFn({ method: "POST" })

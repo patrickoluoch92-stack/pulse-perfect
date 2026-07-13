@@ -2663,54 +2663,105 @@ export type Database = {
       }
       mobility_providers: {
         Row: {
+          address: string | null
           bio: string | null
+          business_reg_number: string | null
           contact_email: string | null
           contact_phone: string | null
+          county_code: string | null
           created_at: string
+          emergency_contact: string | null
           id: string
+          latitude: number | null
+          license_number: string | null
           logo_url: string | null
+          longitude: number | null
           name: string
+          operating_hours: Json | null
           org_id: string
+          policies: string | null
           rating_avg: number | null
           rating_count: number
+          rejection_reason: string | null
           service_areas: Json
           slug: string
+          social_links: Json | null
+          submitted_at: string | null
+          tax_pin: string | null
+          terms: string | null
+          town: string | null
           updated_at: string
+          verification_docs: Json | null
           verification_status: Database["public"]["Enums"]["mobility_status"]
+          verified_at: string | null
           website: string | null
         }
         Insert: {
+          address?: string | null
           bio?: string | null
+          business_reg_number?: string | null
           contact_email?: string | null
           contact_phone?: string | null
+          county_code?: string | null
           created_at?: string
+          emergency_contact?: string | null
           id?: string
+          latitude?: number | null
+          license_number?: string | null
           logo_url?: string | null
+          longitude?: number | null
           name: string
+          operating_hours?: Json | null
           org_id: string
+          policies?: string | null
           rating_avg?: number | null
           rating_count?: number
+          rejection_reason?: string | null
           service_areas?: Json
           slug: string
+          social_links?: Json | null
+          submitted_at?: string | null
+          tax_pin?: string | null
+          terms?: string | null
+          town?: string | null
           updated_at?: string
+          verification_docs?: Json | null
           verification_status?: Database["public"]["Enums"]["mobility_status"]
+          verified_at?: string | null
           website?: string | null
         }
         Update: {
+          address?: string | null
           bio?: string | null
+          business_reg_number?: string | null
           contact_email?: string | null
           contact_phone?: string | null
+          county_code?: string | null
           created_at?: string
+          emergency_contact?: string | null
           id?: string
+          latitude?: number | null
+          license_number?: string | null
           logo_url?: string | null
+          longitude?: number | null
           name?: string
+          operating_hours?: Json | null
           org_id?: string
+          policies?: string | null
           rating_avg?: number | null
           rating_count?: number
+          rejection_reason?: string | null
           service_areas?: Json
           slug?: string
+          social_links?: Json | null
+          submitted_at?: string | null
+          tax_pin?: string | null
+          terms?: string | null
+          town?: string | null
           updated_at?: string
+          verification_docs?: Json | null
           verification_status?: Database["public"]["Enums"]["mobility_status"]
+          verified_at?: string | null
           website?: string | null
         }
         Relationships: [
@@ -2767,6 +2818,53 @@ export type Database = {
           },
           {
             foreignKeyName: "mobility_reviews_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobility_seasonal_rates: {
+        Row: {
+          created_at: string
+          ends_on: string
+          id: string
+          label: string
+          price_kes: number
+          promo_code: string | null
+          starts_on: string
+          unit: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          ends_on: string
+          id?: string
+          label: string
+          price_kes: number
+          promo_code?: string | null
+          starts_on: string
+          unit: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          ends_on?: string
+          id?: string
+          label?: string
+          price_kes?: number
+          promo_code?: string | null
+          starts_on?: string
+          unit?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_seasonal_rates_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "mobility_vehicles"
@@ -2855,26 +2953,39 @@ export type Database = {
       }
       mobility_vehicles: {
         Row: {
+          accessibility: Json | null
           category: Database["public"]["Enums"]["mobility_category"]
           county_code: string | null
           created_at: string
           description: string | null
+          doors: number | null
+          drive_type: string | null
           dropoff_locations: Json
           embedding: string | null
+          engine_size: string | null
+          features: Json | null
+          fuel_policy: string | null
           fuel_type: string | null
           has_ac: boolean
+          has_bluetooth: boolean | null
+          has_child_seat: boolean | null
           has_gps: boolean
           id: string
           insurance_info: Json
           is_featured: boolean
+          license_requirements: string | null
           luggage: number | null
+          main_image_url: string | null
           make: string
+          mileage_policy: string | null
+          min_driver_age: number | null
           model: string
           org_id: string
           pickup_locations: Json
           provider_id: string
           rating_avg: number | null
           rating_count: number
+          registration_plate: string | null
           seats: number | null
           security_deposit_kes: number | null
           slug: string
@@ -2885,26 +2996,39 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          accessibility?: Json | null
           category: Database["public"]["Enums"]["mobility_category"]
           county_code?: string | null
           created_at?: string
           description?: string | null
+          doors?: number | null
+          drive_type?: string | null
           dropoff_locations?: Json
           embedding?: string | null
+          engine_size?: string | null
+          features?: Json | null
+          fuel_policy?: string | null
           fuel_type?: string | null
           has_ac?: boolean
+          has_bluetooth?: boolean | null
+          has_child_seat?: boolean | null
           has_gps?: boolean
           id?: string
           insurance_info?: Json
           is_featured?: boolean
+          license_requirements?: string | null
           luggage?: number | null
+          main_image_url?: string | null
           make: string
+          mileage_policy?: string | null
+          min_driver_age?: number | null
           model: string
           org_id: string
           pickup_locations?: Json
           provider_id: string
           rating_avg?: number | null
           rating_count?: number
+          registration_plate?: string | null
           seats?: number | null
           security_deposit_kes?: number | null
           slug: string
@@ -2915,26 +3039,39 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          accessibility?: Json | null
           category?: Database["public"]["Enums"]["mobility_category"]
           county_code?: string | null
           created_at?: string
           description?: string | null
+          doors?: number | null
+          drive_type?: string | null
           dropoff_locations?: Json
           embedding?: string | null
+          engine_size?: string | null
+          features?: Json | null
+          fuel_policy?: string | null
           fuel_type?: string | null
           has_ac?: boolean
+          has_bluetooth?: boolean | null
+          has_child_seat?: boolean | null
           has_gps?: boolean
           id?: string
           insurance_info?: Json
           is_featured?: boolean
+          license_requirements?: string | null
           luggage?: number | null
+          main_image_url?: string | null
           make?: string
+          mileage_policy?: string | null
+          min_driver_age?: number | null
           model?: string
           org_id?: string
           pickup_locations?: Json
           provider_id?: string
           rating_avg?: number | null
           rating_count?: number
+          registration_plate?: string | null
           seats?: number | null
           security_deposit_kes?: number | null
           slug?: string
