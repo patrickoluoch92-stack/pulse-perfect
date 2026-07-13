@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
+import { formatCurrency } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/wallet")({
   head: () => ({ meta: authPageMeta({
@@ -27,9 +28,7 @@ export const Route = createFileRoute("/_authenticated/wallet")({
   component: WalletPage,
 });
 
-function fmt(n: number, currency = "KES") {
-  return new Intl.NumberFormat("en-KE", { style: "currency", currency, maximumFractionDigits: 0 }).format(Number(n || 0));
-}
+const fmt = (n: number | null | undefined, currency = "KES") => formatCurrency(n, currency);
 
 function WalletPage() {
   const qc = useQueryClient();

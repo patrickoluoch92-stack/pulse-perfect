@@ -16,6 +16,7 @@ import {
 } from "@/lib/revenue-intelligence.functions";
 import { toast } from "sonner";
 import { Sparkles, TrendingUp } from "lucide-react";
+import { formatKES } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/revenue")({
   head: () => ({
@@ -140,8 +141,8 @@ function RevenuePage() {
                     {pricing.data.suggestions.map((s) => (
                       <tr key={s.date} className="border-t">
                         <td className="p-2">{s.date}</td>
-                        <td className="p-2 text-right">{s.baseRate.toLocaleString()}</td>
-                        <td className="p-2 text-right font-medium">{s.suggestedRate.toLocaleString()}</td>
+                        <td className="p-2 text-right">{formatKES(s.baseRate)}</td>
+                        <td className="p-2 text-right font-medium">{formatKES(s.suggestedRate)}</td>
                         <td className="p-2 text-muted-foreground">{s.reason}</td>
                       </tr>
                     ))}
