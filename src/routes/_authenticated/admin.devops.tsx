@@ -38,7 +38,7 @@ function DevOpsPage() {
         </Badge>
       </header>
 
-      {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isLoading && <LoadingState />}
 
       <section className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Errors (7d)</CardTitle></CardHeader>
