@@ -1344,9 +1344,9 @@ function SyncPage() {
             <DialogDescription>{auditFor?.title}</DialogDescription>
           </DialogHeader>
           <div className="max-h-[60vh] space-y-2 overflow-y-auto">
-            {audit.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+            {audit.isLoading && <LoadingState label="Loading audit trail…" />}
             {audit.data && audit.data.length === 0 && (
-              <p className="text-sm text-muted-foreground">No audit entries yet.</p>
+              <EmptyState title="No audit entries yet" />
             )}
             <ul className="divide-y">
               {(audit.data ?? []).map((a) => (
