@@ -4,7 +4,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { hasOrgRole } from "@/lib/access";
+import { hasOrgRole, isPlatformAdmin } from "@/lib/access";
 
 const input = z.object({ orgId: z.string().uuid() });
 
