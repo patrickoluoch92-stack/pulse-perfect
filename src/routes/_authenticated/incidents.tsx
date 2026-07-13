@@ -14,6 +14,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { LoadingState } from "@/components/ui/states";
 import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
@@ -188,6 +189,13 @@ function IncidentsPage() {
                 </TableCell>
               </TableRow>
             ))}
+            {query.isLoading && rows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="py-8">
+                  <LoadingState label="Loading incidents…" />
+                </TableCell>
+              </TableRow>
+            )}
             {!query.isLoading && rows.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="py-12 text-center text-sm text-muted-foreground">

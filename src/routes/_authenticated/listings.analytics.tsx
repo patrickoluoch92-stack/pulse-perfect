@@ -8,6 +8,7 @@ import { getWorkspaceContext } from "@/lib/workspace.functions";
 import { getOwnerAnalytics } from "@/lib/marketplace-ops.functions";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Badge } from "@/components/ui/badge";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/listings/analytics")({
   head: () => ({
@@ -46,7 +47,7 @@ function AnalyticsPage() {
           </p>
         </div>
 
-        {analytics.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+        {analytics.isLoading && <LoadingState label="Loading analytics…" />}
 
         {s && (
           <>
@@ -62,7 +63,9 @@ function AnalyticsPage() {
                 <h2 className="text-lg font-semibold">Per-property breakdown</h2>
               </header>
               {analytics.data && analytics.data.perProperty.length === 0 && (
-                <p className="p-6 text-sm text-muted-foreground">No listings yet.</p>
+                <div className="p-6">
+                  <EmptyState icon={BedDouble} title="No listings yet" description="Publish a property to see per-listing performance here." />
+                </div>
               )}
               {analytics.data && analytics.data.perProperty.length > 0 && (
                 <table className="w-full text-sm">
