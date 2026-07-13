@@ -116,7 +116,7 @@ function DevOpsPage() {
                     <span className="text-xs text-muted-foreground">{new Date(w.created_at).toLocaleString()}</span>
                   </li>
                 ))}
-                {(data?.webhooks.recent ?? []).length === 0 && <li className="p-4 text-sm text-muted-foreground">No recent deliveries.</li>}
+                {(data?.webhooks.recent ?? []).length === 0 && !isLoading && <li className="p-4"><EmptyState title="No recent deliveries" description="Webhook attempts and status codes will be logged here." /></li>}
               </ul>
             </CardContent>
           </Card>
