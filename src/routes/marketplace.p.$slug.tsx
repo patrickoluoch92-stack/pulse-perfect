@@ -142,6 +142,17 @@ function PropertyDetail() {
           <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight md:text-4xl">
             {prop.name}
           </h1>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <PlanWithAI
+              seed={{
+                module: "travel",
+                property_slug: prop.slug,
+                county: prop.county?.name,
+                seed_intent: `Plan a trip to stay at ${prop.name} in ${prop.town ?? prop.county?.name ?? "Kenya"}`,
+              }}
+              label="Plan a trip with AI"
+            />
+          </div>
         </div>
 
         {images.length > 0 && (
