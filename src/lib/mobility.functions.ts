@@ -262,17 +262,19 @@ export const getMyMobilityVehicle = createServerFn({ method: "POST" })
   .inputValidator((v: unknown) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const [vehicle, rates, images, blocks] = await Promise.all([
+    const [vehicle, rates, images, blocks, seasonal] = await Promise.all([
       sb.from("mobility_vehicles").select("*").eq("id", data.id).maybeSingle(),
       sb.from("mobility_vehicle_rates").select("*").eq("vehicle_id", data.id).order("unit"),
       sb.from("mobility_vehicle_images").select("*").eq("vehicle_id", data.id).order("sort_order"),
       sb.from("mobility_availability_blocks").select("*").eq("vehicle_id", data.id).order("start_at"),
+      sb.from("mobility_seasonal_rates").select("*").eq("vehicle_id", data.id).order("starts_on"),
     ]);
     return {
       vehicle: vehicle.data,
       rates: rates.data ?? [],
       images: images.data ?? [],
       blocks: blocks.data ?? [],
+      seasonalRates: seasonal.data ?? [],
     };
   });
 
