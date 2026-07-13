@@ -152,7 +152,9 @@ function ExecutiveCenter() {
               <span className="shrink-0 text-xs text-muted-foreground">{new Date(a.at).toLocaleString()}</span>
             </li>
           ))}
-          {d.activity.length === 0 && <li className="py-2 text-sm text-muted-foreground">No activity yet.</li>}
+          {d.activity.length === 0 && (
+            <li className="py-2"><EmptyState title="No activity yet" description="Platform events will appear here as they occur." /></li>
+          )}
         </ul>
       </Section>
 
