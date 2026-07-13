@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Search, MapPin, Star, SlidersHorizontal } from "lucide-react";
 
 import { listPublicProperties, listCounties } from "@/lib/marketplace.functions";
+import { PlanWithAI } from "@/components/plan-with-ai";
 import { PROPERTY_CATEGORIES, COMMON_AMENITIES, ACTIVITIES, ATTRIBUTES, categoryLabel } from "@/lib/marketplace-constants";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
