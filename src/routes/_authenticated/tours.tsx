@@ -538,9 +538,7 @@ function SchedulesTab({ orgId }: { orgId: string }) {
       )}
 
       {q.data && q.data.length === 0 && pkgs.data?.length ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No departures scheduled yet.
-        </p>
+        <EmptyState title="No departures scheduled yet" />
       ) : null}
 
       <div className="space-y-2">
