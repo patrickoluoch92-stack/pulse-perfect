@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlanWithAI } from "@/components/plan-with-ai";
+import { EmptyState, LoadingState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/discover/")({
   head: () => ({
