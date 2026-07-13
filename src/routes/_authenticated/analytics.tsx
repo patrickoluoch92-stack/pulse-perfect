@@ -11,6 +11,7 @@ import { getAnalytics } from "@/lib/analytics.functions";
 import { planAllows, PLAN_LABEL, type Plan } from "@/lib/plans";
 import { BedDouble, DollarSign, TrendingUp, CalendarCheck, Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 import type { LucideIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/analytics")({
@@ -209,9 +210,11 @@ function AnalyticsPage() {
                   );
                 })
             ) : (
-              <p className="py-12 text-center text-sm text-muted-foreground">
-                {q.isLoading ? "Loading…" : "No bookings in this period."}
-              </p>
+              <div className="py-8">
+                {q.isLoading
+                  ? <LoadingState label="Loading top listings…" />
+                  : <EmptyState title="No bookings in this period" description="Adjust the date range to see performance." />}
+              </div>
             )}
           </div>
         </section>
@@ -237,8 +240,10 @@ function Kpi({ icon: Icon, label, value, hint }: { icon: LucideIcon; label: stri
 
 function EmptyChart({ loading }: { loading: boolean }) {
   return (
-    <div className="grid h-full place-items-center text-sm text-muted-foreground">
-      {loading ? "Loading…" : "No data for this period yet."}
+    <div className="grid h-full place-items-center">
+      {loading
+        ? <LoadingState label="Loading chart…" />
+        : <EmptyState title="No data yet" description="No data for this period yet." />}
     </div>
   );
 }
