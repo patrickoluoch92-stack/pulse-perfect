@@ -208,20 +208,18 @@ function PropertyDetailPage() {
       <section className="space-y-3">
         <h2 className="font-display text-xl font-semibold">Units</h2>
         {units.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <LoadingState label="Loading units…" />
         ) : (units.data?.length ?? 0) === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-            <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
-              <BedDouble className="h-5 w-5" />
-            </div>
-            <h3 className="font-display text-lg font-semibold">No units yet</h3>
-            <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-              Add rooms, suites, cabins, or tour slots that guests can book.
-            </p>
-            <Button className="mt-4" onClick={openCreate}>
-              <Plus className="mr-2 h-4 w-4" /> New unit
-            </Button>
-          </div>
+          <EmptyState
+            icon={BedDouble}
+            title="No units yet"
+            description="Add rooms, suites, cabins, or tour slots that guests can book."
+            action={
+              <Button onClick={openCreate}>
+                <Plus className="mr-2 h-4 w-4" /> New unit
+              </Button>
+            }
+          />
         ) : (
           <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
             <table className="w-full text-sm">
