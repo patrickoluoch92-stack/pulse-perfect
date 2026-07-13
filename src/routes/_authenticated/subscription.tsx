@@ -133,7 +133,7 @@ function SubscriptionPage() {
         <CardHeader><CardTitle className="text-lg">Activity</CardTitle></CardHeader>
         <CardContent className="space-y-2 text-sm">
           {(histQ.data?.events ?? []).length === 0 && (
-            <p className="text-muted-foreground">No activity yet.</p>
+            <EmptyState title="No activity yet" />
           )}
           {(histQ.data?.events ?? []).map((ev: any) => (
             <div key={ev.id} className="flex justify-between border-b py-2 last:border-b-0">
