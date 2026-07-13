@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { enforceAuthRateLimit, requireMfa } from "@/lib/security";
 
-export const ORG_ROLES = ["owner", "admin", "manager", "staff"] as const;
+export const ORG_ROLES = ["owner", "enterprise_admin", "admin", "manager", "staff", "guest"] as const;
 const orgIdSchema = z.object({ orgId: z.string().uuid() });
 
 export const listMembers = createServerFn({ method: "GET" })
