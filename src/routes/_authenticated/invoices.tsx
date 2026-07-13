@@ -13,6 +13,7 @@ import {
   listInvoices, deleteInvoice, generateFromReservation, INVOICE_STATUSES,
 } from "@/lib/invoices.functions";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/format";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
