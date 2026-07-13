@@ -63,7 +63,9 @@ function AnalyticsPage() {
                 <h2 className="text-lg font-semibold">Per-property breakdown</h2>
               </header>
               {analytics.data && analytics.data.perProperty.length === 0 && (
-                <p className="p-6 text-sm text-muted-foreground">No listings yet.</p>
+                <div className="p-6">
+                  <EmptyState icon={BedDouble} title="No listings yet" description="Publish a property to see per-listing performance here." />
+                </div>
               )}
               {analytics.data && analytics.data.perProperty.length > 0 && (
                 <table className="w-full text-sm">
