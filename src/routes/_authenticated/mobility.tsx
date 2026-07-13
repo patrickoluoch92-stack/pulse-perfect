@@ -34,7 +34,7 @@ function MobilityDashboard() {
   const qc = useQueryClient();
 
   const ctx = useQuery({ queryKey: ["workspace"], queryFn: () => fetchCtx() });
-  const orgId = ctx.data?.orgId;
+  const orgId = ctx.data?.currentOrg?.id;
 
   const providers = useQuery({ queryKey: ["mobility-providers"], queryFn: () => fetchProviders() });
   const vehicles = useQuery({

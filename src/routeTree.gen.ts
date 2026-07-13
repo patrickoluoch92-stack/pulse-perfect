@@ -41,6 +41,7 @@ import { Route as AuthenticatedPropertiesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPlannerRouteImport } from './routes/_authenticated/planner'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedMpesaRouteImport } from './routes/_authenticated/mpesa'
+import { Route as AuthenticatedMobilityRouteImport } from './routes/_authenticated/mobility'
 import { Route as AuthenticatedMaintenanceRouteImport } from './routes/_authenticated/maintenance'
 import { Route as AuthenticatedListingsRouteImport } from './routes/_authenticated/listings'
 import { Route as AuthenticatedInvoicesRouteImport } from './routes/_authenticated/invoices'
@@ -245,6 +246,11 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
 const AuthenticatedMpesaRoute = AuthenticatedMpesaRouteImport.update({
   id: '/mpesa',
   path: '/mpesa',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMobilityRoute = AuthenticatedMobilityRouteImport.update({
+  id: '/mobility',
+  path: '/mobility',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMaintenanceRoute =
@@ -510,6 +516,7 @@ export interface FileRoutesByFullPath {
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/listings': typeof AuthenticatedListingsRouteWithChildren
   '/maintenance': typeof AuthenticatedMaintenanceRoute
+  '/mobility': typeof AuthenticatedMobilityRoute
   '/mpesa': typeof AuthenticatedMpesaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/planner': typeof AuthenticatedPlannerRoute
@@ -585,6 +592,7 @@ export interface FileRoutesByTo {
   '/incidents': typeof AuthenticatedIncidentsRoute
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/maintenance': typeof AuthenticatedMaintenanceRoute
+  '/mobility': typeof MobilityIndexRoute
   '/mpesa': typeof AuthenticatedMpesaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/planner': typeof AuthenticatedPlannerRoute
@@ -608,7 +616,6 @@ export interface FileRoutesByTo {
   '/rentals/$child': typeof RentalsChildRoute
   '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
-  '/mobility': typeof MobilityIndexRoute
   '/rentals': typeof RentalsIndexRoute
   '/admin/ai-ops': typeof AuthenticatedAdminAiOpsRoute
   '/admin/cms': typeof AuthenticatedAdminCmsRoute
@@ -664,6 +671,7 @@ export interface FileRoutesById {
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/_authenticated/listings': typeof AuthenticatedListingsRouteWithChildren
   '/_authenticated/maintenance': typeof AuthenticatedMaintenanceRoute
+  '/_authenticated/mobility': typeof AuthenticatedMobilityRoute
   '/_authenticated/mpesa': typeof AuthenticatedMpesaRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/planner': typeof AuthenticatedPlannerRoute
@@ -743,6 +751,7 @@ export interface FileRouteTypes {
     | '/invoices'
     | '/listings'
     | '/maintenance'
+    | '/mobility'
     | '/mpesa'
     | '/onboarding'
     | '/planner'
@@ -818,6 +827,7 @@ export interface FileRouteTypes {
     | '/incidents'
     | '/invoices'
     | '/maintenance'
+    | '/mobility'
     | '/mpesa'
     | '/onboarding'
     | '/planner'
@@ -841,7 +851,6 @@ export interface FileRouteTypes {
     | '/rentals/$child'
     | '/discover'
     | '/marketplace'
-    | '/mobility'
     | '/rentals'
     | '/admin/ai-ops'
     | '/admin/cms'
@@ -896,6 +905,7 @@ export interface FileRouteTypes {
     | '/_authenticated/invoices'
     | '/_authenticated/listings'
     | '/_authenticated/maintenance'
+    | '/_authenticated/mobility'
     | '/_authenticated/mpesa'
     | '/_authenticated/onboarding'
     | '/_authenticated/planner'
@@ -1216,6 +1226,13 @@ declare module '@tanstack/react-router' {
       path: '/mpesa'
       fullPath: '/mpesa'
       preLoaderRoute: typeof AuthenticatedMpesaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/mobility': {
+      id: '/_authenticated/mobility'
+      path: '/mobility'
+      fullPath: '/mobility'
+      preLoaderRoute: typeof AuthenticatedMobilityRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/maintenance': {
@@ -1623,6 +1640,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRouteWithChildren
   AuthenticatedListingsRoute: typeof AuthenticatedListingsRouteWithChildren
   AuthenticatedMaintenanceRoute: typeof AuthenticatedMaintenanceRoute
+  AuthenticatedMobilityRoute: typeof AuthenticatedMobilityRoute
   AuthenticatedMpesaRoute: typeof AuthenticatedMpesaRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPlannerRoute: typeof AuthenticatedPlannerRoute
@@ -1656,6 +1674,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRouteWithChildren,
   AuthenticatedListingsRoute: AuthenticatedListingsRouteWithChildren,
   AuthenticatedMaintenanceRoute: AuthenticatedMaintenanceRoute,
+  AuthenticatedMobilityRoute: AuthenticatedMobilityRoute,
   AuthenticatedMpesaRoute: AuthenticatedMpesaRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPlannerRoute: AuthenticatedPlannerRoute,
