@@ -28,12 +28,7 @@ type NavGroup = {
   items: NavItem[];
 };
 
-type NavGroup = {
-  id: string;
-  label: string;
-  adminOnly?: boolean;
-  items: NavItem[];
-};
+
 
 const groups: NavGroup[] = [
   {
