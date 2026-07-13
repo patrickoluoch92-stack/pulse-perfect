@@ -35,7 +35,7 @@ export const getOwnerCommandCenter = createServerFn({ method: "GET" })
     // Property IDs owned by this org (for booking joins).
     const { data: props, error: pErr } = await supabase
       .from("marketplace_properties")
-      .select("id, status, city, county_code")
+      .select("id, status, town, county_code")
       .eq("org_id", data.orgId);
     if (pErr) throw new Error(pErr.message);
     const propertyIds = (props ?? []).map((p: any) => p.id);
