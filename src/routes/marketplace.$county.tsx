@@ -3,6 +3,7 @@ import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 
 import { getCountyPage } from "@/lib/marketplace.functions";
 import { PropertyCard } from "./marketplace.index";
+import { EmptyState } from "@/components/ui/states";
 
 const countyQuery = (slug: string) =>
   queryOptions({
