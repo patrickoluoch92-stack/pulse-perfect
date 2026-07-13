@@ -109,7 +109,7 @@ function DiscoveryAdmin() {
             <TabsTrigger value="rejected">Rejected</TabsTrigger>
           </TabsList>
           <TabsContent value={tab} className="mt-4 space-y-2">
-            {rows.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+            {rows.isLoading && <LoadingState />}
             {(rows.data?.rows ?? []).map((r: any) => (
               <Card key={r.id}>
                 <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
