@@ -195,9 +195,18 @@ function PropertiesPage() {
       </header>
 
       {props.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <LoadingState label="Loading properties…" />
       ) : (props.data?.length ?? 0) === 0 ? (
-        <EmptyState onCreate={openCreate} canCreate={!!orgId} />
+        <SharedEmptyState
+          icon={BedDouble}
+          title="No properties yet"
+          description="Add your first property to start tracking units, availability, and bookings."
+          action={
+            <Button onClick={openCreate} disabled={!orgId}>
+              <Plus className="mr-2 h-4 w-4" /> New property
+            </Button>
+          }
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {props.data!.map((p) => (
