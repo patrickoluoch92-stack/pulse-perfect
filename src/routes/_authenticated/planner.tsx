@@ -70,9 +70,21 @@ function PlannerPage() {
   const [activeId, setActiveId] = useState<string | undefined>();
   const [module, setModule] = useState<PlannerModule>("travel");
   const [county, setCounty] = useState("");
-  const [prompt, setPrompt] = useState("");
+  const search = Route.useSearch();
+  const [activeId, setActiveId] = useState<string | undefined>();
+  const [module, setModule] = useState<PlannerModule>(search.module ?? "travel");
+  const [county, setCounty] = useState(search.county ?? "");
+  const [prompt, setPrompt] = useState(search.seed_intent ?? "");
   const [chatInput, setChatInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Pre-fill from contextual link (e.g. "Plan with AI" on a property page)
+  useEffect(() => {
+    if (search.seed_intent && !prompt) setPrompt(search.seed_intent);
+    if (search.module) setModule(search.module);
+    if (search.county) setCounty(search.county);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.seed_intent, search.module, search.county]);
 
   const sessions = useQuery({ queryKey: ["planner", "list"], queryFn: () => listFn() });
   const session = useQuery({
