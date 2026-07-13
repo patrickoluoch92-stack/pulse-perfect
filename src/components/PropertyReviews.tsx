@@ -175,7 +175,7 @@ export function PropertyReviews({
 
       <div className="mt-6 space-y-4">
         {reviews.length === 0 && (
-          <p className="text-sm text-muted-foreground">No reviews yet. Be the first.</p>
+          <EmptyState icon={Star} title="No reviews yet" description="Be the first to share your experience." />
         )}
         {reviews.map((r) => (
           <Card key={r.id} className="p-4">
