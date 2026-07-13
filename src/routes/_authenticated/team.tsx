@@ -20,6 +20,7 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { LoadingState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/team")({
   head: () => ({ meta: authPageMeta({ title: "Team", description: "Invite teammates, assign roles, and manage workspace access." }) }),
