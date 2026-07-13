@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_authenticated/admin/finance")({
 });
 
 function fmt(n: number, c = "KES") {
-  return new Intl.NumberFormat("en-KE", { style: "currency", currency: c, maximumFractionDigits: 0 }).format(Number(n || 0));
+  return formatCurrency(Number(n || 0), c);
 }
 
 function FinanceAdmin() {
