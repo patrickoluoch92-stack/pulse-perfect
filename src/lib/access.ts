@@ -1,20 +1,11 @@
-// Inline replacements for SECURITY DEFINER RPC helpers (has_role / has_org_role).
-// The Supabase linter flags those RPCs as callable by signed-in users, so we no
-// longer invoke them directly — they remain available inside RLS policy
-// evaluation. RLS on user_roles / organization_members lets signed-in users
-// read their own rows, so these checks work with the authenticated client.
+// @deprecated — use `@/lib/rbac` instead. Kept as thin re-exports so existing
+// call sites keep working during the RBAC v2 rollout.
+import { hasPlatformRole, hasOrgRole as rbacHasOrgRole, type AppRole, type OrgRole } from "./rbac";
 
 type AnySupabase = any;
 
 export async function isPlatformAdmin(supabase: AnySupabase, userId: string): Promise<boolean> {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("user_id")
-    .eq("user_id", userId)
-    .eq("role", "admin")
-    .maybeSingle();
-  if (error) return false;
-  return Boolean(data);
+  return hasPlatformRole({ supabase, userId }, ["admin", "super_admin"] as AppRole[]);
 }
 
 export async function hasOrgRole(
@@ -23,13 +14,5 @@ export async function hasOrgRole(
   orgId: string,
   roles: readonly string[],
 ): Promise<boolean> {
-  const { data, error } = await supabase
-    .from("organization_members")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("org_id", orgId)
-    .in("role", roles as string[])
-    .maybeSingle();
-  if (error) return false;
-  return Boolean(data);
+  return rbacHasOrgRole({ supabase, userId }, orgId, roles as unknown as OrgRole[]);
 }
