@@ -422,10 +422,11 @@ export function PropertyCard({
       <div className="pointer-events-none absolute inset-x-3 bottom-3 flex justify-end">
         <div className="pointer-events-auto">
           <PlanWithAI
-            module="travel"
-            seedIntent={`Plan a trip to ${property.name} in ${property.town}${countyName ? `, ${countyName}` : ""}`}
-            propertySlug={property.slug}
-            size="sm"
+            seed={{
+              module: "travel",
+              seed_intent: `Plan a trip to ${property.name} in ${property.town}${countyName ? `, ${countyName}` : ""}`,
+              property_slug: property.slug,
+            }}
             variant="secondary"
           />
         </div>
