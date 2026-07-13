@@ -153,13 +153,11 @@ export function MfaSettings() {
       </p>
 
       {loading ? (
-        <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading factors…
-        </div>
+        <div className="mt-6"><LoadingState label="Loading factors…" /></div>
       ) : (
         <ul className="mt-6 space-y-2">
           {factors.length === 0 && (
-            <li className="text-sm text-muted-foreground">No factors enrolled yet.</li>
+            <li><EmptyState icon={ShieldCheck} title="No factors enrolled yet" description="Add an authenticator app or phone to enable two-factor auth." /></li>
           )}
           {factors.map((f) => (
             <li
