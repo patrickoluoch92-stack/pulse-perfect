@@ -64,6 +64,23 @@ const ProviderInput = z.object({
   contactPhone: z.string().max(40).optional(),
   website: z.string().url().optional(),
   serviceAreas: z.array(z.string()).max(50).optional(),
+  businessRegNumber: z.string().max(80).optional(),
+  licenseNumber: z.string().max(80).optional(),
+  taxPin: z.string().max(40).optional(),
+  address: z.string().max(300).optional(),
+  countyCode: z.string().max(10).optional(),
+  town: z.string().max(80).optional(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+  operatingHours: z.record(z.string(), z.any()).optional(),
+  emergencyContact: z.string().max(80).optional(),
+  socialLinks: z.record(z.string(), z.string()).optional(),
+  policies: z.string().max(6000).optional(),
+  terms: z.string().max(6000).optional(),
+  verificationDocs: z.array(z.object({
+    label: z.string().max(120),
+    url: z.string().url(),
+  })).max(20).optional(),
 });
 
 export const upsertMobilityProvider = createServerFn({ method: "POST" })
@@ -80,6 +97,20 @@ export const upsertMobilityProvider = createServerFn({ method: "POST" })
       contact_phone: data.contactPhone ?? null,
       website: data.website ?? null,
       service_areas: data.serviceAreas ?? [],
+      business_reg_number: data.businessRegNumber ?? null,
+      license_number: data.licenseNumber ?? null,
+      tax_pin: data.taxPin ?? null,
+      address: data.address ?? null,
+      county_code: data.countyCode ?? null,
+      town: data.town ?? null,
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
+      operating_hours: data.operatingHours ?? {},
+      emergency_contact: data.emergencyContact ?? null,
+      social_links: data.socialLinks ?? {},
+      policies: data.policies ?? null,
+      terms: data.terms ?? null,
+      verification_docs: data.verificationDocs ?? [],
     };
     if (data.id) {
       const { data: row, error } = await sb.from("mobility_providers")
@@ -101,6 +132,17 @@ export const listMyMobilityProviders = createServerFn({ method: "GET" })
     const { data } = await sb.from("mobility_providers")
       .select("*").order("created_at", { ascending: false });
     return { providers: data ?? [] };
+  });
+
+export const submitMobilityProviderForVerification = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const { error } = await sb.from("mobility_providers")
+      .update({ verification_status: "pending" }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
 
 // ---------- VEHICLE ----------
