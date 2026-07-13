@@ -6,6 +6,7 @@ import { authPageMeta } from "@/lib/route-meta";
 import { adminFraudOverview } from "@/lib/admin-ops.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/admin/fraud")({
   head: () => ({ meta: authPageMeta({
@@ -43,7 +44,7 @@ function FraudPage() {
         <p className="text-sm text-muted-foreground">Cross-platform anomaly signals, rate-limit events, and audit trail.</p>
       </header>
 
-      {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isLoading && <LoadingState />}
 
       <section className="grid gap-4 md:grid-cols-4">
         <Stat label="Cancel rate (7d)" value={`${data?.bookings.cancelRateWeek ?? 0}%`} hint={`${data?.bookings.cancelledWeek ?? 0} cancellations`} tone={((data?.bookings.cancelRateWeek ?? 0) > 20) ? "danger" : "default"} />
@@ -61,7 +62,7 @@ function FraudPage() {
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><Activity className="h-4 w-4" /> Recent audit log</CardTitle></CardHeader>
         <CardContent className="p-0">
-          {(data?.audit ?? []).length === 0 && <p className="p-6 text-sm text-muted-foreground">No audit events.</p>}
+          {(data?.audit ?? []).length === 0 && !isLoading && <div className="p-6"><EmptyState title="No audit events" description="Admin and system actions will be recorded here." /></div>}
           <ul className="divide-y">
             {(data?.audit ?? []).slice(0, 20).map((a: any) => (
               <li key={a.id} className="flex items-center justify-between gap-3 p-3 text-sm">

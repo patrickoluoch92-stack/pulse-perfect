@@ -28,6 +28,7 @@ import {
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/listings/admin")({
   head: () => ({ meta: authPageMeta({ title: "Marketplace admin", description: "Approve, reject, feature, and archive marketplace listings." }) }),
@@ -88,7 +89,7 @@ function AdminPanel() {
   });
 
   if (admin.isLoading) {
-    return <DashboardShell><div className="p-6 text-muted-foreground">Checking access…</div></DashboardShell>;
+    return <DashboardShell><LoadingState label="Checking access…" /></DashboardShell>;
   }
   if (!admin.data?.isAdmin) {
     return (
@@ -162,10 +163,10 @@ function AdminPanel() {
         </div>
 
         <div className="overflow-hidden rounded-xl border bg-card">
-          {list.isLoading && <div className="p-6 text-sm text-muted-foreground">Loading…</div>}
+          {list.isLoading && <LoadingState />}
           {list.data && list.data.items.length === 0 && (
-            <div className="p-12 text-center text-sm text-muted-foreground">
-              No listings match these filters.
+            <div className="p-6">
+              <EmptyState title="No listings match" description="Adjust your filters or clear search to see more results." />
             </div>
           )}
           {list.data && list.data.items.length > 0 && (

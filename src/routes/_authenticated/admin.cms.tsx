@@ -7,6 +7,7 @@ import { adminCmsOverview } from "@/lib/admin-ops.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/admin/cms")({
   head: () => ({ meta: authPageMeta({
@@ -27,7 +28,7 @@ function CmsPage() {
         <p className="text-sm text-muted-foreground">Counties, discovery sources, reviews, and promo content.</p>
       </header>
 
-      {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isLoading && <LoadingState />}
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Counties</CardTitle></CardHeader>
@@ -61,7 +62,7 @@ function CmsPage() {
                   </span>
                 </li>
               ))}
-              {(data?.sources ?? []).length === 0 && <li className="p-4 text-sm text-muted-foreground">No sources configured.</li>}
+              {(data?.sources ?? []).length === 0 && !isLoading && <li className="p-4"><EmptyState title="No sources configured" description="Add a discovery source to start crawling listings." /></li>}
             </ul>
           </CardContent>
         </Card>
@@ -91,7 +92,7 @@ function CmsPage() {
                 <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</span>
               </li>
             ))}
-            {(data?.recentReviews ?? []).length === 0 && <li className="p-4 text-sm text-muted-foreground">No reviews.</li>}
+            {(data?.recentReviews ?? []).length === 0 && !isLoading && <li className="p-4"><EmptyState title="No reviews yet" description="Guest reviews will appear here once submitted." /></li>}
           </ul>
         </CardContent>
       </Card>

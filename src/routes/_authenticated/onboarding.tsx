@@ -28,6 +28,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
@@ -135,11 +136,12 @@ function OnboardingWizard() {
   }
 
   if (!ws.data || !loaded) {
-    return <DashboardShell><div className="p-8 text-muted-foreground">Loading…</div></DashboardShell>;
+    return <DashboardShell><LoadingState label="Loading onboarding…" /></DashboardShell>;
   }
   if (!orgId) {
-    return <DashboardShell><div className="p-8">No workspace found.</div></DashboardShell>;
+    return <DashboardShell><EmptyState icon={Building2} title="No workspace found" description="Create or join an organization to start onboarding a property." /></DashboardShell>;
   }
+
 
   return (
     <DashboardShell>

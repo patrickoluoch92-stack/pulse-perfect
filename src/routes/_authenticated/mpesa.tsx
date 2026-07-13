@@ -3,7 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Smartphone, RefreshCcw } from "lucide-react";
+import { RefreshCcw, Smartphone } from "lucide-react";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 import { listMpesaTransactions } from "@/lib/mpesa.functions";
@@ -77,17 +78,13 @@ function MpesaAdminPage() {
       </div>
 
       {tx.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <LoadingState label="Loading transactions…" />
       ) : rows.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
-          <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
-            <Smartphone className="h-6 w-6" />
-          </div>
-          <h3 className="font-display text-xl font-semibold">No M-PESA transactions yet</h3>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-            STK Push attempts started from pricing or invoices will appear here.
-          </p>
-        </div>
+        <EmptyState
+          icon={Smartphone}
+          title="No M-PESA transactions yet"
+          description="STK Push attempts started from pricing or invoices will appear here."
+        />
       ) : (
         <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
           <table className="w-full text-sm">

@@ -6,6 +6,7 @@ import { authPageMeta } from "@/lib/route-meta";
 import { adminDevopsOverview } from "@/lib/admin-ops.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/admin/devops")({
   head: () => ({ meta: authPageMeta({
@@ -37,7 +38,7 @@ function DevOpsPage() {
         </Badge>
       </header>
 
-      {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isLoading && <LoadingState />}
 
       <section className="grid gap-4 md:grid-cols-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Errors (7d)</CardTitle></CardHeader>
@@ -76,7 +77,7 @@ function DevOpsPage() {
                   {e.route && <p className="text-xs text-muted-foreground">{e.route}</p>}
                 </li>
               ))}
-              {(data?.errors.recent ?? []).length === 0 && <li className="p-4 text-sm text-muted-foreground">No errors captured. 🎉</li>}
+              {(data?.errors.recent ?? []).length === 0 && !isLoading && <li className="p-4"><EmptyState title="No errors captured" description="Your platform is running clean over the last 7 days." /></li>}
             </ul>
           </CardContent>
         </Card>
@@ -95,7 +96,7 @@ function DevOpsPage() {
                     <span className="text-xs text-muted-foreground">{new Date(r.started_at).toLocaleString()}</span>
                   </li>
                 ))}
-                {(data?.syncs.recent ?? []).length === 0 && <li className="p-4 text-sm text-muted-foreground">No sync runs.</li>}
+                {(data?.syncs.recent ?? []).length === 0 && !isLoading && <li className="p-4"><EmptyState title="No sync runs" description="Background syncs will appear once triggered." /></li>}
               </ul>
             </CardContent>
           </Card>
@@ -115,7 +116,7 @@ function DevOpsPage() {
                     <span className="text-xs text-muted-foreground">{new Date(w.created_at).toLocaleString()}</span>
                   </li>
                 ))}
-                {(data?.webhooks.recent ?? []).length === 0 && <li className="p-4 text-sm text-muted-foreground">No recent deliveries.</li>}
+                {(data?.webhooks.recent ?? []).length === 0 && !isLoading && <li className="p-4"><EmptyState title="No recent deliveries" description="Webhook attempts and status codes will be logged here." /></li>}
               </ul>
             </CardContent>
           </Card>

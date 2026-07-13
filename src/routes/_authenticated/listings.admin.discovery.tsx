@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/listings/admin/discovery")({
   head: () => ({
@@ -108,7 +109,7 @@ function DiscoveryAdmin() {
             <TabsTrigger value="rejected">Rejected</TabsTrigger>
           </TabsList>
           <TabsContent value={tab} className="mt-4 space-y-2">
-            {rows.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+            {rows.isLoading && <LoadingState />}
             {(rows.data?.rows ?? []).map((r: any) => (
               <Card key={r.id}>
                 <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
@@ -134,7 +135,7 @@ function DiscoveryAdmin() {
               </Card>
             ))}
             {!rows.isLoading && (rows.data?.rows?.length ?? 0) === 0 && (
-              <p className="text-sm text-muted-foreground">Nothing in this queue.</p>
+              <EmptyState title="Nothing in this queue" description="Discovered properties in this state will appear here." />
             )}
           </TabsContent>
         </Tabs>
