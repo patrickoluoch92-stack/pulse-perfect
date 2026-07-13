@@ -190,18 +190,18 @@ function ListingsPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         {p.status === "approved" && (
-                          <Button asChild variant="ghost" size="sm" title="View public page" aria-label={`View public page for ${p.title}`}>
+                          <Button asChild variant="ghost" size="sm" title="View public page" aria-label={`View public page for ${p.name}`}>
                             <a href={`/marketplace/p/${p.slug}`} target="_blank" rel="noopener">
                               <ExternalLink className="h-4 w-4" aria-hidden />
                             </a>
                           </Button>
                         )}
-                        <Button asChild variant="ghost" size="sm" title="Edit" aria-label={`Edit ${p.title}`}>
+                        <Button asChild variant="ghost" size="sm" title="Edit" aria-label={`Edit ${p.name}`}>
                           <Link to="/listings/$id" params={{ id: p.id }}>
                             <Pencil className="h-4 w-4" aria-hidden />
                           </Link>
                         </Button>
-                        <Button asChild variant="ghost" size="sm" title="Availability" aria-label={`Manage availability for ${p.title}`}>
+                        <Button asChild variant="ghost" size="sm" title="Availability" aria-label={`Manage availability for ${p.name}`}>
                           <Link to="/listings/$id/availability" params={{ id: p.id }}>
                             <Calendar className="h-4 w-4" aria-hidden />
                           </Link>
@@ -213,7 +213,7 @@ function ListingsPage() {
                             onClick={() => submit.mutate(p.id)}
                             disabled={submit.isPending}
                             title="Submit for review"
-                            aria-label={`Submit ${p.title} for review`}
+                            aria-label={`Submit ${p.name} for review`}
                           >
                             <Send className="h-4 w-4" aria-hidden />
                           </Button>
@@ -224,7 +224,7 @@ function ListingsPage() {
                             onClick={() => withdraw.mutate(p.id)}
                             disabled={withdraw.isPending}
                             title="Move back to draft"
-                            aria-label={`Withdraw ${p.title} back to draft`}
+                            aria-label={`Withdraw ${p.name} back to draft`}
                           >
                             <Undo2 className="h-4 w-4" aria-hidden />
                           </Button>
@@ -234,7 +234,7 @@ function ListingsPage() {
                           onClick={() => setPendingDelete(p.id)}
                           className="text-destructive"
                           title="Delete listing"
-                          aria-label={`Delete ${p.title}`}
+                          aria-label={`Delete ${p.name}`}
                         >
                           <Trash2 className="h-4 w-4" aria-hidden />
                         </Button>
