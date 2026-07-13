@@ -414,7 +414,7 @@ export function PropertyCard({
           {property.price_per_night != null && (
             <p className="mt-3 text-sm">
               <span className="font-semibold">
-                {property.currency} {Number(property.price_per_night).toLocaleString()}
+                {formatCurrency(Number(property.price_per_night), property.currency)}
               </span>{" "}
               <span className="text-muted-foreground">/ night</span>
             </p>
