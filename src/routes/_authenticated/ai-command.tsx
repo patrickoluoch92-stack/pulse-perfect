@@ -91,7 +91,7 @@ function AICommandPage() {
                 <StatLine label="Counties covered" value={Object.keys(disc.data.countyCounts ?? {}).length} />
                 <StatLine label="Recent runs" value={disc.data.recentRuns?.length ?? 0} />
               </div>
-            ) : <p className="text-sm text-muted-foreground">Loading…</p>}
+            ) : <LoadingState label="Loading…" />}
           </CardContent>
         </Card>
 
@@ -109,7 +109,7 @@ function AICommandPage() {
                   />
                 ))}
               </div>
-            ) : <p className="text-sm text-muted-foreground">Loading…</p>}
+            ) : <LoadingState label="Loading…" />}
           </CardContent>
         </Card>
 
@@ -154,7 +154,7 @@ function AICommandPage() {
                 )}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">Loading…</p>
+              <LoadingState label="Loading…" />
             )}
           </CardContent>
         </Card>
