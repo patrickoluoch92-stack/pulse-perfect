@@ -10,6 +10,7 @@ import { getWorkspaceContext } from "@/lib/workspace.functions";
 import {
   getMySubscription, listBillingHistory, cancelSubscription, resumeSubscription,
 } from "@/lib/subscription.functions";
+import { formatKES } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/subscription")({
   head: () => ({ meta: [{ title: "Subscription — HostPulse" }] }),
