@@ -77,7 +77,7 @@ function DevOpsPage() {
                   {e.route && <p className="text-xs text-muted-foreground">{e.route}</p>}
                 </li>
               ))}
-              {(data?.errors.recent ?? []).length === 0 && <li className="p-4 text-sm text-muted-foreground">No errors captured. 🎉</li>}
+              {(data?.errors.recent ?? []).length === 0 && !isLoading && <li className="p-4"><EmptyState title="No errors captured" description="Your platform is running clean over the last 7 days." /></li>}
             </ul>
           </CardContent>
         </Card>
