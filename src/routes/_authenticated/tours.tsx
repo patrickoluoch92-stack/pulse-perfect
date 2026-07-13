@@ -345,9 +345,7 @@ function GuidesTab({ orgId }: { orgId: string }) {
       </div>
 
       {q.data && q.data.length === 0 && (
-        <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No guides yet.
-        </p>
+        <EmptyState title="No guides yet" />
       )}
 
       <div className="grid gap-3 md:grid-cols-2">
