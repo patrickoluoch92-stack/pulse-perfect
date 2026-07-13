@@ -35,12 +35,12 @@ export const getOwnerCommandCenter = createServerFn({ method: "GET" })
     // Property IDs owned by this org (for booking joins).
     const { data: props, error: pErr } = await supabase
       .from("marketplace_properties")
-      .select("id, is_published, city, county_code")
+      .select("id, status, city, county_code")
       .eq("org_id", data.orgId);
     if (pErr) throw new Error(pErr.message);
     const propertyIds = (props ?? []).map((p: any) => p.id);
     const propertyCount = props?.length ?? 0;
-    const publishedCount = (props ?? []).filter((p: any) => p.is_published).length;
+    const publishedCount = (props ?? []).filter((p: any) => p.status === "approved" || p.status === "published").length;
 
     // Bookings scoped to this org's properties.
     const bookingsQ = propertyIds.length
