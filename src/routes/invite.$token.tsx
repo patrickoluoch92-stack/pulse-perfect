@@ -90,7 +90,7 @@ function InvitePage() {
 
 function Center({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid min-h-screen place-items-center bg-background p-6">
+    <div className="grid min-h-dvh place-items-center bg-background p-6">
       <div className="w-full max-w-md rounded-2xl border border-border/60 bg-card p-10 text-center">
         {children}
       </div>

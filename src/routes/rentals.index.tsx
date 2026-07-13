@@ -27,7 +27,7 @@ function RentalsHub() {
   const children = parent?.children ?? [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <section className="border-b bg-gradient-to-b from-primary/5 to-transparent">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <nav className="mb-4 text-sm text-muted-foreground">

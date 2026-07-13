@@ -109,7 +109,7 @@ function MarketplaceListing() {
   const totalPages = Math.max(1, Math.ceil((properties.data?.total ?? 0) / 12));
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <header className="border-b bg-card">
         <div className="mx-auto max-w-6xl px-4 py-12">
           <div className="flex items-center justify-between">

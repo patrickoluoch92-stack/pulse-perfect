@@ -26,8 +26,16 @@ export const getWorkspaceContext = createServerFn({ method: "GET" })
     const currentOrg =
       orgs.find((o) => o.id === profile?.current_org_id) ?? orgs[0] ?? null;
 
-    return { profile, organizations: orgs, currentOrg };
+    const { data: adminRole } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    return { profile, organizations: orgs, currentOrg, isPlatformAdmin: Boolean(adminRole) };
   });
+
 
 export const getDashboardStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

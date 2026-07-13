@@ -21,7 +21,20 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 
+type PlannerSearch = {
+  seed_intent?: string;
+  module?: PlannerModule;
+  county?: string;
+  property_slug?: string;
+};
+
 export const Route = createFileRoute("/_authenticated/planner")({
+  validateSearch: (search: Record<string, unknown>): PlannerSearch => ({
+    seed_intent: typeof search.seed_intent === "string" ? search.seed_intent : undefined,
+    module: (PLANNER_MODULES as readonly string[]).includes(String(search.module)) ? (search.module as PlannerModule) : undefined,
+    county: typeof search.county === "string" ? search.county : undefined,
+    property_slug: typeof search.property_slug === "string" ? search.property_slug : undefined,
+  }),
   head: () => ({
     meta: authPageMeta({
       title: "HostPulse Planner AI",
@@ -54,12 +67,21 @@ function PlannerPage() {
   const chatFn = useServerFn(chatOnPlan);
   const delFn = useServerFn(deletePlannerSession);
 
+  const search = Route.useSearch();
   const [activeId, setActiveId] = useState<string | undefined>();
-  const [module, setModule] = useState<PlannerModule>("travel");
-  const [county, setCounty] = useState("");
-  const [prompt, setPrompt] = useState("");
+  const [module, setModule] = useState<PlannerModule>(search.module ?? "travel");
+  const [county, setCounty] = useState(search.county ?? "");
+  const [prompt, setPrompt] = useState(search.seed_intent ?? "");
   const [chatInput, setChatInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Pre-fill from contextual link (e.g. "Plan with AI" on a property page)
+  useEffect(() => {
+    if (search.seed_intent && !prompt) setPrompt(search.seed_intent);
+    if (search.module) setModule(search.module);
+    if (search.county) setCounty(search.county);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.seed_intent, search.module, search.county]);
 
   const sessions = useQuery({ queryKey: ["planner", "list"], queryFn: () => listFn() });
   const session = useQuery({
