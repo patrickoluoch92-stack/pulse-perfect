@@ -109,7 +109,7 @@ function MaintenancePage() {
       </header>
 
       <div className="rounded-xl border bg-card">
-        {list.isLoading && <p className="p-6 text-sm text-muted-foreground">Loading…</p>}
+        {list.isLoading && <div className="p-4"><LoadingState label="Loading maintenance tickets…" /></div>}
         {list.data?.rows?.length === 0 && <p className="p-6 text-sm text-muted-foreground">No tickets.</p>}
         <ul className="divide-y">
           {list.data?.rows?.map((t: any) => (
