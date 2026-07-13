@@ -4,6 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { Building2, ArrowRight } from "lucide-react";
 import { listCategoryTree } from "@/lib/taxonomy.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlanWithAI } from "@/components/plan-with-ai";
+import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/rentals/")({
   head: () => ({
@@ -39,6 +41,13 @@ function RentalsHub() {
           <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
             {parent?.description ?? "Residential and commercial rentals across Kenya. Choose a property type to see listings by county, town, and budget."}
           </p>
+          <div className="mt-6">
+            <PlanWithAI
+              seed={{ module: "rental", seed_intent: "Help me find a rental in Kenya within my budget" }}
+              label="Plan your rental with AI"
+              variant="default"
+            />
+          </div>
         </div>
       </section>
 
@@ -46,7 +55,7 @@ function RentalsHub() {
         <h2 className="mb-6 text-xl font-semibold">Choose a property type</h2>
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {children.map((c) => (
-            <Link key={c.slug} to="/rentals/$child" params={{ child: c.slug }}>
+            <Link key={c.slug} to="/rentals/$child" params={{ child: c.slug }} aria-label={`Browse ${c.name}`}>
               <Card className="h-full transition-all hover:border-primary hover:shadow-md">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center justify-between text-base">
@@ -60,14 +69,14 @@ function RentalsHub() {
               </Card>
             </Link>
           ))}
-          {isLoading && children.length === 0 && <p className="text-sm text-muted-foreground">Loading categories…</p>}
-          {isError && children.length === 0 && (
-            <p className="text-sm text-destructive">{error instanceof Error ? error.message : "Unable to load property categories."}</p>
-          )}
-          {!isLoading && !isError && children.length === 0 && (
-            <p className="text-sm text-muted-foreground">No property types are available yet.</p>
-          )}
         </div>
+        {isLoading && children.length === 0 && <div className="mt-6"><LoadingState label="Loading categories…" /></div>}
+        {isError && children.length === 0 && (
+          <div className="mt-6"><ErrorState description={error instanceof Error ? error.message : "Unable to load property categories."} /></div>
+        )}
+        {!isLoading && !isError && children.length === 0 && (
+          <div className="mt-6"><EmptyState title="No property types yet" description="Categories are being seeded — check back soon." /></div>
+        )}
       </section>
     </div>
   );
