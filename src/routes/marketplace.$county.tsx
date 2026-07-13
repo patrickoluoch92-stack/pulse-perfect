@@ -3,6 +3,7 @@ import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 
 import { getCountyPage } from "@/lib/marketplace.functions";
 import { PropertyCard } from "./marketplace.index";
+import { EmptyState } from "@/components/ui/states";
 
 const countyQuery = (slug: string) =>
   queryOptions({
@@ -78,9 +79,7 @@ function CountyPage() {
 
       <section className="mx-auto max-w-6xl px-4 py-10">
         {data.items.length === 0 ? (
-          <div className="rounded-xl border bg-card p-12 text-center">
-            <p className="text-muted-foreground">No listings yet in {data.county.name}. Check back soon.</p>
-          </div>
+          <EmptyState title="No listings yet" description={`No listings yet in ${data.county.name}. Check back soon.`} />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {data.items.map((p) => (

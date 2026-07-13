@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlanWithAI } from "@/components/plan-with-ai";
 import { formatCurrency } from "@/lib/format";
+import { EmptyState, LoadingState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/rentals/$child")({
   loader: async ({ params }) => {
@@ -134,15 +135,15 @@ function ChildCategoryPage() {
           <Button variant="outline" onClick={() => { setCounty("all"); setTown(""); setPriceMax(""); }}>Reset</Button>
         </div>
 
-        {results.isLoading && <p className="text-sm text-muted-foreground">Loading listings…</p>}
-        {results.data?.items?.length === 0 && (
-          <div className="rounded-lg border border-dashed p-12 text-center">
-            <p className="text-muted-foreground">No {node.name.toLowerCase()} listings match your filters yet.</p>
-            <Link to="/rentals" className="mt-3 inline-flex items-center gap-1 text-primary underline">
-              <ArrowLeft className="h-4 w-4" /> Try another category
-            </Link>
-          </div>
+        {results.isLoading && <LoadingState label="Loading listings…" />}
+        {!results.isLoading && results.data?.items?.length === 0 && (
+          <EmptyState
+            title={`No ${node.name.toLowerCase()} listings match your filters yet`}
+            description="Try widening your filters or exploring another category."
+            action={<Link to="/rentals" className="inline-flex items-center gap-1 text-primary underline"><ArrowLeft className="h-4 w-4" /> Try another category</Link>}
+          />
         )}
+
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(results.data?.items ?? []).map((p: any) => (
