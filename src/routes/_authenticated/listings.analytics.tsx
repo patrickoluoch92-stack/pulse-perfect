@@ -47,7 +47,7 @@ function AnalyticsPage() {
           </p>
         </div>
 
-        {analytics.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+        {analytics.isLoading && <LoadingState label="Loading analytics…" />}
 
         {s && (
           <>
