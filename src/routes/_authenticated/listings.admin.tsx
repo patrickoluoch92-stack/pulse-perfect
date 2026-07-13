@@ -163,10 +163,10 @@ function AdminPanel() {
         </div>
 
         <div className="overflow-hidden rounded-xl border bg-card">
-          {list.isLoading && <div className="p-6 text-sm text-muted-foreground">Loading…</div>}
+          {list.isLoading && <LoadingState />}
           {list.data && list.data.items.length === 0 && (
-            <div className="p-12 text-center text-sm text-muted-foreground">
-              No listings match these filters.
+            <div className="p-6">
+              <EmptyState title="No listings match" description="Adjust your filters or clear search to see more results." />
             </div>
           )}
           {list.data && list.data.items.length > 0 && (
