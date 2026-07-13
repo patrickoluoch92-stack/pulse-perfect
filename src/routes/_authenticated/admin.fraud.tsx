@@ -44,7 +44,7 @@ function FraudPage() {
         <p className="text-sm text-muted-foreground">Cross-platform anomaly signals, rate-limit events, and audit trail.</p>
       </header>
 
-      {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+      {isLoading && <LoadingState />}
 
       <section className="grid gap-4 md:grid-cols-4">
         <Stat label="Cancel rate (7d)" value={`${data?.bookings.cancelRateWeek ?? 0}%`} hint={`${data?.bookings.cancelledWeek ?? 0} cancellations`} tone={((data?.bookings.cancelRateWeek ?? 0) > 20) ? "danger" : "default"} />
