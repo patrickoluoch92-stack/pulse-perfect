@@ -7,6 +7,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Trash2 } from "lucide-react";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/wishlist")({
   head: () => ({
@@ -73,11 +74,14 @@ function WishlistPage() {
           </CardHeader>
           <CardContent>
             {wishlistQ.isLoading ? (
-              <p className="text-muted-foreground">Loading…</p>
+              <LoadingState label="Loading saved properties…" />
             ) : (wishlistQ.data?.items ?? []).length === 0 ? (
-              <p className="text-muted-foreground">
-                Nothing saved yet. Browse the <Link to="/listings" className="underline">marketplace</Link> and tap the heart.
-              </p>
+              <EmptyState
+                title="Nothing saved yet"
+                description="Browse the marketplace and tap the heart to save favourites."
+                icon={Heart}
+                action={<Button asChild size="sm"><Link to="/listings">Browse listings</Link></Button>}
+              />
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {(wishlistQ.data!.items as any[]).map((it) => {

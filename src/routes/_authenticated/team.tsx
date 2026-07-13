@@ -20,6 +20,7 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import { LoadingState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/team")({
   head: () => ({ meta: authPageMeta({ title: "Team", description: "Invite teammates, assign roles, and manage workspace access." }) }),
@@ -99,7 +100,7 @@ function TeamPage() {
           <h2 className="font-medium">Members</h2>
         </div>
         {members.isLoading ? (
-          <p className="p-5 text-sm text-muted-foreground">Loading…</p>
+          <LoadingState label="Loading members…" className="py-8" />
         ) : (members.data?.length ?? 0) === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">No members.</p>
         ) : (
@@ -154,7 +155,7 @@ function TeamPage() {
           <h2 className="font-medium">Pending invitations</h2>
         </div>
         {invites.isLoading ? (
-          <p className="p-5 text-sm text-muted-foreground">Loading…</p>
+          <LoadingState label="Loading invitations…" className="py-8" />
         ) : (invites.data?.filter((i) => !i.accepted_at).length ?? 0) === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">No pending invitations.</p>
         ) : (
