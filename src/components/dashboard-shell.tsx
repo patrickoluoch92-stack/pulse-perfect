@@ -11,11 +11,14 @@ import { planAllows, type Plan } from "@/lib/plans";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import { usePermissions, type Permission } from "@/hooks/use-permissions";
+
 type NavItem = {
   to: string;
   label: string;
   icon: ComponentType<{ className?: string }>;
   feature?: "analytics.basic";
+  permission?: Permission;
 };
 
 type NavGroup = {
@@ -25,6 +28,8 @@ type NavGroup = {
   items: NavItem[];
 };
 
+
+
 const groups: NavGroup[] = [
   {
     id: "operate",
@@ -32,11 +37,11 @@ const groups: NavGroup[] = [
     items: [
       { to: "/dashboard", label: "Overview", icon: Home },
       { to: "/properties", label: "Properties", icon: BedDouble },
-      { to: "/reservations", label: "Reservations", icon: Calendar },
+      { to: "/reservations", label: "Reservations", icon: Calendar, permission: "bookings.read" },
       { to: "/housekeeping", label: "Housekeeping", icon: Sprout },
       { to: "/maintenance", label: "Maintenance", icon: Wrench },
       { to: "/tours", label: "Tours", icon: MapPin },
-      { to: "/sync", label: "Calendar Sync", icon: CalendarSync },
+      { to: "/sync", label: "Calendar Sync", icon: CalendarSync, permission: "availability.write" },
       { to: "/incidents", label: "Incidents", icon: ShieldAlert },
     ],
   },
@@ -58,17 +63,17 @@ const groups: NavGroup[] = [
       { to: "/ai-command", label: "AI Command", icon: Brain },
       { to: "/planner", label: "Planner AI", icon: RouteIcon },
       { to: "/concierge", label: "Concierge", icon: Bot },
-      { to: "/revenue", label: "Revenue AI", icon: TrendingUp },
+      { to: "/revenue", label: "Revenue AI", icon: TrendingUp, permission: "pricing.write" },
     ],
   },
   {
     id: "finance",
     label: "Finance",
     items: [
-      { to: "/invoices", label: "Invoices", icon: FileText },
-      { to: "/wallet", label: "Wallet & Payouts", icon: Wallet },
-      { to: "/mpesa", label: "M-PESA", icon: Smartphone },
-      { to: "/analytics", label: "Analytics", icon: ChartBar, feature: "analytics.basic" },
+      { to: "/invoices", label: "Invoices", icon: FileText, permission: "finance.read" },
+      { to: "/wallet", label: "Wallet & Payouts", icon: Wallet, permission: "finance.read" },
+      { to: "/mpesa", label: "M-PESA", icon: Smartphone, permission: "finance.read" },
+      { to: "/analytics", label: "Analytics", icon: ChartBar, feature: "analytics.basic", permission: "reports.read" },
       { to: "/subscription", label: "Subscription", icon: CreditCard },
     ],
   },
@@ -76,7 +81,7 @@ const groups: NavGroup[] = [
     id: "team",
     label: "Team",
     items: [
-      { to: "/team", label: "Members", icon: Users },
+      { to: "/team", label: "Members", icon: Users, permission: "team.invite" },
       { to: "/settings", label: "Settings", icon: Settings },
     ],
   },
@@ -119,6 +124,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   const isAdmin = data?.isPlatformAdmin ?? false;
   const plan = (data?.currentOrg?.plan ?? null) as Plan | null;
+  const { can, isLoading: permsLoading } = usePermissions();
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -129,7 +135,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     setOpenGroups((s) => ({ ...s, [id]: !s[id] }));
   }
 
-  const visibleGroups = groups.filter((g) => !g.adminOnly || isAdmin);
+  const visibleGroups = groups
+    .filter((g) => !g.adminOnly || isAdmin)
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((it) => !it.permission || permsLoading || can(it.permission)),
+    }))
+    .filter((g) => g.items.length > 0);
 
   const sidebar = (
     <aside className="flex h-full min-h-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">

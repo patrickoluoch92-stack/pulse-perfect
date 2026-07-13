@@ -2739,6 +2739,51 @@ export type Database = {
           },
         ]
       }
+      organization_member_permissions: {
+        Row: {
+          effect: string
+          granted_at: string
+          granted_by: string | null
+          id: string
+          org_id: string
+          permission: string
+          user_id: string
+        }
+        Insert: {
+          effect?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          org_id: string
+          permission: string
+          user_id: string
+        }
+        Update: {
+          effect?: string
+          granted_at?: string
+          granted_by?: string | null
+          id?: string
+          org_id?: string
+          permission?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_member_permissions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_member_permissions_permission_fkey"
+            columns: ["permission"]
+            isOneToOne: false
+            referencedRelation: "rbac_permissions"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string
@@ -3365,6 +3410,53 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      rbac_permissions: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          key: string
+          label: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          key: string
+          label: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          key?: string
+          label?: string
+        }
+        Relationships: []
+      }
+      rbac_role_defaults: {
+        Row: {
+          permission: string
+          role: Database["public"]["Enums"]["org_role"]
+        }
+        Insert: {
+          permission: string
+          role: Database["public"]["Enums"]["org_role"]
+        }
+        Update: {
+          permission?: string
+          role?: Database["public"]["Enums"]["org_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rbac_role_defaults_permission_fkey"
+            columns: ["permission"]
+            isOneToOne: false
+            referencedRelation: "rbac_permissions"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       recommendation_events: {
         Row: {
@@ -4355,6 +4447,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_permission: {
+        Args: { _org_id: string; _permission: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -4420,7 +4516,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "super_admin" | "support"
       commission_scope: "global" | "county" | "category" | "property" | "org"
       invoice_status: "draft" | "sent" | "paid" | "void" | "overdue"
       marketplace_booking_status:
@@ -4508,7 +4604,13 @@ export type Database = {
         | "beach_plot"
         | "lakefront_plot"
         | "riverfront_plot"
-      org_role: "owner" | "admin" | "manager" | "staff"
+      org_role:
+        | "owner"
+        | "admin"
+        | "manager"
+        | "staff"
+        | "enterprise_admin"
+        | "guest"
       payout_status:
         | "requested"
         | "approved"
@@ -4679,7 +4781,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "super_admin", "support"],
       commission_scope: ["global", "county", "category", "property", "org"],
       invoice_status: ["draft", "sent", "paid", "void", "overdue"],
       marketplace_booking_status: [
@@ -4770,7 +4872,14 @@ export const Constants = {
         "lakefront_plot",
         "riverfront_plot",
       ],
-      org_role: ["owner", "admin", "manager", "staff"],
+      org_role: [
+        "owner",
+        "admin",
+        "manager",
+        "staff",
+        "enterprise_admin",
+        "guest",
+      ],
       payout_status: [
         "requested",
         "approved",
