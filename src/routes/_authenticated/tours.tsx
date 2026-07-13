@@ -787,9 +787,7 @@ function BookingsTab({ orgId }: { orgId: string }) {
       )}
 
       {q.data && q.data.length === 0 && upcomingDeps.length ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          No bookings yet.
-        </p>
+        <EmptyState title="No bookings yet" />
       ) : null}
 
       <div className="overflow-x-auto rounded-lg border">
