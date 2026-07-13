@@ -111,9 +111,12 @@ function CouponsAdmin() {
       </header>
 
       <div className="rounded-xl border bg-card">
-        {list.isLoading && <p className="p-6 text-sm text-muted-foreground">Loading…</p>}
-        {list.data?.rows?.length === 0 && <p className="p-6 text-sm text-muted-foreground">No coupons yet.</p>}
+        {list.isLoading && <LoadingState />}
+        {!list.isLoading && list.data?.rows?.length === 0 && (
+          <div className="p-6"><EmptyState icon={Ticket} title="No coupons yet" description="Create a discount code to reward guests or run promotions." /></div>
+        )}
         <ul className="divide-y">
+
           {list.data?.rows?.map((c: any) => (
             <li key={c.id} className="flex items-center justify-between gap-4 p-4">
               <div>
