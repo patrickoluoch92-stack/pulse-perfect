@@ -155,7 +155,7 @@ function TeamPage() {
           <h2 className="font-medium">Pending invitations</h2>
         </div>
         {invites.isLoading ? (
-          <p className="p-5 text-sm text-muted-foreground">Loading…</p>
+          <LoadingState label="Loading invitations…" className="py-8" />
         ) : (invites.data?.filter((i) => !i.accepted_at).length ?? 0) === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">No pending invitations.</p>
         ) : (
