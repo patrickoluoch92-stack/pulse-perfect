@@ -124,6 +124,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   const isAdmin = data?.isPlatformAdmin ?? false;
   const plan = (data?.currentOrg?.plan ?? null) as Plan | null;
+  const { can, isLoading: permsLoading } = usePermissions();
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -134,7 +135,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     setOpenGroups((s) => ({ ...s, [id]: !s[id] }));
   }
 
-  const visibleGroups = groups.filter((g) => !g.adminOnly || isAdmin);
+  const visibleGroups = groups
+    .filter((g) => !g.adminOnly || isAdmin)
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((it) => !it.permission || permsLoading || can(it.permission)),
+    }))
+    .filter((g) => g.items.length > 0);
 
   const sidebar = (
     <aside className="flex h-full min-h-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
