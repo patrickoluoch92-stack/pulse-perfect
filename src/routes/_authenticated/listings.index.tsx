@@ -3,7 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Send, Undo2, Shield, ExternalLink, Calendar, Upload, BarChart3 } from "lucide-react";
+import { Plus, Pencil, Trash2, Send, Undo2, Shield, ExternalLink, Calendar, Upload, BarChart3, Building2 } from "lucide-react";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 import { authPageMeta } from "@/lib/route-meta";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
@@ -130,15 +131,21 @@ function ListingsPage() {
 
         </header>
 
-        {listings.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+        {listings.isLoading && <LoadingState label="Loading your listings…" />}
 
         {listings.data && listings.data.length === 0 && (
-          <div className="rounded-xl border bg-card p-12 text-center">
-            <p className="text-muted-foreground">
-              No listings yet. Create one and submit it for admin review.
-            </p>
-          </div>
+          <EmptyState
+            title="No listings yet"
+            description="Create your first property listing and submit it for admin review to reach travellers and renters."
+            icon={Building2}
+            action={
+              <Button onClick={() => setOpenCreate(true)} disabled={!orgId}>
+                <Plus className="mr-2 h-4 w-4" aria-hidden /> New listing
+              </Button>
+            }
+          />
         )}
+
 
         {listings.data && listings.data.length > 0 && (
           <div className="overflow-hidden rounded-xl border bg-card">
@@ -183,20 +190,20 @@ function ListingsPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         {p.status === "approved" && (
-                          <Button asChild variant="ghost" size="sm">
+                          <Button asChild variant="ghost" size="sm" title="View public page" aria-label={`View public page for ${p.name}`}>
                             <a href={`/marketplace/p/${p.slug}`} target="_blank" rel="noopener">
-                              <ExternalLink className="h-4 w-4" />
+                              <ExternalLink className="h-4 w-4" aria-hidden />
                             </a>
                           </Button>
                         )}
-                        <Button asChild variant="ghost" size="sm" title="Edit">
+                        <Button asChild variant="ghost" size="sm" title="Edit" aria-label={`Edit ${p.name}`}>
                           <Link to="/listings/$id" params={{ id: p.id }}>
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-4 w-4" aria-hidden />
                           </Link>
                         </Button>
-                        <Button asChild variant="ghost" size="sm" title="Availability">
+                        <Button asChild variant="ghost" size="sm" title="Availability" aria-label={`Manage availability for ${p.name}`}>
                           <Link to="/listings/$id/availability" params={{ id: p.id }}>
-                            <Calendar className="h-4 w-4" />
+                            <Calendar className="h-4 w-4" aria-hidden />
                           </Link>
                         </Button>
 
@@ -206,8 +213,9 @@ function ListingsPage() {
                             onClick={() => submit.mutate(p.id)}
                             disabled={submit.isPending}
                             title="Submit for review"
+                            aria-label={`Submit ${p.name} for review`}
                           >
-                            <Send className="h-4 w-4" />
+                            <Send className="h-4 w-4" aria-hidden />
                           </Button>
                         )}
                         {p.status === "pending" && (
@@ -216,16 +224,19 @@ function ListingsPage() {
                             onClick={() => withdraw.mutate(p.id)}
                             disabled={withdraw.isPending}
                             title="Move back to draft"
+                            aria-label={`Withdraw ${p.name} back to draft`}
                           >
-                            <Undo2 className="h-4 w-4" />
+                            <Undo2 className="h-4 w-4" aria-hidden />
                           </Button>
                         )}
                         <Button
                           variant="ghost" size="sm"
                           onClick={() => setPendingDelete(p.id)}
                           className="text-destructive"
+                          title="Delete listing"
+                          aria-label={`Delete ${p.name}`}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" aria-hidden />
                         </Button>
                       </div>
                     </td>

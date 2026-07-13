@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { FileText, Plus, Trash2, Wand2 } from "lucide-react";
+import { LoadingState, EmptyState } from "@/components/ui/states";
 
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 import { listReservations } from "@/lib/reservations.functions";
@@ -107,17 +108,18 @@ function InvoicesPage() {
       </header>
 
       {invoices.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <LoadingState label="Loading invoices…" />
       ) : rows.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
-          <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
-            <FileText className="h-6 w-6" />
-          </div>
-          <h3 className="font-display text-xl font-semibold">No invoices yet</h3>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-            Generate one from an existing reservation or create a blank invoice.
-          </p>
-        </div>
+        <EmptyState
+          title="No invoices yet"
+          description="Generate one from an existing reservation or create a blank invoice."
+          icon={FileText}
+          action={
+            <Button asChild>
+              <Link to="/invoices/new"><Plus className="mr-2 h-4 w-4" aria-hidden /> New invoice</Link>
+            </Button>
+          }
+        />
       ) : (
         <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
           <table className="w-full text-sm">
