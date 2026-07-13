@@ -122,6 +122,10 @@ function AiOpsPage() {
           <CardHeader><CardTitle className="text-base">Recent runs</CardTitle></CardHeader>
           <CardContent className="text-xs">
             <div className="space-y-1 max-h-[420px] overflow-auto">
+              {runs.isLoading && <LoadingState label="Loading runs…" />}
+              {!runs.isLoading && ((runs.data as any)?.runs ?? []).length === 0 && (
+                <EmptyState title="No recent runs" description="Agent runs will appear here as jobs execute." />
+              )}
               {((runs.data as any)?.runs ?? []).map((r: any) => (
                 <div key={r.id} className="flex justify-between border-b py-1">
                   <span>
@@ -140,7 +144,10 @@ function AiOpsPage() {
           <CardHeader><CardTitle className="text-base">Recent decisions</CardTitle></CardHeader>
           <CardContent className="text-xs">
             <div className="space-y-1 max-h-[420px] overflow-auto">
-              {((decisions.data as any)?.decisions ?? []).map((d: any) => (
+              {decisions.isLoading && <LoadingState label="Loading decisions…" />}
+              {!decisions.isLoading && ((decisions.data as any)?.decisions ?? []).length === 0 && (
+                <EmptyState title="No decisions logged" description="Agent decisions will appear here." />
+              )}
                 <div key={d.id} className="border-b py-1">
                   <div className="flex justify-between">
                     <span><Badge className="mr-2">{d.agent_slug}</Badge>{d.action}</span>
