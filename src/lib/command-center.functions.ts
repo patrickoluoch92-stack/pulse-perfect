@@ -4,7 +4,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { hasOrgRole } from "@/lib/access";
+import { hasOrgRole, isPlatformAdmin } from "@/lib/access";
 
 const input = z.object({ orgId: z.string().uuid() });
 
@@ -19,7 +19,9 @@ export const getOwnerCommandCenter = createServerFn({ method: "GET" })
   .inputValidator((raw: unknown) => input.parse(raw))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const isMember = await hasOrgRole(supabase, userId, data.orgId, ["owner","admin","manager","member"]);
+    const isMember =
+      (await isPlatformAdmin(supabase, userId)) ||
+      (await hasOrgRole(supabase, userId, data.orgId, ["owner", "enterprise_admin", "admin", "manager", "staff"]));
     if (!isMember) throw new Error("Forbidden");
 
     const now = new Date();
