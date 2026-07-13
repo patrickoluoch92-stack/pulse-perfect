@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { PropertyReviews } from "@/components/PropertyReviews";
 import { BookingDialog } from "@/components/BookingDialog";
 import { PlanWithAI } from "@/components/plan-with-ai";
+import { formatCurrency } from "@/lib/format";
 
 const propQuery = (slug: string) =>
   queryOptions({
