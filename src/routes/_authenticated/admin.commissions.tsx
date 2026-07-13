@@ -73,7 +73,7 @@ function CommissionsAdmin() {
 
           <Card>
             <CardContent className="p-0">
-              {rules.data?.rows?.length === 0 && <p className="p-6 text-sm text-muted-foreground">No rules yet.</p>}
+              {rules.data?.rows?.length === 0 && <EmptyState title="No rules yet" />}
               <ul className="divide-y">
                 {rules.data?.rows?.map((r: any) => (
                   <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
