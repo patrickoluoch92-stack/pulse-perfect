@@ -67,9 +67,6 @@ function PlannerPage() {
   const chatFn = useServerFn(chatOnPlan);
   const delFn = useServerFn(deletePlannerSession);
 
-  const [activeId, setActiveId] = useState<string | undefined>();
-  const [module, setModule] = useState<PlannerModule>("travel");
-  const [county, setCounty] = useState("");
   const search = Route.useSearch();
   const [activeId, setActiveId] = useState<string | undefined>();
   const [module, setModule] = useState<PlannerModule>(search.module ?? "travel");
