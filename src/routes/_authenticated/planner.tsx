@@ -21,7 +21,20 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 
+type PlannerSearch = {
+  seed_intent?: string;
+  module?: PlannerModule;
+  county?: string;
+  property_slug?: string;
+};
+
 export const Route = createFileRoute("/_authenticated/planner")({
+  validateSearch: (search: Record<string, unknown>): PlannerSearch => ({
+    seed_intent: typeof search.seed_intent === "string" ? search.seed_intent : undefined,
+    module: (PLANNER_MODULES as readonly string[]).includes(String(search.module)) ? (search.module as PlannerModule) : undefined,
+    county: typeof search.county === "string" ? search.county : undefined,
+    property_slug: typeof search.property_slug === "string" ? search.property_slug : undefined,
+  }),
   head: () => ({
     meta: authPageMeta({
       title: "HostPulse Planner AI",
