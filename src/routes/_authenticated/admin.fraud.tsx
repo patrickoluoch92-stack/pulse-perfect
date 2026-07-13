@@ -62,7 +62,7 @@ function FraudPage() {
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><Activity className="h-4 w-4" /> Recent audit log</CardTitle></CardHeader>
         <CardContent className="p-0">
-          {(data?.audit ?? []).length === 0 && <p className="p-6 text-sm text-muted-foreground">No audit events.</p>}
+          {(data?.audit ?? []).length === 0 && !isLoading && <div className="p-6"><EmptyState title="No audit events" description="Admin and system actions will be recorded here." /></div>}
           <ul className="divide-y">
             {(data?.audit ?? []).slice(0, 20).map((a: any) => (
               <li key={a.id} className="flex items-center justify-between gap-3 p-3 text-sm">
