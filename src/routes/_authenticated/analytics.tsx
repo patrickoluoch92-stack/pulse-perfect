@@ -210,9 +210,11 @@ function AnalyticsPage() {
                   );
                 })
             ) : (
-              <p className="py-12 text-center text-sm text-muted-foreground">
-                {q.isLoading ? "Loading…" : "No bookings in this period."}
-              </p>
+              <div className="py-8">
+                {q.isLoading
+                  ? <LoadingState label="Loading top listings…" />
+                  : <EmptyState title="No bookings in this period" description="Adjust the date range to see performance." />}
+              </div>
             )}
           </div>
         </section>
