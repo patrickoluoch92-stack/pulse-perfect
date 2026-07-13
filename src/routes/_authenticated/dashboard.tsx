@@ -114,7 +114,12 @@ function CommandCenter() {
           </CardHeader>
           <CardContent className="space-y-2">
             {(d?.bookings.recent ?? []).length === 0 && (
-              <p className="text-sm text-muted-foreground">No bookings yet. Publish a listing to get started.</p>
+              <EmptyState
+                title="No bookings yet"
+                description="Publish a listing to start attracting guests, or use Planner AI to shape a launch strategy."
+                icon={Calendar}
+                action={<PlanWithAI label="Plan launch with AI" seed={{ seed_intent: "New property launch playbook for Kenya" }} />}
+              />
             )}
             {d?.bookings.recent.map((b) => (
               <div key={b.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md border p-3 sm:flex sm:justify-between">
