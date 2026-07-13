@@ -85,43 +85,56 @@ function DiscoverIndex() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(listing.data?.rows ?? []).map((r: any) => (
-            <Link
-              key={r.id}
-              to="/discover/$slug"
-              params={{ slug: r.slug }}
-              className="group"
-            >
-              <Card className="h-full transition hover:shadow-md">
-                <CardHeader>
-                  <CardTitle className="line-clamp-2 text-base">{r.name}</CardTitle>
-                  <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
-                    <Badge variant="secondary">{r.property_type ?? "unknown"}</Badge>
-                    {r.county_code && <Badge variant="outline">County {r.county_code}</Badge>}
-                    {r.town && (
-                      <span className="inline-flex items-center gap-1">
-                        <MapPin className="h-3 w-3" /> {r.town}
-                      </span>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="line-clamp-3 text-sm text-muted-foreground">
-                    {r.ai_description ?? "No description yet."}
-                  </p>
-                  <div className="mt-3 text-xs text-muted-foreground">
-                    Quality {r.quality_score}/100
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+            <div key={r.id} className="group relative">
+              <Link
+                to="/discover/$slug"
+                params={{ slug: r.slug }}
+                aria-label={`View ${r.name}`}
+              >
+                <Card className="h-full pb-14 transition hover:shadow-md">
+                  <CardHeader>
+                    <CardTitle className="line-clamp-2 text-base">{r.name}</CardTitle>
+                    <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
+                      <Badge variant="secondary">{r.property_type ?? "unknown"}</Badge>
+                      {r.county_code && <Badge variant="outline">County {r.county_code}</Badge>}
+                      {r.town && (
+                        <span className="inline-flex items-center gap-1">
+                          <MapPin className="h-3 w-3" /> {r.town}
+                        </span>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="line-clamp-3 text-sm text-muted-foreground">
+                      {r.ai_description ?? "No description yet."}
+                    </p>
+                    <div className="mt-3 text-xs text-muted-foreground">
+                      Quality {r.quality_score}/100
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+              <div className="absolute inset-x-3 bottom-3 flex justify-end">
+                <PlanWithAI
+                  seed={{
+                    module: "travel",
+                    seed_intent: `Plan a trip to ${r.name}${r.town ? ` in ${r.town}` : ""}`,
+                  }}
+                  variant="secondary"
+                />
+              </div>
+            </div>
           ))}
           {listing.isLoading && (
-            <p className="col-span-full text-sm text-muted-foreground">Loading…</p>
+            <div className="col-span-full"><LoadingState label="Loading discoveries…" /></div>
           )}
           {!listing.isLoading && (listing.data?.rows?.length ?? 0) === 0 && (
-            <p className="col-span-full text-sm text-muted-foreground">
-              No properties yet. The discovery engine runs in the background — check back soon.
-            </p>
+            <div className="col-span-full">
+              <EmptyState
+                title="No discoveries yet"
+                description="The discovery engine runs in the background — check back soon."
+              />
+            </div>
           )}
         </div>
 
