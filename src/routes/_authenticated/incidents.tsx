@@ -189,6 +189,13 @@ function IncidentsPage() {
                 </TableCell>
               </TableRow>
             ))}
+            {query.isLoading && rows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={6} className="py-8">
+                  <LoadingState label="Loading incidents…" />
+                </TableCell>
+              </TableRow>
+            )}
             {!query.isLoading && rows.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="py-12 text-center text-sm text-muted-foreground">
