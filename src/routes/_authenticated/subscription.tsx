@@ -11,6 +11,7 @@ import {
   getMySubscription, listBillingHistory, cancelSubscription, resumeSubscription,
 } from "@/lib/subscription.functions";
 import { formatKES } from "@/lib/format";
+import { EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/subscription")({
   head: () => ({ meta: [{ title: "Subscription — HostPulse" }] }),
