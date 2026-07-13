@@ -308,6 +308,52 @@ export const setMobilityVehicleRates = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// ---------- SEASONAL / PROMOTIONAL RATES ----------
+const SeasonalRateInput = z.object({
+  vehicleId: z.string().uuid(),
+  label: z.string().min(1).max(120),
+  startsOn: z.string(),
+  endsOn: z.string(),
+  unit: z.enum(["hour", "day", "week", "month"]),
+  priceKes: z.number().nonnegative(),
+  promoCode: z.string().max(40).optional(),
+});
+
+export const upsertMobilitySeasonalRate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => SeasonalRateInput.extend({ id: z.string().uuid().optional() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const payload = {
+      vehicle_id: data.vehicleId,
+      label: data.label,
+      starts_on: data.startsOn,
+      ends_on: data.endsOn,
+      unit: data.unit,
+      price_kes: data.priceKes,
+      promo_code: data.promoCode ?? null,
+    };
+    if (data.id) {
+      const { error } = await sb.from("mobility_seasonal_rates").update(payload).eq("id", data.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await sb.from("mobility_seasonal_rates").insert(payload);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+export const deleteMobilitySeasonalRate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    await sb.from("mobility_seasonal_rates").delete().eq("id", data.id);
+    return { ok: true };
+  });
+
+
+
 // ---------- IMAGES ----------
 export const addMobilityVehicleImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
