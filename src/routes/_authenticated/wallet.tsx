@@ -184,7 +184,7 @@ function WalletPage() {
         <CardHeader><CardTitle>Payout history</CardTitle></CardHeader>
         <CardContent className="p-0">
           {payouts.data?.rows?.length === 0 && (
-            <p className="p-6 text-sm text-muted-foreground">No payouts yet.</p>
+            <EmptyState title="No payouts yet" />
           )}
           <ul className="divide-y">
             {payouts.data?.rows?.map((p: any) => (
