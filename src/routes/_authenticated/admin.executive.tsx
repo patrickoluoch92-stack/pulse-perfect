@@ -11,6 +11,8 @@ import {
   CreditCard, DollarSign, Gauge, HeartHandshake, Landmark, LifeBuoy, Megaphone,
   ShieldCheck, Sparkles, Star, TrendingUp, Users, Wallet, Zap,
 } from "lucide-react";
+import { LoadingState, EmptyState } from "@/components/ui/states";
+import { formatKES } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin/executive")({
   head: () => ({
