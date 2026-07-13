@@ -44,6 +44,15 @@ function CommandCenter() {
 
   const d = q.data;
 
+  if (q.isLoading && !d) {
+    return (
+      <div className="mx-auto max-w-7xl p-4 md:p-8">
+        <LoadingState label="Loading your command center…" />
+      </div>
+    );
+  }
+
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8">
       {/* Welcome + health score */}
