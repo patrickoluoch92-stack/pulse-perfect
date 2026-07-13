@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PlanWithAI } from "@/components/plan-with-ai";
 
 export const Route = createFileRoute("/rentals/$child")({
   loader: async ({ params }) => {
@@ -90,10 +91,18 @@ function ChildCategoryPage() {
             <Link to="/rentals" className="hover:underline">{parent?.name ?? "Rentals"}</Link> /{" "}
             <span className="text-foreground">{node.name}</span>
           </nav>
-          <h1 className="text-3xl font-semibold tracking-tight">{node.name} for Rent</h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
-            {node.seo_description ?? `Browse ${node.name.toLowerCase()} listings across Kenya. Filter by county, town, and budget.`}
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-3xl font-semibold tracking-tight">{node.name} for Rent</h1>
+              <p className="mt-2 max-w-2xl text-muted-foreground">
+                {node.seo_description ?? `Browse ${node.name.toLowerCase()} listings across Kenya. Filter by county, town, and budget.`}
+              </p>
+            </div>
+            <PlanWithAI
+              label="Plan with AI"
+              seed={{ seed_intent: `Help me find a ${node.name.toLowerCase()} to rent in Kenya`, module: "rental", child_category: node.slug }}
+            />
+          </div>
 
           {siblings.length > 1 && (
             <div className="mt-6 flex flex-wrap gap-2">

@@ -12,6 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { LoadingState, EmptyState } from "@/components/ui/states";
+import { PlanWithAI } from "@/components/plan-with-ai";
+import { formatKES } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -23,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: CommandCenter,
 });
 
-const KES = (v: number) => `KES ${Math.round(v).toLocaleString()}`;
+const KES = (v: number) => formatKES(v);
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
 function CommandCenter() {
@@ -40,6 +43,15 @@ function CommandCenter() {
   });
 
   const d = q.data;
+
+  if (q.isLoading && !d) {
+    return (
+      <div className="mx-auto max-w-7xl p-4 md:p-8">
+        <LoadingState label="Loading your command center…" />
+      </div>
+    );
+  }
+
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8">
@@ -62,9 +74,9 @@ function CommandCenter() {
         <Card className="border-amber-500/40 bg-amber-500/5">
           <CardContent className="space-y-2 pt-4">
             {d.alerts.map((a, i) => (
-              <Link key={i} to={a.href ?? "/dashboard"} className="flex items-center justify-between gap-3 rounded-md p-2 hover:bg-muted/50">
+              <Link key={i} to={a.href ?? "/dashboard"} aria-label={`Alert: ${a.message}`} className="flex items-center justify-between gap-3 rounded-md p-2 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <div className="flex min-w-0 items-center gap-2 text-sm">
-                  <AlertTriangle className={`h-4 w-4 shrink-0 ${
+                  <AlertTriangle aria-hidden className={`h-4 w-4 shrink-0 ${
                     a.level === "error" ? "text-destructive" : a.level === "warn" ? "text-amber-500" : "text-muted-foreground"
                   }`} />
                   <span className="truncate">{a.message}</span>
@@ -102,7 +114,12 @@ function CommandCenter() {
           </CardHeader>
           <CardContent className="space-y-2">
             {(d?.bookings.recent ?? []).length === 0 && (
-              <p className="text-sm text-muted-foreground">No bookings yet. Publish a listing to get started.</p>
+              <EmptyState
+                title="No bookings yet"
+                description="Publish a listing to start attracting guests, or use Planner AI to shape a launch strategy."
+                icon={Calendar}
+                action={<PlanWithAI label="Plan launch with AI" seed={{ seed_intent: "New property launch playbook for Kenya" }} />}
+              />
             )}
             {d?.bookings.recent.map((b) => (
               <div key={b.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md border p-3 sm:flex sm:justify-between">
