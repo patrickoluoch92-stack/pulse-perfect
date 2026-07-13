@@ -372,50 +372,64 @@ export function PropertyCard({
   countyName?: string;
 }) {
   return (
-    <Link
-      to="/marketplace/p/$slug"
-      params={{ slug: property.slug }}
-      className="group overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-lg"
-    >
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        {property.main_image_url ? (
-          <img
-            src={property.main_image_url}
-            alt={property.name}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-          />
-        ) : (
-          <div className="grid h-full w-full place-items-center text-muted-foreground">
-            <MapPin className="h-8 w-8" />
-          </div>
-        )}
-        {property.is_featured && (
-          <Badge className="absolute left-3 top-3 bg-yellow-500 hover:bg-yellow-500">
-            Featured
-          </Badge>
-        )}
-      </div>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold leading-tight">{property.name}</h3>
+    <div className="group relative overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-lg">
+      <Link
+        to="/marketplace/p/$slug"
+        params={{ slug: property.slug }}
+        className="block"
+        aria-label={`View ${property.name}`}
+      >
+        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+          {property.main_image_url ? (
+            <img
+              src={property.main_image_url}
+              alt={property.name}
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform group-hover:scale-105"
+            />
+          ) : (
+            <div className="grid h-full w-full place-items-center text-muted-foreground">
+              <MapPin className="h-8 w-8" />
+            </div>
+          )}
+          {property.is_featured && (
+            <Badge className="absolute left-3 top-3 bg-yellow-500 hover:bg-yellow-500">
+              Featured
+            </Badge>
+          )}
         </div>
-        <p className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
-          {categoryLabel(property.category)} · {property.town}
-          {countyName ? `, ${countyName}` : ""}
-        </p>
-        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-          {property.description}
-        </p>
-        {property.price_per_night != null && (
-          <p className="mt-3 text-sm">
-            <span className="font-semibold">
-              {property.currency} {Number(property.price_per_night).toLocaleString()}
-            </span>{" "}
-            <span className="text-muted-foreground">/ night</span>
+        <div className="p-4 pb-14">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-semibold leading-tight">{property.name}</h3>
+          </div>
+          <p className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
+            {categoryLabel(property.category)} · {property.town}
+            {countyName ? `, ${countyName}` : ""}
           </p>
-        )}
+          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+            {property.description}
+          </p>
+          {property.price_per_night != null && (
+            <p className="mt-3 text-sm">
+              <span className="font-semibold">
+                {property.currency} {Number(property.price_per_night).toLocaleString()}
+              </span>{" "}
+              <span className="text-muted-foreground">/ night</span>
+            </p>
+          )}
+        </div>
+      </Link>
+      <div className="pointer-events-none absolute inset-x-3 bottom-3 flex justify-end">
+        <div className="pointer-events-auto">
+          <PlanWithAI
+            module="travel"
+            seedIntent={`Plan a trip to ${property.name} in ${property.town}${countyName ? `, ${countyName}` : ""}`}
+            propertySlug={property.slug}
+            size="sm"
+            variant="secondary"
+          />
+        </div>
       </div>
-    </Link>
+    </div>
   );
 }
