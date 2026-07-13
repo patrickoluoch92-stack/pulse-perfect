@@ -100,7 +100,7 @@ function TeamPage() {
           <h2 className="font-medium">Members</h2>
         </div>
         {members.isLoading ? (
-          <p className="p-5 text-sm text-muted-foreground">Loading…</p>
+          <LoadingState label="Loading members…" className="py-8" />
         ) : (members.data?.length ?? 0) === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">No members.</p>
         ) : (
