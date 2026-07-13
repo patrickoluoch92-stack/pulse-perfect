@@ -218,7 +218,7 @@ function WalletPage() {
         <CardHeader><CardTitle>Recent wallet activity</CardTitle></CardHeader>
         <CardContent className="p-0">
           {ledger.data?.rows?.length === 0 && (
-            <p className="p-6 text-sm text-muted-foreground">No activity yet.</p>
+            <EmptyState title="No activity yet" />
           )}
           <ul className="divide-y">
             {ledger.data?.rows?.map((e: any) => (
