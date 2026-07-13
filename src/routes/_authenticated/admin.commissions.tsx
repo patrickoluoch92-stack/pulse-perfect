@@ -83,7 +83,7 @@ function CommissionsAdmin() {
                         <Badge variant="outline" className="capitalize">{r.scope}{r.scope_value ? `: ${r.scope_value}` : ""}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        <Percent className="inline h-3 w-3" /> {r.rate_percent}% + KES {r.flat_amount} · priority {r.priority}
+                        <Percent className="inline h-3 w-3" /> {r.rate_percent}% + {formatKES(Number(r.flat_amount ?? 0))} · priority {r.priority}
                       </p>
                       {r.notes && <p className="text-xs text-muted-foreground">{r.notes}</p>}
                     </div>
