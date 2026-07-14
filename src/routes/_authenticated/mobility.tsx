@@ -329,8 +329,16 @@ function VehicleForm({ provider, orgId, upsert, onSaved }: {
               {MOBILITY_CATEGORIES.map((c) => (<option key={c} value={c}>{MOBILITY_CATEGORY_LABELS[c]}</option>))}
             </select>
           </div>
+          <div>
+            <Label>Vehicle type (body style)</Label>
+            <select value={f.vehicleType} onChange={(e) => setF({ ...f, vehicleType: e.target.value as any })} className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm">
+              {MOBILITY_VEHICLE_TYPES.map((t) => (<option key={t} value={t}>{MOBILITY_VEHICLE_TYPE_LABELS?.[t] ?? t}</option>))}
+            </select>
+          </div>
           <Field label="Make" value={f.make} onChange={(v) => setF({ ...f, make: v })} placeholder="Toyota" />
           <Field label="Model" value={f.model} onChange={(v) => setF({ ...f, model: v })} placeholder="Land Cruiser Prado" />
+          <Field label="Trim" value={f.trim} onChange={(v) => setF({ ...f, trim: v })} placeholder="TX-L" />
+          <Field label="Color" value={f.color} onChange={(v) => setF({ ...f, color: v })} placeholder="Pearl white" />
           <Field label="Year" type="number" value={f.year} onChange={(v) => setF({ ...f, year: v })} />
           <Field label="Registration plate" value={f.registrationPlate} onChange={(v) => setF({ ...f, registrationPlate: v })} placeholder="KDA 123A" />
           <div>
