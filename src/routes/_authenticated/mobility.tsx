@@ -368,11 +368,27 @@ function VehicleForm({ provider, orgId, upsert, onSaved }: {
           <Field label="Luggage (bags)" type="number" value={f.luggage} onChange={(v) => setF({ ...f, luggage: v })} />
           <Field label="Min driver age" type="number" value={f.minDriverAge} onChange={(v) => setF({ ...f, minDriverAge: v })} />
           <Field label="Security deposit (KES)" type="number" value={f.securityDepositKes} onChange={(v) => setF({ ...f, securityDepositKes: v })} />
+          <Field label="Promo daily price (KES)" type="number" value={f.promoPriceKes} onChange={(v) => setF({ ...f, promoPriceKes: v })} />
           <Field label="Base town / city" value={f.town} onChange={(v) => setF({ ...f, town: v })} />
           <div className="sm:col-span-3"><Label>Mileage policy</Label><Input value={f.mileagePolicy} onChange={(e) => setF({ ...f, mileagePolicy: e.target.value })} placeholder="200 km/day, then KES 30/km" /></div>
           <div className="sm:col-span-3"><Label>Fuel policy</Label><Input value={f.fuelPolicy} onChange={(e) => setF({ ...f, fuelPolicy: e.target.value })} placeholder="Full-to-full" /></div>
           <div className="sm:col-span-3"><Label>License requirements</Label><Input value={f.licenseRequirements} onChange={(e) => setF({ ...f, licenseRequirements: e.target.value })} placeholder="Valid Kenyan or international license, 2+ years" /></div>
           <div className="sm:col-span-3"><Label>Description</Label><Textarea rows={3} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></div>
+          <div className="sm:col-span-3">
+            <Label>Features & flags</Label>
+            <div className="mt-2 grid gap-2 sm:grid-cols-3">
+              {flag("hasAc", "Air conditioning")}
+              {flag("hasGps", "GPS")}
+              {flag("hasBluetooth", "Bluetooth")}
+              {flag("hasChildSeat", "Child seat")}
+              {flag("isLuxury", "Luxury")}
+              {flag("isElectric", "Electric")}
+              {flag("isHybrid", "Hybrid")}
+              {flag("isWedding", "Wedding-ready")}
+              {flag("isSafari", "Safari-ready")}
+              {flag("instantBook", "Instant book")}
+            </div>
+          </div>
         </div>
         <Button disabled={!f.make || !f.model || save.isPending} onClick={() => save.mutate()}>
           <Plus className="mr-1 h-4 w-4" />{save.isPending ? "Adding…" : "Add vehicle"}
