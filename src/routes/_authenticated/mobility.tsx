@@ -250,7 +250,8 @@ function VehicleForm({ provider, orgId, upsert, onSaved }: {
 }) {
   const [f, setF] = useState({
     category: "self_drive" as (typeof MOBILITY_CATEGORIES)[number],
-    make: "", model: "", year: "", seats: "5", luggage: "",
+    vehicleType: "sedan" as (typeof MOBILITY_VEHICLE_TYPES)[number],
+    make: "", model: "", trim: "", color: "", year: "", seats: "5", luggage: "",
     transmission: "automatic" as "automatic" | "manual",
     fuelType: "petrol",
     driveType: "2wd" as "2wd" | "4wd" | "awd",
@@ -258,8 +259,12 @@ function VehicleForm({ provider, orgId, upsert, onSaved }: {
     town: "", registrationPlate: "",
     minDriverAge: "23",
     securityDepositKes: "",
+    promoPriceKes: "",
     mileagePolicy: "", fuelPolicy: "", licenseRequirements: "",
     description: "",
+    isLuxury: false, isElectric: false, isHybrid: false,
+    isWedding: false, isSafari: false, instantBook: false,
+    hasAc: true, hasGps: false, hasBluetooth: false, hasChildSeat: false,
   });
 
   const save = useMutation({
@@ -268,7 +273,10 @@ function VehicleForm({ provider, orgId, upsert, onSaved }: {
         providerId: provider.id,
         orgId,
         category: f.category,
+        vehicleType: f.vehicleType,
         make: f.make, model: f.model,
+        trim: f.trim || undefined,
+        color: f.color || undefined,
         year: f.year ? Number(f.year) : undefined,
         transmission: f.transmission,
         fuelType: f.fuelType,
@@ -281,20 +289,31 @@ function VehicleForm({ provider, orgId, upsert, onSaved }: {
         registrationPlate: f.registrationPlate || undefined,
         minDriverAge: f.minDriverAge ? Number(f.minDriverAge) : undefined,
         securityDepositKes: f.securityDepositKes ? Number(f.securityDepositKes) : undefined,
+        promoPriceKes: f.promoPriceKes ? Number(f.promoPriceKes) : undefined,
         mileagePolicy: f.mileagePolicy || undefined,
         fuelPolicy: f.fuelPolicy || undefined,
         licenseRequirements: f.licenseRequirements || undefined,
         description: f.description || undefined,
-        hasAc: true,
+        hasAc: f.hasAc, hasGps: f.hasGps, hasBluetooth: f.hasBluetooth, hasChildSeat: f.hasChildSeat,
+        isLuxury: f.isLuxury, isElectric: f.isElectric, isHybrid: f.isHybrid,
+        isWedding: f.isWedding, isSafari: f.isSafari, instantBook: f.instantBook,
       },
     }),
     onSuccess: () => {
       toast.success("Vehicle added — set rates & submit for review");
       onSaved();
-      setF({ ...f, make: "", model: "", year: "", registrationPlate: "", description: "" });
+      setF({ ...f, make: "", model: "", trim: "", year: "", registrationPlate: "", description: "" });
     },
     onError: (e: any) => toast.error(e?.message ?? "Failed"),
   });
+
+  const flag = (key: keyof typeof f, label: string) => (
+    <label className="flex items-center gap-2 text-sm">
+      <input type="checkbox" checked={Boolean(f[key])} onChange={(e) => setF({ ...f, [key]: e.target.checked } as any)} />
+      {label}
+    </label>
+  );
+
 
   return (
     <Card>
