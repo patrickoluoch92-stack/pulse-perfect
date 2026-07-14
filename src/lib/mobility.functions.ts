@@ -90,6 +90,7 @@ const ProviderInput = z.object({
   contactPhone: z.string().max(40).optional(),
   website: z.string().url().optional(),
   serviceAreas: z.array(z.string()).max(50).optional(),
+  serviceCategories: z.array(z.enum(MOBILITY_CATEGORIES)).max(MOBILITY_CATEGORIES.length).optional(),
   businessRegNumber: z.string().max(80).optional(),
   licenseNumber: z.string().max(80).optional(),
   taxPin: z.string().max(40).optional(),
