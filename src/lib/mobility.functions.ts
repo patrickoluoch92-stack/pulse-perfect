@@ -464,10 +464,24 @@ export const unblockMobilityDates = createServerFn({ method: "POST" })
 // ---------- PUBLIC SEARCH ----------
 const SearchInput = z.object({
   category: z.enum(MOBILITY_CATEGORIES).optional(),
+  vehicleType: z.enum(MOBILITY_VEHICLE_TYPES).optional(),
+  make: z.string().max(60).optional(),
   county: z.string().max(20).optional(),
   town: z.string().max(80).optional(),
   minSeats: z.number().int().optional(),
+  minLuggage: z.number().int().optional(),
   transmission: z.enum(["automatic", "manual"]).optional(),
+  fuelType: z.string().max(30).optional(),
+  driveType: z.enum(["2wd", "4wd", "awd"]).optional(),
+  hasAc: z.boolean().optional(),
+  hasGps: z.boolean().optional(),
+  isLuxury: z.boolean().optional(),
+  isElectric: z.boolean().optional(),
+  isHybrid: z.boolean().optional(),
+  isWedding: z.boolean().optional(),
+  isSafari: z.boolean().optional(),
+  instantBook: z.boolean().optional(),
+  priceMaxKes: z.number().nonnegative().optional(),
   query: z.string().max(120).optional(),
   limit: z.number().int().min(1).max(50).default(20),
   offset: z.number().int().min(0).default(0),
@@ -478,21 +492,43 @@ export const searchMobilityVehicles = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const sb = publicSb();
     let q = sb.from("mobility_vehicles")
-      .select("id, slug, category, make, model, year, transmission, fuel_type, seats, luggage, has_ac, has_gps, county_code, town, description, rating_avg, rating_count, mobility_vehicle_images(url, alt, sort_order), mobility_vehicle_rates(unit, price_kes)")
+      .select("id, slug, category, vehicle_type, make, model, trim, color, year, transmission, fuel_type, drive_type, seats, luggage, has_ac, has_gps, is_luxury, is_electric, is_hybrid, is_wedding, is_safari, instant_book, promo_price_kes, county_code, town, description, rating_avg, rating_count, mobility_vehicle_images(url, alt, sort_order), mobility_vehicle_rates(unit, price_kes)")
       .eq("status", "approved")
       .order("is_featured", { ascending: false })
       .order("rating_avg", { ascending: false, nullsFirst: false })
       .range(data.offset, data.offset + data.limit - 1);
     if (data.category) q = q.eq("category", data.category);
+    if (data.vehicleType) q = q.eq("vehicle_type", data.vehicleType);
+    if (data.make) q = q.ilike("make", `%${data.make}%`);
     if (data.county) q = q.eq("county_code", data.county);
     if (data.town) q = q.ilike("town", `%${data.town}%`);
     if (data.minSeats) q = q.gte("seats", data.minSeats);
+    if (data.minLuggage) q = q.gte("luggage", data.minLuggage);
     if (data.transmission) q = q.eq("transmission", data.transmission);
+    if (data.fuelType) q = q.eq("fuel_type", data.fuelType);
+    if (data.driveType) q = q.eq("drive_type", data.driveType);
+    if (data.hasAc) q = q.eq("has_ac", true);
+    if (data.hasGps) q = q.eq("has_gps", true);
+    if (data.isLuxury) q = q.eq("is_luxury", true);
+    if (data.isElectric) q = q.eq("is_electric", true);
+    if (data.isHybrid) q = q.eq("is_hybrid", true);
+    if (data.isWedding) q = q.eq("is_wedding", true);
+    if (data.isSafari) q = q.eq("is_safari", true);
+    if (data.instantBook) q = q.eq("instant_book", true);
     if (data.query) q = q.or(`make.ilike.%${data.query}%,model.ilike.%${data.query}%,description.ilike.%${data.query}%`);
-    const { data: rows, error } = await q;
+    let { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return { vehicles: rows ?? [] };
+    let vehicles = rows ?? [];
+    if (data.priceMaxKes) {
+      vehicles = vehicles.filter((v: any) => {
+        const rates = (v.mobility_vehicle_rates ?? []) as Array<{ unit: string; price_kes: number }>;
+        const daily = rates.find(r => r.unit === "day")?.price_kes;
+        return daily != null && Number(daily) <= data.priceMaxKes!;
+      });
+    }
+    return { vehicles };
   });
+
 
 export const getPublicMobilityVehicle = createServerFn({ method: "POST" })
   .inputValidator((v: unknown) => z.object({ slug: z.string() }).parse(v))
