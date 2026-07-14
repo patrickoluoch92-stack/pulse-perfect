@@ -2684,6 +2684,7 @@ export type Database = {
           rating_count: number
           rejection_reason: string | null
           service_areas: Json
+          service_categories: string[]
           slug: string
           social_links: Json | null
           submitted_at: string | null
@@ -2718,6 +2719,7 @@ export type Database = {
           rating_count?: number
           rejection_reason?: string | null
           service_areas?: Json
+          service_categories?: string[]
           slug: string
           social_links?: Json | null
           submitted_at?: string | null
@@ -2752,6 +2754,7 @@ export type Database = {
           rating_count?: number
           rejection_reason?: string | null
           service_areas?: Json
+          service_categories?: string[]
           slug?: string
           social_links?: Json | null
           submitted_at?: string | null
@@ -2955,6 +2958,7 @@ export type Database = {
         Row: {
           accessibility: Json | null
           category: Database["public"]["Enums"]["mobility_category"]
+          color: string | null
           county_code: string | null
           created_at: string
           description: string | null
@@ -2971,8 +2975,14 @@ export type Database = {
           has_child_seat: boolean | null
           has_gps: boolean
           id: string
+          instant_book: boolean
           insurance_info: Json
+          is_electric: boolean
           is_featured: boolean
+          is_hybrid: boolean
+          is_luxury: boolean
+          is_safari: boolean
+          is_wedding: boolean
           license_requirements: string | null
           luggage: number | null
           main_image_url: string | null
@@ -2982,6 +2992,7 @@ export type Database = {
           model: string
           org_id: string
           pickup_locations: Json
+          promo_price_kes: number | null
           provider_id: string
           rating_avg: number | null
           rating_count: number
@@ -2992,12 +3003,15 @@ export type Database = {
           status: Database["public"]["Enums"]["mobility_status"]
           town: string | null
           transmission: string | null
+          trim: string | null
           updated_at: string
+          vehicle_type: string | null
           year: number | null
         }
         Insert: {
           accessibility?: Json | null
           category: Database["public"]["Enums"]["mobility_category"]
+          color?: string | null
           county_code?: string | null
           created_at?: string
           description?: string | null
@@ -3014,8 +3028,14 @@ export type Database = {
           has_child_seat?: boolean | null
           has_gps?: boolean
           id?: string
+          instant_book?: boolean
           insurance_info?: Json
+          is_electric?: boolean
           is_featured?: boolean
+          is_hybrid?: boolean
+          is_luxury?: boolean
+          is_safari?: boolean
+          is_wedding?: boolean
           license_requirements?: string | null
           luggage?: number | null
           main_image_url?: string | null
@@ -3025,6 +3045,7 @@ export type Database = {
           model: string
           org_id: string
           pickup_locations?: Json
+          promo_price_kes?: number | null
           provider_id: string
           rating_avg?: number | null
           rating_count?: number
@@ -3035,12 +3056,15 @@ export type Database = {
           status?: Database["public"]["Enums"]["mobility_status"]
           town?: string | null
           transmission?: string | null
+          trim?: string | null
           updated_at?: string
+          vehicle_type?: string | null
           year?: number | null
         }
         Update: {
           accessibility?: Json | null
           category?: Database["public"]["Enums"]["mobility_category"]
+          color?: string | null
           county_code?: string | null
           created_at?: string
           description?: string | null
@@ -3057,8 +3081,14 @@ export type Database = {
           has_child_seat?: boolean | null
           has_gps?: boolean
           id?: string
+          instant_book?: boolean
           insurance_info?: Json
+          is_electric?: boolean
           is_featured?: boolean
+          is_hybrid?: boolean
+          is_luxury?: boolean
+          is_safari?: boolean
+          is_wedding?: boolean
           license_requirements?: string | null
           luggage?: number | null
           main_image_url?: string | null
@@ -3068,6 +3098,7 @@ export type Database = {
           model?: string
           org_id?: string
           pickup_locations?: Json
+          promo_price_kes?: number | null
           provider_id?: string
           rating_avg?: number | null
           rating_count?: number
@@ -3078,7 +3109,9 @@ export type Database = {
           status?: Database["public"]["Enums"]["mobility_status"]
           town?: string | null
           transmission?: string | null
+          trim?: string | null
           updated_at?: string
+          vehicle_type?: string | null
           year?: number | null
         }
         Relationships: [
