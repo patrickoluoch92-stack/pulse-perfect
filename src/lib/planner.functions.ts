@@ -143,7 +143,7 @@ export const generatePlan = createServerFn({ method: "POST" })
     const { fetchMobilityForPlan } = await import("@/lib/mobility.functions");
     const [props, vehicles] = await Promise.all([
       fetchProperties(`${data.module} ${data.prompt}`, data.county),
-      fetchMobilityForPlan(`${data.module} ${data.prompt}`, data.county, 4).catch(() => []),
+      fetchMobilityForPlan(`${data.module} ${data.prompt}`, { county: data.county, purpose: data.module, limit: 4 }).catch(() => []),
     ]);
     const grounding = props
       .map((p: any) => `- ${p.name} (${p.category}) — ${p.town ?? ""}, ${p.county_code ?? ""} [slug: ${p.slug}]`)

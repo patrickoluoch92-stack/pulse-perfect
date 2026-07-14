@@ -13,8 +13,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 type SB = any;
 
 export const MOBILITY_CATEGORIES = [
-  "self_drive", "chauffeur", "airport_transfer", "executive", "tour_van",
-  "safari_4x4", "luxury", "wedding", "shuttle", "bus", "motorcycle", "bicycle", "boat",
+  "self_drive", "chauffeur", "airport_transfer", "taxi", "shuttle",
+  "executive", "luxury", "wedding", "safari_4x4", "tour_van", "camper",
+  "bus", "motorcycle", "bicycle", "boat",
 ] as const;
 export type MobilityCategory = (typeof MOBILITY_CATEGORIES)[number];
 
@@ -22,17 +23,42 @@ export const MOBILITY_CATEGORY_LABELS: Record<MobilityCategory, string> = {
   self_drive: "Self-drive rentals",
   chauffeur: "Chauffeur-driven",
   airport_transfer: "Airport transfers",
+  taxi: "Taxi services",
+  shuttle: "Shuttle services",
   executive: "Executive transport",
-  tour_van: "Tour vans",
-  safari_4x4: "Safari 4x4",
   luxury: "Luxury cars",
   wedding: "Wedding vehicles",
-  shuttle: "Shuttle services",
+  safari_4x4: "Safari 4x4",
+  tour_van: "Tour vans",
+  camper: "Camper vans",
   bus: "Bus hire",
   motorcycle: "Motorcycle hire",
   bicycle: "Bicycle hire",
   boat: "Boat hire",
 };
+
+// Granular vehicle body/type classification (what the vehicle *is*),
+// distinct from service categories above (how it's rented out).
+export const MOBILITY_VEHICLE_TYPES = [
+  "economy", "compact", "sedan", "hatchback", "station_wagon",
+  "suv", "crossover", "4x4", "pickup", "van", "minivan", "passenger_van",
+  "tour_van", "safari_land_cruiser", "luxury_sedan", "luxury_suv",
+  "sports", "convertible", "limousine", "wedding_car",
+  "electric", "hybrid", "camper", "bus", "motorcycle", "scooter", "bicycle", "boat",
+] as const;
+export type MobilityVehicleType = (typeof MOBILITY_VEHICLE_TYPES)[number];
+
+export const MOBILITY_VEHICLE_TYPE_LABELS: Record<MobilityVehicleType, string> = {
+  economy: "Economy", compact: "Compact", sedan: "Sedan", hatchback: "Hatchback",
+  station_wagon: "Station wagon", suv: "SUV", crossover: "Crossover", "4x4": "4x4",
+  pickup: "Pickup truck", van: "Van", minivan: "Minivan", passenger_van: "Passenger van",
+  tour_van: "Tour van", safari_land_cruiser: "Safari Land Cruiser",
+  luxury_sedan: "Luxury sedan", luxury_suv: "Luxury SUV", sports: "Sports car",
+  convertible: "Convertible", limousine: "Limousine", wedding_car: "Wedding car",
+  electric: "Electric", hybrid: "Hybrid", camper: "Camper van",
+  bus: "Bus", motorcycle: "Motorcycle", scooter: "Scooter", bicycle: "Bicycle", boat: "Boat",
+};
+
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
@@ -64,6 +90,7 @@ const ProviderInput = z.object({
   contactPhone: z.string().max(40).optional(),
   website: z.string().url().optional(),
   serviceAreas: z.array(z.string()).max(50).optional(),
+  serviceCategories: z.array(z.enum(MOBILITY_CATEGORIES)).max(MOBILITY_CATEGORIES.length).optional(),
   businessRegNumber: z.string().max(80).optional(),
   licenseNumber: z.string().max(80).optional(),
   taxPin: z.string().max(40).optional(),
@@ -97,6 +124,7 @@ export const upsertMobilityProvider = createServerFn({ method: "POST" })
       contact_phone: data.contactPhone ?? null,
       website: data.website ?? null,
       service_areas: data.serviceAreas ?? [],
+      service_categories: data.serviceCategories ?? [],
       business_reg_number: data.businessRegNumber ?? null,
       license_number: data.licenseNumber ?? null,
       tax_pin: data.taxPin ?? null,
@@ -151,8 +179,11 @@ const VehicleInput = z.object({
   providerId: z.string().uuid(),
   orgId: z.string().uuid(),
   category: z.enum(MOBILITY_CATEGORIES),
+  vehicleType: z.enum(MOBILITY_VEHICLE_TYPES).optional(),
   make: z.string().min(1).max(60),
   model: z.string().min(1).max(80),
+  trim: z.string().max(60).optional(),
+  color: z.string().max(30).optional(),
   year: z.number().int().min(1980).max(new Date().getFullYear() + 1).optional(),
   transmission: z.enum(["automatic", "manual"]).optional(),
   fuelType: z.string().max(30).optional(),
@@ -175,11 +206,18 @@ const VehicleInput = z.object({
   mainImageUrl: z.string().url().optional(),
   insuranceInfo: z.record(z.string(), z.any()).optional(),
   securityDepositKes: z.number().nonnegative().optional(),
+  promoPriceKes: z.number().nonnegative().optional(),
   pickupLocations: z.array(z.string()).max(20).optional(),
   dropoffLocations: z.array(z.string()).max(20).optional(),
   countyCode: z.string().max(10).optional(),
   town: z.string().max(80).optional(),
   description: z.string().max(4000).optional(),
+  isLuxury: z.boolean().optional(),
+  isElectric: z.boolean().optional(),
+  isHybrid: z.boolean().optional(),
+  isWedding: z.boolean().optional(),
+  isSafari: z.boolean().optional(),
+  instantBook: z.boolean().optional(),
 });
 
 export const upsertMobilityVehicle = createServerFn({ method: "POST" })
@@ -191,8 +229,11 @@ export const upsertMobilityVehicle = createServerFn({ method: "POST" })
       provider_id: data.providerId,
       org_id: data.orgId,
       category: data.category,
+      vehicle_type: data.vehicleType ?? null,
       make: data.make,
       model: data.model,
+      trim: data.trim ?? null,
+      color: data.color ?? null,
       year: data.year ?? null,
       transmission: data.transmission ?? null,
       fuel_type: data.fuelType ?? null,
@@ -215,11 +256,18 @@ export const upsertMobilityVehicle = createServerFn({ method: "POST" })
       main_image_url: data.mainImageUrl ?? null,
       insurance_info: data.insuranceInfo ?? {},
       security_deposit_kes: data.securityDepositKes ?? null,
+      promo_price_kes: data.promoPriceKes ?? null,
       pickup_locations: data.pickupLocations ?? [],
       dropoff_locations: data.dropoffLocations ?? [],
       county_code: data.countyCode ?? null,
       town: data.town ?? null,
       description: data.description ?? null,
+      is_luxury: data.isLuxury ?? false,
+      is_electric: data.isElectric ?? false,
+      is_hybrid: data.isHybrid ?? false,
+      is_wedding: data.isWedding ?? false,
+      is_safari: data.isSafari ?? false,
+      instant_book: data.instantBook ?? false,
     };
     if (data.id) {
       const { data: row, error } = await sb.from("mobility_vehicles")
@@ -416,10 +464,24 @@ export const unblockMobilityDates = createServerFn({ method: "POST" })
 // ---------- PUBLIC SEARCH ----------
 const SearchInput = z.object({
   category: z.enum(MOBILITY_CATEGORIES).optional(),
+  vehicleType: z.enum(MOBILITY_VEHICLE_TYPES).optional(),
+  make: z.string().max(60).optional(),
   county: z.string().max(20).optional(),
   town: z.string().max(80).optional(),
   minSeats: z.number().int().optional(),
+  minLuggage: z.number().int().optional(),
   transmission: z.enum(["automatic", "manual"]).optional(),
+  fuelType: z.string().max(30).optional(),
+  driveType: z.enum(["2wd", "4wd", "awd"]).optional(),
+  hasAc: z.boolean().optional(),
+  hasGps: z.boolean().optional(),
+  isLuxury: z.boolean().optional(),
+  isElectric: z.boolean().optional(),
+  isHybrid: z.boolean().optional(),
+  isWedding: z.boolean().optional(),
+  isSafari: z.boolean().optional(),
+  instantBook: z.boolean().optional(),
+  priceMaxKes: z.number().nonnegative().optional(),
   query: z.string().max(120).optional(),
   limit: z.number().int().min(1).max(50).default(20),
   offset: z.number().int().min(0).default(0),
@@ -430,21 +492,43 @@ export const searchMobilityVehicles = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const sb = publicSb();
     let q = sb.from("mobility_vehicles")
-      .select("id, slug, category, make, model, year, transmission, fuel_type, seats, luggage, has_ac, has_gps, county_code, town, description, rating_avg, rating_count, mobility_vehicle_images(url, alt, sort_order), mobility_vehicle_rates(unit, price_kes)")
+      .select("id, slug, category, vehicle_type, make, model, trim, color, year, transmission, fuel_type, drive_type, seats, luggage, has_ac, has_gps, is_luxury, is_electric, is_hybrid, is_wedding, is_safari, instant_book, promo_price_kes, county_code, town, description, rating_avg, rating_count, mobility_vehicle_images(url, alt, sort_order), mobility_vehicle_rates(unit, price_kes)")
       .eq("status", "approved")
       .order("is_featured", { ascending: false })
       .order("rating_avg", { ascending: false, nullsFirst: false })
       .range(data.offset, data.offset + data.limit - 1);
     if (data.category) q = q.eq("category", data.category);
+    if (data.vehicleType) q = q.eq("vehicle_type", data.vehicleType);
+    if (data.make) q = q.ilike("make", `%${data.make}%`);
     if (data.county) q = q.eq("county_code", data.county);
     if (data.town) q = q.ilike("town", `%${data.town}%`);
     if (data.minSeats) q = q.gte("seats", data.minSeats);
+    if (data.minLuggage) q = q.gte("luggage", data.minLuggage);
     if (data.transmission) q = q.eq("transmission", data.transmission);
+    if (data.fuelType) q = q.eq("fuel_type", data.fuelType);
+    if (data.driveType) q = q.eq("drive_type", data.driveType);
+    if (data.hasAc) q = q.eq("has_ac", true);
+    if (data.hasGps) q = q.eq("has_gps", true);
+    if (data.isLuxury) q = q.eq("is_luxury", true);
+    if (data.isElectric) q = q.eq("is_electric", true);
+    if (data.isHybrid) q = q.eq("is_hybrid", true);
+    if (data.isWedding) q = q.eq("is_wedding", true);
+    if (data.isSafari) q = q.eq("is_safari", true);
+    if (data.instantBook) q = q.eq("instant_book", true);
     if (data.query) q = q.or(`make.ilike.%${data.query}%,model.ilike.%${data.query}%,description.ilike.%${data.query}%`);
-    const { data: rows, error } = await q;
+    let { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return { vehicles: rows ?? [] };
+    let vehicles = rows ?? [];
+    if (data.priceMaxKes) {
+      vehicles = vehicles.filter((v: any) => {
+        const rates = (v.mobility_vehicle_rates ?? []) as Array<{ unit: string; price_kes: number }>;
+        const daily = rates.find(r => r.unit === "day")?.price_kes;
+        return daily != null && Number(daily) <= data.priceMaxKes!;
+      });
+    }
+    return { vehicles };
   });
+
 
 export const getPublicMobilityVehicle = createServerFn({ method: "POST" })
   .inputValidator((v: unknown) => z.object({ slug: z.string() }).parse(v))
@@ -560,23 +644,39 @@ export const getMobilityProviderAnalytics = createServerFn({ method: "POST" })
   });
 
 // ---------- MOBILITY GROUNDING (for Planner AI) ----------
-export async function fetchMobilityForPlan(query: string, county?: string, limit = 4) {
+export async function fetchMobilityForPlan(
+  query: string,
+  opts?: { county?: string; travellers?: number; luggage?: number; purpose?: string; budgetKesPerDay?: number; limit?: number },
+) {
+  const { county, travellers, luggage, purpose, budgetKesPerDay, limit = 4 } = opts ?? {};
   const sb = publicSb();
   let q = sb.from("mobility_vehicles")
-    .select("id, slug, category, make, model, seats, transmission, town, county_code, mobility_vehicle_rates(unit, price_kes)")
+    .select("id, slug, category, vehicle_type, make, model, seats, luggage, transmission, drive_type, is_luxury, is_safari, is_wedding, is_electric, is_hybrid, town, county_code, mobility_vehicle_rates(unit, price_kes)")
     .eq("status", "approved")
-    .limit(limit * 2);
+    .limit(limit * 4);
   if (county) q = q.ilike("county_code", `%${county}%`);
+  if (travellers) q = q.gte("seats", travellers);
   const { data } = await q;
   const rows = (data ?? []) as any[];
-  const scored = rows.map(r => ({
-    ...r,
-    _score: (
-      (query.toLowerCase().includes(r.category) ? 3 : 0) +
-      (query.toLowerCase().includes((r.make ?? "").toLowerCase()) ? 2 : 0) +
-      (query.toLowerCase().includes((r.model ?? "").toLowerCase()) ? 2 : 0)
-    ),
-  }));
+  const q_l = query.toLowerCase();
+  const p_l = (purpose ?? "").toLowerCase();
+  const scored = rows.map(r => {
+    const rates: Array<{ unit: string; price_kes: number }> = r.mobility_vehicle_rates ?? [];
+    const daily = Number(rates.find(x => x.unit === "day")?.price_kes ?? 0);
+    let score = 0;
+    if (q_l.includes(r.category)) score += 3;
+    if (r.make && q_l.includes(String(r.make).toLowerCase())) score += 2;
+    if (r.model && q_l.includes(String(r.model).toLowerCase())) score += 2;
+    if (luggage && r.luggage && r.luggage >= luggage) score += 1;
+    if (p_l.includes("safari") && r.is_safari) score += 4;
+    if (p_l.includes("wedding") && r.is_wedding) score += 4;
+    if ((p_l.includes("luxury") || p_l.includes("executive")) && r.is_luxury) score += 3;
+    if ((p_l.includes("eco") || p_l.includes("green")) && (r.is_electric || r.is_hybrid)) score += 2;
+    if (budgetKesPerDay && daily && daily <= budgetKesPerDay) score += 2;
+    if (budgetKesPerDay && daily && daily > budgetKesPerDay) score -= 2;
+    return { ...r, _score: score };
+  });
   scored.sort((a, b) => b._score - a._score);
   return scored.slice(0, limit);
 }
+
