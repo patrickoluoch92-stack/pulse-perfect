@@ -124,6 +124,7 @@ export const upsertMobilityProvider = createServerFn({ method: "POST" })
       contact_phone: data.contactPhone ?? null,
       website: data.website ?? null,
       service_areas: data.serviceAreas ?? [],
+      service_categories: data.serviceCategories ?? [],
       business_reg_number: data.businessRegNumber ?? null,
       license_number: data.licenseNumber ?? null,
       tax_pin: data.taxPin ?? null,
