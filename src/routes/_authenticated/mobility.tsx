@@ -163,7 +163,15 @@ function ProviderCard({ provider, orgId, upsert, submit, onSaved }: {
     emergencyContact: provider?.emergency_contact ?? "",
     policies: provider?.policies ?? "",
     terms: provider?.terms ?? "",
+    serviceCategories: (provider?.service_categories ?? []) as string[],
   });
+
+  const toggleCat = (c: string) => setForm((f) => ({
+    ...f,
+    serviceCategories: f.serviceCategories.includes(c)
+      ? f.serviceCategories.filter((x) => x !== c)
+      : [...f.serviceCategories, c],
+  }));
 
   const save = useMutation({
     mutationFn: () => upsert({ data: { id: provider?.id, orgId: orgId!, ...form } }),
