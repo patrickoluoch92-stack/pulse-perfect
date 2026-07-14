@@ -29,9 +29,10 @@ export const Route = createFileRoute("/mobility/$category")({
 function CategoryPage() {
   const { category } = Route.useParams();
   const fetchList = useServerFn(searchMobilityVehicles);
+  const [filters, setFilters] = useState<{ vehicleType?: MobilityVehicleType; make?: string; minSeats?: number; priceMaxKes?: number; transmission?: "automatic" | "manual" }>({});
   const { data, isLoading } = useQuery({
-    queryKey: ["mobility-cat", category],
-    queryFn: () => fetchList({ data: { category: category as MobilityCategory, limit: 30 } }),
+    queryKey: ["mobility-cat", category, filters],
+    queryFn: () => fetchList({ data: { category: category as MobilityCategory, limit: 30, ...filters } }),
   });
   const vehicles = data?.vehicles ?? [];
   const label = MOBILITY_CATEGORY_LABELS[category as MobilityCategory];
@@ -45,11 +46,45 @@ function CategoryPage() {
         <h1 className="text-3xl font-semibold tracking-tight">{label}</h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">Browse available {label.toLowerCase()} across Kenya. Book directly through HostPulse.</p>
 
+        <div className="mt-6 grid gap-3 rounded-lg border bg-card p-4 sm:grid-cols-2 md:grid-cols-5">
+          <div>
+            <Label className="text-xs">Vehicle type</Label>
+            <select className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              value={filters.vehicleType ?? ""}
+              onChange={(e) => setFilters({ ...filters, vehicleType: (e.target.value || undefined) as any })}>
+              <option value="">Any</option>
+              {MOBILITY_VEHICLE_TYPES.map(t => <option key={t} value={t}>{MOBILITY_VEHICLE_TYPE_LABELS[t]}</option>)}
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">Make</Label>
+            <Input className="mt-1" placeholder="Toyota" value={filters.make ?? ""} onChange={(e) => setFilters({ ...filters, make: e.target.value || undefined })} />
+          </div>
+          <div>
+            <Label className="text-xs">Min seats</Label>
+            <Input className="mt-1" type="number" value={filters.minSeats ?? ""} onChange={(e) => setFilters({ ...filters, minSeats: e.target.value ? Number(e.target.value) : undefined })} />
+          </div>
+          <div>
+            <Label className="text-xs">Max price / day (KES)</Label>
+            <Input className="mt-1" type="number" value={filters.priceMaxKes ?? ""} onChange={(e) => setFilters({ ...filters, priceMaxKes: e.target.value ? Number(e.target.value) : undefined })} />
+          </div>
+          <div>
+            <Label className="text-xs">Transmission</Label>
+            <select className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              value={filters.transmission ?? ""}
+              onChange={(e) => setFilters({ ...filters, transmission: (e.target.value || undefined) as any })}>
+              <option value="">Any</option>
+              <option value="automatic">Automatic</option>
+              <option value="manual">Manual</option>
+            </select>
+          </div>
+        </div>
+
         <div className="mt-8">
           {isLoading ? (
             <LoadingState label="Loading vehicles…" />
           ) : vehicles.length === 0 ? (
-            <EmptyState title="No vehicles yet" description="No listings in this category yet — try another." />
+            <EmptyState title="No vehicles match" description="Try adjusting your filters." />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {vehicles.map((v: any) => {
