@@ -13,8 +13,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 type SB = any;
 
 export const MOBILITY_CATEGORIES = [
-  "self_drive", "chauffeur", "airport_transfer", "executive", "tour_van",
-  "safari_4x4", "luxury", "wedding", "shuttle", "bus", "motorcycle", "bicycle", "boat",
+  "self_drive", "chauffeur", "airport_transfer", "taxi", "shuttle",
+  "executive", "luxury", "wedding", "safari_4x4", "tour_van", "camper",
+  "bus", "motorcycle", "bicycle", "boat",
 ] as const;
 export type MobilityCategory = (typeof MOBILITY_CATEGORIES)[number];
 
@@ -22,17 +23,42 @@ export const MOBILITY_CATEGORY_LABELS: Record<MobilityCategory, string> = {
   self_drive: "Self-drive rentals",
   chauffeur: "Chauffeur-driven",
   airport_transfer: "Airport transfers",
+  taxi: "Taxi services",
+  shuttle: "Shuttle services",
   executive: "Executive transport",
-  tour_van: "Tour vans",
-  safari_4x4: "Safari 4x4",
   luxury: "Luxury cars",
   wedding: "Wedding vehicles",
-  shuttle: "Shuttle services",
+  safari_4x4: "Safari 4x4",
+  tour_van: "Tour vans",
+  camper: "Camper vans",
   bus: "Bus hire",
   motorcycle: "Motorcycle hire",
   bicycle: "Bicycle hire",
   boat: "Boat hire",
 };
+
+// Granular vehicle body/type classification (what the vehicle *is*),
+// distinct from service categories above (how it's rented out).
+export const MOBILITY_VEHICLE_TYPES = [
+  "economy", "compact", "sedan", "hatchback", "station_wagon",
+  "suv", "crossover", "4x4", "pickup", "van", "minivan", "passenger_van",
+  "tour_van", "safari_land_cruiser", "luxury_sedan", "luxury_suv",
+  "sports", "convertible", "limousine", "wedding_car",
+  "electric", "hybrid", "camper", "bus", "motorcycle", "scooter", "bicycle", "boat",
+] as const;
+export type MobilityVehicleType = (typeof MOBILITY_VEHICLE_TYPES)[number];
+
+export const MOBILITY_VEHICLE_TYPE_LABELS: Record<MobilityVehicleType, string> = {
+  economy: "Economy", compact: "Compact", sedan: "Sedan", hatchback: "Hatchback",
+  station_wagon: "Station wagon", suv: "SUV", crossover: "Crossover", "4x4": "4x4",
+  pickup: "Pickup truck", van: "Van", minivan: "Minivan", passenger_van: "Passenger van",
+  tour_van: "Tour van", safari_land_cruiser: "Safari Land Cruiser",
+  luxury_sedan: "Luxury sedan", luxury_suv: "Luxury SUV", sports: "Sports car",
+  convertible: "Convertible", limousine: "Limousine", wedding_car: "Wedding car",
+  electric: "Electric", hybrid: "Hybrid", camper: "Camper van",
+  bus: "Bus", motorcycle: "Motorcycle", scooter: "Scooter", bicycle: "Bicycle", boat: "Boat",
+};
+
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
