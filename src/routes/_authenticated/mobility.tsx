@@ -220,6 +220,20 @@ function ProviderCard({ provider, orgId, upsert, submit, onSaved }: {
           <div className="sm:col-span-2"><Label>About the company</Label><Textarea rows={3} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} /></div>
           <div className="sm:col-span-2"><Label>Rental policies</Label><Textarea rows={3} value={form.policies} onChange={(e) => setForm({ ...form, policies: e.target.value })} placeholder="Fuel, mileage, driver requirements…" /></div>
           <div className="sm:col-span-2"><Label>Terms & conditions</Label><Textarea rows={3} value={form.terms} onChange={(e) => setForm({ ...form, terms: e.target.value })} /></div>
+          <div className="sm:col-span-2">
+            <Label>Service categories offered</Label>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {MOBILITY_CATEGORIES.map((c) => {
+                const on = form.serviceCategories.includes(c);
+                return (
+                  <button type="button" key={c} onClick={() => toggleCat(c)}
+                    className={`rounded-full border px-3 py-1 text-xs transition ${on ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted"}`}>
+                    {MOBILITY_CATEGORY_LABELS[c]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
         <Button disabled={!form.name || !orgId || save.isPending} onClick={() => save.mutate()}>
           {save.isPending ? "Saving…" : provider ? "Save changes" : "Create provider"}
