@@ -644,23 +644,39 @@ export const getMobilityProviderAnalytics = createServerFn({ method: "POST" })
   });
 
 // ---------- MOBILITY GROUNDING (for Planner AI) ----------
-export async function fetchMobilityForPlan(query: string, county?: string, limit = 4) {
+export async function fetchMobilityForPlan(
+  query: string,
+  opts?: { county?: string; travellers?: number; luggage?: number; purpose?: string; budgetKesPerDay?: number; limit?: number },
+) {
+  const { county, travellers, luggage, purpose, budgetKesPerDay, limit = 4 } = opts ?? {};
   const sb = publicSb();
   let q = sb.from("mobility_vehicles")
-    .select("id, slug, category, make, model, seats, transmission, town, county_code, mobility_vehicle_rates(unit, price_kes)")
+    .select("id, slug, category, vehicle_type, make, model, seats, luggage, transmission, drive_type, is_luxury, is_safari, is_wedding, is_electric, is_hybrid, town, county_code, mobility_vehicle_rates(unit, price_kes)")
     .eq("status", "approved")
-    .limit(limit * 2);
+    .limit(limit * 4);
   if (county) q = q.ilike("county_code", `%${county}%`);
+  if (travellers) q = q.gte("seats", travellers);
   const { data } = await q;
   const rows = (data ?? []) as any[];
-  const scored = rows.map(r => ({
-    ...r,
-    _score: (
-      (query.toLowerCase().includes(r.category) ? 3 : 0) +
-      (query.toLowerCase().includes((r.make ?? "").toLowerCase()) ? 2 : 0) +
-      (query.toLowerCase().includes((r.model ?? "").toLowerCase()) ? 2 : 0)
-    ),
-  }));
+  const q_l = query.toLowerCase();
+  const p_l = (purpose ?? "").toLowerCase();
+  const scored = rows.map(r => {
+    const rates: Array<{ unit: string; price_kes: number }> = r.mobility_vehicle_rates ?? [];
+    const daily = Number(rates.find(x => x.unit === "day")?.price_kes ?? 0);
+    let score = 0;
+    if (q_l.includes(r.category)) score += 3;
+    if (r.make && q_l.includes(String(r.make).toLowerCase())) score += 2;
+    if (r.model && q_l.includes(String(r.model).toLowerCase())) score += 2;
+    if (luggage && r.luggage && r.luggage >= luggage) score += 1;
+    if (p_l.includes("safari") && r.is_safari) score += 4;
+    if (p_l.includes("wedding") && r.is_wedding) score += 4;
+    if ((p_l.includes("luxury") || p_l.includes("executive")) && r.is_luxury) score += 3;
+    if ((p_l.includes("eco") || p_l.includes("green")) && (r.is_electric || r.is_hybrid)) score += 2;
+    if (budgetKesPerDay && daily && daily <= budgetKesPerDay) score += 2;
+    if (budgetKesPerDay && daily && daily > budgetKesPerDay) score -= 2;
+    return { ...r, _score: score };
+  });
   scored.sort((a, b) => b._score - a._score);
   return scored.slice(0, limit);
 }
+
