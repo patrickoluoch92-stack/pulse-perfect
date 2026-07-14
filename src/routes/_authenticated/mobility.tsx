@@ -16,6 +16,7 @@ import {
   listMyMobilityProviders, upsertMobilityProvider, submitMobilityProviderForVerification,
   listMyMobilityVehicles, upsertMobilityVehicle, submitMobilityVehicle,
   getMobilityProviderAnalytics, MOBILITY_CATEGORIES, MOBILITY_CATEGORY_LABELS,
+  MOBILITY_VEHICLE_TYPES, MOBILITY_VEHICLE_TYPE_LABELS,
 } from "@/lib/mobility.functions";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 
