@@ -1,9 +1,12 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { searchMobilityVehicles, MOBILITY_CATEGORY_LABELS, MOBILITY_CATEGORIES, type MobilityCategory } from "@/lib/mobility.functions";
+import { searchMobilityVehicles, MOBILITY_CATEGORY_LABELS, MOBILITY_CATEGORIES, MOBILITY_VEHICLE_TYPES, MOBILITY_VEHICLE_TYPE_LABELS, type MobilityCategory, type MobilityVehicleType } from "@/lib/mobility.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadingState, EmptyState } from "@/components/ui/states";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/mobility/$category")({
   beforeLoad: ({ params }) => {
