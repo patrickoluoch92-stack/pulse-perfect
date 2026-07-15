@@ -1,11 +1,12 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Car, Users, Fuel, Cog, Snowflake, Navigation, Shield, Star } from "lucide-react";
 import {
   getPublicMobilityVehicle,
   createMobilityBooking,
+  quoteMobilityBooking,
   listPublicVehicleReviews,
   submitMobilityReview,
   getMyMobilityReviewStatus,
