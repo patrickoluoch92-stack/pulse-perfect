@@ -351,3 +351,12 @@ function PrivateOwnerDashboard() {
     </DashboardShell>
   );
 }
+
+function Stat({ label, value, tone }: { label: string; value: string; tone?: "primary" | "muted" }) {
+  return (
+    <div className={`rounded-md border p-3 ${tone === "primary" ? "border-primary/40 bg-primary/5" : ""}`}>
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className={`mt-1 text-lg font-semibold ${tone === "muted" ? "text-muted-foreground" : ""}`}>{value}</div>
+    </div>
+  );
+}
