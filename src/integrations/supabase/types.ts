@@ -3008,8 +3008,11 @@ export type Database = {
           accepts_private_vehicles: boolean
           address: string | null
           ai_summary: string | null
+          auto_approve_rules: Json
           bio: string | null
           business_reg_number: string | null
+          commission_company_pct: number
+          commission_platform_pct: number
           contact_email: string | null
           contact_phone: string | null
           county_code: string | null
@@ -3024,6 +3027,7 @@ export type Database = {
           name: string
           operating_hours: Json | null
           org_id: string
+          payout_schedule: string
           policies: string | null
           private_owner_commission_pct: number | null
           private_owner_quality_min: number | null
@@ -3050,8 +3054,11 @@ export type Database = {
           accepts_private_vehicles?: boolean
           address?: string | null
           ai_summary?: string | null
+          auto_approve_rules?: Json
           bio?: string | null
           business_reg_number?: string | null
+          commission_company_pct?: number
+          commission_platform_pct?: number
           contact_email?: string | null
           contact_phone?: string | null
           county_code?: string | null
@@ -3066,6 +3073,7 @@ export type Database = {
           name: string
           operating_hours?: Json | null
           org_id: string
+          payout_schedule?: string
           policies?: string | null
           private_owner_commission_pct?: number | null
           private_owner_quality_min?: number | null
@@ -3092,8 +3100,11 @@ export type Database = {
           accepts_private_vehicles?: boolean
           address?: string | null
           ai_summary?: string | null
+          auto_approve_rules?: Json
           bio?: string | null
           business_reg_number?: string | null
+          commission_company_pct?: number
+          commission_platform_pct?: number
           contact_email?: string | null
           contact_phone?: string | null
           county_code?: string | null
@@ -3108,6 +3119,7 @@ export type Database = {
           name?: string
           operating_hours?: Json | null
           org_id?: string
+          payout_schedule?: string
           policies?: string | null
           private_owner_commission_pct?: number | null
           private_owner_quality_min?: number | null
@@ -3479,6 +3491,7 @@ export type Database = {
         Row: {
           accessibility: Json | null
           ai_flags: Json | null
+          ai_recommendation: Json | null
           archived_at: string | null
           body_type: string | null
           category: Database["public"]["Enums"]["mobility_category"]
@@ -3553,6 +3566,7 @@ export type Database = {
         Insert: {
           accessibility?: Json | null
           ai_flags?: Json | null
+          ai_recommendation?: Json | null
           archived_at?: string | null
           body_type?: string | null
           category: Database["public"]["Enums"]["mobility_category"]
@@ -3627,6 +3641,7 @@ export type Database = {
         Update: {
           accessibility?: Json | null
           ai_flags?: Json | null
+          ai_recommendation?: Json | null
           archived_at?: string | null
           body_type?: string | null
           category?: Database["public"]["Enums"]["mobility_category"]
@@ -5678,6 +5693,10 @@ export type Database = {
           slug: string
           town: string
         }[]
+      }
+      mobility_is_company_admin: {
+        Args: { _provider_id: string; _user_id: string }
+        Returns: boolean
       }
       next_invoice_number:
         | { Args: { _org_id: string }; Returns: string }
