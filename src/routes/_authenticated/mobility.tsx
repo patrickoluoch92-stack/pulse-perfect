@@ -123,6 +123,9 @@ function MobilityDashboard() {
                               <Send className="mr-1 h-3 w-3" /> Submit
                             </Button>
                           )}
+                          <Button size="sm" variant="outline" asChild>
+                            <Link to="/_authenticated/mobility/v/$id" params={{ id: v.id }}>Manage</Link>
+                          </Button>
                           {v.status === "approved" && v.slug && (
                             <Button size="sm" variant="ghost" asChild>
                               <Link to="/mobility/v/$slug" params={{ slug: v.slug }}>View <ArrowRight className="ml-1 h-3 w-3" /></Link>
