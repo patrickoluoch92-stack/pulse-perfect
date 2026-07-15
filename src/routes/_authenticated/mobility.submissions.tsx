@@ -15,7 +15,7 @@ import {
   listProviderSubmissions, decideSubmission, updatePrivateVehiclePolicy,
 } from "@/lib/mobility-ext.functions";
 
-export const Route = createFileRoute("/_authenticated/mobility.submissions")({
+export const Route = createFileRoute("/_authenticated/mobility/submissions")({
   component: SubmissionsQueue,
 });
 
