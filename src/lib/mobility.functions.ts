@@ -580,38 +580,147 @@ const BookingInput = z.object({
   dropoffAt: z.string(),
   pickupLocation: z.string().max(200).optional(),
   dropoffLocation: z.string().max(200).optional(),
+  deliveryAddress: z.string().max(300).optional(),
   driverOption: z.enum(["self", "chauffeur"]).default("self"),
   guestName: z.string().max(120).optional(),
   guestEmail: z.string().email().optional(),
   guestPhone: z.string().max(40).optional(),
   notes: z.string().max(1000).optional(),
+  extensionOf: z.string().uuid().optional(),
 });
+
+const QuoteInput = z.object({
+  vehicleId: z.string().uuid(),
+  pickupAt: z.string(),
+  dropoffAt: z.string(),
+  driverOption: z.enum(["self", "chauffeur"]).default("self"),
+});
+
+// Shared pricing engine — uses base rates, seasonal overrides, and pricing tiers.
+// Returns a full breakdown for the quote endpoint and the create endpoint.
+async function computeMobilityQuote(sb: SB, params: {
+  vehicleId: string; pickupAt: string; dropoffAt: string; driverOption: "self" | "chauffeur";
+}) {
+  const { data: v, error: vErr } = await sb.from("mobility_vehicles")
+    .select("id, provider_id, org_id, security_deposit_kes, promo_price_kes, mobility_vehicle_rates(unit, price_kes, min_units)")
+    .eq("id", params.vehicleId).eq("status", "approved").maybeSingle();
+  if (vErr || !v) throw new Error("Vehicle not available");
+
+  const start = new Date(params.pickupAt).getTime();
+  const end = new Date(params.dropoffAt).getTime();
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+    throw new Error("Dropoff must be after pickup");
+  }
+  const hours = Math.max(1, Math.ceil((end - start) / 3_600_000));
+  const days = Math.ceil(hours / 24);
+  const rates: Array<{ unit: string; price_kes: number; min_units?: number }> = v.mobility_vehicle_rates ?? [];
+  const baseDay = Number(rates.find(r => r.unit === "day")?.price_kes ?? 0);
+  const baseHour = Number(rates.find(r => r.unit === "hour")?.price_kes ?? 0);
+  const baseWeek = Number(rates.find(r => r.unit === "week")?.price_kes ?? 0);
+  const baseMonth = Number(rates.find(r => r.unit === "month")?.price_kes ?? 0);
+
+  // Seasonal override
+  const pickupDate = new Date(params.pickupAt).toISOString().slice(0, 10);
+  const { data: seasonal } = await sb.from("mobility_seasonal_rates")
+    .select("unit, price_kes, starts_on, ends_on, label")
+    .eq("vehicle_id", params.vehicleId)
+    .lte("starts_on", pickupDate).gte("ends_on", pickupDate);
+  const seasonalDay = Number((seasonal ?? []).find((s: any) => s.unit === "day")?.price_kes ?? 0);
+  const seasonalHour = Number((seasonal ?? []).find((s: any) => s.unit === "hour")?.price_kes ?? 0);
+
+  // Duration-based pricing tiers (weekly/monthly discounts)
+  const { data: tiers } = await sb.from("mobility_pricing_tiers")
+    .select("tier, price_kes, min_units, starts_on, ends_on, is_active")
+    .eq("vehicle_id", params.vehicleId).eq("is_active", true);
+  const applicableTiers = (tiers ?? []).filter((t: any) =>
+    (!t.starts_on || t.starts_on <= pickupDate) && (!t.ends_on || t.ends_on >= pickupDate)
+  );
+  // Best (cheapest per-day-equivalent) tier for the duration
+  let tierDaily = 0;
+  let tierLabel: string | null = null;
+  for (const t of applicableTiers) {
+    const minUnits = Number(t.min_units ?? 1);
+    if (days < minUnits) continue;
+    const perDay = Number(t.price_kes ?? 0) / minUnits;
+    if (perDay > 0 && (tierDaily === 0 || perDay < tierDaily)) {
+      tierDaily = perDay;
+      tierLabel = String(t.tier);
+    }
+  }
+
+  // Pick daily rate: prefer promo → seasonal → tier → base
+  const promoDay = Number(v.promo_price_kes ?? 0);
+  let dailyRate = baseDay;
+  let dailySource = "base";
+  if (promoDay > 0 && (dailyRate === 0 || promoDay < dailyRate)) { dailyRate = promoDay; dailySource = "promo"; }
+  if (seasonalDay > 0 && seasonalDay < dailyRate) { dailyRate = seasonalDay; dailySource = "seasonal"; }
+  if (tierDaily > 0 && tierDaily < dailyRate) { dailyRate = tierDaily; dailySource = tierLabel ? `tier:${tierLabel}` : "tier"; }
+
+  const hourlyRate = seasonalHour > 0 ? seasonalHour : baseHour;
+
+  let subtotal = 0;
+  let unit: "day" | "hour" = "day";
+  if (days >= 1 && dailyRate > 0) {
+    subtotal = dailyRate * days;
+    unit = "day";
+    // long stays: prefer weekly / monthly base if cheaper
+    if (baseWeek > 0 && days >= 7 && baseWeek * Math.ceil(days / 7) < subtotal) {
+      subtotal = baseWeek * Math.ceil(days / 7);
+      dailySource = "weekly";
+    }
+    if (baseMonth > 0 && days >= 30 && baseMonth * Math.ceil(days / 30) < subtotal) {
+      subtotal = baseMonth * Math.ceil(days / 30);
+      dailySource = "monthly";
+    }
+  } else if (hourlyRate > 0) {
+    subtotal = hourlyRate * hours;
+    unit = "hour";
+  }
+  if (subtotal <= 0) throw new Error("Vehicle has no configured pricing");
+
+  const chauffeurFee = params.driverOption === "chauffeur" ? Math.round(subtotal * 0.25) : 0;
+  const deposit = Number(v.security_deposit_kes ?? 0);
+  const total = subtotal + chauffeurFee;
+
+  return {
+    vehicle: { id: v.id, provider_id: v.provider_id, org_id: v.org_id },
+    duration: { hours, days, unit },
+    breakdown: {
+      dailyRate: unit === "day" ? Math.round(subtotal / days) : hourlyRate,
+      dailySource,
+      subtotalKes: subtotal,
+      chauffeurFeeKes: chauffeurFee,
+      depositKes: deposit,
+      totalKes: total,
+    },
+  };
+}
+
+export const quoteMobilityBooking = createServerFn({ method: "POST" })
+  .inputValidator((v: unknown) => QuoteInput.parse(v))
+  .handler(async ({ data }) => {
+    // Public endpoint — use publishable client (RLS still applies via anon-safe SELECT policies).
+    const sb = publicSb();
+    const q = await computeMobilityQuote(sb, data);
+    return { quote: q.breakdown, duration: q.duration };
+  });
 
 export const createMobilityBooking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v: unknown) => BookingInput.parse(v))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const { data: v, error: vErr } = await sb.from("mobility_vehicles")
-      .select("id, provider_id, org_id, mobility_vehicle_rates(unit, price_kes)")
-      .eq("id", data.vehicleId).eq("status", "approved").maybeSingle();
-    if (vErr || !v) throw new Error("Vehicle not available");
-
-    const start = new Date(data.pickupAt).getTime();
-    const end = new Date(data.dropoffAt).getTime();
-    if (end <= start) throw new Error("Dropoff must be after pickup");
-    const hours = Math.max(1, Math.ceil((end - start) / 3_600_000));
-    const days = Math.ceil(hours / 24);
-    const rates: Array<{ unit: string; price_kes: number }> = v.mobility_vehicle_rates ?? [];
-    const dayRate = rates.find(r => r.unit === "day")?.price_kes ?? 0;
-    const hourRate = rates.find(r => r.unit === "hour")?.price_kes ?? 0;
-    const total = days >= 1 && dayRate ? Number(dayRate) * days : Number(hourRate) * hours;
-    if (total <= 0) throw new Error("Vehicle has no configured pricing");
+    const q = await computeMobilityQuote(sb, {
+      vehicleId: data.vehicleId,
+      pickupAt: data.pickupAt,
+      dropoffAt: data.dropoffAt,
+      driverOption: data.driverOption,
+    });
 
     const { data: booking, error } = await sb.from("mobility_bookings").insert({
-      vehicle_id: v.id,
-      provider_id: v.provider_id,
-      org_id: v.org_id,
+      vehicle_id: q.vehicle.id,
+      provider_id: q.vehicle.provider_id,
+      org_id: q.vehicle.org_id,
       guest_user_id: context.userId,
       guest_name: data.guestName ?? null,
       guest_email: data.guestEmail ?? null,
@@ -620,18 +729,21 @@ export const createMobilityBooking = createServerFn({ method: "POST" })
       dropoff_at: data.dropoffAt,
       pickup_location: data.pickupLocation ?? null,
       dropoff_location: data.dropoffLocation ?? null,
+      delivery_address: data.deliveryAddress ?? null,
       driver_option: data.driverOption,
-      total_kes: total,
+      total_kes: q.breakdown.totalKes,
+      deposit_kes: q.breakdown.depositKes,
       status: "pending",
       payment_status: "unpaid",
       notes: data.notes ?? null,
+      extension_of: data.extensionOf ?? null,
     }).select("*").single();
     if (error) throw new Error(error.message);
 
     // Reserve the calendar slot; if it collides, the exclusion constraint
     // will throw and we cancel the booking so it doesn't linger.
     const { error: blockErr } = await sb.from("mobility_availability_blocks").insert({
-      vehicle_id: v.id,
+      vehicle_id: q.vehicle.id,
       start_at: data.pickupAt,
       end_at: data.dropoffAt,
       reason: "booking",
@@ -641,7 +753,7 @@ export const createMobilityBooking = createServerFn({ method: "POST" })
       await sb.from("mobility_bookings").update({ status: "cancelled" }).eq("id", booking.id);
       throw new Error("Vehicle is not available for the selected dates");
     }
-    return { booking };
+    return { booking, breakdown: q.breakdown };
   });
 
 export const listMyMobilityBookings = createServerFn({ method: "GET" })
@@ -761,14 +873,27 @@ export const respondMobilityBooking = createServerFn({ method: "POST" })
 // ---------- REVIEWS ----------
 export const listMobilityProviderReviews = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({ orgId: z.string().uuid() }).parse(v))
+  .inputValidator((v: unknown) => z.object({
+    orgId: z.string().uuid(),
+    vehicleId: z.string().uuid().optional(),
+    status: z.enum(["pending", "approved", "rejected", "all"]).default("all"),
+  }).parse(v))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const { data: rows } = await sb.from("mobility_reviews")
+    // mobility_reviews has provider_id (not org_id) — resolve providers under this org.
+    const { data: providers } = await sb.from("mobility_providers").select("id").eq("org_id", data.orgId);
+    const providerIds = (providers ?? []).map((p: any) => p.id);
+    if (providerIds.length === 0) return { reviews: [] };
+
+    let q = sb.from("mobility_reviews")
       .select("*, mobility_vehicles(make, model, slug)")
-      .eq("org_id", data.orgId)
+      .in("provider_id", providerIds)
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(200);
+    if (data.vehicleId) q = q.eq("vehicle_id", data.vehicleId);
+    if (data.status !== "all") q = q.eq("status", data.status);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
     return { reviews: rows ?? [] };
   });
 
@@ -783,6 +908,26 @@ export const respondMobilityReview = createServerFn({ method: "POST" })
     const { error } = await sb.from("mobility_reviews").update({
       response: data.response,
       responded_at: new Date().toISOString(),
+    }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Provider approves or rejects a pending review before it goes public.
+export const moderateMobilityReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({
+    id: z.string().uuid(),
+    action: z.enum(["approve", "reject"]),
+    reason: z.string().max(500).optional(),
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const { error } = await sb.from("mobility_reviews").update({
+      status: data.action === "approve" ? "approved" : "rejected",
+      moderated_at: new Date().toISOString(),
+      moderated_by: context.userId,
+      moderation_reason: data.reason ?? null,
     }).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };

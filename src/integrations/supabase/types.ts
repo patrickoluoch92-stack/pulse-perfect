@@ -2833,6 +2833,59 @@ export type Database = {
           },
         ]
       }
+      mobility_owner_payout_requests: {
+        Row: {
+          amount_kes: number
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          destination: Json
+          external_reference: string | null
+          id: string
+          method: string
+          notes: string | null
+          owner_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_kes: number
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          destination?: Json
+          external_reference?: string | null
+          id?: string
+          method?: string
+          notes?: string | null
+          owner_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_kes?: number
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          destination?: Json
+          external_reference?: string | null
+          id?: string
+          method?: string
+          notes?: string | null
+          owner_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_owner_payout_requests_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_private_owners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mobility_pricing_tiers: {
         Row: {
           created_at: string
@@ -3093,6 +3146,9 @@ export type Database = {
           comment: string | null
           created_at: string
           id: string
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_reason: string | null
           provider_id: string
           rating: number
           responded_at: string | null
@@ -3106,6 +3162,9 @@ export type Database = {
           comment?: string | null
           created_at?: string
           id?: string
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
           provider_id: string
           rating: number
           responded_at?: string | null
@@ -3119,6 +3178,9 @@ export type Database = {
           comment?: string | null
           created_at?: string
           id?: string
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
           provider_id?: string
           rating?: number
           responded_at?: string | null

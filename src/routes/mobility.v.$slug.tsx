@@ -6,6 +6,7 @@ import { Car, Users, Fuel, Cog, Snowflake, Navigation, Shield, Star } from "luci
 import {
   getPublicMobilityVehicle,
   createMobilityBooking,
+  quoteMobilityBooking,
   listPublicVehicleReviews,
   submitMobilityReview,
   getMyMobilityReviewStatus,
@@ -35,6 +36,7 @@ function VehicleDetail() {
   const { slug } = Route.useParams();
   const fetchVehicle = useServerFn(getPublicMobilityVehicle);
   const bookFn = useServerFn(createMobilityBooking);
+  const quoteFn = useServerFn(quoteMobilityBooking);
 
   const { data, isLoading } = useQuery({
     queryKey: ["mobility-vehicle", slug],
@@ -44,7 +46,18 @@ function VehicleDetail() {
   const [pickupAt, setPickupAt] = useState("");
   const [dropoffAt, setDropoffAt] = useState("");
   const [pickupLocation, setPickupLocation] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
   const [driverOption, setDriverOption] = useState<"self" | "chauffeur">("self");
+  const [notes, setNotes] = useState("");
+
+  const vehicleId = (data?.vehicle as any)?.id;
+  const quoteEnabled = !!(vehicleId && pickupAt && dropoffAt && new Date(dropoffAt) > new Date(pickupAt));
+  const quote = useQuery({
+    queryKey: ["mobility-quote", vehicleId, pickupAt, dropoffAt, driverOption],
+    queryFn: () => quoteFn({ data: { vehicleId, pickupAt: new Date(pickupAt).toISOString(), dropoffAt: new Date(dropoffAt).toISOString(), driverOption } }),
+    enabled: quoteEnabled,
+    retry: false,
+  });
 
   const book = useMutation({
     mutationFn: (payload: {
@@ -52,17 +65,19 @@ function VehicleDetail() {
       pickupAt: string;
       dropoffAt: string;
       pickupLocation?: string;
+      deliveryAddress?: string;
       driverOption: "self" | "chauffeur";
+      notes?: string;
     }) => bookFn({ data: payload }),
-    onSuccess: (res) => {
+    onSuccess: () => {
       toast.success("Booking created — provider will confirm shortly.");
-      console.log("booking", res);
     },
     onError: (err: any) => toast.error(err?.message ?? "Booking failed"),
   });
 
   if (isLoading) return <div className="p-8"><LoadingState label="Loading vehicle…" /></div>;
   if (!data?.vehicle) throw notFound();
+
 
   const v: any = data.vehicle;
   const images: any[] = (v.mobility_vehicle_images ?? []).sort((a: any, b: any) => a.sort_order - b.sort_order);
@@ -153,20 +168,64 @@ function VehicleDetail() {
                   <Label htmlFor="loc">Pickup location</Label>
                   <Input id="loc" value={pickupLocation} onChange={(e) => setPickupLocation(e.target.value)} placeholder="e.g. JKIA, Nairobi" />
                 </div>
+                <div>
+                  <Label htmlFor="delivery">Delivery address (optional)</Label>
+                  <Input id="delivery" value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} placeholder="Where should we deliver?" />
+                </div>
                 <div className="flex gap-2">
                   <Button type="button" size="sm" variant={driverOption === "self" ? "default" : "outline"} onClick={() => setDriverOption("self")}>Self-drive</Button>
-                  <Button type="button" size="sm" variant={driverOption === "chauffeur" ? "default" : "outline"} onClick={() => setDriverOption("chauffeur")}>With driver</Button>
+                  <Button type="button" size="sm" variant={driverOption === "chauffeur" ? "default" : "outline"} onClick={() => setDriverOption("chauffeur")}>With driver (+25%)</Button>
                 </div>
+                <div>
+                  <Label htmlFor="notes">Notes for the provider (optional)</Label>
+                  <Textarea id="notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Flight number, special requests…" />
+                </div>
+
+                {quoteEnabled && (
+                  <div className="rounded-md border bg-muted/40 p-3 text-sm space-y-1">
+                    {quote.isLoading && <div className="text-muted-foreground">Calculating price…</div>}
+                    {quote.error && <div className="text-destructive">{(quote.error as any).message}</div>}
+                    {quote.data && (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">
+                            {quote.data.duration.days} day{quote.data.duration.days === 1 ? "" : "s"} · {quote.data.quote.dailySource}
+                          </span>
+                          <span>KES {quote.data.quote.subtotalKes.toLocaleString()}</span>
+                        </div>
+                        {quote.data.quote.chauffeurFeeKes > 0 && (
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Chauffeur (25%)</span>
+                            <span>KES {quote.data.quote.chauffeurFeeKes.toLocaleString()}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between border-t pt-1 font-semibold">
+                          <span>Total</span>
+                          <span>KES {quote.data.quote.totalKes.toLocaleString()}</span>
+                        </div>
+                        {quote.data.quote.depositKes > 0 && (
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Refundable security deposit</span>
+                            <span>KES {quote.data.quote.depositKes.toLocaleString()}</span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+
                 <Button
                   className="w-full"
-                  disabled={!pickupAt || !dropoffAt || book.isPending}
+                  disabled={!pickupAt || !dropoffAt || book.isPending || !quote.data}
                   onClick={() =>
                     book.mutate({
                       vehicleId: v.id,
                       pickupAt: new Date(pickupAt).toISOString(),
                       dropoffAt: new Date(dropoffAt).toISOString(),
                       pickupLocation: pickupLocation || undefined,
+                      deliveryAddress: deliveryAddress || undefined,
                       driverOption,
+                      notes: notes || undefined,
                     })
                   }
                 >
@@ -175,6 +234,7 @@ function VehicleDetail() {
                 <p className="text-xs text-muted-foreground">Sign in required. Provider confirms availability before payment.</p>
               </CardContent>
             </Card>
+
           </aside>
         </div>
       </section>

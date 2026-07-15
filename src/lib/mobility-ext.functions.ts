@@ -606,3 +606,98 @@ export const getPrivateOwnerEarnings = createServerFn({ method: "GET" })
       bookings: (bookings ?? []).slice(0, 20),
     };
   });
+
+// ---------------------------------------------------------------------------
+// PRIVATE OWNER PAYOUT REQUESTS
+// ---------------------------------------------------------------------------
+// Owners request payouts against their net earnings; platform admins process.
+async function ownerNetAvailable(sb: SB, userId: string): Promise<{ ownerId: string | null; available: number }> {
+  const { data: owner } = await sb
+    .from("mobility_private_owners")
+    .select("id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!owner) return { ownerId: null, available: 0 };
+
+  const { data: vehicles } = await sb
+    .from("mobility_vehicles")
+    .select("id, mobility_providers:provider_id (private_owner_commission_pct)")
+    .eq("private_owner_id", owner.id);
+  const ids = (vehicles ?? []).map((v: any) => v.id);
+  if (ids.length === 0) return { ownerId: owner.id, available: 0 };
+
+  const { data: bookings } = await sb
+    .from("mobility_bookings")
+    .select("vehicle_id, status, total_kes")
+    .in("vehicle_id", ids);
+  const pctByVeh = new Map<string, number>();
+  for (const v of vehicles ?? []) pctByVeh.set(v.id, Number(v.mobility_providers?.private_owner_commission_pct ?? 20));
+  let net = 0;
+  for (const b of bookings ?? []) {
+    if (!["confirmed", "completed"].includes(b.status)) continue;
+    const g = Number(b.total_kes ?? 0);
+    const c = Math.round((g * (pctByVeh.get(b.vehicle_id) ?? 20)) / 100);
+    net += g - c;
+  }
+
+  const { data: reqs } = await sb
+    .from("mobility_owner_payout_requests")
+    .select("amount_kes, status")
+    .eq("owner_id", owner.id);
+  let reserved = 0;
+  for (const r of reqs ?? []) {
+    if (["pending", "approved", "processing", "paid"].includes(r.status)) reserved += Number(r.amount_kes ?? 0);
+  }
+  return { ownerId: owner.id, available: Math.max(0, net - reserved) };
+}
+
+export const requestOwnerPayout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({
+    amountKes: z.number().positive(),
+    method: z.enum(["mpesa", "bank"]).default("mpesa"),
+    destination: z.record(z.string(), z.any()).default({}),
+    notes: z.string().max(500).optional(),
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const { ownerId, available } = await ownerNetAvailable(sb, context.userId);
+    if (!ownerId) throw new Error("Register as a private owner first.");
+    if (data.amountKes > available) throw new Error(`Only KES ${available.toLocaleString()} available for payout.`);
+
+    const { data: row, error } = await sb.from("mobility_owner_payout_requests").insert({
+      owner_id: ownerId,
+      amount_kes: data.amountKes,
+      method: data.method,
+      destination: data.destination,
+      notes: data.notes ?? null,
+    }).select("*").single();
+    if (error) throw new Error(error.message);
+    return { request: row, availableAfter: available - data.amountKes };
+  });
+
+export const listOwnerPayoutRequests = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sb = context.supabase as SB;
+    const { data: owner } = await sb.from("mobility_private_owners").select("id").eq("user_id", context.userId).maybeSingle();
+    if (!owner) return { requests: [], available: 0 };
+    const [{ data: rows }, availability] = await Promise.all([
+      sb.from("mobility_owner_payout_requests").select("*").eq("owner_id", owner.id).order("created_at", { ascending: false }).limit(50),
+      ownerNetAvailable(sb, context.userId),
+    ]);
+    return { requests: rows ?? [], available: availability.available };
+  });
+
+export const cancelOwnerPayoutRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const { error } = await sb.from("mobility_owner_payout_requests")
+      .update({ status: "cancelled" })
+      .eq("id", data.id)
+      .eq("status", "pending");
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

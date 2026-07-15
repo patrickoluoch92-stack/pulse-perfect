@@ -16,6 +16,7 @@ import {
   upsertPrivateOwner, getMyPrivateOwner, listAcceptingProviders,
   submitVehicleToProvider, listMySubmissions, withdrawSubmission,
   getPrivateOwnerEarnings,
+  requestOwnerPayout, listOwnerPayoutRequests, cancelOwnerPayoutRequest,
 } from "@/lib/mobility-ext.functions";
 
 export const Route = createFileRoute("/_authenticated/mobility/owner")({
@@ -224,6 +225,12 @@ function PrivateOwnerDashboard() {
           </CardContent>
         </Card>
 
+        <PayoutsCard />
+
+
+
+
+
 
         <Card>
           <CardHeader>
@@ -358,5 +365,89 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: "pr
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className={`mt-1 text-lg font-semibold ${tone === "muted" ? "text-muted-foreground" : ""}`}>{value}</div>
     </div>
+  );
+}
+
+function PayoutsCard() {
+  const qc = useQueryClient();
+  const listFn = useServerFn(listOwnerPayoutRequests);
+  const reqFn = useServerFn(requestOwnerPayout);
+  const cancelFn = useServerFn(cancelOwnerPayoutRequest);
+  const q = useQuery({ queryKey: ["mob-owner-payouts"], queryFn: () => listFn() });
+  const [amount, setAmount] = useState("");
+  const [method, setMethod] = useState<"mpesa" | "bank">("mpesa");
+  const [dest, setDest] = useState("");
+  const [notes, setNotes] = useState("");
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["mob-owner-payouts"] });
+    qc.invalidateQueries({ queryKey: ["mob-owner-earnings"] });
+  };
+
+  const submit = () => {
+    const amt = Number(amount);
+    if (!amt || amt <= 0) { toast.error("Enter a valid amount"); return; }
+    const destination = method === "mpesa" ? { phone: dest } : { account: dest };
+    reqFn({ data: { amountKes: amt, method, destination, notes: notes || undefined } })
+      .then(() => { toast.success("Payout requested"); setAmount(""); setDest(""); setNotes(""); invalidate(); })
+      .catch((e: any) => toast.error(e?.message ?? "Failed"));
+  };
+
+  const available = (q.data as any)?.available ?? 0;
+  const rows: any[] = (q.data as any)?.requests ?? [];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2"><Wallet className="h-5 w-5" /> Payouts</CardTitle>
+        <p className="text-xs text-muted-foreground">Request payouts against your net earnings. Platform processes M-Pesa or bank transfers.</p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="rounded-md border bg-muted/40 p-3 text-sm">
+          Available for payout: <span className="font-semibold">KES {Number(available).toLocaleString()}</span>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-4">
+          <div>
+            <Label>Amount (KES)</Label>
+            <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          </div>
+          <div>
+            <Label>Method</Label>
+            <div className="flex gap-2 mt-1">
+              <Button type="button" size="sm" variant={method === "mpesa" ? "default" : "outline"} onClick={() => setMethod("mpesa")}>M-Pesa</Button>
+              <Button type="button" size="sm" variant={method === "bank" ? "default" : "outline"} onClick={() => setMethod("bank")}>Bank</Button>
+            </div>
+          </div>
+          <div className="sm:col-span-2">
+            <Label>{method === "mpesa" ? "M-Pesa phone" : "Bank account"}</Label>
+            <Input value={dest} onChange={(e) => setDest(e.target.value)} placeholder={method === "mpesa" ? "07XXXXXXXX" : "Bank / account number"} />
+          </div>
+          <div className="sm:col-span-4">
+            <Label>Notes (optional)</Label>
+            <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </div>
+        </div>
+        <Button onClick={submit} disabled={!amount || Number(amount) <= 0 || Number(amount) > available}>Request payout</Button>
+
+        {q.isLoading ? <LoadingState label="Loading payouts…" /> :
+          rows.length === 0 ? <EmptyState title="No payout requests yet" description="Your requests will appear here." /> : (
+          <div className="space-y-2">
+            {rows.map((r) => (
+              <div key={r.id} className="flex items-center justify-between rounded-md border p-3 text-sm">
+                <div>
+                  <div className="font-medium">KES {Number(r.amount_kes).toLocaleString()} · <span className="uppercase text-xs">{r.method}</span></div>
+                  <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}{r.notes ? ` · ${r.notes}` : ""}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant={r.status === "paid" ? "default" : r.status === "rejected" || r.status === "cancelled" ? "outline" : "secondary"}>{r.status}</Badge>
+                  {r.status === "pending" && (
+                    <Button size="sm" variant="ghost" onClick={() => cancelFn({ data: { id: r.id } }).then(() => { toast.success("Cancelled"); invalidate(); }).catch((e: any) => toast.error(e?.message ?? "Failed"))}>Cancel</Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
