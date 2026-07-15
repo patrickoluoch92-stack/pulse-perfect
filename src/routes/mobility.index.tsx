@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Car, ArrowRight } from "lucide-react";
+import { Car, ArrowRight, Building2 } from "lucide-react";
 import { searchMobilityVehicles, MOBILITY_CATEGORIES, MOBILITY_CATEGORY_LABELS, type MobilityCategory } from "@/lib/mobility.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlanWithAI } from "@/components/plan-with-ai";
