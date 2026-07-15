@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Car, Send, ShieldCheck, Building2 } from "lucide-react";
+import { Car, Send, ShieldCheck, Building2, Wallet } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import {
   upsertPrivateOwner, getMyPrivateOwner, listAcceptingProviders,
   submitVehicleToProvider, listMySubmissions, withdrawSubmission,
+  getPrivateOwnerEarnings,
 } from "@/lib/mobility-ext.functions";
 
 export const Route = createFileRoute("/_authenticated/mobility/owner")({
