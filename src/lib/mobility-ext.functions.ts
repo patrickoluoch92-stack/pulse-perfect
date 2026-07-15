@@ -22,6 +22,8 @@ const privateOwnerInput = z.object({
   countyCode: z.string().max(10).optional(),
   town: z.string().max(80).optional(),
   address: z.string().max(200).optional(),
+  emergencyContact: z.string().max(200).optional(),
+  preferredPaymentMethod: z.enum(["mpesa", "bank", "both"]).optional(),
   bankDetails: z.record(z.any()).optional(),
 });
 
@@ -43,6 +45,8 @@ export const upsertPrivateOwner = createServerFn({ method: "POST" })
           county_code: data.countyCode ?? null,
           town: data.town ?? null,
           address: data.address ?? null,
+          emergency_contact: data.emergencyContact ?? null,
+          preferred_payment_method: data.preferredPaymentMethod ?? null,
           bank_details: data.bankDetails ?? {},
         },
         { onConflict: "user_id" },
@@ -52,6 +56,7 @@ export const upsertPrivateOwner = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return row;
   });
+
 
 export const getMyPrivateOwner = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
