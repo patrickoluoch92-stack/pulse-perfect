@@ -119,6 +119,7 @@ function VehicleManager() {
             <TabsTrigger value="maintenance"><Wrench className="mr-1 h-3.5 w-3.5" /> Maintenance</TabsTrigger>
             <TabsTrigger value="calendar"><Calendar className="mr-1 h-3.5 w-3.5" /> Availability</TabsTrigger>
             <TabsTrigger value="bookings"><MessageSquare className="mr-1 h-3.5 w-3.5" /> Bookings</TabsTrigger>
+            <TabsTrigger value="reviews"><Star className="mr-1 h-3.5 w-3.5" /> Reviews</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details">
