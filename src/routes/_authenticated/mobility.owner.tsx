@@ -37,6 +37,7 @@ function PrivateOwnerDashboard() {
   const submit = useServerFn(submitVehicleToProvider);
   const listSubs = useServerFn(listMySubmissions);
   const withdraw = useServerFn(withdrawSubmission);
+  const fetchEarnings = useServerFn(getPrivateOwnerEarnings);
 
   const owner = useQuery({ queryKey: ["mob-owner"], queryFn: () => fetchOwner() });
   const providers = useQuery({
@@ -47,6 +48,11 @@ function PrivateOwnerDashboard() {
   const subs = useQuery({
     queryKey: ["mob-my-subs"],
     queryFn: () => listSubs(),
+    enabled: !!owner.data,
+  });
+  const earnings = useQuery({
+    queryKey: ["mob-owner-earnings"],
+    queryFn: () => fetchEarnings(),
     enabled: !!owner.data,
   });
 
