@@ -185,3 +185,118 @@ function VehicleDetail() {
 function Spec({ icon: Icon, label }: { icon: any; label: string }) {
   return <div className="flex items-center gap-2"><Icon className="h-4 w-4 text-muted-foreground" /><span>{label}</span></div>;
 }
+
+function Stars({ value }: { value: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Star key={n} className={`h-4 w-4 ${n <= Math.round(value) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}`} />
+      ))}
+    </div>
+  );
+}
+
+function ReviewsSection({ vehicleId }: { vehicleId: string }) {
+  const qc = useQueryClient();
+  const listFn = useServerFn(listPublicVehicleReviews);
+  const statusFn = useServerFn(getMyMobilityReviewStatus);
+  const submitFn = useServerFn(submitMobilityReview);
+
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  useState(() => {
+    supabase.auth.getUser().then(({ data }) => setSignedIn(!!data.user));
+    return 0;
+  });
+
+  const reviews = useQuery({
+    queryKey: ["mobility-reviews", vehicleId],
+    queryFn: () => listFn({ data: { vehicleId, limit: 20 } }),
+  });
+  const status = useQuery({
+    queryKey: ["mobility-review-status", vehicleId, signedIn],
+    queryFn: () => statusFn({ data: { vehicleId } }),
+    enabled: !!signedIn,
+  });
+
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+
+  const submit = useMutation({
+    mutationFn: () => submitFn({ data: { vehicleId, rating, comment: comment || undefined } }),
+    onSuccess: (res: any) => {
+      toast.success(res?.updated ? "Review updated — pending approval." : "Review submitted — pending approval.");
+      setComment("");
+      qc.invalidateQueries({ queryKey: ["mobility-review-status", vehicleId] });
+      qc.invalidateQueries({ queryKey: ["mobility-reviews", vehicleId] });
+    },
+    onError: (err: any) => toast.error(err?.message ?? "Could not submit review"),
+  });
+
+  const list = reviews.data?.reviews ?? [];
+  const avg = list.length ? list.reduce((s: number, r: any) => s + r.rating, 0) / list.length : 0;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>Guest reviews</span>
+          {list.length > 0 && (
+            <span className="flex items-center gap-2 text-sm font-normal text-muted-foreground">
+              <Stars value={avg} /> {avg.toFixed(1)} · {list.length} review{list.length === 1 ? "" : "s"}
+            </span>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {reviews.isLoading ? (
+          <LoadingState label="Loading reviews…" />
+        ) : list.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No reviews yet. Be the first after your trip.</p>
+        ) : (
+          <div className="space-y-3">
+            {list.map((r: any) => (
+              <div key={r.id} className="rounded-md border p-3">
+                <div className="flex items-center justify-between">
+                  <Stars value={r.rating} />
+                  <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</span>
+                </div>
+                {r.comment && <p className="mt-1 text-sm">{r.comment}</p>}
+                {r.response && (
+                  <div className="mt-2 rounded bg-muted p-2 text-xs">
+                    <div className="font-medium">Provider response</div>
+                    <p>{r.response}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {signedIn && status.data?.eligible && (
+          <div className="rounded-md border p-3 space-y-2">
+            <div className="text-sm font-medium">
+              {status.data.review ? "Update your review" : "Leave a review"}
+            </div>
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button key={n} type="button" onClick={() => setRating(n)} aria-label={`${n} stars`}>
+                  <Star className={`h-6 w-6 ${n <= rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}`} />
+                </button>
+              ))}
+            </div>
+            <Textarea rows={3} placeholder="Share your experience…" value={comment} onChange={(e) => setComment(e.target.value)} />
+            <Button size="sm" onClick={() => submit.mutate()} disabled={submit.isPending}>
+              {submit.isPending ? "Submitting…" : status.data.review ? "Update review" : "Submit review"}
+            </Button>
+            {status.data.review?.status === "pending" && (
+              <p className="text-xs text-muted-foreground">Your review is pending approval.</p>
+            )}
+          </div>
+        )}
+        {signedIn && status.data && !status.data.eligible && (
+          <p className="text-xs text-muted-foreground">Reviews open after your booking is completed.</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
