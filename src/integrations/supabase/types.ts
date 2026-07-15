@@ -2569,16 +2569,24 @@ export type Database = {
       }
       mobility_bookings: {
         Row: {
+          chauffeur_id: string | null
           created_at: string
+          damage_report: Json | null
+          delivery_address: string | null
           deposit_kes: number
           driver_option: Database["public"]["Enums"]["mobility_driver_option"]
           dropoff_at: string
           dropoff_location: string | null
+          extension_of: string | null
+          fuel_end: string | null
+          fuel_start: string | null
           guest_email: string | null
           guest_name: string | null
           guest_phone: string | null
           guest_user_id: string | null
           id: string
+          mileage_end_km: number | null
+          mileage_start_km: number | null
           notes: string | null
           org_id: string
           payment_ref: string | null
@@ -2594,16 +2602,24 @@ export type Database = {
           vehicle_id: string
         }
         Insert: {
+          chauffeur_id?: string | null
           created_at?: string
+          damage_report?: Json | null
+          delivery_address?: string | null
           deposit_kes?: number
           driver_option?: Database["public"]["Enums"]["mobility_driver_option"]
           dropoff_at: string
           dropoff_location?: string | null
+          extension_of?: string | null
+          fuel_end?: string | null
+          fuel_start?: string | null
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
           guest_user_id?: string | null
           id?: string
+          mileage_end_km?: number | null
+          mileage_start_km?: number | null
           notes?: string | null
           org_id: string
           payment_ref?: string | null
@@ -2619,16 +2635,24 @@ export type Database = {
           vehicle_id: string
         }
         Update: {
+          chauffeur_id?: string | null
           created_at?: string
+          damage_report?: Json | null
+          delivery_address?: string | null
           deposit_kes?: number
           driver_option?: Database["public"]["Enums"]["mobility_driver_option"]
           dropoff_at?: string
           dropoff_location?: string | null
+          extension_of?: string | null
+          fuel_end?: string | null
+          fuel_start?: string | null
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
           guest_user_id?: string | null
           id?: string
+          mileage_end_km?: number | null
+          mileage_start_km?: number | null
           notes?: string | null
           org_id?: string
           payment_ref?: string | null
@@ -2644,6 +2668,13 @@ export type Database = {
           vehicle_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "mobility_bookings_extension_of_fkey"
+            columns: ["extension_of"]
+            isOneToOne: false
+            referencedRelation: "mobility_bookings"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "mobility_bookings_org_id_fkey"
             columns: ["org_id"]
@@ -2667,9 +2698,263 @@ export type Database = {
           },
         ]
       }
-      mobility_providers: {
+      mobility_branches: {
         Row: {
           address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          county_code: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          is_primary: boolean
+          latitude: number | null
+          longitude: number | null
+          name: string
+          operating_hours: Json | null
+          org_id: string
+          provider_id: string
+          town: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          county_code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          operating_hours?: Json | null
+          org_id: string
+          provider_id: string
+          town?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          county_code?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          operating_hours?: Json | null
+          org_id?: string
+          provider_id?: string
+          town?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_branches_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobility_branches_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobility_maintenance: {
+        Row: {
+          cost_kes: number | null
+          created_at: string
+          done_at: string | null
+          id: string
+          maintenance_type: string
+          notes: string | null
+          odometer_km: number | null
+          org_id: string
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["mobility_maintenance_status"]
+          updated_at: string
+          vehicle_id: string
+          vendor: string | null
+        }
+        Insert: {
+          cost_kes?: number | null
+          created_at?: string
+          done_at?: string | null
+          id?: string
+          maintenance_type: string
+          notes?: string | null
+          odometer_km?: number | null
+          org_id: string
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["mobility_maintenance_status"]
+          updated_at?: string
+          vehicle_id: string
+          vendor?: string | null
+        }
+        Update: {
+          cost_kes?: number | null
+          created_at?: string
+          done_at?: string | null
+          id?: string
+          maintenance_type?: string
+          notes?: string | null
+          odometer_km?: number | null
+          org_id?: string
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["mobility_maintenance_status"]
+          updated_at?: string
+          vehicle_id?: string
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_maintenance_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobility_maintenance_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobility_pricing_tiers: {
+        Row: {
+          created_at: string
+          ends_on: string | null
+          id: string
+          is_active: boolean
+          min_units: number | null
+          notes: string | null
+          org_id: string
+          price_kes: number
+          starts_on: string | null
+          tier: Database["public"]["Enums"]["mobility_pricing_tier"]
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          ends_on?: string | null
+          id?: string
+          is_active?: boolean
+          min_units?: number | null
+          notes?: string | null
+          org_id: string
+          price_kes: number
+          starts_on?: string | null
+          tier: Database["public"]["Enums"]["mobility_pricing_tier"]
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          ends_on?: string | null
+          id?: string
+          is_active?: boolean
+          min_units?: number | null
+          notes?: string | null
+          org_id?: string
+          price_kes?: number
+          starts_on?: string | null
+          tier?: Database["public"]["Enums"]["mobility_pricing_tier"]
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_pricing_tiers_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobility_pricing_tiers_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobility_private_owners: {
+        Row: {
+          address: string | null
+          bank_details: Json | null
+          county_code: string | null
+          created_at: string
+          email: string | null
+          id: string
+          id_number: string | null
+          kra_pin: string | null
+          legal_name: string
+          notes: string | null
+          phone: string | null
+          town: string | null
+          updated_at: string
+          user_id: string
+          verification_status: string
+          verified_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          bank_details?: Json | null
+          county_code?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          id_number?: string | null
+          kra_pin?: string | null
+          legal_name: string
+          notes?: string | null
+          phone?: string | null
+          town?: string | null
+          updated_at?: string
+          user_id: string
+          verification_status?: string
+          verified_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          bank_details?: Json | null
+          county_code?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          id_number?: string | null
+          kra_pin?: string | null
+          legal_name?: string
+          notes?: string | null
+          phone?: string | null
+          town?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_status?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      mobility_providers: {
+        Row: {
+          accepts_private_vehicles: boolean
+          address: string | null
+          ai_summary: string | null
           bio: string | null
           business_reg_number: string | null
           contact_email: string | null
@@ -2687,12 +2972,15 @@ export type Database = {
           operating_hours: Json | null
           org_id: string
           policies: string | null
+          private_owner_commission_pct: number | null
+          private_owner_quality_min: number | null
           rating_avg: number | null
           rating_count: number
           rejection_reason: string | null
           service_areas: Json
           service_categories: string[]
           slug: string
+          social: Json | null
           social_links: Json | null
           submitted_at: string | null
           tax_pin: string | null
@@ -2703,9 +2991,12 @@ export type Database = {
           verification_status: Database["public"]["Enums"]["mobility_status"]
           verified_at: string | null
           website: string | null
+          years_in_business: number | null
         }
         Insert: {
+          accepts_private_vehicles?: boolean
           address?: string | null
+          ai_summary?: string | null
           bio?: string | null
           business_reg_number?: string | null
           contact_email?: string | null
@@ -2723,12 +3014,15 @@ export type Database = {
           operating_hours?: Json | null
           org_id: string
           policies?: string | null
+          private_owner_commission_pct?: number | null
+          private_owner_quality_min?: number | null
           rating_avg?: number | null
           rating_count?: number
           rejection_reason?: string | null
           service_areas?: Json
           service_categories?: string[]
           slug: string
+          social?: Json | null
           social_links?: Json | null
           submitted_at?: string | null
           tax_pin?: string | null
@@ -2739,9 +3033,12 @@ export type Database = {
           verification_status?: Database["public"]["Enums"]["mobility_status"]
           verified_at?: string | null
           website?: string | null
+          years_in_business?: number | null
         }
         Update: {
+          accepts_private_vehicles?: boolean
           address?: string | null
+          ai_summary?: string | null
           bio?: string | null
           business_reg_number?: string | null
           contact_email?: string | null
@@ -2759,12 +3056,15 @@ export type Database = {
           operating_hours?: Json | null
           org_id?: string
           policies?: string | null
+          private_owner_commission_pct?: number | null
+          private_owner_quality_min?: number | null
           rating_avg?: number | null
           rating_count?: number
           rejection_reason?: string | null
           service_areas?: Json
           service_categories?: string[]
           slug?: string
+          social?: Json | null
           social_links?: Json | null
           submitted_at?: string | null
           tax_pin?: string | null
@@ -2775,6 +3075,7 @@ export type Database = {
           verification_status?: Database["public"]["Enums"]["mobility_status"]
           verified_at?: string | null
           website?: string | null
+          years_in_business?: number | null
         }
         Relationships: [
           {
@@ -2890,6 +3191,69 @@ export type Database = {
           },
         ]
       }
+      mobility_vehicle_documents: {
+        Row: {
+          created_at: string
+          doc_type: Database["public"]["Enums"]["mobility_doc_type"]
+          expires_at: string | null
+          file_url: string
+          id: string
+          issued_at: string | null
+          notes: string | null
+          org_id: string
+          title: string | null
+          updated_at: string
+          vehicle_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          doc_type: Database["public"]["Enums"]["mobility_doc_type"]
+          expires_at?: string | null
+          file_url: string
+          id?: string
+          issued_at?: string | null
+          notes?: string | null
+          org_id: string
+          title?: string | null
+          updated_at?: string
+          vehicle_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          doc_type?: Database["public"]["Enums"]["mobility_doc_type"]
+          expires_at?: string | null
+          file_url?: string
+          id?: string
+          issued_at?: string | null
+          notes?: string | null
+          org_id?: string
+          title?: string | null
+          updated_at?: string
+          vehicle_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_vehicle_documents_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobility_vehicle_documents_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mobility_vehicle_images: {
         Row: {
           alt: string | null
@@ -2969,21 +3333,109 @@ export type Database = {
           },
         ]
       }
+      mobility_vehicle_submissions: {
+        Row: {
+          approved_vehicle_id: string | null
+          commission_pct: number | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_reason: string | null
+          id: string
+          private_owner_id: string
+          proposed_daily_rate_kes: number | null
+          provider_id: string
+          provider_org_id: string
+          status: Database["public"]["Enums"]["mobility_submission_status"]
+          updated_at: string
+          vehicle_snapshot: Json
+        }
+        Insert: {
+          approved_vehicle_id?: string | null
+          commission_pct?: number | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
+          id?: string
+          private_owner_id: string
+          proposed_daily_rate_kes?: number | null
+          provider_id: string
+          provider_org_id: string
+          status?: Database["public"]["Enums"]["mobility_submission_status"]
+          updated_at?: string
+          vehicle_snapshot: Json
+        }
+        Update: {
+          approved_vehicle_id?: string | null
+          commission_pct?: number | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
+          id?: string
+          private_owner_id?: string
+          proposed_daily_rate_kes?: number | null
+          provider_id?: string
+          provider_org_id?: string
+          status?: Database["public"]["Enums"]["mobility_submission_status"]
+          updated_at?: string
+          vehicle_snapshot?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobility_vehicle_submissions_approved_vehicle_id_fkey"
+            columns: ["approved_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobility_vehicle_submissions_private_owner_id_fkey"
+            columns: ["private_owner_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_private_owners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobility_vehicle_submissions_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobility_vehicle_submissions_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mobility_vehicles: {
         Row: {
           accessibility: Json | null
+          ai_flags: Json | null
           archived_at: string | null
+          body_type: string | null
           category: Database["public"]["Enums"]["mobility_category"]
+          chauffeur_available: boolean
           color: string | null
           county_code: string | null
           created_at: string
+          delivery_fee_kes: number | null
+          deposit_kes: number | null
           description: string | null
           doors: number | null
           drive_type: string | null
+          drive_type_ext: string | null
           dropoff_locations: Json
           embedding: string | null
           engine_size: string | null
+          extra_km_kes: number | null
           features: Json | null
+          fleet_no: string | null
           fuel_policy: string | null
           fuel_type: string | null
           has_ac: boolean
@@ -2992,6 +3444,7 @@ export type Database = {
           has_gps: boolean
           id: string
           instant_book: boolean
+          insurance: Json | null
           insurance_info: Json
           is_archived: boolean
           is_electric: boolean
@@ -3004,41 +3457,59 @@ export type Database = {
           luggage: number | null
           main_image_url: string | null
           make: string
+          mileage_km: number | null
+          mileage_limit_km_per_day: number | null
           mileage_policy: string | null
           min_driver_age: number | null
+          min_rental_hours: number | null
           model: string
           org_id: string
+          owner_type: Database["public"]["Enums"]["mobility_owner_type"]
           pickup_locations: Json
+          private_owner_id: string | null
           promo_price_kes: number | null
           provider_id: string
+          quality_score: number | null
           rating_avg: number | null
           rating_count: number
           registration_plate: string | null
           seats: number | null
           security_deposit_kes: number | null
+          self_drive_available: boolean
           slug: string
           status: Database["public"]["Enums"]["mobility_status"]
+          submission_id: string | null
           town: string | null
           transmission: string | null
           trim: string | null
           updated_at: string
+          variant: string | null
           vehicle_type: string | null
+          vin: string | null
           year: number | null
         }
         Insert: {
           accessibility?: Json | null
+          ai_flags?: Json | null
           archived_at?: string | null
+          body_type?: string | null
           category: Database["public"]["Enums"]["mobility_category"]
+          chauffeur_available?: boolean
           color?: string | null
           county_code?: string | null
           created_at?: string
+          delivery_fee_kes?: number | null
+          deposit_kes?: number | null
           description?: string | null
           doors?: number | null
           drive_type?: string | null
+          drive_type_ext?: string | null
           dropoff_locations?: Json
           embedding?: string | null
           engine_size?: string | null
+          extra_km_kes?: number | null
           features?: Json | null
+          fleet_no?: string | null
           fuel_policy?: string | null
           fuel_type?: string | null
           has_ac?: boolean
@@ -3047,6 +3518,7 @@ export type Database = {
           has_gps?: boolean
           id?: string
           instant_book?: boolean
+          insurance?: Json | null
           insurance_info?: Json
           is_archived?: boolean
           is_electric?: boolean
@@ -3059,41 +3531,59 @@ export type Database = {
           luggage?: number | null
           main_image_url?: string | null
           make: string
+          mileage_km?: number | null
+          mileage_limit_km_per_day?: number | null
           mileage_policy?: string | null
           min_driver_age?: number | null
+          min_rental_hours?: number | null
           model: string
           org_id: string
+          owner_type?: Database["public"]["Enums"]["mobility_owner_type"]
           pickup_locations?: Json
+          private_owner_id?: string | null
           promo_price_kes?: number | null
           provider_id: string
+          quality_score?: number | null
           rating_avg?: number | null
           rating_count?: number
           registration_plate?: string | null
           seats?: number | null
           security_deposit_kes?: number | null
+          self_drive_available?: boolean
           slug: string
           status?: Database["public"]["Enums"]["mobility_status"]
+          submission_id?: string | null
           town?: string | null
           transmission?: string | null
           trim?: string | null
           updated_at?: string
+          variant?: string | null
           vehicle_type?: string | null
+          vin?: string | null
           year?: number | null
         }
         Update: {
           accessibility?: Json | null
+          ai_flags?: Json | null
           archived_at?: string | null
+          body_type?: string | null
           category?: Database["public"]["Enums"]["mobility_category"]
+          chauffeur_available?: boolean
           color?: string | null
           county_code?: string | null
           created_at?: string
+          delivery_fee_kes?: number | null
+          deposit_kes?: number | null
           description?: string | null
           doors?: number | null
           drive_type?: string | null
+          drive_type_ext?: string | null
           dropoff_locations?: Json
           embedding?: string | null
           engine_size?: string | null
+          extra_km_kes?: number | null
           features?: Json | null
+          fleet_no?: string | null
           fuel_policy?: string | null
           fuel_type?: string | null
           has_ac?: boolean
@@ -3102,6 +3592,7 @@ export type Database = {
           has_gps?: boolean
           id?: string
           instant_book?: boolean
+          insurance?: Json | null
           insurance_info?: Json
           is_archived?: boolean
           is_electric?: boolean
@@ -3114,25 +3605,35 @@ export type Database = {
           luggage?: number | null
           main_image_url?: string | null
           make?: string
+          mileage_km?: number | null
+          mileage_limit_km_per_day?: number | null
           mileage_policy?: string | null
           min_driver_age?: number | null
+          min_rental_hours?: number | null
           model?: string
           org_id?: string
+          owner_type?: Database["public"]["Enums"]["mobility_owner_type"]
           pickup_locations?: Json
+          private_owner_id?: string | null
           promo_price_kes?: number | null
           provider_id?: string
+          quality_score?: number | null
           rating_avg?: number | null
           rating_count?: number
           registration_plate?: string | null
           seats?: number | null
           security_deposit_kes?: number | null
+          self_drive_available?: boolean
           slug?: string
           status?: Database["public"]["Enums"]["mobility_status"]
+          submission_id?: string | null
           town?: string | null
           transmission?: string | null
           trim?: string | null
           updated_at?: string
+          variant?: string | null
           vehicle_type?: string | null
+          vin?: string | null
           year?: number | null
         }
         Relationships: [
@@ -3144,10 +3645,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "mobility_vehicles_private_owner_id_fkey"
+            columns: ["private_owner_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_private_owners"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "mobility_vehicles_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "mobility_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobility_vehicles_submission_fk"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "mobility_vehicle_submissions"
             referencedColumns: ["id"]
           },
         ]
@@ -5248,7 +5763,31 @@ export type Database = {
         | "motorcycle"
         | "bicycle"
         | "boat"
+      mobility_doc_type:
+        | "insurance"
+        | "inspection"
+        | "logbook"
+        | "roadworthiness"
+        | "service_history"
+        | "compliance"
+        | "other"
       mobility_driver_option: "self" | "chauffeur"
+      mobility_maintenance_status:
+        | "scheduled"
+        | "in_progress"
+        | "done"
+        | "cancelled"
+      mobility_owner_type: "company" | "private"
+      mobility_pricing_tier:
+        | "daily"
+        | "weekend"
+        | "weekly"
+        | "monthly"
+        | "lease"
+        | "corporate"
+        | "holiday"
+        | "peak"
+        | "promo"
       mobility_rate_unit: "hour" | "day" | "week" | "month"
       mobility_status:
         | "draft"
@@ -5256,6 +5795,11 @@ export type Database = {
         | "approved"
         | "rejected"
         | "archived"
+      mobility_submission_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "withdrawn"
       org_role:
         | "owner"
         | "admin"
@@ -5547,9 +6091,42 @@ export const Constants = {
         "bicycle",
         "boat",
       ],
+      mobility_doc_type: [
+        "insurance",
+        "inspection",
+        "logbook",
+        "roadworthiness",
+        "service_history",
+        "compliance",
+        "other",
+      ],
       mobility_driver_option: ["self", "chauffeur"],
+      mobility_maintenance_status: [
+        "scheduled",
+        "in_progress",
+        "done",
+        "cancelled",
+      ],
+      mobility_owner_type: ["company", "private"],
+      mobility_pricing_tier: [
+        "daily",
+        "weekend",
+        "weekly",
+        "monthly",
+        "lease",
+        "corporate",
+        "holiday",
+        "peak",
+        "promo",
+      ],
       mobility_rate_unit: ["hour", "day", "week", "month"],
       mobility_status: ["draft", "pending", "approved", "rejected", "archived"],
+      mobility_submission_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "withdrawn",
+      ],
       org_role: [
         "owner",
         "admin",

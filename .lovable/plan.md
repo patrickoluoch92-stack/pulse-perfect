@@ -1,93 +1,81 @@
-# HostPulse Mobility & Car Rental Integration — Implementation Plan
+# HostPulse Mobility → Vehicle Rental & Fleet Management Ecosystem
 
-Deliver a fully integrated Car Hire & Mobility module that plugs into the existing Tours & Travel ecosystem (marketplace, bookings, payments, reviews, notifications, analytics, AI Recs, Property Intelligence, Planner AI) — not as a standalone silo.
+Scope is very large. To keep each change reviewable and avoid breaking the live Car Hire flow, I'll deliver in batches. Each batch ends with a working preview; nothing is dropped until its replacement is live.
 
-## 1. Data model (single migration)
+## 0. Audit (no code change)
+Confirm current state of:
+- `mobility_providers / vehicles / rates / images / seasonal_rates / availability_blocks / bookings / reviews`
+- `src/lib/mobility.functions.ts`, `src/routes/_authenticated/mobility*`, public `mobility.*` routes
+- Existing hooks into finance, commissions, notifications, RBAC, AI orchestrator.
 
-New tables in `public` (each with `authenticated` + `service_role` GRANTs, RLS, and org-scoped policies mirroring `marketplace_properties`):
+Deliverable: short gap list in `docs/MOBILITY_AUDIT.md`.
 
-- `mobility_providers` — verified car-hire companies. Fields: `org_id`, `name`, `slug`, `logo_url`, `bio`, `contact_*`, `verification_status`, `rating_avg`, `rating_count`, `service_areas jsonb`.
-- `mobility_vehicles` — one row per vehicle/fleet unit. Fields: `provider_id`, `org_id`, `slug`, `category` (enum: `self_drive`, `chauffeur`, `airport_transfer`, `executive`, `tour_van`, `safari_4x4`, `luxury`, `wedding`, `shuttle`, `bus`, `motorcycle`, `bicycle`, `boat`), `make`, `model`, `year`, `transmission` (auto/manual), `fuel_type`, `seats`, `luggage`, `has_ac`, `has_gps`, `insurance_info jsonb`, `security_deposit_kes`, `pickup_locations jsonb`, `dropoff_locations jsonb`, `county_code`, `town`, `status` (draft/pending/approved/rejected), `is_featured`, `description`, `embedding vector(3072)`.
-- `mobility_vehicle_rates` — pricing tiers: `vehicle_id`, `unit` (hour/day/week/month), `price_kes`, `min_units`, `included_km`, `extra_km_kes`.
-- `mobility_vehicle_images` — `vehicle_id`, `url`, `sort_order`, `alt`.
-- `mobility_availability_blocks` — `vehicle_id`, `start_at`, `end_at`, `reason`, `booking_id`.
-- `mobility_bookings` — `vehicle_id`, `provider_id`, `org_id`, `guest_user_id`, `pickup_at`, `dropoff_at`, `pickup_location`, `dropoff_location`, `driver_option` (self/chauffeur), `total_kes`, `deposit_kes`, `status` (pending/confirmed/in_progress/completed/cancelled), `payment_status`, `payment_ref`. Reuses booking status machinery.
-- `mobility_reviews` — mirrors `marketplace_property_reviews` shape (rating + comment, moderation).
-
-RLS pattern: public `SELECT` on approved vehicles/providers (safe columns only, contact PII revoked at column grant); org members manage their own fleet via `is_org_member`; guests see their own bookings; admins bypass via `has_role`.
-
-Extend `mkt_property_category` — not needed; mobility uses its own enum. But add `mobility` scope to search facets and Planner grounding.
+## 1. Data model refactor (single migration)
+Extend, don't replace:
+- `mobility_providers`: add `cover_image_url` (exists), `branches jsonb`, `years_in_business`, `operating_hours jsonb`, `social jsonb`, `ai_summary`, `accepts_private_vehicles bool`, `private_owner_commission_pct numeric`, `private_owner_quality_min int`.
+- New `mobility_branches` (org, provider, county, town, geo, address, hours).
+- New `mobility_private_owners` (user, KRA PIN encrypted, verification, payout).
+- New `mobility_vehicle_submissions` (private_owner → provider workflow: pending/approved/rejected/withdrawn, terms snapshot, commission_pct).
+- `mobility_vehicles`: add `registration_no`, `fleet_no`, `vin` (private), `variant`, `body_type`, `drive_type`, `mileage_km`, `owner_type` (`company|private`), `private_owner_id`, `submission_id`, `quality_score`, `ai_flags jsonb`, `instant_book bool`, `min_rental_hours`, `mileage_limit_km_per_day`, `extra_km_kes`, `insurance jsonb`, `deposit_kes`, `delivery_fee_kes`, `chauffeur_available bool`, `self_drive_available bool`, `documents jsonb` (refs to storage).
+- New `mobility_vehicle_documents` (vehicle, type, url, expires_at, verified_by).
+- New `mobility_maintenance` (vehicle, type, scheduled_at, done_at, cost_kes, notes, status).
+- New `mobility_pricing_tiers` extend rates with `tier` (daily/weekend/weekly/monthly/lease/corporate/holiday/peak), `starts_at`, `ends_at`.
+- New `mobility_payouts` view/table linked to existing `payouts` + `booking_commissions` with `source='mobility'`.
+- `mobility_bookings`: add `mileage_start/end`, `fuel_start/end`, `damage_report jsonb`, `chauffeur_id`, `delivery_address`, `extension_of` self-ref.
+- RLS: public sees only approved, non-archived; org staff via `is_org_member` + role; private owners see their own submissions + resulting bookings; admin bypass via `has_role`. Column-level revoke of `vin`, `documents`, guest PII columns from `anon`.
+- GRANTs + RLS + policies inline for every new table.
+- RBAC seed: `mobility.manage`, `mobility.fleet.write`, `mobility.bookings.manage`, `mobility.payouts.read`, `mobility.private_owner.review`.
 
 ## 2. Server functions (`src/lib/mobility.functions.ts` + `mobility.server.ts`)
+- Provider: branches CRUD, staff invite (reuse `team.functions`), settings for private-vehicle policy.
+- Fleet: vehicle CRUD w/ Zod schema covering every new field; document upload signed URL flow; maintenance CRUD; pricing tiers CRUD; availability + calendar; instant/request-book toggles.
+- Private owner: register, submit vehicle to provider, list my submissions, withdraw.
+- Provider review queue: list pending submissions, approve/reject (creates linked `mobility_vehicles` row with `owner_type='private'`).
+- Search: extend `searchMobilityVehicles` with all new filters (drive type, body, features array via `@>`, instant_book, verified_only, price bands, 4WD/EV/hybrid).
+- Bookings: quote (with mileage/delivery/deposit), create, extend, cancel, chat handoff, invoice.
+- Payouts: statement generator per provider + per private owner.
+- AI: `scoreVehicleListing` (quality + duplicate + description improvements) via `ai.server.ts`; `recommendPricing`; `forecastDemand`; hooked into `ai-orchestrator` as `mobility.enrichment.agent`.
 
-All authenticated via `requireSupabaseAuth`, org-scoped via `requireOrgRole`/`requirePermission`:
+## 3. Provider dashboard UI (`_authenticated/mobility.*`)
+- `mobility.tsx` — KPI hub (fleet, revenue, utilization, alerts, private-owner queue).
+- `mobility.fleet.tsx` — table + filters + bulk actions.
+- `mobility.manage.$id.tsx` — expand existing tabs (Details, Media, Docs, Pricing Tiers, Seasonal, Availability, Maintenance, Bookings, Reviews, AI Insights).
+- `mobility.branches.tsx`, `mobility.staff.tsx` (reuses team invites).
+- `mobility.submissions.tsx` — private-owner review queue.
+- `mobility.payouts.tsx`, `mobility.analytics.tsx`.
 
-- Provider CRUD: `upsertProvider`, `getProvider`, `listMyProviders`.
-- Vehicle CRUD: `upsertVehicle` (Zod schema for all listing fields), `submitVehicleForReview`, `listMyVehicles`, `getVehicle`.
-- Rates: `setVehicleRates`.
-- Images: `addVehicleImage`, `reorderVehicleImages`, `deleteVehicleImage`.
-- Availability: `blockVehicleDates`, `unblockVehicleDates`, `getVehicleAvailability`.
-- Public search (server publishable client, `anon` SELECT policy): `searchVehicles({ category?, county?, town?, seats?, transmission?, priceMax?, pickupDate?, dropoffDate?, query? })`, `getPublicVehicle(slug)`.
-- Bookings: `quoteVehicleBooking`, `createVehicleBooking`, `confirmVehicleBooking`, `cancelVehicleBooking`, `listVehicleBookings`.
-- Reviews: `submitVehicleReview`, `moderateVehicleReview`.
-- Analytics: `getProviderAnalytics` (revenue, occupancy, top vehicles, review score).
+## 4. Private-owner dashboard
+- `_authenticated/mobility.owner.tsx` — my vehicles, submissions, bookings, payouts, docs, messages.
+- Submit-vehicle wizard that targets one or more accepting providers.
 
-Payments: reuse existing M-Pesa + Paddle server flows — call `finance.server.ts` commission logic (`booking_commissions`) with `source='mobility'`.
+## 5. Platform admin
+- `_authenticated/admin.mobility.tsx` — provider verification queue, private-owner verification, commission overrides, disputes, moderation, AI service toggles.
 
-## 3. Public routes
+## 6. Public surfaces
+- Extend existing `mobility.index / $category / v.$slug / companies / company.$slug` with new filters, quality badges, verified-company badges, JSON-LD `Vehicle` + `Product`, and updated head() metadata.
+- Sitemap + `discover` integration.
 
-- `src/routes/mobility.index.tsx` — hub landing (categories grid, hero, Plan-with-AI CTA seeded `module=travel, need=transport`).
-- `src/routes/mobility.$category.tsx` — category listing (e.g. `/mobility/safari-4x4`).
-- `src/routes/mobility.v.$slug.tsx` — vehicle detail (gallery, specs, rates, availability calendar, reviews, book CTA).
-- `src/routes/mobility.county.$county.tsx` — county-scoped listings for SEO.
-- Each route with proper `head()` (title/description/og:title/og:description; og:image only on leaf with real vehicle photo).
-- Sitemap: extend `src/routes/sitemap[.]xml.ts` to include approved vehicles.
+## 7. AI + integrations
+- Listing gate: `scoreVehicleListing` runs on submit-for-review; block publish under threshold, surface reasons.
+- Planner AI: extend `fetchMobilityForPlan` with new signals (instant_book, 4WD for safari, EV for city).
+- Recommendations: emit `recommendation_events` for mobility; RPC `recommend_vehicles_for_user`.
+- Executive dashboard: mobility GMV, utilization, top providers.
+- Finance: `booking_commissions.source='mobility'`, split company/private-owner/platform.
+- Notifications: reuse booking notification path for mobility bookings, submissions, maintenance.
 
-## 4. Authenticated dashboard routes
+## 8. QA / hardening
+- RLS tests for private-owner isolation and PII columns.
+- Vitest for pricing quote + extension math.
+- Playwright smoke: company onboarding → vehicle create → AI gate → publish → search → book → provider approves → review.
+- Rate limiting on submissions and search.
 
-- `src/routes/_authenticated/mobility.tsx` — provider dashboard hub (fleet overview, bookings, revenue KPIs).
-- `src/routes/_authenticated/mobility.fleet.tsx` — vehicle list + add.
-- `src/routes/_authenticated/mobility.fleet.$id.tsx` — edit vehicle (specs, images, rates, availability, pickup/dropoff).
-- `src/routes/_authenticated/mobility.bookings.tsx` — inbound bookings queue.
-- `src/routes/_authenticated/mobility.analytics.tsx` — revenue, occupancy, top vehicles.
-- `src/routes/_authenticated/admin.mobility.tsx` — moderation queue (approve/reject vehicles + providers).
+## Ordering
+Batch 1 → migration only (needs your approval before I write dependent code).
+Batches 2–8 land sequentially, each self-contained and previewable.
 
-Nav: add "Mobility" section to `src/components/dashboard-shell.tsx`, gated by a new `mobility.manage` RBAC permission (seeded to `owner`, `enterprise_admin`, `admin`, `manager`).
+## Non-goals (explicit)
+- No motorcycle/boat category rollout yet (schema-ready, UI hidden).
+- No escrow (schema hook only).
+- No native mobile app.
 
-## 5. Integration points
-
-- **Planner AI** (`src/lib/planner.functions.ts`): in `fetchProperties`, also fetch relevant `mobility_vehicles` via a new `fetchMobilityForPlan(query, county, module)`. Extend `PlanSchema` with `recommendedVehicles` (slug list). Update system prompt: "Recommend suitable vehicles alongside accommodation for travel/safari/wedding/business/weekend modules — reference by slug." Enrich response with real vehicle lookups.
-- **Property Intelligence / Recommendations**: emit `recommendation_events` on view/book. Add `recommend_vehicles_for_user` RPC mirroring `recommend_for_user`.
-- **Search**: add a Mobility tab on `src/routes/marketplace.index.tsx` that routes to `mobility.index`. Cross-link on property detail page ("Getting there — vehicles near this property").
-- **Maps**: reuse existing map component; add vehicle pickup markers on `mobility.map` (optional deferred).
-- **Reviews**: reuse `PropertyReviews` shape with a `mobility` variant.
-- **Notifications**: reuse existing booking notification path (guest + provider) keyed on `mobility_bookings`.
-- **Analytics/Executive**: add mobility KPIs to `getExecutiveOverview` (GMV, active vehicles, top providers).
-- **Finance**: commission rules extended to include a `mobility` scope; wire `booking_commissions.source='mobility'`.
-- **AI Ops**: add `mobility.enrichment.agent` (image tagging + embedding backfill) reusing `enrichment-tick.server.ts`.
-- **SEO**: `discover`/`sitemap`/JSON-LD (`Product` + `Vehicle` schema) on vehicle detail.
-
-## 6. Ordering & delivery
-
-Batches (each a small, verifiable step):
-
-1. Migration (tables, enums, RLS, GRANTs, RPC helpers, permission seed).
-2. Server functions + Zod schemas.
-3. Provider dashboard (fleet CRUD + images + rates + availability).
-4. Public routes (hub, category, detail, county) + SEO.
-5. Booking flow (quote → create → payment → confirm) + reviews.
-6. Planner AI integration (grounding, schema field, UI card for recommended vehicles on `planner.tsx`).
-7. Cross-surface integration (marketplace tab, property detail cross-link, executive KPIs, sitemap, discover).
-8. Admin moderation route + analytics + notifications wiring.
-
-No changes to auto-generated files (`types.ts`, `client.ts`, `routeTree.gen.ts`). Types regenerate after the migration is approved.
-
-## Technical notes
-
-- All server-only helpers live in `mobility.server.ts` (imported inside handlers only).
-- Column-level `REVOKE SELECT` on `mobility_providers.contact_email/phone` from `anon`; expose only through booking flow.
-- `mobility_bookings` guest PII gated by role (guest, provider org roles, admin) — same pattern used for `marketplace_bookings`.
-- Availability collision check enforced by an exclusion constraint on `mobility_availability_blocks` (using `btree_gist` already present) `EXCLUDE USING gist (vehicle_id WITH =, tstzrange(start_at, end_at) WITH &&)`.
-- Extend `sitemap.xml`, `llms.txt`, and JSON-LD.
-
-Ready to start with Batch 1 (migration) on approval.
+Reply **approve batch 1** to start with the migration, or tell me which batches to reorder/skip.
