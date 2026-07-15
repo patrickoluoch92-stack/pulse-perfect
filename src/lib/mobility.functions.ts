@@ -104,6 +104,7 @@ const ProviderInput = z.object({
   socialLinks: z.record(z.string(), z.string()).optional(),
   policies: z.string().max(6000).optional(),
   terms: z.string().max(6000).optional(),
+  coverImageUrl: z.string().url().optional(),
   verificationDocs: z.array(z.object({
     label: z.string().max(120),
     url: z.string().url(),
