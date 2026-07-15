@@ -17,7 +17,7 @@ import {
   submitVehicleToProvider, listMySubmissions, withdrawSubmission,
 } from "@/lib/mobility-ext.functions";
 
-export const Route = createFileRoute("/_authenticated/mobility.owner")({
+export const Route = createFileRoute("/_authenticated/mobility/owner")({
   component: PrivateOwnerDashboard,
 });
 
