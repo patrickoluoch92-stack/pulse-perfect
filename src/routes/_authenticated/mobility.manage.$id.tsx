@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { ArrowLeft, Archive, ArchiveRestore, Trash2, Plus, Send, X, Image as ImageIcon, Calendar, DollarSign, Info, MessageSquare, FileText, Wrench, Tag } from "lucide-react";
+import { ArrowLeft, Archive, ArchiveRestore, Trash2, Plus, Send, X, Image as ImageIcon, Calendar, DollarSign, Info, MessageSquare, FileText, Wrench, Tag, Star, Check } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
