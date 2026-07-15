@@ -36,6 +36,7 @@ function VehicleDetail() {
   const { slug } = Route.useParams();
   const fetchVehicle = useServerFn(getPublicMobilityVehicle);
   const bookFn = useServerFn(createMobilityBooking);
+  const quoteFn = useServerFn(quoteMobilityBooking);
 
   const { data, isLoading } = useQuery({
     queryKey: ["mobility-vehicle", slug],
@@ -45,7 +46,18 @@ function VehicleDetail() {
   const [pickupAt, setPickupAt] = useState("");
   const [dropoffAt, setDropoffAt] = useState("");
   const [pickupLocation, setPickupLocation] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
   const [driverOption, setDriverOption] = useState<"self" | "chauffeur">("self");
+  const [notes, setNotes] = useState("");
+
+  const vehicleId = (data?.vehicle as any)?.id;
+  const quoteEnabled = !!(vehicleId && pickupAt && dropoffAt && new Date(dropoffAt) > new Date(pickupAt));
+  const quote = useQuery({
+    queryKey: ["mobility-quote", vehicleId, pickupAt, dropoffAt, driverOption],
+    queryFn: () => quoteFn({ data: { vehicleId, pickupAt: new Date(pickupAt).toISOString(), dropoffAt: new Date(dropoffAt).toISOString(), driverOption } }),
+    enabled: quoteEnabled,
+    retry: false,
+  });
 
   const book = useMutation({
     mutationFn: (payload: {
@@ -53,17 +65,19 @@ function VehicleDetail() {
       pickupAt: string;
       dropoffAt: string;
       pickupLocation?: string;
+      deliveryAddress?: string;
       driverOption: "self" | "chauffeur";
+      notes?: string;
     }) => bookFn({ data: payload }),
-    onSuccess: (res) => {
+    onSuccess: () => {
       toast.success("Booking created — provider will confirm shortly.");
-      console.log("booking", res);
     },
     onError: (err: any) => toast.error(err?.message ?? "Booking failed"),
   });
 
   if (isLoading) return <div className="p-8"><LoadingState label="Loading vehicle…" /></div>;
   if (!data?.vehicle) throw notFound();
+
 
   const v: any = data.vehicle;
   const images: any[] = (v.mobility_vehicle_images ?? []).sort((a: any, b: any) => a.sort_order - b.sort_order);
