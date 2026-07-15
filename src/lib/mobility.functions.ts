@@ -140,6 +140,7 @@ export const upsertMobilityProvider = createServerFn({ method: "POST" })
       policies: data.policies ?? null,
       terms: data.terms ?? null,
       verification_docs: data.verificationDocs ?? [],
+      cover_image_url: data.coverImageUrl ?? null,
     };
     if (data.id) {
       const { data: row, error } = await sb.from("mobility_providers")
