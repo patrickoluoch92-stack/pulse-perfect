@@ -104,6 +104,7 @@ const ProviderInput = z.object({
   socialLinks: z.record(z.string(), z.string()).optional(),
   policies: z.string().max(6000).optional(),
   terms: z.string().max(6000).optional(),
+  coverImageUrl: z.string().url().optional(),
   verificationDocs: z.array(z.object({
     label: z.string().max(120),
     url: z.string().url(),
@@ -139,6 +140,7 @@ export const upsertMobilityProvider = createServerFn({ method: "POST" })
       policies: data.policies ?? null,
       terms: data.terms ?? null,
       verification_docs: data.verificationDocs ?? [],
+      cover_image_url: data.coverImageUrl ?? null,
     };
     if (data.id) {
       const { data: row, error } = await sb.from("mobility_providers")
@@ -295,15 +297,46 @@ export const submitMobilityVehicle = createServerFn({ method: "POST" })
 
 export const listMyMobilityVehicles = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({ orgId: z.string().uuid().optional() }).parse(v ?? {}))
+  .inputValidator((v: unknown) => z.object({
+    orgId: z.string().uuid().optional(),
+    includeArchived: z.boolean().default(false),
+  }).parse(v ?? {}))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
     let q = sb.from("mobility_vehicles").select("*, mobility_providers(name, slug)")
       .order("created_at", { ascending: false });
     if (data.orgId) q = q.eq("org_id", data.orgId);
+    if (!data.includeArchived) q = q.eq("is_archived", false);
     const { data: rows } = await q;
     return { vehicles: rows ?? [] };
   });
+
+export const archiveMobilityVehicle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({
+    id: z.string().uuid(), archived: z.boolean().default(true),
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const { error } = await sb.from("mobility_vehicles").update({
+      is_archived: data.archived,
+      archived_at: data.archived ? new Date().toISOString() : null,
+      status: data.archived ? "archived" : "draft",
+    }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteMobilityVehicle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const { error } = await sb.from("mobility_vehicles").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 
 export const getMyMobilityVehicle = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -680,3 +713,121 @@ export async function fetchMobilityForPlan(
   return scored.slice(0, limit);
 }
 
+
+// ---------- BOOKING MANAGEMENT (provider side) ----------
+export const listMobilityProviderBookings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({
+    orgId: z.string().uuid(),
+    vehicleId: z.string().uuid().optional(),
+    status: z.string().max(30).optional(),
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    let q = sb.from("mobility_bookings")
+      .select("*, mobility_vehicles(make, model, slug)")
+      .eq("org_id", data.orgId)
+      .order("pickup_at", { ascending: false })
+      .limit(100);
+    if (data.vehicleId) q = q.eq("vehicle_id", data.vehicleId);
+    if (data.status) q = q.eq("status", data.status);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return { bookings: rows ?? [] };
+  });
+
+export const respondMobilityBooking = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({
+    id: z.string().uuid(),
+    status: z.enum(["confirmed", "declined", "cancelled", "completed"]),
+    message: z.string().max(2000).optional(),
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const patch: Record<string, unknown> = {
+      status: data.status,
+      provider_response: data.message ?? null,
+      provider_responded_at: new Date().toISOString(),
+    };
+    const { error } = await sb.from("mobility_bookings").update(patch).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    if (data.status === "declined" || data.status === "cancelled") {
+      await sb.from("mobility_availability_blocks").delete().eq("booking_id", data.id);
+    }
+    return { ok: true };
+  });
+
+// ---------- REVIEWS ----------
+export const listMobilityProviderReviews = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({ orgId: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const { data: rows } = await sb.from("mobility_reviews")
+      .select("*, mobility_vehicles(make, model, slug)")
+      .eq("org_id", data.orgId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    return { reviews: rows ?? [] };
+  });
+
+export const respondMobilityReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({
+    id: z.string().uuid(),
+    response: z.string().min(1).max(2000),
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const { error } = await sb.from("mobility_reviews").update({
+      response: data.response,
+      responded_at: new Date().toISOString(),
+    }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---------- PUBLIC COMPANY DIRECTORY ----------
+export const listPublicMobilityProviders = createServerFn({ method: "POST" })
+  .inputValidator((v: unknown) => z.object({
+    query: z.string().max(120).optional(),
+    county: z.string().max(20).optional(),
+    category: z.enum(MOBILITY_CATEGORIES).optional(),
+    limit: z.number().int().min(1).max(60).default(24),
+    offset: z.number().int().min(0).default(0),
+  }).parse(v ?? {}))
+  .handler(async ({ data }) => {
+    const sb = publicSb();
+    let q = sb.from("mobility_providers")
+      .select("id, slug, name, bio, logo_url, cover_image_url, town, county_code, rating_avg, rating_count, service_categories, verification_status")
+      .eq("verification_status", "verified")
+      .order("rating_avg", { ascending: false, nullsFirst: false })
+      .range(data.offset, data.offset + data.limit - 1);
+    if (data.query) q = q.or(`name.ilike.%${data.query}%,bio.ilike.%${data.query}%`);
+    if (data.county) q = q.eq("county_code", data.county);
+    if (data.category) q = q.contains("service_categories", [data.category]);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return { providers: rows ?? [] };
+  });
+
+export const getPublicMobilityProvider = createServerFn({ method: "POST" })
+  .inputValidator((v: unknown) => z.object({ slug: z.string().max(120) }).parse(v))
+  .handler(async ({ data }) => {
+    const sb = publicSb();
+    const { data: provider } = await sb.from("mobility_providers")
+      .select("id, slug, name, bio, logo_url, cover_image_url, website, contact_email, contact_phone, address, town, county_code, service_categories, service_areas, operating_hours, policies, terms, rating_avg, rating_count, verification_status")
+      .eq("slug", data.slug)
+      .eq("verification_status", "verified")
+      .maybeSingle();
+    if (!provider) return { provider: null, vehicles: [] };
+    const { data: vehicles } = await sb.from("mobility_vehicles")
+      .select("id, slug, category, vehicle_type, make, model, year, seats, transmission, town, main_image_url, rating_avg, rating_count, mobility_vehicle_rates(unit, price_kes)")
+      .eq("provider_id", provider.id)
+      .eq("status", "approved")
+      .eq("is_archived", false)
+      .order("rating_avg", { ascending: false, nullsFirst: false })
+      .limit(60);
+    return { provider, vehicles: vehicles ?? [] };
+  });

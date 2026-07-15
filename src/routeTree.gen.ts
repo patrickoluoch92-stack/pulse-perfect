@@ -21,6 +21,7 @@ import { Route as MobilityIndexRouteImport } from './routes/mobility.index'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
 import { Route as DiscoverIndexRouteImport } from './routes/discover.index'
 import { Route as RentalsChildRouteImport } from './routes/rentals.$child'
+import { Route as MobilityCompaniesRouteImport } from './routes/mobility.companies'
 import { Route as MobilityCategoryRouteImport } from './routes/mobility.$category'
 import { Route as MarketplaceMapRouteImport } from './routes/marketplace.map'
 import { Route as MarketplaceCountyRouteImport } from './routes/marketplace.$county'
@@ -53,6 +54,7 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAiCommandRouteImport } from './routes/_authenticated/ai-command'
 import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authenticated/listings.index'
 import { Route as MobilityVSlugRouteImport } from './routes/mobility.v.$slug'
+import { Route as MobilityCompanySlugRouteImport } from './routes/mobility.company.$slug'
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
 import { Route as DiscoverCountyCountyRouteImport } from './routes/discover.county.$county'
 import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-vitals'
@@ -83,6 +85,7 @@ import { Route as ApiPublicHooksEmbeddingsBackfillRouteImport } from './routes/a
 import { Route as ApiPublicHooksDiscoveryTickRouteImport } from './routes/api/public/hooks/discovery-tick'
 import { Route as ApiPublicHooksDiscoveryRescoreRouteImport } from './routes/api/public/hooks/discovery-rescore'
 import { Route as ApiPublicHooksAiEnrichmentRouteImport } from './routes/api/public/hooks/ai-enrichment'
+import { Route as AuthenticatedMobilityManageIdRouteImport } from './routes/_authenticated/mobility.manage.$id'
 import { Route as AuthenticatedListingsAdminDiscoveryRouteImport } from './routes/_authenticated/listings.admin.discovery'
 import { Route as AuthenticatedListingsAdminCouponsRouteImport } from './routes/_authenticated/listings.admin.coupons'
 import { Route as AuthenticatedListingsIdAvailabilityRouteImport } from './routes/_authenticated/listings.$id.availability'
@@ -144,6 +147,11 @@ const DiscoverIndexRoute = DiscoverIndexRouteImport.update({
 const RentalsChildRoute = RentalsChildRouteImport.update({
   id: '/rentals/$child',
   path: '/rentals/$child',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MobilityCompaniesRoute = MobilityCompaniesRouteImport.update({
+  id: '/mobility/companies',
+  path: '/mobility/companies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MobilityCategoryRoute = MobilityCategoryRouteImport.update({
@@ -309,6 +317,11 @@ const AuthenticatedListingsIndexRoute =
 const MobilityVSlugRoute = MobilityVSlugRouteImport.update({
   id: '/mobility/v/$slug',
   path: '/mobility/v/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MobilityCompanySlugRoute = MobilityCompanySlugRouteImport.update({
+  id: '/mobility/company/$slug',
+  path: '/mobility/company/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketplacePSlugRoute = MarketplacePSlugRouteImport.update({
@@ -481,6 +494,12 @@ const ApiPublicHooksAiEnrichmentRoute =
     path: '/api/public/hooks/ai-enrichment',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedMobilityManageIdRoute =
+  AuthenticatedMobilityManageIdRouteImport.update({
+    id: '/manage/$id',
+    path: '/manage/$id',
+    getParentRoute: () => AuthenticatedMobilityRoute,
+  } as any)
 const AuthenticatedListingsAdminDiscoveryRoute =
   AuthenticatedListingsAdminDiscoveryRouteImport.update({
     id: '/discovery',
@@ -516,7 +535,7 @@ export interface FileRoutesByFullPath {
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/listings': typeof AuthenticatedListingsRouteWithChildren
   '/maintenance': typeof AuthenticatedMaintenanceRoute
-  '/mobility': typeof AuthenticatedMobilityRoute
+  '/mobility': typeof AuthenticatedMobilityRouteWithChildren
   '/mpesa': typeof AuthenticatedMpesaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/planner': typeof AuthenticatedPlannerRoute
@@ -537,6 +556,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
   '/mobility/$category': typeof MobilityCategoryRoute
+  '/mobility/companies': typeof MobilityCompaniesRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
@@ -560,11 +580,13 @@ export interface FileRoutesByFullPath {
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
+  '/mobility/company/$slug': typeof MobilityCompanySlugRoute
   '/mobility/v/$slug': typeof MobilityVSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
+  '/mobility/manage/$id': typeof AuthenticatedMobilityManageIdRoute
   '/api/public/hooks/ai-enrichment': typeof ApiPublicHooksAiEnrichmentRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -613,6 +635,7 @@ export interface FileRoutesByTo {
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
   '/mobility/$category': typeof MobilityCategoryRoute
+  '/mobility/companies': typeof MobilityCompaniesRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
@@ -635,11 +658,13 @@ export interface FileRoutesByTo {
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
+  '/mobility/company/$slug': typeof MobilityCompanySlugRoute
   '/mobility/v/$slug': typeof MobilityVSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
+  '/mobility/manage/$id': typeof AuthenticatedMobilityManageIdRoute
   '/api/public/hooks/ai-enrichment': typeof ApiPublicHooksAiEnrichmentRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -671,7 +696,7 @@ export interface FileRoutesById {
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/_authenticated/listings': typeof AuthenticatedListingsRouteWithChildren
   '/_authenticated/maintenance': typeof AuthenticatedMaintenanceRoute
-  '/_authenticated/mobility': typeof AuthenticatedMobilityRoute
+  '/_authenticated/mobility': typeof AuthenticatedMobilityRouteWithChildren
   '/_authenticated/mpesa': typeof AuthenticatedMpesaRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/planner': typeof AuthenticatedPlannerRoute
@@ -692,6 +717,7 @@ export interface FileRoutesById {
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
   '/mobility/$category': typeof MobilityCategoryRoute
+  '/mobility/companies': typeof MobilityCompaniesRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
@@ -715,11 +741,13 @@ export interface FileRoutesById {
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
+  '/mobility/company/$slug': typeof MobilityCompanySlugRoute
   '/mobility/v/$slug': typeof MobilityVSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/_authenticated/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/_authenticated/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
+  '/_authenticated/mobility/manage/$id': typeof AuthenticatedMobilityManageIdRoute
   '/api/public/hooks/ai-enrichment': typeof ApiPublicHooksAiEnrichmentRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -772,6 +800,7 @@ export interface FileRouteTypes {
     | '/marketplace/$county'
     | '/marketplace/map'
     | '/mobility/$category'
+    | '/mobility/companies'
     | '/rentals/$child'
     | '/discover/'
     | '/marketplace/'
@@ -795,11 +824,13 @@ export interface FileRouteTypes {
     | '/api/public/web-vitals'
     | '/discover/county/$county'
     | '/marketplace/p/$slug'
+    | '/mobility/company/$slug'
     | '/mobility/v/$slug'
     | '/listings/'
     | '/listings/$id/availability'
     | '/listings/admin/coupons'
     | '/listings/admin/discovery'
+    | '/mobility/manage/$id'
     | '/api/public/hooks/ai-enrichment'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -848,6 +879,7 @@ export interface FileRouteTypes {
     | '/marketplace/$county'
     | '/marketplace/map'
     | '/mobility/$category'
+    | '/mobility/companies'
     | '/rentals/$child'
     | '/discover'
     | '/marketplace'
@@ -870,11 +902,13 @@ export interface FileRouteTypes {
     | '/api/public/web-vitals'
     | '/discover/county/$county'
     | '/marketplace/p/$slug'
+    | '/mobility/company/$slug'
     | '/mobility/v/$slug'
     | '/listings'
     | '/listings/$id/availability'
     | '/listings/admin/coupons'
     | '/listings/admin/discovery'
+    | '/mobility/manage/$id'
     | '/api/public/hooks/ai-enrichment'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -926,6 +960,7 @@ export interface FileRouteTypes {
     | '/marketplace/$county'
     | '/marketplace/map'
     | '/mobility/$category'
+    | '/mobility/companies'
     | '/rentals/$child'
     | '/discover/'
     | '/marketplace/'
@@ -949,11 +984,13 @@ export interface FileRouteTypes {
     | '/api/public/web-vitals'
     | '/discover/county/$county'
     | '/marketplace/p/$slug'
+    | '/mobility/company/$slug'
     | '/mobility/v/$slug'
     | '/_authenticated/listings/'
     | '/_authenticated/listings/$id/availability'
     | '/_authenticated/listings/admin/coupons'
     | '/_authenticated/listings/admin/discovery'
+    | '/_authenticated/mobility/manage/$id'
     | '/api/public/hooks/ai-enrichment'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -981,12 +1018,14 @@ export interface RootRouteChildren {
   GuidesHotelSeoRoute: typeof GuidesHotelSeoRoute
   InviteTokenRoute: typeof InviteTokenRoute
   MobilityCategoryRoute: typeof MobilityCategoryRoute
+  MobilityCompaniesRoute: typeof MobilityCompaniesRoute
   RentalsChildRoute: typeof RentalsChildRoute
   DiscoverIndexRoute: typeof DiscoverIndexRoute
   MobilityIndexRoute: typeof MobilityIndexRoute
   RentalsIndexRoute: typeof RentalsIndexRoute
   ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
   DiscoverCountyCountyRoute: typeof DiscoverCountyCountyRoute
+  MobilityCompanySlugRoute: typeof MobilityCompanySlugRoute
   MobilityVSlugRoute: typeof MobilityVSlugRoute
   ApiPublicHooksAiEnrichmentRoute: typeof ApiPublicHooksAiEnrichmentRoute
   ApiPublicHooksDiscoveryRescoreRoute: typeof ApiPublicHooksDiscoveryRescoreRoute
@@ -1086,6 +1125,13 @@ declare module '@tanstack/react-router' {
       path: '/rentals/$child'
       fullPath: '/rentals/$child'
       preLoaderRoute: typeof RentalsChildRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mobility/companies': {
+      id: '/mobility/companies'
+      path: '/mobility/companies'
+      fullPath: '/mobility/companies'
+      preLoaderRoute: typeof MobilityCompaniesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mobility/$category': {
@@ -1312,6 +1358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MobilityVSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mobility/company/$slug': {
+      id: '/mobility/company/$slug'
+      path: '/mobility/company/$slug'
+      fullPath: '/mobility/company/$slug'
+      preLoaderRoute: typeof MobilityCompanySlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketplace/p/$slug': {
       id: '/marketplace/p/$slug'
       path: '/p/$slug'
@@ -1522,6 +1575,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksAiEnrichmentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/mobility/manage/$id': {
+      id: '/_authenticated/mobility/manage/$id'
+      path: '/manage/$id'
+      fullPath: '/mobility/manage/$id'
+      preLoaderRoute: typeof AuthenticatedMobilityManageIdRouteImport
+      parentRoute: typeof AuthenticatedMobilityRoute
+    }
     '/_authenticated/listings/admin/discovery': {
       id: '/_authenticated/listings/admin/discovery'
       path: '/discovery'
@@ -1615,6 +1675,19 @@ const AuthenticatedListingsRouteWithChildren =
     AuthenticatedListingsRouteChildren,
   )
 
+interface AuthenticatedMobilityRouteChildren {
+  AuthenticatedMobilityManageIdRoute: typeof AuthenticatedMobilityManageIdRoute
+}
+
+const AuthenticatedMobilityRouteChildren: AuthenticatedMobilityRouteChildren = {
+  AuthenticatedMobilityManageIdRoute: AuthenticatedMobilityManageIdRoute,
+}
+
+const AuthenticatedMobilityRouteWithChildren =
+  AuthenticatedMobilityRoute._addFileChildren(
+    AuthenticatedMobilityRouteChildren,
+  )
+
 interface AuthenticatedPropertiesRouteChildren {
   AuthenticatedPropertiesPropertyIdRoute: typeof AuthenticatedPropertiesPropertyIdRoute
 }
@@ -1640,7 +1713,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRouteWithChildren
   AuthenticatedListingsRoute: typeof AuthenticatedListingsRouteWithChildren
   AuthenticatedMaintenanceRoute: typeof AuthenticatedMaintenanceRoute
-  AuthenticatedMobilityRoute: typeof AuthenticatedMobilityRoute
+  AuthenticatedMobilityRoute: typeof AuthenticatedMobilityRouteWithChildren
   AuthenticatedMpesaRoute: typeof AuthenticatedMpesaRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPlannerRoute: typeof AuthenticatedPlannerRoute
@@ -1674,7 +1747,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRouteWithChildren,
   AuthenticatedListingsRoute: AuthenticatedListingsRouteWithChildren,
   AuthenticatedMaintenanceRoute: AuthenticatedMaintenanceRoute,
-  AuthenticatedMobilityRoute: AuthenticatedMobilityRoute,
+  AuthenticatedMobilityRoute: AuthenticatedMobilityRouteWithChildren,
   AuthenticatedMpesaRoute: AuthenticatedMpesaRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPlannerRoute: AuthenticatedPlannerRoute,
@@ -1732,12 +1805,14 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesHotelSeoRoute: GuidesHotelSeoRoute,
   InviteTokenRoute: InviteTokenRoute,
   MobilityCategoryRoute: MobilityCategoryRoute,
+  MobilityCompaniesRoute: MobilityCompaniesRoute,
   RentalsChildRoute: RentalsChildRoute,
   DiscoverIndexRoute: DiscoverIndexRoute,
   MobilityIndexRoute: MobilityIndexRoute,
   RentalsIndexRoute: RentalsIndexRoute,
   ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
   DiscoverCountyCountyRoute: DiscoverCountyCountyRoute,
+  MobilityCompanySlugRoute: MobilityCompanySlugRoute,
   MobilityVSlugRoute: MobilityVSlugRoute,
   ApiPublicHooksAiEnrichmentRoute: ApiPublicHooksAiEnrichmentRoute,
   ApiPublicHooksDiscoveryRescoreRoute: ApiPublicHooksDiscoveryRescoreRoute,

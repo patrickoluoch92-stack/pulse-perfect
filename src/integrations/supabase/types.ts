@@ -2586,6 +2586,8 @@ export type Database = {
           pickup_at: string
           pickup_location: string | null
           provider_id: string
+          provider_responded_at: string | null
+          provider_response: string | null
           status: Database["public"]["Enums"]["mobility_booking_status"]
           total_kes: number
           updated_at: string
@@ -2609,6 +2611,8 @@ export type Database = {
           pickup_at: string
           pickup_location?: string | null
           provider_id: string
+          provider_responded_at?: string | null
+          provider_response?: string | null
           status?: Database["public"]["Enums"]["mobility_booking_status"]
           total_kes: number
           updated_at?: string
@@ -2632,6 +2636,8 @@ export type Database = {
           pickup_at?: string
           pickup_location?: string | null
           provider_id?: string
+          provider_responded_at?: string | null
+          provider_response?: string | null
           status?: Database["public"]["Enums"]["mobility_booking_status"]
           total_kes?: number
           updated_at?: string
@@ -2669,6 +2675,7 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           county_code: string | null
+          cover_image_url: string | null
           created_at: string
           emergency_contact: string | null
           id: string
@@ -2704,6 +2711,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           county_code?: string | null
+          cover_image_url?: string | null
           created_at?: string
           emergency_contact?: string | null
           id?: string
@@ -2739,6 +2747,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           county_code?: string | null
+          cover_image_url?: string | null
           created_at?: string
           emergency_contact?: string | null
           id?: string
@@ -2785,6 +2794,8 @@ export type Database = {
           id: string
           provider_id: string
           rating: number
+          responded_at: string | null
+          response: string | null
           status: string
           updated_at: string
           vehicle_id: string
@@ -2796,6 +2807,8 @@ export type Database = {
           id?: string
           provider_id: string
           rating: number
+          responded_at?: string | null
+          response?: string | null
           status?: string
           updated_at?: string
           vehicle_id: string
@@ -2807,6 +2820,8 @@ export type Database = {
           id?: string
           provider_id?: string
           rating?: number
+          responded_at?: string | null
+          response?: string | null
           status?: string
           updated_at?: string
           vehicle_id?: string
@@ -2957,6 +2972,7 @@ export type Database = {
       mobility_vehicles: {
         Row: {
           accessibility: Json | null
+          archived_at: string | null
           category: Database["public"]["Enums"]["mobility_category"]
           color: string | null
           county_code: string | null
@@ -2977,6 +2993,7 @@ export type Database = {
           id: string
           instant_book: boolean
           insurance_info: Json
+          is_archived: boolean
           is_electric: boolean
           is_featured: boolean
           is_hybrid: boolean
@@ -3010,6 +3027,7 @@ export type Database = {
         }
         Insert: {
           accessibility?: Json | null
+          archived_at?: string | null
           category: Database["public"]["Enums"]["mobility_category"]
           color?: string | null
           county_code?: string | null
@@ -3030,6 +3048,7 @@ export type Database = {
           id?: string
           instant_book?: boolean
           insurance_info?: Json
+          is_archived?: boolean
           is_electric?: boolean
           is_featured?: boolean
           is_hybrid?: boolean
@@ -3063,6 +3082,7 @@ export type Database = {
         }
         Update: {
           accessibility?: Json | null
+          archived_at?: string | null
           category?: Database["public"]["Enums"]["mobility_category"]
           color?: string | null
           county_code?: string | null
@@ -3083,6 +3103,7 @@ export type Database = {
           id?: string
           instant_book?: boolean
           insurance_info?: Json
+          is_archived?: boolean
           is_electric?: boolean
           is_featured?: boolean
           is_hybrid?: boolean
