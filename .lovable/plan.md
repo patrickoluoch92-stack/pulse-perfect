@@ -1,81 +1,87 @@
-# HostPulse Mobility → Vehicle Rental & Fleet Management Ecosystem
 
-Scope is very large. To keep each change reviewable and avoid breaking the live Car Hire flow, I'll deliver in batches. Each batch ends with a working preview; nothing is dropped until its replacement is live.
+# Mobility Refactor — Company-First Onboarding
 
-## 0. Audit (no code change)
-Confirm current state of:
-- `mobility_providers / vehicles / rates / images / seasonal_rates / availability_blocks / bookings / reviews`
-- `src/lib/mobility.functions.ts`, `src/routes/_authenticated/mobility*`, public `mobility.*` routes
-- Existing hooks into finance, commissions, notifications, RBAC, AI orchestrator.
+Goal: make the **Rental Company** the primary entity. Vehicles can only exist under a verified company. Private owners submit into a company's fleet and never publish directly. Preserve everything that already works (search, quotes, bookings, reviews, payouts, submissions, docs, maintenance, tiers).
 
-Deliverable: short gap list in `docs/MOBILITY_AUDIT.md`.
+Delivered in reviewable batches. Each batch ends previewable; nothing is dropped until its replacement is live.
 
-## 1. Data model refactor (single migration)
-Extend, don't replace:
-- `mobility_providers`: add `cover_image_url` (exists), `branches jsonb`, `years_in_business`, `operating_hours jsonb`, `social jsonb`, `ai_summary`, `accepts_private_vehicles bool`, `private_owner_commission_pct numeric`, `private_owner_quality_min int`.
-- New `mobility_branches` (org, provider, county, town, geo, address, hours).
-- New `mobility_private_owners` (user, KRA PIN encrypted, verification, payout).
-- New `mobility_vehicle_submissions` (private_owner → provider workflow: pending/approved/rejected/withdrawn, terms snapshot, commission_pct).
-- `mobility_vehicles`: add `registration_no`, `fleet_no`, `vin` (private), `variant`, `body_type`, `drive_type`, `mileage_km`, `owner_type` (`company|private`), `private_owner_id`, `submission_id`, `quality_score`, `ai_flags jsonb`, `instant_book bool`, `min_rental_hours`, `mileage_limit_km_per_day`, `extra_km_kes`, `insurance jsonb`, `deposit_kes`, `delivery_fee_kes`, `chauffeur_available bool`, `self_drive_available bool`, `documents jsonb` (refs to storage).
-- New `mobility_vehicle_documents` (vehicle, type, url, expires_at, verified_by).
-- New `mobility_maintenance` (vehicle, type, scheduled_at, done_at, cost_kes, notes, status).
-- New `mobility_pricing_tiers` extend rates with `tier` (daily/weekend/weekly/monthly/lease/corporate/holiday/peak), `starts_at`, `ends_at`.
-- New `mobility_payouts` view/table linked to existing `payouts` + `booking_commissions` with `source='mobility'`.
-- `mobility_bookings`: add `mileage_start/end`, `fuel_start/end`, `damage_report jsonb`, `chauffeur_id`, `delivery_address`, `extension_of` self-ref.
-- RLS: public sees only approved, non-archived; org staff via `is_org_member` + role; private owners see their own submissions + resulting bookings; admin bypass via `has_role`. Column-level revoke of `vin`, `documents`, guest PII columns from `anon`.
-- GRANTs + RLS + policies inline for every new table.
-- RBAC seed: `mobility.manage`, `mobility.fleet.write`, `mobility.bookings.manage`, `mobility.payouts.read`, `mobility.private_owner.review`.
+## Current state (from audit)
 
-## 2. Server functions (`src/lib/mobility.functions.ts` + `mobility.server.ts`)
-- Provider: branches CRUD, staff invite (reuse `team.functions`), settings for private-vehicle policy.
-- Fleet: vehicle CRUD w/ Zod schema covering every new field; document upload signed URL flow; maintenance CRUD; pricing tiers CRUD; availability + calendar; instant/request-book toggles.
-- Private owner: register, submit vehicle to provider, list my submissions, withdraw.
-- Provider review queue: list pending submissions, approve/reject (creates linked `mobility_vehicles` row with `owner_type='private'`).
-- Search: extend `searchMobilityVehicles` with all new filters (drive type, body, features array via `@>`, instant_book, verified_only, price bands, 4WD/EV/hybrid).
-- Bookings: quote (with mileage/delivery/deposit), create, extend, cancel, chat handoff, invoice.
-- Payouts: statement generator per provider + per private owner.
-- AI: `scoreVehicleListing` (quality + duplicate + description improvements) via `ai.server.ts`; `recommendPricing`; `forecastDemand`; hooked into `ai-orchestrator` as `mobility.enrichment.agent`.
+Already in place and kept:
+- `mobility_providers` (company), `mobility_branches`, `mobility_vehicles` (+ images/rates/tiers/seasonal/availability/maintenance/documents), `mobility_bookings`, `mobility_reviews`, `mobility_private_owners`, `mobility_vehicle_submissions`, `mobility_owner_payout_requests`.
+- Server fns: `mobility.functions.ts` (search, quote, bookings, reviews), `mobility-ext.functions.ts` (owner + submissions + payouts).
+- Routes: `_authenticated/mobility.tsx` (KPI hub), `mobility.manage.$id.tsx` (per-vehicle tabs), `mobility.owner.tsx`, `mobility.submissions.tsx`, plus public `mobility.index/$category/v.$slug/companies/company.$slug`.
 
-## 3. Provider dashboard UI (`_authenticated/mobility.*`)
-- `mobility.tsx` — KPI hub (fleet, revenue, utilization, alerts, private-owner queue).
-- `mobility.fleet.tsx` — table + filters + bulk actions.
-- `mobility.manage.$id.tsx` — expand existing tabs (Details, Media, Docs, Pricing Tiers, Seasonal, Availability, Maintenance, Bookings, Reviews, AI Insights).
-- `mobility.branches.tsx`, `mobility.staff.tsx` (reuses team invites).
-- `mobility.submissions.tsx` — private-owner review queue.
-- `mobility.payouts.tsx`, `mobility.analytics.tsx`.
+Gaps vs. spec:
+1. Landing `/mobility` doesn't force the two-path choice ("I own a rental company" vs "I own a vehicle").
+2. No dedicated **Register Rental Company** wizard — company fields live inside the KPI hub.
+3. Fleet view mixes company-owned + private + statuses in one list.
+4. No `accepts_private_vehicles` toggle surfaced with a gated "Private Fleet Management" menu.
+5. Review panel exists but lacks Quality Score / AI recommendation / auto-approval rules per company.
+6. Revenue-sharing % (company / private owner / platform) isn't editable per company.
+7. Public listings don't strictly gate on "belongs to a verified company + approved vehicle."
 
-## 4. Private-owner dashboard
-- `_authenticated/mobility.owner.tsx` — my vehicles, submissions, bookings, payouts, docs, messages.
-- Submit-vehicle wizard that targets one or more accepting providers.
+## Batches
 
-## 5. Platform admin
-- `_authenticated/admin.mobility.tsx` — provider verification queue, private-owner verification, commission overrides, disputes, moderation, AI service toggles.
+### Batch A — Data model deltas (single migration)
+- `mobility_providers`: add `business_registration_no`, `kra_pin_encrypted`, `address_line`, `geo_lat`, `geo_lng`, `phone`, `email`, `website`, `operating_hours jsonb`, `commission_company_pct`, `commission_private_owner_pct`, `commission_platform_pct`, `auto_approve_rules jsonb`, `payout_schedule` (`weekly|biweekly|monthly`).
+- `accepts_private_vehicles` already present — confirm + default `false`.
+- `mobility_vehicles`: add `quality_score numeric`, `ai_recommendation jsonb`, `owner_type` (`company|private`) — already present; ensure NOT NULL default `company`.
+- **Public-visibility rule**: RLS on `mobility_vehicles` for `anon`/`authenticated` narrows to `status='active' AND is_archived=false AND EXISTS (provider verified) AND (owner_type='company' OR submission.status='approved')`. Same predicate on `mobility_vehicle_images` join.
+- KRA PIN stored via `pgcrypto` symmetric enc with `vault`-style key; column-level `REVOKE` from `anon/authenticated`, exposed only through a security-definer fn to org admins.
+- New helper fn `public.mobility_is_company_admin(_user_id uuid, _provider_id uuid)` used by policies.
 
-## 6. Public surfaces
-- Extend existing `mobility.index / $category / v.$slug / companies / company.$slug` with new filters, quality badges, verified-company badges, JSON-LD `Vehicle` + `Product`, and updated head() metadata.
-- Sitemap + `discover` integration.
+### Batch B — Server functions
+`src/lib/mobility-company.functions.ts` (new):
+- `registerRentalCompany` (creates org if missing → provider row → default commissions → wallet).
+- `updateCompanyProfile`, `updateCompanyCommissions`, `togglePrivateVehicleProgram`, `updateAutoApproveRules`.
+- `listCompanyFleet({ providerId, bucket })` where bucket ∈ `company_owned | private_owned | pending | maintenance | booked | available | inactive | archived`.
+- `getCompanyDashboardKPIs`.
 
-## 7. AI + integrations
-- Listing gate: `scoreVehicleListing` runs on submit-for-review; block publish under threshold, surface reasons.
-- Planner AI: extend `fetchMobilityForPlan` with new signals (instant_book, 4WD for safari, EV for city).
-- Recommendations: emit `recommendation_events` for mobility; RPC `recommend_vehicles_for_user`.
-- Executive dashboard: mobility GMV, utilization, top providers.
-- Finance: `booking_commissions.source='mobility'`, split company/private-owner/platform.
-- Notifications: reuse booking notification path for mobility bookings, submissions, maintenance.
+Extend `mobility-ext.functions.ts`:
+- Submission decisioning applies `auto_approve_rules` (min photos, valid docs, min quality score).
+- On approve → set vehicle `owner_type='private'`, link submission, publish only after verified provider.
 
-## 8. QA / hardening
-- RLS tests for private-owner isolation and PII columns.
-- Vitest for pricing quote + extension math.
-- Playwright smoke: company onboarding → vehicle create → AI gate → publish → search → book → provider approves → review.
-- Rate limiting on submissions and search.
+Extend `mobility.functions.ts`:
+- `computeMobilityQuote` unchanged, but booking creation writes commission split rows using the provider's configured %.
+- `searchMobilityVehicles` already joins provider; add `provider.verification_status='verified'` filter and enforce approval predicate.
+
+### Batch C — Onboarding UX
+- `src/routes/mobility.index.tsx`: hero gets two primary CTAs → **/mobility/register-company** and **/mobility/owner**. Keep existing browse-by-category and featured vehicles below.
+- New `src/routes/_authenticated/mobility.register-company.tsx`: multi-step wizard (Identity → Location → Contact → Hours/Branches → Commissions → Review). On submit → provider row + redirect to dashboard.
+- Keep `/mobility/owner` as private-owner onboarding entry.
+
+### Batch D — Company Dashboard shell
+Refactor `src/routes/_authenticated/mobility.tsx` into a shell with tabs/sub-routes:
+- Overview (KPIs) · Fleet · Bookings · Customers · Revenue · Analytics · Staff · Branches · Private Requests (gated) · Settings · AI Insights.
+
+New leaf routes (thin, reuse existing data fns):
+- `mobility.fleet.tsx` — bucketed tabs (Company-Owned / Private / Pending / Maintenance / Booked / Available / Inactive / Archived) using `listCompanyFleet`.
+- `mobility.bookings.tsx`, `mobility.customers.tsx`, `mobility.revenue.tsx`, `mobility.analytics.tsx`, `mobility.staff.tsx`, `mobility.branches.tsx`, `mobility.settings.tsx`, `mobility.ai.tsx`.
+- `mobility.private-requests.tsx` — visible only when `accepts_private_vehicles=true`; wraps existing submissions queue and adds Quality Score + AI recommendation + auto-rule editor.
+
+Existing `mobility.manage.$id.tsx` is kept and linked from Fleet.
+
+### Batch E — Private Owner journey
+- Keep `mobility.owner.tsx`. Ensure submission flow requires selecting a rental company from providers where `accepts_private_vehicles=true`.
+- Add missing sections to owner dashboard: Messages placeholder, Performance card, "Companies I work with" list derived from approved submissions.
+- Owner vehicles never appear in public search until submission is approved and provider is verified (enforced in RLS, Batch A).
+
+### Batch F — Revenue sharing & payouts
+- Settings tab surfaces commission % editor + payout schedule.
+- Booking-completion path writes split into `booking_commissions` using provider config; existing payout tables consume it.
+
+### Batch G — Public gating & QA
+- Verify `/mobility`, `/mobility/$category`, `/mobility/v/$slug`, `/mobility/companies`, `/mobility/company/$slug` only show verified-company + approved vehicles.
+- Add small vitest around commission split + fleet bucketing.
+- Manual smoke: register company → toggle private program → owner submits → company approves → vehicle public → booking → split.
+
+## Non-goals
+- No new vehicle attribute additions beyond quality/AI fields.
+- No native messaging system (Messages remains a placeholder linking to existing channels).
+- No change to public URLs/SEO structure.
 
 ## Ordering
-Batch 1 → migration only (needs your approval before I write dependent code).
-Batches 2–8 land sequentially, each self-contained and previewable.
+A → B → C → D → E → F → G. Each batch is self-contained and preserves the current live flow until its successor is wired.
 
-## Non-goals (explicit)
-- No motorcycle/boat category rollout yet (schema-ready, UI hidden).
-- No escrow (schema hook only).
-- No native mobile app.
-
-Reply **approve batch 1** to start with the migration, or tell me which batches to reorder/skip.
+Reply **approve batch A** to start with the migration, or tell me which batches to reorder/skip.
