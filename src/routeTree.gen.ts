@@ -60,7 +60,10 @@ import { Route as DiscoverCountyCountyRouteImport } from './routes/discover.coun
 import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-vitals'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
 import { Route as AuthenticatedMobilitySubmissionsRouteImport } from './routes/_authenticated/mobility.submissions'
+import { Route as AuthenticatedMobilitySettingsRouteImport } from './routes/_authenticated/mobility.settings'
+import { Route as AuthenticatedMobilityRegisterCompanyRouteImport } from './routes/_authenticated/mobility.register-company'
 import { Route as AuthenticatedMobilityOwnerRouteImport } from './routes/_authenticated/mobility.owner'
+import { Route as AuthenticatedMobilityFleetRouteImport } from './routes/_authenticated/mobility.fleet'
 import { Route as AuthenticatedListingsPartnersRouteImport } from './routes/_authenticated/listings.partners'
 import { Route as AuthenticatedListingsImportRouteImport } from './routes/_authenticated/listings.import'
 import { Route as AuthenticatedListingsAnalyticsRouteImport } from './routes/_authenticated/listings.analytics'
@@ -353,10 +356,28 @@ const AuthenticatedMobilitySubmissionsRoute =
     path: '/submissions',
     getParentRoute: () => AuthenticatedMobilityRoute,
   } as any)
+const AuthenticatedMobilitySettingsRoute =
+  AuthenticatedMobilitySettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedMobilityRoute,
+  } as any)
+const AuthenticatedMobilityRegisterCompanyRoute =
+  AuthenticatedMobilityRegisterCompanyRouteImport.update({
+    id: '/register-company',
+    path: '/register-company',
+    getParentRoute: () => AuthenticatedMobilityRoute,
+  } as any)
 const AuthenticatedMobilityOwnerRoute =
   AuthenticatedMobilityOwnerRouteImport.update({
     id: '/owner',
     path: '/owner',
+    getParentRoute: () => AuthenticatedMobilityRoute,
+  } as any)
+const AuthenticatedMobilityFleetRoute =
+  AuthenticatedMobilityFleetRouteImport.update({
+    id: '/fleet',
+    path: '/fleet',
     getParentRoute: () => AuthenticatedMobilityRoute,
   } as any)
 const AuthenticatedListingsPartnersRoute =
@@ -590,7 +611,10 @@ export interface FileRoutesByFullPath {
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
+  '/mobility/fleet': typeof AuthenticatedMobilityFleetRoute
   '/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
+  '/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
+  '/mobility/settings': typeof AuthenticatedMobilitySettingsRoute
   '/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
@@ -670,7 +694,10 @@ export interface FileRoutesByTo {
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
+  '/mobility/fleet': typeof AuthenticatedMobilityFleetRoute
   '/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
+  '/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
+  '/mobility/settings': typeof AuthenticatedMobilitySettingsRoute
   '/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
@@ -755,7 +782,10 @@ export interface FileRoutesById {
   '/_authenticated/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/_authenticated/listings/import': typeof AuthenticatedListingsImportRoute
   '/_authenticated/listings/partners': typeof AuthenticatedListingsPartnersRoute
+  '/_authenticated/mobility/fleet': typeof AuthenticatedMobilityFleetRoute
   '/_authenticated/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
+  '/_authenticated/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
+  '/_authenticated/mobility/settings': typeof AuthenticatedMobilitySettingsRoute
   '/_authenticated/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
@@ -840,7 +870,10 @@ export interface FileRouteTypes {
     | '/listings/analytics'
     | '/listings/import'
     | '/listings/partners'
+    | '/mobility/fleet'
     | '/mobility/owner'
+    | '/mobility/register-company'
+    | '/mobility/settings'
     | '/mobility/submissions'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
@@ -920,7 +953,10 @@ export interface FileRouteTypes {
     | '/listings/analytics'
     | '/listings/import'
     | '/listings/partners'
+    | '/mobility/fleet'
     | '/mobility/owner'
+    | '/mobility/register-company'
+    | '/mobility/settings'
     | '/mobility/submissions'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
@@ -1004,7 +1040,10 @@ export interface FileRouteTypes {
     | '/_authenticated/listings/analytics'
     | '/_authenticated/listings/import'
     | '/_authenticated/listings/partners'
+    | '/_authenticated/mobility/fleet'
     | '/_authenticated/mobility/owner'
+    | '/_authenticated/mobility/register-company'
+    | '/_authenticated/mobility/settings'
     | '/_authenticated/mobility/submissions'
     | '/_authenticated/properties/$propertyId'
     | '/api/public/web-vitals'
@@ -1426,11 +1465,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMobilitySubmissionsRouteImport
       parentRoute: typeof AuthenticatedMobilityRoute
     }
+    '/_authenticated/mobility/settings': {
+      id: '/_authenticated/mobility/settings'
+      path: '/settings'
+      fullPath: '/mobility/settings'
+      preLoaderRoute: typeof AuthenticatedMobilitySettingsRouteImport
+      parentRoute: typeof AuthenticatedMobilityRoute
+    }
+    '/_authenticated/mobility/register-company': {
+      id: '/_authenticated/mobility/register-company'
+      path: '/register-company'
+      fullPath: '/mobility/register-company'
+      preLoaderRoute: typeof AuthenticatedMobilityRegisterCompanyRouteImport
+      parentRoute: typeof AuthenticatedMobilityRoute
+    }
     '/_authenticated/mobility/owner': {
       id: '/_authenticated/mobility/owner'
       path: '/owner'
       fullPath: '/mobility/owner'
       preLoaderRoute: typeof AuthenticatedMobilityOwnerRouteImport
+      parentRoute: typeof AuthenticatedMobilityRoute
+    }
+    '/_authenticated/mobility/fleet': {
+      id: '/_authenticated/mobility/fleet'
+      path: '/fleet'
+      fullPath: '/mobility/fleet'
+      preLoaderRoute: typeof AuthenticatedMobilityFleetRouteImport
       parentRoute: typeof AuthenticatedMobilityRoute
     }
     '/_authenticated/listings/partners': {
@@ -1716,13 +1776,20 @@ const AuthenticatedListingsRouteWithChildren =
   )
 
 interface AuthenticatedMobilityRouteChildren {
+  AuthenticatedMobilityFleetRoute: typeof AuthenticatedMobilityFleetRoute
   AuthenticatedMobilityOwnerRoute: typeof AuthenticatedMobilityOwnerRoute
+  AuthenticatedMobilityRegisterCompanyRoute: typeof AuthenticatedMobilityRegisterCompanyRoute
+  AuthenticatedMobilitySettingsRoute: typeof AuthenticatedMobilitySettingsRoute
   AuthenticatedMobilitySubmissionsRoute: typeof AuthenticatedMobilitySubmissionsRoute
   AuthenticatedMobilityManageIdRoute: typeof AuthenticatedMobilityManageIdRoute
 }
 
 const AuthenticatedMobilityRouteChildren: AuthenticatedMobilityRouteChildren = {
+  AuthenticatedMobilityFleetRoute: AuthenticatedMobilityFleetRoute,
   AuthenticatedMobilityOwnerRoute: AuthenticatedMobilityOwnerRoute,
+  AuthenticatedMobilityRegisterCompanyRoute:
+    AuthenticatedMobilityRegisterCompanyRoute,
+  AuthenticatedMobilitySettingsRoute: AuthenticatedMobilitySettingsRoute,
   AuthenticatedMobilitySubmissionsRoute: AuthenticatedMobilitySubmissionsRoute,
   AuthenticatedMobilityManageIdRoute: AuthenticatedMobilityManageIdRoute,
 }
