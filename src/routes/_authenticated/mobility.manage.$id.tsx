@@ -149,6 +149,9 @@ function VehicleManager() {
           <TabsContent value="bookings">
             <BookingsTab bookings={bookingsQ.data?.bookings ?? []} isLoading={bookingsQ.isLoading} respond={respond} onChanged={() => qc.invalidateQueries({ queryKey: ["mobility-provider-bookings"] })} />
           </TabsContent>
+          <TabsContent value="reviews">
+            <ReviewsTab providerId={v.provider_id} vehicleId={id} />
+          </TabsContent>
         </Tabs>
       </div>
     </DashboardShell>
