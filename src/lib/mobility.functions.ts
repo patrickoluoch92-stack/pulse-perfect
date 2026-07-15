@@ -297,15 +297,46 @@ export const submitMobilityVehicle = createServerFn({ method: "POST" })
 
 export const listMyMobilityVehicles = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({ orgId: z.string().uuid().optional() }).parse(v ?? {}))
+  .inputValidator((v: unknown) => z.object({
+    orgId: z.string().uuid().optional(),
+    includeArchived: z.boolean().default(false),
+  }).parse(v ?? {}))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
     let q = sb.from("mobility_vehicles").select("*, mobility_providers(name, slug)")
       .order("created_at", { ascending: false });
     if (data.orgId) q = q.eq("org_id", data.orgId);
+    if (!data.includeArchived) q = q.eq("is_archived", false);
     const { data: rows } = await q;
     return { vehicles: rows ?? [] };
   });
+
+export const archiveMobilityVehicle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({
+    id: z.string().uuid(), archived: z.boolean().default(true),
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const { error } = await sb.from("mobility_vehicles").update({
+      is_archived: data.archived,
+      archived_at: data.archived ? new Date().toISOString() : null,
+      status: data.archived ? "archived" : "draft",
+    }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteMobilityVehicle = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({ id: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const { error } = await sb.from("mobility_vehicles").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 
 export const getMyMobilityVehicle = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
