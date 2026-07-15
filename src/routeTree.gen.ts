@@ -54,6 +54,7 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAiCommandRouteImport } from './routes/_authenticated/ai-command'
 import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authenticated/listings.index'
 import { Route as MobilityVSlugRouteImport } from './routes/mobility.v.$slug'
+import { Route as MobilityCompanySlugRouteImport } from './routes/mobility.company.$slug'
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
 import { Route as DiscoverCountyCountyRouteImport } from './routes/discover.county.$county'
 import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-vitals'
@@ -318,6 +319,11 @@ const MobilityVSlugRoute = MobilityVSlugRouteImport.update({
   path: '/mobility/v/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MobilityCompanySlugRoute = MobilityCompanySlugRouteImport.update({
+  id: '/mobility/company/$slug',
+  path: '/mobility/company/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketplacePSlugRoute = MarketplacePSlugRouteImport.update({
   id: '/p/$slug',
   path: '/p/$slug',
@@ -574,6 +580,7 @@ export interface FileRoutesByFullPath {
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
+  '/mobility/company/$slug': typeof MobilityCompanySlugRoute
   '/mobility/v/$slug': typeof MobilityVSlugRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
@@ -651,6 +658,7 @@ export interface FileRoutesByTo {
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
+  '/mobility/company/$slug': typeof MobilityCompanySlugRoute
   '/mobility/v/$slug': typeof MobilityVSlugRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
@@ -733,6 +741,7 @@ export interface FileRoutesById {
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
+  '/mobility/company/$slug': typeof MobilityCompanySlugRoute
   '/mobility/v/$slug': typeof MobilityVSlugRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
@@ -815,6 +824,7 @@ export interface FileRouteTypes {
     | '/api/public/web-vitals'
     | '/discover/county/$county'
     | '/marketplace/p/$slug'
+    | '/mobility/company/$slug'
     | '/mobility/v/$slug'
     | '/listings/'
     | '/listings/$id/availability'
@@ -892,6 +902,7 @@ export interface FileRouteTypes {
     | '/api/public/web-vitals'
     | '/discover/county/$county'
     | '/marketplace/p/$slug'
+    | '/mobility/company/$slug'
     | '/mobility/v/$slug'
     | '/listings'
     | '/listings/$id/availability'
@@ -973,6 +984,7 @@ export interface FileRouteTypes {
     | '/api/public/web-vitals'
     | '/discover/county/$county'
     | '/marketplace/p/$slug'
+    | '/mobility/company/$slug'
     | '/mobility/v/$slug'
     | '/_authenticated/listings/'
     | '/_authenticated/listings/$id/availability'
@@ -1013,6 +1025,7 @@ export interface RootRouteChildren {
   RentalsIndexRoute: typeof RentalsIndexRoute
   ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
   DiscoverCountyCountyRoute: typeof DiscoverCountyCountyRoute
+  MobilityCompanySlugRoute: typeof MobilityCompanySlugRoute
   MobilityVSlugRoute: typeof MobilityVSlugRoute
   ApiPublicHooksAiEnrichmentRoute: typeof ApiPublicHooksAiEnrichmentRoute
   ApiPublicHooksDiscoveryRescoreRoute: typeof ApiPublicHooksDiscoveryRescoreRoute
@@ -1343,6 +1356,13 @@ declare module '@tanstack/react-router' {
       path: '/mobility/v/$slug'
       fullPath: '/mobility/v/$slug'
       preLoaderRoute: typeof MobilityVSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mobility/company/$slug': {
+      id: '/mobility/company/$slug'
+      path: '/mobility/company/$slug'
+      fullPath: '/mobility/company/$slug'
+      preLoaderRoute: typeof MobilityCompanySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/marketplace/p/$slug': {
@@ -1792,6 +1812,7 @@ const rootRouteChildren: RootRouteChildren = {
   RentalsIndexRoute: RentalsIndexRoute,
   ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
   DiscoverCountyCountyRoute: DiscoverCountyCountyRoute,
+  MobilityCompanySlugRoute: MobilityCompanySlugRoute,
   MobilityVSlugRoute: MobilityVSlugRoute,
   ApiPublicHooksAiEnrichmentRoute: ApiPublicHooksAiEnrichmentRoute,
   ApiPublicHooksDiscoveryRescoreRoute: ApiPublicHooksDiscoveryRescoreRoute,
