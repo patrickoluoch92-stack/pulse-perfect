@@ -2953,12 +2953,14 @@ export type Database = {
           county_code: string | null
           created_at: string
           email: string | null
+          emergency_contact: string | null
           id: string
           id_number: string | null
           kra_pin: string | null
           legal_name: string
           notes: string | null
           phone: string | null
+          preferred_payment_method: string | null
           town: string | null
           updated_at: string
           user_id: string
@@ -2971,12 +2973,14 @@ export type Database = {
           county_code?: string | null
           created_at?: string
           email?: string | null
+          emergency_contact?: string | null
           id?: string
           id_number?: string | null
           kra_pin?: string | null
           legal_name: string
           notes?: string | null
           phone?: string | null
+          preferred_payment_method?: string | null
           town?: string | null
           updated_at?: string
           user_id: string
@@ -2989,12 +2993,14 @@ export type Database = {
           county_code?: string | null
           created_at?: string
           email?: string | null
+          emergency_contact?: string | null
           id?: string
           id_number?: string | null
           kra_pin?: string | null
           legal_name?: string
           notes?: string | null
           phone?: string | null
+          preferred_payment_method?: string | null
           town?: string | null
           updated_at?: string
           user_id?: string
