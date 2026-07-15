@@ -203,10 +203,9 @@ function ReviewsSection({ vehicleId }: { vehicleId: string }) {
   const submitFn = useServerFn(submitMobilityReview);
 
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
-  useState(() => {
+  useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setSignedIn(!!data.user));
-    return 0;
-  });
+  }, []);
 
   const reviews = useQuery({
     queryKey: ["mobility-reviews", vehicleId],
