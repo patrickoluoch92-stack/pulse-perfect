@@ -880,9 +880,14 @@ export const listMobilityProviderReviews = createServerFn({ method: "POST" })
   }).parse(v))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
+    // mobility_reviews has provider_id (not org_id) — resolve providers under this org.
+    const { data: providers } = await sb.from("mobility_providers").select("id").eq("org_id", data.orgId);
+    const providerIds = (providers ?? []).map((p: any) => p.id);
+    if (providerIds.length === 0) return { reviews: [] };
+
     let q = sb.from("mobility_reviews")
       .select("*, mobility_vehicles(make, model, slug)")
-      .eq("org_id", data.orgId)
+      .in("provider_id", providerIds)
       .order("created_at", { ascending: false })
       .limit(200);
     if (data.vehicleId) q = q.eq("vehicle_id", data.vehicleId);
