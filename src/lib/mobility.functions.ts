@@ -831,3 +831,92 @@ export const getPublicMobilityProvider = createServerFn({ method: "POST" })
       .limit(60);
     return { provider, vehicles: vehicles ?? [] };
   });
+
+// ---------- PUBLIC VEHICLE REVIEWS ----------
+export const listPublicVehicleReviews = createServerFn({ method: "POST" })
+  .inputValidator((v: unknown) => z.object({
+    vehicleId: z.string().uuid(),
+    limit: z.number().int().min(1).max(50).default(20),
+  }).parse(v))
+  .handler(async ({ data }) => {
+    const sb = publicSb();
+    const { data: rows, error } = await sb.from("mobility_reviews")
+      .select("id, rating, comment, response, responded_at, created_at")
+      .eq("vehicle_id", data.vehicleId)
+      .eq("status", "approved")
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    return { reviews: rows ?? [] };
+  });
+
+// Guest submits a review. Must have a completed booking for the vehicle.
+export const submitMobilityReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({
+    vehicleId: z.string().uuid(),
+    rating: z.number().int().min(1).max(5),
+    comment: z.string().max(2000).optional(),
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    // Verify the caller has at least one completed booking on this vehicle.
+    const { data: booking } = await sb.from("mobility_bookings")
+      .select("id, provider_id")
+      .eq("vehicle_id", data.vehicleId)
+      .eq("guest_user_id", context.userId)
+      .eq("status", "completed")
+      .limit(1)
+      .maybeSingle();
+    if (!booking) throw new Error("You can only review a vehicle after a completed booking.");
+
+    // One review per author per vehicle: update if already exists.
+    const { data: existing } = await sb.from("mobility_reviews")
+      .select("id")
+      .eq("vehicle_id", data.vehicleId)
+      .eq("author_id", context.userId)
+      .maybeSingle();
+
+    if (existing) {
+      const { error } = await sb.from("mobility_reviews").update({
+        rating: data.rating,
+        comment: data.comment ?? null,
+        status: "pending",
+      }).eq("id", existing.id);
+      if (error) throw new Error(error.message);
+      return { ok: true, id: existing.id, updated: true };
+    }
+
+    const { data: row, error } = await sb.from("mobility_reviews").insert({
+      vehicle_id: data.vehicleId,
+      provider_id: booking.provider_id,
+      author_id: context.userId,
+      rating: data.rating,
+      comment: data.comment ?? null,
+      status: "pending",
+    }).select("id").single();
+    if (error) throw new Error(error.message);
+    return { ok: true, id: row.id, updated: false };
+  });
+
+// Whether the current user is eligible to review a given vehicle
+// (has a completed booking on it) plus any existing review.
+export const getMyMobilityReviewStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({ vehicleId: z.string().uuid() }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const { data: booking } = await sb.from("mobility_bookings")
+      .select("id")
+      .eq("vehicle_id", data.vehicleId)
+      .eq("guest_user_id", context.userId)
+      .eq("status", "completed")
+      .limit(1)
+      .maybeSingle();
+    const { data: mine } = await sb.from("mobility_reviews")
+      .select("id, rating, comment, status, response, created_at")
+      .eq("vehicle_id", data.vehicleId)
+      .eq("author_id", context.userId)
+      .maybeSingle();
+    return { eligible: !!booking, review: mine ?? null };
+  });
