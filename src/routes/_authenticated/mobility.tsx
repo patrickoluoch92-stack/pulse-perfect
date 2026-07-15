@@ -55,12 +55,34 @@ function MobilityDashboard() {
   return (
     <DashboardShell>
       <div className="space-y-6 p-6">
-        <header>
-          <h1 className="flex items-center gap-3 text-2xl font-semibold">
-            <Car className="h-6 w-6" /> Car Hire & Mobility
-          </h1>
-          <p className="text-sm text-muted-foreground">Onboard your company, manage your fleet and drive bookings.</p>
+        <header className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="flex items-center gap-3 text-2xl font-semibold">
+              <Car className="h-6 w-6" /> Car Hire & Mobility
+            </h1>
+            <p className="text-sm text-muted-foreground">Onboard your company, manage your fleet and drive bookings.</p>
+          </div>
+          {primaryProvider && (
+            <nav className="flex flex-wrap gap-2 text-sm">
+              <Link to="/mobility/register-company" className="rounded-md border px-3 py-1 hover:border-primary">Company</Link>
+              <Link to="/mobility/fleet" className="rounded-md border px-3 py-1 hover:border-primary">Fleet</Link>
+              <Link to="/mobility/submissions" className="rounded-md border px-3 py-1 hover:border-primary">Submissions</Link>
+              <Link to="/mobility/settings" className="rounded-md border px-3 py-1 hover:border-primary">Settings</Link>
+            </nav>
+          )}
         </header>
+
+        {!providers.isLoading && !primaryProvider && (
+          <Card className="border-primary/40 bg-primary/5">
+            <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+              <div>
+                <div className="font-medium">Register your rental company to get started</div>
+                <p className="text-sm text-muted-foreground">A verified company is required before your vehicles can go public.</p>
+              </div>
+              <Link to="/mobility/register-company"><Button>Register company</Button></Link>
+            </CardContent>
+          </Card>
+        )}
 
         {orgId && primaryProvider && (
           <div className="grid gap-4 sm:grid-cols-4">
