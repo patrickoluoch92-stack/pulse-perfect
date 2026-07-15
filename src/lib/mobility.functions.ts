@@ -873,14 +873,22 @@ export const respondMobilityBooking = createServerFn({ method: "POST" })
 // ---------- REVIEWS ----------
 export const listMobilityProviderReviews = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({ orgId: z.string().uuid() }).parse(v))
+  .inputValidator((v: unknown) => z.object({
+    orgId: z.string().uuid(),
+    vehicleId: z.string().uuid().optional(),
+    status: z.enum(["pending", "approved", "rejected", "all"]).default("all"),
+  }).parse(v))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const { data: rows } = await sb.from("mobility_reviews")
+    let q = sb.from("mobility_reviews")
       .select("*, mobility_vehicles(make, model, slug)")
       .eq("org_id", data.orgId)
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(200);
+    if (data.vehicleId) q = q.eq("vehicle_id", data.vehicleId);
+    if (data.status !== "all") q = q.eq("status", data.status);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
     return { reviews: rows ?? [] };
   });
 
@@ -895,6 +903,26 @@ export const respondMobilityReview = createServerFn({ method: "POST" })
     const { error } = await sb.from("mobility_reviews").update({
       response: data.response,
       responded_at: new Date().toISOString(),
+    }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Provider approves or rejects a pending review before it goes public.
+export const moderateMobilityReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((v: unknown) => z.object({
+    id: z.string().uuid(),
+    action: z.enum(["approve", "reject"]),
+    reason: z.string().max(500).optional(),
+  }).parse(v))
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SB;
+    const { error } = await sb.from("mobility_reviews").update({
+      status: data.action === "approve" ? "approved" : "rejected",
+      moderated_at: new Date().toISOString(),
+      moderated_by: context.userId,
+      moderation_reason: data.reason ?? null,
     }).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
