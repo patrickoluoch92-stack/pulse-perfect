@@ -27,7 +27,7 @@ function SubmissionsQueue() {
   const updatePolicy = useServerFn(updatePrivateVehiclePolicy);
 
   const providers = useQuery({ queryKey: ["mob-providers"], queryFn: () => fetchProviders() });
-  const provider = providers.data?.[0];
+  const provider = providers.data?.providers?.[0];
   const providerId = provider?.id as string | undefined;
 
   const subs = useQuery({
