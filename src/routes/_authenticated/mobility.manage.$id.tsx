@@ -113,6 +113,9 @@ function VehicleManager() {
             <TabsTrigger value="images"><ImageIcon className="mr-1 h-3.5 w-3.5" /> Images</TabsTrigger>
             <TabsTrigger value="rates"><DollarSign className="mr-1 h-3.5 w-3.5" /> Rates</TabsTrigger>
             <TabsTrigger value="seasonal">Seasonal</TabsTrigger>
+            <TabsTrigger value="tiers"><Tag className="mr-1 h-3.5 w-3.5" /> Tiers</TabsTrigger>
+            <TabsTrigger value="documents"><FileText className="mr-1 h-3.5 w-3.5" /> Documents</TabsTrigger>
+            <TabsTrigger value="maintenance"><Wrench className="mr-1 h-3.5 w-3.5" /> Maintenance</TabsTrigger>
             <TabsTrigger value="calendar"><Calendar className="mr-1 h-3.5 w-3.5" /> Availability</TabsTrigger>
             <TabsTrigger value="bookings"><MessageSquare className="mr-1 h-3.5 w-3.5" /> Bookings</TabsTrigger>
           </TabsList>
@@ -128,6 +131,15 @@ function VehicleManager() {
           </TabsContent>
           <TabsContent value="seasonal">
             <SeasonalTab vehicleId={id} rates={q.data?.seasonalRates ?? []} upsert={upsertSeasonal} remove={deleteSeasonal} onChanged={invalidate} />
+          </TabsContent>
+          <TabsContent value="tiers">
+            <TiersTab vehicleId={id} orgId={v.org_id} />
+          </TabsContent>
+          <TabsContent value="documents">
+            <DocumentsTab vehicleId={id} orgId={v.org_id} />
+          </TabsContent>
+          <TabsContent value="maintenance">
+            <MaintenanceTab vehicleId={id} orgId={v.org_id} />
           </TabsContent>
           <TabsContent value="calendar">
             <AvailabilityTab vehicleId={id} blocks={q.data?.blocks ?? []} block={block} unblock={unblock} onChanged={invalidate} />
