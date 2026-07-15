@@ -1,13 +1,23 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Car, Users, Fuel, Cog, Snowflake, Navigation, Shield } from "lucide-react";
-import { getPublicMobilityVehicle, createMobilityBooking, MOBILITY_CATEGORY_LABELS, type MobilityCategory } from "@/lib/mobility.functions";
+import { Car, Users, Fuel, Cog, Snowflake, Navigation, Shield, Star } from "lucide-react";
+import {
+  getPublicMobilityVehicle,
+  createMobilityBooking,
+  listPublicVehicleReviews,
+  submitMobilityReview,
+  getMyMobilityReviewStatus,
+  MOBILITY_CATEGORY_LABELS,
+  type MobilityCategory,
+} from "@/lib/mobility.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { LoadingState } from "@/components/ui/states";
 import { toast } from "sonner";
 
