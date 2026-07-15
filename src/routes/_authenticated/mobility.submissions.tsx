@@ -171,31 +171,37 @@ function SubmissionsQueue() {
                             <div className="text-xs mt-1">Proposed rate: KES {Number(s.proposed_daily_rate_kes).toLocaleString()}/day</div>
                           )}
                         </div>
-                        <Badge variant="outline">{new Date(s.created_at).toLocaleDateString()}</Badge>
+                        <Badge variant={s.status === "approved" ? "default" : s.status === "rejected" ? "destructive" : "outline"}>
+                          {s.status} · {new Date(s.created_at).toLocaleDateString()}
+                        </Badge>
                       </div>
-                      <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
-                        <Textarea
-                          placeholder="Optional note to the owner…"
-                          rows={2}
-                          value={reasons[s.id] ?? ""}
-                          onChange={(e) => setReasons({ ...reasons, [s.id]: e.target.value })}
-                        />
-                        <Button
-                          size="sm"
-                          onClick={() => decideMut.mutate({ id: s.id, decision: "approved", reason: reasons[s.id] })}
-                          disabled={decideMut.isPending}
-                        >
-                          <CheckCircle2 className="h-4 w-4 mr-1" /> Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => decideMut.mutate({ id: s.id, decision: "rejected", reason: reasons[s.id] })}
-                          disabled={decideMut.isPending}
-                        >
-                          <XCircle className="h-4 w-4 mr-1" /> Reject
-                        </Button>
-                      </div>
+                      {s.status === "pending" ? (
+                        <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+                          <Textarea
+                            placeholder="Optional note to the owner…"
+                            rows={2}
+                            value={reasons[s.id] ?? ""}
+                            onChange={(e) => setReasons({ ...reasons, [s.id]: e.target.value })}
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => decideMut.mutate({ id: s.id, decision: "approved", reason: reasons[s.id] })}
+                            disabled={decideMut.isPending}
+                          >
+                            <CheckCircle2 className="h-4 w-4 mr-1" /> Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => decideMut.mutate({ id: s.id, decision: "rejected", reason: reasons[s.id] })}
+                            disabled={decideMut.isPending}
+                          >
+                            <XCircle className="h-4 w-4 mr-1" /> Reject
+                          </Button>
+                        </div>
+                      ) : s.decision_reason ? (
+                        <p className="mt-2 text-xs text-muted-foreground">Note: {s.decision_reason}</p>
+                      ) : null}
                     </div>
                   );
                 })}
