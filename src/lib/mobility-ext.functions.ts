@@ -80,13 +80,14 @@ export const listAcceptingProviders = createServerFn({ method: "GET" })
     const sb = context.supabase as SB;
     const { data, error } = await sb
       .from("mobility_providers")
-      .select("id, org_id, name, slug, county_code, town, verification_status, private_owner_commission_pct, private_owner_quality_min")
+      .select("id, org_id, name, slug, county_code, town, verification_status, private_owner_commission_pct, private_owner_quality_min, logo_url, cover_image_url, bio, service_categories, rating_avg, rating_count, policies, terms")
       .eq("accepts_private_vehicles", true)
       .eq("verification_status", "approved")
       .order("name");
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+
 
 // ---------------------------------------------------------------------------
 // VEHICLE SUBMISSIONS (private owner → rental company)
