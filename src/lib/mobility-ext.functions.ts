@@ -22,6 +22,8 @@ const privateOwnerInput = z.object({
   countyCode: z.string().max(10).optional(),
   town: z.string().max(80).optional(),
   address: z.string().max(200).optional(),
+  emergencyContact: z.string().max(200).optional(),
+  preferredPaymentMethod: z.enum(["mpesa", "bank", "both"]).optional(),
   bankDetails: z.record(z.any()).optional(),
 });
 
@@ -43,6 +45,8 @@ export const upsertPrivateOwner = createServerFn({ method: "POST" })
           county_code: data.countyCode ?? null,
           town: data.town ?? null,
           address: data.address ?? null,
+          emergency_contact: data.emergencyContact ?? null,
+          preferred_payment_method: data.preferredPaymentMethod ?? null,
           bank_details: data.bankDetails ?? {},
         },
         { onConflict: "user_id" },
@@ -52,6 +56,7 @@ export const upsertPrivateOwner = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return row;
   });
+
 
 export const getMyPrivateOwner = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -75,13 +80,14 @@ export const listAcceptingProviders = createServerFn({ method: "GET" })
     const sb = context.supabase as SB;
     const { data, error } = await sb
       .from("mobility_providers")
-      .select("id, org_id, name, slug, county_code, town, verification_status, private_owner_commission_pct, private_owner_quality_min")
+      .select("id, org_id, name, slug, county_code, town, verification_status, private_owner_commission_pct, private_owner_quality_min, logo_url, cover_image_url, bio, service_categories, rating_avg, rating_count, policies, terms")
       .eq("accepts_private_vehicles", true)
       .eq("verification_status", "approved")
       .order("name");
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+
 
 // ---------------------------------------------------------------------------
 // VEHICLE SUBMISSIONS (private owner → rental company)
@@ -93,6 +99,7 @@ const submissionInput = z.object({
     model: z.string().min(1),
     year: z.number().int().min(1980).max(2100),
     variant: z.string().optional(),
+    bodyType: z.string().optional(),
     color: z.string().optional(),
     registrationNo: z.string().optional(),
     transmission: z.string().optional(),
@@ -100,10 +107,20 @@ const submissionInput = z.object({
     seats: z.number().int().min(1).max(80).optional(),
     mileageKm: z.number().int().min(0).optional(),
     description: z.string().max(4000).optional(),
+    features: z.array(z.string()).max(40).optional(),
+    coverPhoto: z.string().url().optional(),
     images: z.array(z.string().url()).max(20).optional(),
+    videoUrl: z.string().url().optional(),
+    documents: z.object({
+      logbookUrl: z.string().url().optional(),
+      insuranceUrl: z.string().url().optional(),
+      inspectionUrl: z.string().url().optional(),
+      serviceHistoryUrl: z.string().url().optional(),
+    }).optional(),
   }),
   proposedDailyRateKes: z.number().positive().optional(),
 });
+
 
 export const submitVehicleToProvider = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
