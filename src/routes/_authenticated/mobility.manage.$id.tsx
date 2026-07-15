@@ -25,7 +25,7 @@ import {
   MOBILITY_VEHICLE_TYPES, MOBILITY_VEHICLE_TYPE_LABELS,
 } from "@/lib/mobility.functions";
 
-export const Route = createFileRoute("/_authenticated/mobility/v/$id")({
+export const Route = createFileRoute("/_authenticated/mobility/manage/$id")({
   component: VehicleManager,
 });
 

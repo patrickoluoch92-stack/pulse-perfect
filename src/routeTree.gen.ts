@@ -83,7 +83,7 @@ import { Route as ApiPublicHooksEmbeddingsBackfillRouteImport } from './routes/a
 import { Route as ApiPublicHooksDiscoveryTickRouteImport } from './routes/api/public/hooks/discovery-tick'
 import { Route as ApiPublicHooksDiscoveryRescoreRouteImport } from './routes/api/public/hooks/discovery-rescore'
 import { Route as ApiPublicHooksAiEnrichmentRouteImport } from './routes/api/public/hooks/ai-enrichment'
-import { Route as AuthenticatedMobilityVIdRouteImport } from './routes/_authenticated/mobility.v.$id'
+import { Route as AuthenticatedMobilityManageIdRouteImport } from './routes/_authenticated/mobility.manage.$id'
 import { Route as AuthenticatedListingsAdminDiscoveryRouteImport } from './routes/_authenticated/listings.admin.discovery'
 import { Route as AuthenticatedListingsAdminCouponsRouteImport } from './routes/_authenticated/listings.admin.coupons'
 import { Route as AuthenticatedListingsIdAvailabilityRouteImport } from './routes/_authenticated/listings.$id.availability'
@@ -482,10 +482,10 @@ const ApiPublicHooksAiEnrichmentRoute =
     path: '/api/public/hooks/ai-enrichment',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AuthenticatedMobilityVIdRoute =
-  AuthenticatedMobilityVIdRouteImport.update({
-    id: '/v/$id',
-    path: '/v/$id',
+const AuthenticatedMobilityManageIdRoute =
+  AuthenticatedMobilityManageIdRouteImport.update({
+    id: '/manage/$id',
+    path: '/manage/$id',
     getParentRoute: () => AuthenticatedMobilityRoute,
   } as any)
 const AuthenticatedListingsAdminDiscoveryRoute =
@@ -572,7 +572,7 @@ export interface FileRoutesByFullPath {
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
-  '/mobility/v/$id': typeof AuthenticatedMobilityVIdRoute
+  '/mobility/manage/$id': typeof AuthenticatedMobilityManageIdRoute
   '/api/public/hooks/ai-enrichment': typeof ApiPublicHooksAiEnrichmentRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -648,7 +648,7 @@ export interface FileRoutesByTo {
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
-  '/mobility/v/$id': typeof AuthenticatedMobilityVIdRoute
+  '/mobility/manage/$id': typeof AuthenticatedMobilityManageIdRoute
   '/api/public/hooks/ai-enrichment': typeof ApiPublicHooksAiEnrichmentRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -729,7 +729,7 @@ export interface FileRoutesById {
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/_authenticated/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/_authenticated/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
-  '/_authenticated/mobility/v/$id': typeof AuthenticatedMobilityVIdRoute
+  '/_authenticated/mobility/manage/$id': typeof AuthenticatedMobilityManageIdRoute
   '/api/public/hooks/ai-enrichment': typeof ApiPublicHooksAiEnrichmentRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -810,7 +810,7 @@ export interface FileRouteTypes {
     | '/listings/$id/availability'
     | '/listings/admin/coupons'
     | '/listings/admin/discovery'
-    | '/mobility/v/$id'
+    | '/mobility/manage/$id'
     | '/api/public/hooks/ai-enrichment'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -886,7 +886,7 @@ export interface FileRouteTypes {
     | '/listings/$id/availability'
     | '/listings/admin/coupons'
     | '/listings/admin/discovery'
-    | '/mobility/v/$id'
+    | '/mobility/manage/$id'
     | '/api/public/hooks/ai-enrichment'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -966,7 +966,7 @@ export interface FileRouteTypes {
     | '/_authenticated/listings/$id/availability'
     | '/_authenticated/listings/admin/coupons'
     | '/_authenticated/listings/admin/discovery'
-    | '/_authenticated/mobility/v/$id'
+    | '/_authenticated/mobility/manage/$id'
     | '/api/public/hooks/ai-enrichment'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -1535,11 +1535,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksAiEnrichmentRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/mobility/v/$id': {
-      id: '/_authenticated/mobility/v/$id'
-      path: '/v/$id'
-      fullPath: '/mobility/v/$id'
-      preLoaderRoute: typeof AuthenticatedMobilityVIdRouteImport
+    '/_authenticated/mobility/manage/$id': {
+      id: '/_authenticated/mobility/manage/$id'
+      path: '/manage/$id'
+      fullPath: '/mobility/manage/$id'
+      preLoaderRoute: typeof AuthenticatedMobilityManageIdRouteImport
       parentRoute: typeof AuthenticatedMobilityRoute
     }
     '/_authenticated/listings/admin/discovery': {
@@ -1636,11 +1636,11 @@ const AuthenticatedListingsRouteWithChildren =
   )
 
 interface AuthenticatedMobilityRouteChildren {
-  AuthenticatedMobilityVIdRoute: typeof AuthenticatedMobilityVIdRoute
+  AuthenticatedMobilityManageIdRoute: typeof AuthenticatedMobilityManageIdRoute
 }
 
 const AuthenticatedMobilityRouteChildren: AuthenticatedMobilityRouteChildren = {
-  AuthenticatedMobilityVIdRoute: AuthenticatedMobilityVIdRoute,
+  AuthenticatedMobilityManageIdRoute: AuthenticatedMobilityManageIdRoute,
 }
 
 const AuthenticatedMobilityRouteWithChildren =

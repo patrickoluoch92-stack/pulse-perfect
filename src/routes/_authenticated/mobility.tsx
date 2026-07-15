@@ -124,7 +124,7 @@ function MobilityDashboard() {
                             </Button>
                           )}
                           <Button size="sm" variant="outline" asChild>
-                            <Link to="/_authenticated/mobility/v/$id" params={{ id: v.id }}>Manage</Link>
+                            <Link to="/_authenticated/mobility/manage/$id" params={{ id: v.id }}>Manage</Link>
                           </Button>
                           {v.status === "approved" && v.slug && (
                             <Button size="sm" variant="ghost" asChild>
