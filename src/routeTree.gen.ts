@@ -60,6 +60,7 @@ import { Route as DiscoverCountyCountyRouteImport } from './routes/discover.coun
 import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-vitals'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
 import { Route as AuthenticatedMobilitySubmissionsRouteImport } from './routes/_authenticated/mobility.submissions'
+import { Route as AuthenticatedMobilityRegisterCompanyRouteImport } from './routes/_authenticated/mobility.register-company'
 import { Route as AuthenticatedMobilityOwnerRouteImport } from './routes/_authenticated/mobility.owner'
 import { Route as AuthenticatedListingsPartnersRouteImport } from './routes/_authenticated/listings.partners'
 import { Route as AuthenticatedListingsImportRouteImport } from './routes/_authenticated/listings.import'
@@ -353,6 +354,12 @@ const AuthenticatedMobilitySubmissionsRoute =
     path: '/submissions',
     getParentRoute: () => AuthenticatedMobilityRoute,
   } as any)
+const AuthenticatedMobilityRegisterCompanyRoute =
+  AuthenticatedMobilityRegisterCompanyRouteImport.update({
+    id: '/register-company',
+    path: '/register-company',
+    getParentRoute: () => AuthenticatedMobilityRoute,
+  } as any)
 const AuthenticatedMobilityOwnerRoute =
   AuthenticatedMobilityOwnerRouteImport.update({
     id: '/owner',
@@ -591,6 +598,7 @@ export interface FileRoutesByFullPath {
   '/listings/import': typeof AuthenticatedListingsImportRoute
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
+  '/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
   '/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
@@ -671,6 +679,7 @@ export interface FileRoutesByTo {
   '/listings/import': typeof AuthenticatedListingsImportRoute
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
+  '/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
   '/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
@@ -756,6 +765,7 @@ export interface FileRoutesById {
   '/_authenticated/listings/import': typeof AuthenticatedListingsImportRoute
   '/_authenticated/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/_authenticated/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
+  '/_authenticated/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
   '/_authenticated/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
@@ -841,6 +851,7 @@ export interface FileRouteTypes {
     | '/listings/import'
     | '/listings/partners'
     | '/mobility/owner'
+    | '/mobility/register-company'
     | '/mobility/submissions'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
@@ -921,6 +932,7 @@ export interface FileRouteTypes {
     | '/listings/import'
     | '/listings/partners'
     | '/mobility/owner'
+    | '/mobility/register-company'
     | '/mobility/submissions'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
@@ -1005,6 +1017,7 @@ export interface FileRouteTypes {
     | '/_authenticated/listings/import'
     | '/_authenticated/listings/partners'
     | '/_authenticated/mobility/owner'
+    | '/_authenticated/mobility/register-company'
     | '/_authenticated/mobility/submissions'
     | '/_authenticated/properties/$propertyId'
     | '/api/public/web-vitals'
@@ -1426,6 +1439,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMobilitySubmissionsRouteImport
       parentRoute: typeof AuthenticatedMobilityRoute
     }
+    '/_authenticated/mobility/register-company': {
+      id: '/_authenticated/mobility/register-company'
+      path: '/register-company'
+      fullPath: '/mobility/register-company'
+      preLoaderRoute: typeof AuthenticatedMobilityRegisterCompanyRouteImport
+      parentRoute: typeof AuthenticatedMobilityRoute
+    }
     '/_authenticated/mobility/owner': {
       id: '/_authenticated/mobility/owner'
       path: '/owner'
@@ -1717,12 +1737,15 @@ const AuthenticatedListingsRouteWithChildren =
 
 interface AuthenticatedMobilityRouteChildren {
   AuthenticatedMobilityOwnerRoute: typeof AuthenticatedMobilityOwnerRoute
+  AuthenticatedMobilityRegisterCompanyRoute: typeof AuthenticatedMobilityRegisterCompanyRoute
   AuthenticatedMobilitySubmissionsRoute: typeof AuthenticatedMobilitySubmissionsRoute
   AuthenticatedMobilityManageIdRoute: typeof AuthenticatedMobilityManageIdRoute
 }
 
 const AuthenticatedMobilityRouteChildren: AuthenticatedMobilityRouteChildren = {
   AuthenticatedMobilityOwnerRoute: AuthenticatedMobilityOwnerRoute,
+  AuthenticatedMobilityRegisterCompanyRoute:
+    AuthenticatedMobilityRegisterCompanyRoute,
   AuthenticatedMobilitySubmissionsRoute: AuthenticatedMobilitySubmissionsRoute,
   AuthenticatedMobilityManageIdRoute: AuthenticatedMobilityManageIdRoute,
 }
