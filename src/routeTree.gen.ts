@@ -59,6 +59,8 @@ import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$sl
 import { Route as DiscoverCountyCountyRouteImport } from './routes/discover.county.$county'
 import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-vitals'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
+import { Route as AuthenticatedMobilitySubmissionsRouteImport } from './routes/_authenticated/mobility.submissions'
+import { Route as AuthenticatedMobilityOwnerRouteImport } from './routes/_authenticated/mobility.owner'
 import { Route as AuthenticatedListingsPartnersRouteImport } from './routes/_authenticated/listings.partners'
 import { Route as AuthenticatedListingsImportRouteImport } from './routes/_authenticated/listings.import'
 import { Route as AuthenticatedListingsAnalyticsRouteImport } from './routes/_authenticated/listings.analytics'
@@ -345,6 +347,18 @@ const AuthenticatedPropertiesPropertyIdRoute =
     path: '/$propertyId',
     getParentRoute: () => AuthenticatedPropertiesRoute,
   } as any)
+const AuthenticatedMobilitySubmissionsRoute =
+  AuthenticatedMobilitySubmissionsRouteImport.update({
+    id: '/submissions',
+    path: '/submissions',
+    getParentRoute: () => AuthenticatedMobilityRoute,
+  } as any)
+const AuthenticatedMobilityOwnerRoute =
+  AuthenticatedMobilityOwnerRouteImport.update({
+    id: '/owner',
+    path: '/owner',
+    getParentRoute: () => AuthenticatedMobilityRoute,
+  } as any)
 const AuthenticatedListingsPartnersRoute =
   AuthenticatedListingsPartnersRouteImport.update({
     id: '/partners',
@@ -576,6 +590,8 @@ export interface FileRoutesByFullPath {
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
+  '/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
+  '/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
@@ -654,6 +670,8 @@ export interface FileRoutesByTo {
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
+  '/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
+  '/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
@@ -737,6 +755,8 @@ export interface FileRoutesById {
   '/_authenticated/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/_authenticated/listings/import': typeof AuthenticatedListingsImportRoute
   '/_authenticated/listings/partners': typeof AuthenticatedListingsPartnersRoute
+  '/_authenticated/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
+  '/_authenticated/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
@@ -820,6 +840,8 @@ export interface FileRouteTypes {
     | '/listings/analytics'
     | '/listings/import'
     | '/listings/partners'
+    | '/mobility/owner'
+    | '/mobility/submissions'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
     | '/discover/county/$county'
@@ -898,6 +920,8 @@ export interface FileRouteTypes {
     | '/listings/analytics'
     | '/listings/import'
     | '/listings/partners'
+    | '/mobility/owner'
+    | '/mobility/submissions'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
     | '/discover/county/$county'
@@ -980,6 +1004,8 @@ export interface FileRouteTypes {
     | '/_authenticated/listings/analytics'
     | '/_authenticated/listings/import'
     | '/_authenticated/listings/partners'
+    | '/_authenticated/mobility/owner'
+    | '/_authenticated/mobility/submissions'
     | '/_authenticated/properties/$propertyId'
     | '/api/public/web-vitals'
     | '/discover/county/$county'
@@ -1393,6 +1419,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPropertiesPropertyIdRouteImport
       parentRoute: typeof AuthenticatedPropertiesRoute
     }
+    '/_authenticated/mobility/submissions': {
+      id: '/_authenticated/mobility/submissions'
+      path: '/submissions'
+      fullPath: '/mobility/submissions'
+      preLoaderRoute: typeof AuthenticatedMobilitySubmissionsRouteImport
+      parentRoute: typeof AuthenticatedMobilityRoute
+    }
+    '/_authenticated/mobility/owner': {
+      id: '/_authenticated/mobility/owner'
+      path: '/owner'
+      fullPath: '/mobility/owner'
+      preLoaderRoute: typeof AuthenticatedMobilityOwnerRouteImport
+      parentRoute: typeof AuthenticatedMobilityRoute
+    }
     '/_authenticated/listings/partners': {
       id: '/_authenticated/listings/partners'
       path: '/partners'
@@ -1676,10 +1716,14 @@ const AuthenticatedListingsRouteWithChildren =
   )
 
 interface AuthenticatedMobilityRouteChildren {
+  AuthenticatedMobilityOwnerRoute: typeof AuthenticatedMobilityOwnerRoute
+  AuthenticatedMobilitySubmissionsRoute: typeof AuthenticatedMobilitySubmissionsRoute
   AuthenticatedMobilityManageIdRoute: typeof AuthenticatedMobilityManageIdRoute
 }
 
 const AuthenticatedMobilityRouteChildren: AuthenticatedMobilityRouteChildren = {
+  AuthenticatedMobilityOwnerRoute: AuthenticatedMobilityOwnerRoute,
+  AuthenticatedMobilitySubmissionsRoute: AuthenticatedMobilitySubmissionsRoute,
   AuthenticatedMobilityManageIdRoute: AuthenticatedMobilityManageIdRoute,
 }
 
