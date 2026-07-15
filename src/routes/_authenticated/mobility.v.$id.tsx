@@ -81,7 +81,7 @@ function VehicleManager() {
             <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
               <Badge variant={v.status === "approved" ? "default" : v.status === "pending" ? "secondary" : "outline"}>{v.status}</Badge>
               {v.is_archived && <Badge variant="destructive">Archived</Badge>}
-              <span>· {MOBILITY_CATEGORY_LABELS[v.category as any] ?? v.category}</span>
+              <span>· {(MOBILITY_CATEGORY_LABELS as Record<string, string>)[v.category] ?? v.category}</span>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">

@@ -83,6 +83,7 @@ import { Route as ApiPublicHooksEmbeddingsBackfillRouteImport } from './routes/a
 import { Route as ApiPublicHooksDiscoveryTickRouteImport } from './routes/api/public/hooks/discovery-tick'
 import { Route as ApiPublicHooksDiscoveryRescoreRouteImport } from './routes/api/public/hooks/discovery-rescore'
 import { Route as ApiPublicHooksAiEnrichmentRouteImport } from './routes/api/public/hooks/ai-enrichment'
+import { Route as AuthenticatedMobilityVIdRouteImport } from './routes/_authenticated/mobility.v.$id'
 import { Route as AuthenticatedListingsAdminDiscoveryRouteImport } from './routes/_authenticated/listings.admin.discovery'
 import { Route as AuthenticatedListingsAdminCouponsRouteImport } from './routes/_authenticated/listings.admin.coupons'
 import { Route as AuthenticatedListingsIdAvailabilityRouteImport } from './routes/_authenticated/listings.$id.availability'
@@ -481,6 +482,12 @@ const ApiPublicHooksAiEnrichmentRoute =
     path: '/api/public/hooks/ai-enrichment',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedMobilityVIdRoute =
+  AuthenticatedMobilityVIdRouteImport.update({
+    id: '/v/$id',
+    path: '/v/$id',
+    getParentRoute: () => AuthenticatedMobilityRoute,
+  } as any)
 const AuthenticatedListingsAdminDiscoveryRoute =
   AuthenticatedListingsAdminDiscoveryRouteImport.update({
     id: '/discovery',
@@ -516,7 +523,7 @@ export interface FileRoutesByFullPath {
   '/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/listings': typeof AuthenticatedListingsRouteWithChildren
   '/maintenance': typeof AuthenticatedMaintenanceRoute
-  '/mobility': typeof AuthenticatedMobilityRoute
+  '/mobility': typeof AuthenticatedMobilityRouteWithChildren
   '/mpesa': typeof AuthenticatedMpesaRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/planner': typeof AuthenticatedPlannerRoute
@@ -565,6 +572,7 @@ export interface FileRoutesByFullPath {
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
+  '/mobility/v/$id': typeof AuthenticatedMobilityVIdRoute
   '/api/public/hooks/ai-enrichment': typeof ApiPublicHooksAiEnrichmentRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -640,6 +648,7 @@ export interface FileRoutesByTo {
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
+  '/mobility/v/$id': typeof AuthenticatedMobilityVIdRoute
   '/api/public/hooks/ai-enrichment': typeof ApiPublicHooksAiEnrichmentRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -671,7 +680,7 @@ export interface FileRoutesById {
   '/_authenticated/invoices': typeof AuthenticatedInvoicesRouteWithChildren
   '/_authenticated/listings': typeof AuthenticatedListingsRouteWithChildren
   '/_authenticated/maintenance': typeof AuthenticatedMaintenanceRoute
-  '/_authenticated/mobility': typeof AuthenticatedMobilityRoute
+  '/_authenticated/mobility': typeof AuthenticatedMobilityRouteWithChildren
   '/_authenticated/mpesa': typeof AuthenticatedMpesaRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/planner': typeof AuthenticatedPlannerRoute
@@ -720,6 +729,7 @@ export interface FileRoutesById {
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/_authenticated/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
   '/_authenticated/listings/admin/discovery': typeof AuthenticatedListingsAdminDiscoveryRoute
+  '/_authenticated/mobility/v/$id': typeof AuthenticatedMobilityVIdRoute
   '/api/public/hooks/ai-enrichment': typeof ApiPublicHooksAiEnrichmentRoute
   '/api/public/hooks/discovery-rescore': typeof ApiPublicHooksDiscoveryRescoreRoute
   '/api/public/hooks/discovery-tick': typeof ApiPublicHooksDiscoveryTickRoute
@@ -800,6 +810,7 @@ export interface FileRouteTypes {
     | '/listings/$id/availability'
     | '/listings/admin/coupons'
     | '/listings/admin/discovery'
+    | '/mobility/v/$id'
     | '/api/public/hooks/ai-enrichment'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -875,6 +886,7 @@ export interface FileRouteTypes {
     | '/listings/$id/availability'
     | '/listings/admin/coupons'
     | '/listings/admin/discovery'
+    | '/mobility/v/$id'
     | '/api/public/hooks/ai-enrichment'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -954,6 +966,7 @@ export interface FileRouteTypes {
     | '/_authenticated/listings/$id/availability'
     | '/_authenticated/listings/admin/coupons'
     | '/_authenticated/listings/admin/discovery'
+    | '/_authenticated/mobility/v/$id'
     | '/api/public/hooks/ai-enrichment'
     | '/api/public/hooks/discovery-rescore'
     | '/api/public/hooks/discovery-tick'
@@ -1522,6 +1535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksAiEnrichmentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/mobility/v/$id': {
+      id: '/_authenticated/mobility/v/$id'
+      path: '/v/$id'
+      fullPath: '/mobility/v/$id'
+      preLoaderRoute: typeof AuthenticatedMobilityVIdRouteImport
+      parentRoute: typeof AuthenticatedMobilityRoute
+    }
     '/_authenticated/listings/admin/discovery': {
       id: '/_authenticated/listings/admin/discovery'
       path: '/discovery'
@@ -1615,6 +1635,19 @@ const AuthenticatedListingsRouteWithChildren =
     AuthenticatedListingsRouteChildren,
   )
 
+interface AuthenticatedMobilityRouteChildren {
+  AuthenticatedMobilityVIdRoute: typeof AuthenticatedMobilityVIdRoute
+}
+
+const AuthenticatedMobilityRouteChildren: AuthenticatedMobilityRouteChildren = {
+  AuthenticatedMobilityVIdRoute: AuthenticatedMobilityVIdRoute,
+}
+
+const AuthenticatedMobilityRouteWithChildren =
+  AuthenticatedMobilityRoute._addFileChildren(
+    AuthenticatedMobilityRouteChildren,
+  )
+
 interface AuthenticatedPropertiesRouteChildren {
   AuthenticatedPropertiesPropertyIdRoute: typeof AuthenticatedPropertiesPropertyIdRoute
 }
@@ -1640,7 +1673,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInvoicesRoute: typeof AuthenticatedInvoicesRouteWithChildren
   AuthenticatedListingsRoute: typeof AuthenticatedListingsRouteWithChildren
   AuthenticatedMaintenanceRoute: typeof AuthenticatedMaintenanceRoute
-  AuthenticatedMobilityRoute: typeof AuthenticatedMobilityRoute
+  AuthenticatedMobilityRoute: typeof AuthenticatedMobilityRouteWithChildren
   AuthenticatedMpesaRoute: typeof AuthenticatedMpesaRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPlannerRoute: typeof AuthenticatedPlannerRoute
@@ -1674,7 +1707,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInvoicesRoute: AuthenticatedInvoicesRouteWithChildren,
   AuthenticatedListingsRoute: AuthenticatedListingsRouteWithChildren,
   AuthenticatedMaintenanceRoute: AuthenticatedMaintenanceRoute,
-  AuthenticatedMobilityRoute: AuthenticatedMobilityRoute,
+  AuthenticatedMobilityRoute: AuthenticatedMobilityRouteWithChildren,
   AuthenticatedMpesaRoute: AuthenticatedMpesaRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPlannerRoute: AuthenticatedPlannerRoute,
