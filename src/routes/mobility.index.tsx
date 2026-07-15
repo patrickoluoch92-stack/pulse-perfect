@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Car, ArrowRight } from "lucide-react";
+import { Car, ArrowRight, Building2 } from "lucide-react";
 import { searchMobilityVehicles, MOBILITY_CATEGORIES, MOBILITY_CATEGORY_LABELS, type MobilityCategory } from "@/lib/mobility.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlanWithAI } from "@/components/plan-with-ai";
@@ -43,12 +43,18 @@ function MobilityHub() {
           <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
             Book self-drive cars, chauffeur services, safari 4x4s, tour vans, shuttles, motorcycles, and more — integrated with HostPulse stays and itineraries.
           </p>
-          <div className="mt-6">
+          <div className="mt-6 flex flex-wrap items-center gap-3">
             <PlanWithAI
               seed={{ module: "travel", seed_intent: "Plan a trip with transport included" }}
               label="Plan your trip with AI"
               variant="default"
             />
+            <Link
+              to="/mobility/companies"
+              className="inline-flex items-center gap-2 rounded-md border bg-background px-4 py-2 text-sm font-medium hover:border-primary hover:text-primary"
+            >
+              <Building2 className="h-4 w-4" /> Browse rental companies
+            </Link>
           </div>
         </div>
       </section>

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Car, Send, ShieldCheck, Building2 } from "lucide-react";
+import { Car, Send, ShieldCheck, Building2, Wallet } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import {
   upsertPrivateOwner, getMyPrivateOwner, listAcceptingProviders,
   submitVehicleToProvider, listMySubmissions, withdrawSubmission,
+  getPrivateOwnerEarnings,
 } from "@/lib/mobility-ext.functions";
 
 export const Route = createFileRoute("/_authenticated/mobility/owner")({
@@ -36,6 +37,7 @@ function PrivateOwnerDashboard() {
   const submit = useServerFn(submitVehicleToProvider);
   const listSubs = useServerFn(listMySubmissions);
   const withdraw = useServerFn(withdrawSubmission);
+  const fetchEarnings = useServerFn(getPrivateOwnerEarnings);
 
   const owner = useQuery({ queryKey: ["mob-owner"], queryFn: () => fetchOwner() });
   const providers = useQuery({
@@ -46,6 +48,11 @@ function PrivateOwnerDashboard() {
   const subs = useQuery({
     queryKey: ["mob-my-subs"],
     queryFn: () => listSubs(),
+    enabled: !!owner.data,
+  });
+  const earnings = useQuery({
+    queryKey: ["mob-owner-earnings"],
+    queryFn: () => fetchEarnings(),
     enabled: !!owner.data,
   });
 
@@ -178,6 +185,49 @@ function PrivateOwnerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
+              <Wallet className="h-5 w-5" /> Earnings from your vehicles
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">Net payouts after each rental company's commission. Includes confirmed and completed bookings.</p>
+          </CardHeader>
+          <CardContent>
+            {earnings.isLoading ? (
+              <LoadingState label="Loading earnings" />
+            ) : !earnings.data?.totals ? (
+              <EmptyState title="No approved vehicles yet" description="Submit a vehicle and get it approved to start earning." />
+            ) : (
+              <div className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-4">
+                  <Stat label="Gross" value={`KES ${earnings.data.totals.gross.toLocaleString()}`} />
+                  <Stat label="Commission" value={`KES ${earnings.data.totals.commission.toLocaleString()}`} tone="muted" />
+                  <Stat label="Net payout" value={`KES ${earnings.data.totals.net.toLocaleString()}`} tone="primary" />
+                  <Stat label="Bookings" value={String(earnings.data.totals.count)} />
+                </div>
+                {earnings.data.byVehicle.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="text-xs font-medium text-muted-foreground">By vehicle</div>
+                    {earnings.data.byVehicle.map((row: any) => (
+                      <div key={row.vehicle?.id} className="flex items-center justify-between rounded-md border p-3 text-sm">
+                        <div>
+                          <div className="font-medium">{row.vehicle?.make} {row.vehicle?.model} {row.vehicle?.year ? `(${row.vehicle.year})` : ""}</div>
+                          <div className="text-xs text-muted-foreground">{row.vehicle?.mobility_providers?.name ?? "—"} · {row.count} booking{row.count === 1 ? "" : "s"}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium">KES {row.net.toLocaleString()}</div>
+                          <div className="text-xs text-muted-foreground">of {row.gross.toLocaleString()} gross</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
               <Send className="h-5 w-5" /> Submit a vehicle to a rental company
             </CardTitle>
           </CardHeader>
@@ -299,5 +349,14 @@ function PrivateOwnerDashboard() {
         </Card>
       </div>
     </DashboardShell>
+  );
+}
+
+function Stat({ label, value, tone }: { label: string; value: string; tone?: "primary" | "muted" }) {
+  return (
+    <div className={`rounded-md border p-3 ${tone === "primary" ? "border-primary/40 bg-primary/5" : ""}`}>
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className={`mt-1 text-lg font-semibold ${tone === "muted" ? "text-muted-foreground" : ""}`}>{value}</div>
+    </div>
   );
 }

@@ -548,3 +548,61 @@ export const updatePrivateVehiclePolicy = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ---------------------------------------------------------------------------
+// PRIVATE OWNER EARNINGS
+// ---------------------------------------------------------------------------
+// Aggregates bookings on vehicles this private owner submitted+got approved,
+// applies the provider's commission %, and returns net owner payouts.
+export const getPrivateOwnerEarnings = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sb = context.supabase as SB;
+
+    const { data: owner } = await sb
+      .from("mobility_private_owners")
+      .select("id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (!owner) return { totals: null, byVehicle: [], bookings: [] };
+
+    const { data: vehicles, error: vErr } = await sb
+      .from("mobility_vehicles")
+      .select("id, make, model, year, provider_id, mobility_providers:provider_id (name, private_owner_commission_pct)")
+      .eq("private_owner_id", owner.id);
+    if (vErr) throw new Error(vErr.message);
+    const vehicleIds = (vehicles ?? []).map((v: any) => v.id);
+    if (vehicleIds.length === 0) return { totals: { gross: 0, commission: 0, net: 0, count: 0 }, byVehicle: [], bookings: [] };
+
+    const { data: bookings, error: bErr } = await sb
+      .from("mobility_bookings")
+      .select("id, vehicle_id, status, total_kes, pickup_at, dropoff_at, payment_status, created_at")
+      .in("vehicle_id", vehicleIds)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (bErr) throw new Error(bErr.message);
+
+    const vehById = new Map<string, any>((vehicles ?? []).map((v: any) => [v.id, v]));
+    let gross = 0, commission = 0, net = 0, count = 0;
+    const byVehicleMap = new Map<string, { vehicle: any; gross: number; commission: number; net: number; count: number }>();
+
+    for (const b of bookings ?? []) {
+      if (!["confirmed", "completed"].includes(b.status)) continue;
+      const veh = vehById.get(b.vehicle_id);
+      const pct = Number(veh?.mobility_providers?.private_owner_commission_pct ?? 20);
+      const g = Number(b.total_kes ?? 0);
+      const c = Math.round((g * pct) / 100);
+      const n = g - c;
+      gross += g; commission += c; net += n; count += 1;
+      const key = b.vehicle_id;
+      const cur = byVehicleMap.get(key) ?? { vehicle: veh, gross: 0, commission: 0, net: 0, count: 0 };
+      cur.gross += g; cur.commission += c; cur.net += n; cur.count += 1;
+      byVehicleMap.set(key, cur);
+    }
+
+    return {
+      totals: { gross, commission, net, count },
+      byVehicle: Array.from(byVehicleMap.values()).sort((a, b) => b.net - a.net),
+      bookings: (bookings ?? []).slice(0, 20),
+    };
+  });
