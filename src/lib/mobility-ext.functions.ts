@@ -98,6 +98,7 @@ const submissionInput = z.object({
     model: z.string().min(1),
     year: z.number().int().min(1980).max(2100),
     variant: z.string().optional(),
+    bodyType: z.string().optional(),
     color: z.string().optional(),
     registrationNo: z.string().optional(),
     transmission: z.string().optional(),
@@ -105,10 +106,20 @@ const submissionInput = z.object({
     seats: z.number().int().min(1).max(80).optional(),
     mileageKm: z.number().int().min(0).optional(),
     description: z.string().max(4000).optional(),
+    features: z.array(z.string()).max(40).optional(),
+    coverPhoto: z.string().url().optional(),
     images: z.array(z.string().url()).max(20).optional(),
+    videoUrl: z.string().url().optional(),
+    documents: z.object({
+      logbookUrl: z.string().url().optional(),
+      insuranceUrl: z.string().url().optional(),
+      inspectionUrl: z.string().url().optional(),
+      serviceHistoryUrl: z.string().url().optional(),
+    }).optional(),
   }),
   proposedDailyRateKes: z.number().positive().optional(),
 });
+
 
 export const submitVehicleToProvider = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
