@@ -30,9 +30,10 @@ function SubmissionsQueue() {
   const provider = providers.data?.providers?.[0];
   const providerId = provider?.id as string | undefined;
 
+  const [statusFilter, setStatusFilter] = useState<string>("pending");
   const subs = useQuery({
-    queryKey: ["mob-provider-subs", providerId],
-    queryFn: () => fetchSubs({ data: { providerId: providerId!, status: "pending" } }),
+    queryKey: ["mob-provider-subs", providerId, statusFilter],
+    queryFn: () => fetchSubs({ data: { providerId: providerId!, status: statusFilter === "all" ? undefined : statusFilter } }),
     enabled: !!providerId,
   });
 
