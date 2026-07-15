@@ -223,7 +223,9 @@ function PrivateOwnerDashboard() {
               </div>
             )}
           </CardContent>
-        </Card>
+        <PayoutsCard />
+
+
 
 
         <Card>
