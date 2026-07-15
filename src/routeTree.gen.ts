@@ -60,6 +60,7 @@ import { Route as DiscoverCountyCountyRouteImport } from './routes/discover.coun
 import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-vitals'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
 import { Route as AuthenticatedMobilitySubmissionsRouteImport } from './routes/_authenticated/mobility.submissions'
+import { Route as AuthenticatedMobilitySettingsRouteImport } from './routes/_authenticated/mobility.settings'
 import { Route as AuthenticatedMobilityRegisterCompanyRouteImport } from './routes/_authenticated/mobility.register-company'
 import { Route as AuthenticatedMobilityOwnerRouteImport } from './routes/_authenticated/mobility.owner'
 import { Route as AuthenticatedMobilityFleetRouteImport } from './routes/_authenticated/mobility.fleet'
@@ -355,6 +356,12 @@ const AuthenticatedMobilitySubmissionsRoute =
     path: '/submissions',
     getParentRoute: () => AuthenticatedMobilityRoute,
   } as any)
+const AuthenticatedMobilitySettingsRoute =
+  AuthenticatedMobilitySettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedMobilityRoute,
+  } as any)
 const AuthenticatedMobilityRegisterCompanyRoute =
   AuthenticatedMobilityRegisterCompanyRouteImport.update({
     id: '/register-company',
@@ -607,6 +614,7 @@ export interface FileRoutesByFullPath {
   '/mobility/fleet': typeof AuthenticatedMobilityFleetRoute
   '/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
   '/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
+  '/mobility/settings': typeof AuthenticatedMobilitySettingsRoute
   '/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
@@ -689,6 +697,7 @@ export interface FileRoutesByTo {
   '/mobility/fleet': typeof AuthenticatedMobilityFleetRoute
   '/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
   '/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
+  '/mobility/settings': typeof AuthenticatedMobilitySettingsRoute
   '/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
@@ -776,6 +785,7 @@ export interface FileRoutesById {
   '/_authenticated/mobility/fleet': typeof AuthenticatedMobilityFleetRoute
   '/_authenticated/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
   '/_authenticated/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
+  '/_authenticated/mobility/settings': typeof AuthenticatedMobilitySettingsRoute
   '/_authenticated/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
@@ -863,6 +873,7 @@ export interface FileRouteTypes {
     | '/mobility/fleet'
     | '/mobility/owner'
     | '/mobility/register-company'
+    | '/mobility/settings'
     | '/mobility/submissions'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
@@ -945,6 +956,7 @@ export interface FileRouteTypes {
     | '/mobility/fleet'
     | '/mobility/owner'
     | '/mobility/register-company'
+    | '/mobility/settings'
     | '/mobility/submissions'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
@@ -1031,6 +1043,7 @@ export interface FileRouteTypes {
     | '/_authenticated/mobility/fleet'
     | '/_authenticated/mobility/owner'
     | '/_authenticated/mobility/register-company'
+    | '/_authenticated/mobility/settings'
     | '/_authenticated/mobility/submissions'
     | '/_authenticated/properties/$propertyId'
     | '/api/public/web-vitals'
@@ -1452,6 +1465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMobilitySubmissionsRouteImport
       parentRoute: typeof AuthenticatedMobilityRoute
     }
+    '/_authenticated/mobility/settings': {
+      id: '/_authenticated/mobility/settings'
+      path: '/settings'
+      fullPath: '/mobility/settings'
+      preLoaderRoute: typeof AuthenticatedMobilitySettingsRouteImport
+      parentRoute: typeof AuthenticatedMobilityRoute
+    }
     '/_authenticated/mobility/register-company': {
       id: '/_authenticated/mobility/register-company'
       path: '/register-company'
@@ -1759,6 +1779,7 @@ interface AuthenticatedMobilityRouteChildren {
   AuthenticatedMobilityFleetRoute: typeof AuthenticatedMobilityFleetRoute
   AuthenticatedMobilityOwnerRoute: typeof AuthenticatedMobilityOwnerRoute
   AuthenticatedMobilityRegisterCompanyRoute: typeof AuthenticatedMobilityRegisterCompanyRoute
+  AuthenticatedMobilitySettingsRoute: typeof AuthenticatedMobilitySettingsRoute
   AuthenticatedMobilitySubmissionsRoute: typeof AuthenticatedMobilitySubmissionsRoute
   AuthenticatedMobilityManageIdRoute: typeof AuthenticatedMobilityManageIdRoute
 }
@@ -1768,6 +1789,7 @@ const AuthenticatedMobilityRouteChildren: AuthenticatedMobilityRouteChildren = {
   AuthenticatedMobilityOwnerRoute: AuthenticatedMobilityOwnerRoute,
   AuthenticatedMobilityRegisterCompanyRoute:
     AuthenticatedMobilityRegisterCompanyRoute,
+  AuthenticatedMobilitySettingsRoute: AuthenticatedMobilitySettingsRoute,
   AuthenticatedMobilitySubmissionsRoute: AuthenticatedMobilitySubmissionsRoute,
   AuthenticatedMobilityManageIdRoute: AuthenticatedMobilityManageIdRoute,
 }

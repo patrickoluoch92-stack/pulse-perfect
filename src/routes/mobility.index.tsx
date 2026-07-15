@@ -56,6 +56,31 @@ function MobilityHub() {
               <Building2 className="h-4 w-4" /> Browse rental companies
             </Link>
           </div>
+
+          <div className="mt-10 grid gap-4 md:grid-cols-2">
+            <Link to="/mobility/register-company" className="group rounded-xl border bg-card p-6 transition hover:border-primary hover:shadow-md">
+              <div className="flex items-center gap-2 text-lg font-semibold">
+                <Building2 className="h-5 w-5 text-primary" /> List your rental company
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Register your car-hire business, get verified, then manage your fleet, bookings and payouts.
+              </p>
+              <div className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
+                Get started <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+              </div>
+            </Link>
+            <Link to="/mobility/owner" className="group rounded-xl border bg-card p-6 transition hover:border-primary hover:shadow-md">
+              <div className="flex items-center gap-2 text-lg font-semibold">
+                <Car className="h-5 w-5 text-primary" /> Submit your private vehicle
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Own a car but not a company? Submit your vehicle to a verified rental company and earn on every booking.
+              </p>
+              <div className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
+                Submit vehicle <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
 
