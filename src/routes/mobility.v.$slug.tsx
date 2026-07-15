@@ -121,6 +121,8 @@ function VehicleDetail() {
                 </CardContent>
               </Card>
             )}
+
+            <ReviewsSection vehicleId={v.id} />
           </div>
 
           <aside className="space-y-4">
