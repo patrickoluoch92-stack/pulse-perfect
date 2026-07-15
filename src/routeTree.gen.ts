@@ -21,6 +21,7 @@ import { Route as MobilityIndexRouteImport } from './routes/mobility.index'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
 import { Route as DiscoverIndexRouteImport } from './routes/discover.index'
 import { Route as RentalsChildRouteImport } from './routes/rentals.$child'
+import { Route as MobilityCompaniesRouteImport } from './routes/mobility.companies'
 import { Route as MobilityCategoryRouteImport } from './routes/mobility.$category'
 import { Route as MarketplaceMapRouteImport } from './routes/marketplace.map'
 import { Route as MarketplaceCountyRouteImport } from './routes/marketplace.$county'
@@ -145,6 +146,11 @@ const DiscoverIndexRoute = DiscoverIndexRouteImport.update({
 const RentalsChildRoute = RentalsChildRouteImport.update({
   id: '/rentals/$child',
   path: '/rentals/$child',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MobilityCompaniesRoute = MobilityCompaniesRouteImport.update({
+  id: '/mobility/companies',
+  path: '/mobility/companies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MobilityCategoryRoute = MobilityCategoryRouteImport.update({
@@ -544,6 +550,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
   '/mobility/$category': typeof MobilityCategoryRoute
+  '/mobility/companies': typeof MobilityCompaniesRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
@@ -621,6 +628,7 @@ export interface FileRoutesByTo {
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
   '/mobility/$category': typeof MobilityCategoryRoute
+  '/mobility/companies': typeof MobilityCompaniesRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
@@ -701,6 +709,7 @@ export interface FileRoutesById {
   '/marketplace/$county': typeof MarketplaceCountyRoute
   '/marketplace/map': typeof MarketplaceMapRoute
   '/mobility/$category': typeof MobilityCategoryRoute
+  '/mobility/companies': typeof MobilityCompaniesRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
@@ -782,6 +791,7 @@ export interface FileRouteTypes {
     | '/marketplace/$county'
     | '/marketplace/map'
     | '/mobility/$category'
+    | '/mobility/companies'
     | '/rentals/$child'
     | '/discover/'
     | '/marketplace/'
@@ -859,6 +869,7 @@ export interface FileRouteTypes {
     | '/marketplace/$county'
     | '/marketplace/map'
     | '/mobility/$category'
+    | '/mobility/companies'
     | '/rentals/$child'
     | '/discover'
     | '/marketplace'
@@ -938,6 +949,7 @@ export interface FileRouteTypes {
     | '/marketplace/$county'
     | '/marketplace/map'
     | '/mobility/$category'
+    | '/mobility/companies'
     | '/rentals/$child'
     | '/discover/'
     | '/marketplace/'
@@ -994,6 +1006,7 @@ export interface RootRouteChildren {
   GuidesHotelSeoRoute: typeof GuidesHotelSeoRoute
   InviteTokenRoute: typeof InviteTokenRoute
   MobilityCategoryRoute: typeof MobilityCategoryRoute
+  MobilityCompaniesRoute: typeof MobilityCompaniesRoute
   RentalsChildRoute: typeof RentalsChildRoute
   DiscoverIndexRoute: typeof DiscoverIndexRoute
   MobilityIndexRoute: typeof MobilityIndexRoute
@@ -1099,6 +1112,13 @@ declare module '@tanstack/react-router' {
       path: '/rentals/$child'
       fullPath: '/rentals/$child'
       preLoaderRoute: typeof RentalsChildRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mobility/companies': {
+      id: '/mobility/companies'
+      path: '/mobility/companies'
+      fullPath: '/mobility/companies'
+      preLoaderRoute: typeof MobilityCompaniesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mobility/$category': {
@@ -1765,6 +1785,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesHotelSeoRoute: GuidesHotelSeoRoute,
   InviteTokenRoute: InviteTokenRoute,
   MobilityCategoryRoute: MobilityCategoryRoute,
+  MobilityCompaniesRoute: MobilityCompaniesRoute,
   RentalsChildRoute: RentalsChildRoute,
   DiscoverIndexRoute: DiscoverIndexRoute,
   MobilityIndexRoute: MobilityIndexRoute,
