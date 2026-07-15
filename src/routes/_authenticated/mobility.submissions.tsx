@@ -125,7 +125,20 @@ function SubmissionsQueue() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Pending submissions</CardTitle></CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <CardTitle>Submissions</CardTitle>
+            <select
+              className="h-9 rounded-md border bg-background px-2 text-sm"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="withdrawn">Withdrawn</option>
+              <option value="all">All</option>
+            </select>
+          </CardHeader>
           <CardContent>
             {subs.isLoading ? (
               <LoadingState label="Loading" />
