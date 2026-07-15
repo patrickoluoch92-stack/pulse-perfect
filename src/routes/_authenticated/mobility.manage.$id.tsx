@@ -449,3 +449,199 @@ function Sel({ label, value, onChange, options }: { label: string; value: string
     </div>
   );
 }
+
+// ---------------------------------------------------------------------------
+// TIERS
+// ---------------------------------------------------------------------------
+const TIER_OPTIONS: [string, string][] = [
+  ["daily", "Daily"], ["weekend", "Weekend"], ["weekly", "Weekly"], ["monthly", "Monthly"],
+  ["lease", "Long-term lease"], ["corporate", "Corporate"],
+  ["holiday", "Holiday"], ["peak", "Peak season"], ["promo", "Promo"],
+];
+
+function TiersTab({ vehicleId, orgId }: { vehicleId: string; orgId: string }) {
+  const qc = useQueryClient();
+  const list = useServerFn(listPricingTiers);
+  const upsert = useServerFn(upsertPricingTier);
+  const remove = useServerFn(deletePricingTier);
+  const q = useQuery({ queryKey: ["mobility-tiers", vehicleId], queryFn: () => list({ data: { vehicleId } }) });
+  const [f, setF] = useState({ tier: "daily", priceKes: "", minUnits: "1", startsOn: "", endsOn: "", notes: "" });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["mobility-tiers", vehicleId] });
+  const rows: any[] = q.data ?? [];
+  return (
+    <Card><CardHeader><CardTitle>Pricing tiers</CardTitle></CardHeader><CardContent className="space-y-4">
+      <p className="text-xs text-muted-foreground">Layer on tiered pricing beyond the base rates — corporate deals, weekend surcharges, lease rates.</p>
+      <div className="grid gap-2 sm:grid-cols-6">
+        <Sel label="Tier" value={f.tier} onChange={(x) => setF({ ...f, tier: x })} options={TIER_OPTIONS} />
+        <F label="Price (KES)" type="number" value={f.priceKes} on={(x) => setF({ ...f, priceKes: x })} />
+        <F label="Min units" type="number" value={f.minUnits} on={(x) => setF({ ...f, minUnits: x })} />
+        <F label="Starts" type="date" value={f.startsOn} on={(x) => setF({ ...f, startsOn: x })} />
+        <F label="Ends" type="date" value={f.endsOn} on={(x) => setF({ ...f, endsOn: x })} />
+        <F label="Notes" value={f.notes} on={(x) => setF({ ...f, notes: x })} />
+      </div>
+      <Button disabled={!f.priceKes} onClick={() => upsert({ data: {
+        vehicleId, orgId, tier: f.tier as any, priceKes: Number(f.priceKes),
+        minUnits: Number(f.minUnits) || 1,
+        startsOn: f.startsOn || undefined, endsOn: f.endsOn || undefined,
+        notes: f.notes || undefined,
+      } }).then(() => { toast.success("Tier saved"); setF({ tier: "daily", priceKes: "", minUnits: "1", startsOn: "", endsOn: "", notes: "" }); invalidate(); }).catch((e: any) => toast.error(e?.message ?? "Failed"))}>
+        <Plus className="mr-1 h-4 w-4" /> Add tier
+      </Button>
+      {q.isLoading ? <LoadingState label="Loading tiers…" /> :
+        rows.length === 0 ? <EmptyState title="No pricing tiers" description="Add tiered pricing to unlock corporate & long-term rates." /> : (
+        <div className="space-y-2">
+          {rows.map((r) => (
+            <div key={r.id} className="flex items-center justify-between rounded-md border p-3">
+              <div>
+                <div className="font-medium capitalize">{r.tier} · KES {Number(r.price_kes).toLocaleString()} <span className="text-xs text-muted-foreground">/ min {r.min_units}</span></div>
+                <div className="text-xs text-muted-foreground">
+                  {r.starts_on ? `${r.starts_on} → ${r.ends_on ?? "…"}` : "Always active"}
+                  {r.notes ? ` · ${r.notes}` : ""}
+                  {r.is_active === false ? " · inactive" : ""}
+                </div>
+              </div>
+              <Button size="sm" variant="ghost" onClick={() => remove({ data: { id: r.id } }).then(() => { toast.success("Removed"); invalidate(); })}><X className="h-4 w-4" /></Button>
+            </div>
+          ))}
+        </div>
+      )}
+    </CardContent></Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// DOCUMENTS
+// ---------------------------------------------------------------------------
+const DOC_TYPES: [string, string][] = [
+  ["insurance", "Insurance"], ["inspection", "Inspection"], ["logbook", "Logbook"],
+  ["roadworthiness", "Roadworthiness"], ["service_history", "Service history"],
+  ["compliance", "Compliance"], ["other", "Other"],
+];
+
+function DocumentsTab({ vehicleId, orgId }: { vehicleId: string; orgId: string }) {
+  const qc = useQueryClient();
+  const list = useServerFn(listVehicleDocuments);
+  const add = useServerFn(addVehicleDocument);
+  const remove = useServerFn(deleteVehicleDocument);
+  const q = useQuery({ queryKey: ["mobility-docs", vehicleId], queryFn: () => list({ data: { vehicleId } }) });
+  const [f, setF] = useState({ docType: "insurance", title: "", fileUrl: "", issuedAt: "", expiresAt: "", notes: "" });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["mobility-docs", vehicleId] });
+  const rows: any[] = q.data ?? [];
+
+  const daysUntil = (iso?: string | null) => iso ? Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000) : null;
+
+  return (
+    <Card><CardHeader><CardTitle>Compliance documents</CardTitle></CardHeader><CardContent className="space-y-4">
+      <p className="text-xs text-muted-foreground">Upload insurance, inspection, and logbook records. Expiring documents get flagged.</p>
+      <div className="grid gap-2 sm:grid-cols-6">
+        <Sel label="Type" value={f.docType} onChange={(x) => setF({ ...f, docType: x })} options={DOC_TYPES} />
+        <F label="Title" value={f.title} on={(x) => setF({ ...f, title: x })} />
+        <div className="sm:col-span-2"><Label>File URL</Label><Input placeholder="https://…" value={f.fileUrl} onChange={(e) => setF({ ...f, fileUrl: e.target.value })} /></div>
+        <F label="Issued" type="date" value={f.issuedAt} on={(x) => setF({ ...f, issuedAt: x })} />
+        <F label="Expires" type="date" value={f.expiresAt} on={(x) => setF({ ...f, expiresAt: x })} />
+        <div className="sm:col-span-6"><Label>Notes</Label><Input value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></div>
+      </div>
+      <Button disabled={!f.fileUrl} onClick={() => add({ data: {
+        vehicleId, orgId, docType: f.docType as any,
+        title: f.title || undefined, fileUrl: f.fileUrl,
+        issuedAt: f.issuedAt || undefined, expiresAt: f.expiresAt || undefined,
+        notes: f.notes || undefined,
+      } }).then(() => { toast.success("Uploaded"); setF({ docType: "insurance", title: "", fileUrl: "", issuedAt: "", expiresAt: "", notes: "" }); invalidate(); }).catch((e: any) => toast.error(e?.message ?? "Failed"))}>
+        <Plus className="mr-1 h-4 w-4" /> Add document
+      </Button>
+      {q.isLoading ? <LoadingState label="Loading documents…" /> :
+        rows.length === 0 ? <EmptyState title="No documents" description="Add compliance records to speed up approval." /> : (
+        <div className="space-y-2">
+          {rows.map((r) => {
+            const d = daysUntil(r.expires_at);
+            const expiringSoon = d !== null && d <= 30;
+            const expired = d !== null && d < 0;
+            return (
+              <div key={r.id} className="flex items-center justify-between rounded-md border p-3">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <a href={r.file_url} target="_blank" rel="noreferrer" className="font-medium hover:underline truncate">{r.title || r.doc_type}</a>
+                    <Badge variant="outline" className="capitalize">{r.doc_type.replace(/_/g, " ")}</Badge>
+                    {expired && <Badge variant="destructive">Expired</Badge>}
+                    {!expired && expiringSoon && <Badge variant="secondary">Expires in {d}d</Badge>}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {r.issued_at ? `Issued ${r.issued_at}` : ""}
+                    {r.expires_at ? ` · Expires ${r.expires_at}` : ""}
+                    {r.notes ? ` · ${r.notes}` : ""}
+                  </div>
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => remove({ data: { id: r.id } }).then(() => { toast.success("Removed"); invalidate(); })}><X className="h-4 w-4" /></Button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </CardContent></Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// MAINTENANCE
+// ---------------------------------------------------------------------------
+const MAINT_STATUS: [string, string][] = [
+  ["scheduled", "Scheduled"], ["in_progress", "In progress"], ["done", "Done"], ["cancelled", "Cancelled"],
+];
+
+function MaintenanceTab({ vehicleId, orgId }: { vehicleId: string; orgId: string }) {
+  const qc = useQueryClient();
+  const list = useServerFn(listVehicleMaintenance);
+  const upsert = useServerFn(upsertMaintenance);
+  const q = useQuery({ queryKey: ["mobility-maintenance", vehicleId], queryFn: () => list({ data: { vehicleId } }) });
+  const [f, setF] = useState({ maintenanceType: "", scheduledAt: "", doneAt: "", costKes: "", odometerKm: "", vendor: "", notes: "", status: "scheduled" });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["mobility-maintenance", vehicleId] });
+  const rows: any[] = q.data ?? [];
+  return (
+    <Card><CardHeader><CardTitle>Maintenance log</CardTitle></CardHeader><CardContent className="space-y-4">
+      <p className="text-xs text-muted-foreground">Track service history, upcoming maintenance, and repair costs.</p>
+      <div className="grid gap-2 sm:grid-cols-4">
+        <F label="Type" value={f.maintenanceType} on={(x) => setF({ ...f, maintenanceType: x })} />
+        <F label="Vendor" value={f.vendor} on={(x) => setF({ ...f, vendor: x })} />
+        <F label="Scheduled" type="datetime-local" value={f.scheduledAt} on={(x) => setF({ ...f, scheduledAt: x })} />
+        <F label="Completed" type="datetime-local" value={f.doneAt} on={(x) => setF({ ...f, doneAt: x })} />
+        <F label="Cost (KES)" type="number" value={f.costKes} on={(x) => setF({ ...f, costKes: x })} />
+        <F label="Odometer (km)" type="number" value={f.odometerKm} on={(x) => setF({ ...f, odometerKm: x })} />
+        <Sel label="Status" value={f.status} onChange={(x) => setF({ ...f, status: x })} options={MAINT_STATUS} />
+        <div className="sm:col-span-4"><Label>Notes</Label><Textarea rows={2} value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} /></div>
+      </div>
+      <Button disabled={!f.maintenanceType} onClick={() => upsert({ data: {
+        vehicleId, orgId, maintenanceType: f.maintenanceType,
+        scheduledAt: f.scheduledAt ? new Date(f.scheduledAt).toISOString() : undefined,
+        doneAt: f.doneAt ? new Date(f.doneAt).toISOString() : undefined,
+        costKes: f.costKes ? Number(f.costKes) : undefined,
+        odometerKm: f.odometerKm ? Number(f.odometerKm) : undefined,
+        vendor: f.vendor || undefined,
+        notes: f.notes || undefined,
+        status: f.status as any,
+      } }).then(() => { toast.success("Saved"); setF({ maintenanceType: "", scheduledAt: "", doneAt: "", costKes: "", odometerKm: "", vendor: "", notes: "", status: "scheduled" }); invalidate(); }).catch((e: any) => toast.error(e?.message ?? "Failed"))}>
+        <Plus className="mr-1 h-4 w-4" /> Log entry
+      </Button>
+      {q.isLoading ? <LoadingState label="Loading maintenance…" /> :
+        rows.length === 0 ? <EmptyState title="No maintenance records" description="Log services to keep this vehicle roadworthy." /> : (
+        <div className="space-y-2">
+          {rows.map((r) => (
+            <div key={r.id} className="rounded-md border p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="font-medium">{r.maintenance_type}</div>
+                <Badge variant={r.status === "done" ? "default" : r.status === "cancelled" ? "outline" : "secondary"}>{r.status.replace(/_/g, " ")}</Badge>
+                {r.cost_kes ? <span className="text-xs text-muted-foreground">KES {Number(r.cost_kes).toLocaleString()}</span> : null}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {r.scheduled_at ? `Scheduled ${new Date(r.scheduled_at).toLocaleString()}` : ""}
+                {r.done_at ? ` · Done ${new Date(r.done_at).toLocaleString()}` : ""}
+                {r.vendor ? ` · ${r.vendor}` : ""}
+                {r.odometer_km ? ` · ${r.odometer_km} km` : ""}
+              </div>
+              {r.notes && <div className="mt-1 text-sm">{r.notes}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+    </CardContent></Card>
+  );
+}
