@@ -102,8 +102,12 @@ export const listPublicProperties = createServerFn({ method: "GET" })
       query = query.contains("nearby_parks", data.nearbyParks);
     }
     if (data.search) {
-      const term = `%${data.search.replace(/[%_]/g, "")}%`;
-      query = query.or(`name.ilike.${term},town.ilike.${term},description.ilike.${term}`);
+      const { sanitizePostgrestTerm } = await import("@/lib/safe-fetch");
+      const clean = sanitizePostgrestTerm(data.search);
+      if (clean) {
+        const term = `%${clean}%`;
+        query = query.or(`name.ilike.${term},town.ilike.${term},description.ilike.${term}`);
+      }
     }
 
 
