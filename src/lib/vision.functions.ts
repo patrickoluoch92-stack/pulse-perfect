@@ -47,6 +47,18 @@ export const analyzePropertyImages = createServerFn({ method: "POST" })
     const isAdmin = await isPlatformAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    // For non-admins, restrict to org(s) the caller is a member of.
+    let allowedOrgIds: Set<string> | null = null;
+    if (!isAdmin) {
+      const { data: memberships, error: memErr } = await context.supabase
+        .from("organization_members")
+        .select("org_id")
+        .eq("user_id", context.userId);
+      if (memErr) throw new Error(memErr.message);
+      allowedOrgIds = new Set((memberships ?? []).map((r: any) => r.org_id));
+      if (allowedOrgIds.size === 0) return { processed: 0, attempted: 0 };
+    }
+
     let q = supabaseAdmin
       .from("marketplace_property_images")
       .select("id, property_id, image_url, marketplace_properties!inner(org_id)")
@@ -62,12 +74,12 @@ export const analyzePropertyImages = createServerFn({ method: "POST" })
       .from("image_ai_tags").select("image_id").in("image_id", ids);
     const done = new Set((existing ?? []).map((r: any) => r.image_id));
 
-    // Non-admins may only analyze their own org's images
+    // Non-admins may only analyze their own org's images.
     const pool = (allImages ?? []).filter((r: any) => {
       if (done.has(r.id)) return false;
       if (isAdmin) return true;
-      // context.supabase runs as user; check org membership via RLS-safe query
-      return true; // fine-grained: rely on org join below
+      const orgId = r.marketplace_properties?.org_id;
+      return orgId && allowedOrgIds!.has(orgId);
     }).slice(0, data.limit ?? 10);
 
     let ok = 0;

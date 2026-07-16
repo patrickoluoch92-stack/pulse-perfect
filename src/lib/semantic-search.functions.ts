@@ -62,13 +62,16 @@ export const semanticSearchProperties = createServerFn({ method: "POST" })
     } catch (err) {
       // Fall back to keyword search when embeddings fail (credits/rate limit).
       const supabase = publicClient();
-      const q = data.query.slice(0, 40).replace(/[%_]/g, " ");
-      const { data: rows } = await supabase
-        .from("marketplace_properties")
-        .select("id, name, slug, town, county_code, category, description")
-        .eq("status", "approved")
-        .or(`name.ilike.%${q}%,description.ilike.%${q}%,town.ilike.%${q}%`)
-        .limit(data.limit);
+      const { sanitizePostgrestTerm } = await import("@/lib/safe-fetch");
+      const q = sanitizePostgrestTerm(data.query, 40);
+      const { data: rows } = q
+        ? await supabase
+            .from("marketplace_properties")
+            .select("id, name, slug, town, county_code, category, description")
+            .eq("status", "approved")
+            .or(`name.ilike.%${q}%,description.ilike.%${q}%,town.ilike.%${q}%`)
+            .limit(data.limit)
+        : { data: [] as any[] };
       return {
         mode: "keyword" as const,
         latencyMs: Date.now() - t0,

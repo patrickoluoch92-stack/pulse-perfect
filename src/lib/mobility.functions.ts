@@ -548,7 +548,11 @@ export const searchMobilityVehicles = createServerFn({ method: "POST" })
     if (data.isWedding) q = q.eq("is_wedding", true);
     if (data.isSafari) q = q.eq("is_safari", true);
     if (data.instantBook) q = q.eq("instant_book", true);
-    if (data.query) q = q.or(`make.ilike.%${data.query}%,model.ilike.%${data.query}%,description.ilike.%${data.query}%`);
+    if (data.query) {
+      const { sanitizePostgrestTerm } = await import("@/lib/safe-fetch");
+      const clean = sanitizePostgrestTerm(data.query);
+      if (clean) q = q.or(`make.ilike.%${clean}%,model.ilike.%${clean}%,description.ilike.%${clean}%`);
+    }
     let { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     let vehicles = rows ?? [];
@@ -949,7 +953,11 @@ export const listPublicMobilityProviders = createServerFn({ method: "POST" })
       .eq("verification_status", "verified")
       .order("rating_avg", { ascending: false, nullsFirst: false })
       .range(data.offset, data.offset + data.limit - 1);
-    if (data.query) q = q.or(`name.ilike.%${data.query}%,bio.ilike.%${data.query}%`);
+    if (data.query) {
+      const { sanitizePostgrestTerm } = await import("@/lib/safe-fetch");
+      const clean = sanitizePostgrestTerm(data.query);
+      if (clean) q = q.or(`name.ilike.%${clean}%,bio.ilike.%${clean}%`);
+    }
     if (data.county) q = q.eq("county_code", data.county);
     if (data.category) q = q.contains("service_categories", [data.category]);
     const { data: rows, error } = await q;

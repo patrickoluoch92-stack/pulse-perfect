@@ -61,7 +61,9 @@ async function retrieveContext(query: string, county?: string): Promise<Groundin
   }
 
   // Keyword fallback (also handles zero-embedding cold start).
-  const q = query.slice(0, 40).replace(/[%_]/g, " ");
+  const { sanitizePostgrestTerm } = await import("@/lib/safe-fetch");
+  const q = sanitizePostgrestTerm(query, 40);
+  if (!q) return [];
   const { data } = await supabase
     .from("marketplace_properties")
     .select("id, name, slug, town, county_code, category, description")
