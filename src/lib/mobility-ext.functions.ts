@@ -181,8 +181,25 @@ export const submitVehicleToProvider = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
+
+    // Notify company org members of the new application (best-effort)
+    try {
+      const { notifyOrgMembers } = await import("./notifications.server");
+      const snap = data.vehicleSnapshot;
+      await notifyOrgMembers(prov.org_id, {
+        type: "mobility_submission_new",
+        title: "New vehicle partnership application",
+        body: `${snap.make} ${snap.model} ${snap.year} submitted for review.`,
+        linkUrl: "/mobility/submissions",
+        data: { submissionId: sub.id, providerId: prov.id },
+      });
+    } catch (err) {
+      console.warn("[mobility] notify org members failed", err);
+    }
+
     return sub;
   });
+
 
 export const listMySubmissions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
