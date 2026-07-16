@@ -821,12 +821,13 @@ export const syncIcalSource = createServerFn({ method: "POST" })
     if (srcErr || !src) throw new Error(srcErr?.message ?? "Source not found");
 
     try {
-      const res = await fetch(src.url, {
+      const { safeFetchText } = await import("@/lib/safe-fetch");
+      const text = await safeFetchText(src.url, {
+        maxBytes: 5 * 1024 * 1024,
+        timeoutMs: 15_000,
+        maxRedirects: 3,
         headers: { "User-Agent": "HostPulse iCal Sync/1.0", Accept: "text/calendar, */*" },
-        redirect: "follow",
       });
-      if (!res.ok) throw new Error(`Feed returned HTTP ${res.status}`);
-      const text = await res.text();
       const events = parseICS(text);
 
       // Replace strategy: delete existing blocks for this source, re-insert.
