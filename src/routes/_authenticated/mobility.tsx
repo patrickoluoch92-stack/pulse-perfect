@@ -18,6 +18,7 @@ import {
   getMobilityProviderAnalytics, MOBILITY_CATEGORIES, MOBILITY_CATEGORY_LABELS,
   MOBILITY_VEHICLE_TYPES, MOBILITY_VEHICLE_TYPE_LABELS,
 } from "@/lib/mobility.functions";
+import { getMyPrivateOwner } from "@/lib/mobility-ext.functions";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 
 export const Route = createFileRoute("/_authenticated/mobility")({
