@@ -22,8 +22,17 @@ import { getMyPrivateOwner } from "@/lib/mobility-ext.functions";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 
 export const Route = createFileRoute("/_authenticated/mobility")({
-  component: MobilityDashboard,
+  component: MobilityRoute,
 });
+
+function MobilityRoute() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // When a child route like /mobility/owner is active, render the child only.
+  // Otherwise render the mobility dashboard at /mobility.
+  const isRoot = pathname === "/mobility" || pathname === "/mobility/";
+  if (!isRoot) return <Outlet />;
+  return <MobilityDashboard />;
+}
 
 function MobilityDashboard() {
   const fetchCtx = useServerFn(getWorkspaceContext);
