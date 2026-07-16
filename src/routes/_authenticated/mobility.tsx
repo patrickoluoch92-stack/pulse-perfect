@@ -29,6 +29,7 @@ function MobilityDashboard() {
   const fetchCtx = useServerFn(getWorkspaceContext);
   const fetchProviders = useServerFn(listMyMobilityProviders);
   const fetchVehicles = useServerFn(listMyMobilityVehicles);
+  const fetchPrivateOwner = useServerFn(getMyPrivateOwner);
   const upsertProvider = useServerFn(upsertMobilityProvider);
   const submitProvider = useServerFn(submitMobilityProviderForVerification);
   const upsertVehicle = useServerFn(upsertMobilityVehicle);
@@ -40,6 +41,7 @@ function MobilityDashboard() {
   const orgId = ctx.data?.currentOrg?.id;
 
   const providers = useQuery({ queryKey: ["mobility-providers"], queryFn: () => fetchProviders() });
+  const privateOwner = useQuery({ queryKey: ["mob-owner"], queryFn: () => fetchPrivateOwner() });
   const vehicles = useQuery({
     queryKey: ["mobility-vehicles", orgId],
     queryFn: () => fetchVehicles({ data: { orgId } }),
@@ -52,6 +54,27 @@ function MobilityDashboard() {
   });
 
   const primaryProvider = providers.data?.providers?.[0];
+  const isPrivateOwner = !!privateOwner.data && !primaryProvider;
+
+  // Private car owners never see the "register a company" flow — they only pick
+  // an existing rental company and list their vehicle with it.
+  if (isPrivateOwner) {
+    return (
+      <DashboardShell>
+        <div className="mx-auto max-w-4xl space-y-4 p-6">
+          <Card className="border-primary/40 bg-primary/5">
+            <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+              <div>
+                <div className="font-medium">Your fleet partnerships</div>
+                <p className="text-sm text-muted-foreground">Manage the rental company that professionally handles your vehicle, or list another vehicle.</p>
+              </div>
+              <Link to="/mobility/owner"><Button>Open my partnerships</Button></Link>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardShell>
+    );
+  }
 
   return (
     <DashboardShell>
@@ -73,16 +96,23 @@ function MobilityDashboard() {
           )}
         </header>
 
-        {!providers.isLoading && !primaryProvider && (
-          <Card className="border-primary/40 bg-primary/5">
-            <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-              <div>
-                <div className="font-medium">Register your rental company to get started</div>
-                <p className="text-sm text-muted-foreground">A verified company is required before your vehicles can go public.</p>
-              </div>
-              <Link to="/mobility/register-company"><Button>Register company</Button></Link>
-            </CardContent>
-          </Card>
+        {!providers.isLoading && !privateOwner.isLoading && !primaryProvider && (
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="border-primary/40 bg-primary/5">
+              <CardContent className="space-y-2 p-5">
+                <div className="font-medium">I run a rental company</div>
+                <p className="text-sm text-muted-foreground">Register your car-hire business, get verified and manage a fleet.</p>
+                <Link to="/mobility/register-company"><Button size="sm">Register company</Button></Link>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="space-y-2 p-5">
+                <div className="font-medium">I own a private car</div>
+                <p className="text-sm text-muted-foreground">Partner with a verified rental company on HostPulse and earn from your vehicle — no company registration needed.</p>
+                <Link to="/mobility/owner"><Button size="sm" variant="outline">List my vehicle with a company</Button></Link>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {orgId && primaryProvider && (
