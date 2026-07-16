@@ -791,6 +791,9 @@ export const addIcalSource = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => addSchema.parse(d))
   .handler(async ({ context, data }) => {
+    const { isPublicHttpUrl } = await import("@/lib/safe-fetch");
+    const check = isPublicHttpUrl(data.url);
+    if (!check.ok) throw new Error(`URL rejected: ${check.reason}`);
     const { data: row, error } = await context.supabase
       .from("ical_import_sources")
       .insert({ org_id: data.orgId, unit_id: data.unitId, name: data.name, url: data.url })
