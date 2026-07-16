@@ -548,7 +548,11 @@ export const searchMobilityVehicles = createServerFn({ method: "POST" })
     if (data.isWedding) q = q.eq("is_wedding", true);
     if (data.isSafari) q = q.eq("is_safari", true);
     if (data.instantBook) q = q.eq("instant_book", true);
-    if (data.query) q = q.or(`make.ilike.%${data.query}%,model.ilike.%${data.query}%,description.ilike.%${data.query}%`);
+    if (data.query) {
+      const { sanitizePostgrestTerm } = await import("@/lib/safe-fetch");
+      const clean = sanitizePostgrestTerm(data.query);
+      if (clean) q = q.or(`make.ilike.%${clean}%,model.ilike.%${clean}%,description.ilike.%${clean}%`);
+    }
     let { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     let vehicles = rows ?? [];
