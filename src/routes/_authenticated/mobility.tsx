@@ -21,7 +21,7 @@ import {
 import { getMyPrivateOwner } from "@/lib/mobility-ext.functions";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 
-export const Route = createFileRoute("/_authenticated/mobility/")({
+export const Route = createFileRoute("/_authenticated/mobility")({
   component: MobilityDashboard,
 });
 
