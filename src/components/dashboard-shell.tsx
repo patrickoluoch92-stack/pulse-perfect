@@ -253,7 +253,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           </span>
           <span className="font-display text-base font-semibold tracking-tight">HostPulse</span>
         </Link>
-        <div className="w-9" />
+        <NotificationBell />
       </div>
 
       {/* Desktop sidebar */}
