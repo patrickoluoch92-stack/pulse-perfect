@@ -71,13 +71,13 @@ function MobilityHub() {
             </Link>
             <Link to="/mobility/owner" className="group rounded-xl border bg-card p-6 transition hover:border-primary hover:shadow-md">
               <div className="flex items-center gap-2 text-lg font-semibold">
-                <Car className="h-5 w-5 text-primary" /> Submit your private vehicle
+                <Car className="h-5 w-5 text-primary" /> Earn money from your vehicle
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
-                Own a car but not a company? Submit your vehicle to a verified rental company and earn on every booking.
+                Partner with a verified HostPulse rental company. You keep ownership — they manage bookings, customers and pricing while you earn.
               </p>
               <div className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                Submit vehicle <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                Explore partnerships <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
               </div>
             </Link>
           </div>
