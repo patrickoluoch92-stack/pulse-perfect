@@ -187,32 +187,50 @@ function SubmissionsQueue() {
                         </Badge>
                       </div>
                       {s.status === "pending" ? (
-                        <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+                        <div className="mt-3 space-y-2">
                           <Textarea
-                            placeholder="Optional note to the owner…"
+                            placeholder="Note to owner (used for approval/rejection, or as the info request message)…"
                             rows={2}
                             value={reasons[s.id] ?? ""}
                             onChange={(e) => setReasons({ ...reasons, [s.id]: e.target.value })}
                           />
-                          <Button
-                            size="sm"
-                            onClick={() => decideMut.mutate({ id: s.id, decision: "approved", reason: reasons[s.id] })}
-                            disabled={decideMut.isPending}
-                          >
-                            <CheckCircle2 className="h-4 w-4 mr-1" /> Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => decideMut.mutate({ id: s.id, decision: "rejected", reason: reasons[s.id] })}
-                            disabled={decideMut.isPending}
-                          >
-                            <XCircle className="h-4 w-4 mr-1" /> Reject
-                          </Button>
+                          <div className="flex flex-wrap gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => decideMut.mutate({ id: s.id, decision: "approved", reason: reasons[s.id] })}
+                              disabled={decideMut.isPending}
+                            >
+                              <CheckCircle2 className="h-4 w-4 mr-1" /> Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => decideMut.mutate({ id: s.id, decision: "rejected", reason: reasons[s.id] })}
+                              disabled={decideMut.isPending}
+                            >
+                              <XCircle className="h-4 w-4 mr-1" /> Reject
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => {
+                                const msg = (reasons[s.id] ?? "").trim();
+                                if (msg.length < 3) {
+                                  toast.error("Type the information you need from the owner first");
+                                  return;
+                                }
+                                infoMut.mutate({ id: s.id, message: msg });
+                              }}
+                              disabled={infoMut.isPending}
+                            >
+                              <MessageCircleQuestion className="h-4 w-4 mr-1" /> Request info
+                            </Button>
+                          </div>
                         </div>
                       ) : s.decision_reason ? (
                         <p className="mt-2 text-xs text-muted-foreground">Note: {s.decision_reason}</p>
                       ) : null}
+
                     </div>
                   );
                 })}
