@@ -25,6 +25,7 @@ function SubmissionsQueue() {
   const fetchProviders = useServerFn(listMyMobilityProviders);
   const fetchSubs = useServerFn(listProviderSubmissions);
   const decide = useServerFn(decideSubmission);
+  const requestInfo = useServerFn(requestSubmissionInfo);
   const updatePolicy = useServerFn(updatePrivateVehiclePolicy);
 
   const providers = useQuery({ queryKey: ["mob-providers"], queryFn: () => fetchProviders() });
