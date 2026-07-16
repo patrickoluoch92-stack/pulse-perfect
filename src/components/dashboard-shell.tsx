@@ -10,6 +10,7 @@ import { getWorkspaceContext } from "@/lib/workspace.functions";
 import { planAllows, type Plan } from "@/lib/plans";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "@/components/notification-bell";
 
 import { usePermissions, type Permission } from "@/hooks/use-permissions";
 
@@ -230,6 +231,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{data?.profile?.full_name ?? "—"}</p>
           </div>
+          <NotificationBell />
           <Button variant="ghost" size="icon" onClick={signOut} aria-label="Sign out">
             <LogOut className="h-4 w-4" />
           </Button>
@@ -251,7 +253,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           </span>
           <span className="font-display text-base font-semibold tracking-tight">HostPulse</span>
         </Link>
-        <div className="w-9" />
+        <NotificationBell />
       </div>
 
       {/* Desktop sidebar */}

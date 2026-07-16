@@ -181,8 +181,25 @@ export const submitVehicleToProvider = createServerFn({ method: "POST" })
       .select()
       .single();
     if (error) throw new Error(error.message);
+
+    // Notify company org members of the new application (best-effort)
+    try {
+      const { notifyOrgMembers } = await import("./notifications.server");
+      const snap = data.vehicleSnapshot;
+      await notifyOrgMembers(prov.org_id, {
+        type: "mobility_submission_new",
+        title: "New vehicle partnership application",
+        body: `${snap.make} ${snap.model} ${snap.year} submitted for review.`,
+        linkUrl: "/mobility/submissions",
+        data: { submissionId: sub.id, providerId: prov.id },
+      });
+    } catch (err) {
+      console.warn("[mobility] notify org members failed", err);
+    }
+
     return sub;
   });
+
 
 export const listMySubmissions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -298,8 +315,90 @@ export const decideSubmission = createServerFn({ method: "POST" })
       })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
+
+    // Notify the private owner
+    try {
+      const { notify } = await import("./notifications.server");
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: owner } = await supabaseAdmin
+        .from("mobility_private_owners")
+        .select("user_id, email")
+        .eq("id", sub.private_owner_id)
+        .maybeSingle();
+      if (owner?.user_id) {
+        const snap = sub.vehicle_snapshot ?? {};
+        const approved = data.decision === "approved";
+        await notify({
+          userId: owner.user_id,
+          email: owner.email ?? null,
+          type: approved ? "mobility_submission_approved" : "mobility_submission_rejected",
+          title: approved
+            ? "Your vehicle application was approved 🎉"
+            : "Your vehicle application was not approved",
+          body: `${snap.make ?? ""} ${snap.model ?? ""} ${snap.year ?? ""}${data.reason ? `\n\nNote from company: ${data.reason}` : ""}`.trim(),
+          linkUrl: "/mobility/owner",
+          data: { submissionId: sub.id, decision: data.decision },
+        });
+      }
+    } catch (err) {
+      console.warn("[mobility] notify owner failed", err);
+    }
+
     return { ok: true, approvedVehicleId };
   });
+
+// Request additional information from the private owner
+export const requestSubmissionInfo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      id: z.string().uuid(),
+      message: z.string().min(3).max(2000),
+    }).parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    const sb = context.supabase as SB;
+    const { data: sub, error: sErr } = await sb
+      .from("mobility_vehicle_submissions")
+      .select("id, private_owner_id, vehicle_snapshot, status")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (sErr) throw new Error(sErr.message);
+    if (!sub) throw new Error("Submission not found");
+
+    // Persist the info request as decision_reason note (keeps status pending)
+    await sb
+      .from("mobility_vehicle_submissions")
+      .update({ decision_reason: data.message })
+      .eq("id", data.id);
+
+    try {
+      const { notify } = await import("./notifications.server");
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: owner } = await supabaseAdmin
+        .from("mobility_private_owners")
+        .select("user_id, email")
+        .eq("id", sub.private_owner_id)
+        .maybeSingle();
+      if (owner?.user_id) {
+        const snap = sub.vehicle_snapshot ?? {};
+        await notify({
+          userId: owner.user_id,
+          email: owner.email ?? null,
+          type: "mobility_submission_info_requested",
+          title: "More information needed on your vehicle application",
+          body: `${snap.make ?? ""} ${snap.model ?? ""} — ${data.message}`,
+          linkUrl: "/mobility/owner",
+          data: { submissionId: sub.id },
+        });
+      }
+    } catch (err) {
+      console.warn("[mobility] notify info request failed", err);
+    }
+
+    return { ok: true };
+  });
+
 
 // ---------------------------------------------------------------------------
 // VEHICLE DOCUMENTS
