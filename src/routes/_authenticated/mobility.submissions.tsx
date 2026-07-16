@@ -51,6 +51,15 @@ function SubmissionsQueue() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const infoMut = useMutation({
+    mutationFn: (v: { id: string; message: string }) => requestInfo({ data: v }),
+    onSuccess: () => {
+      toast.success("Info request sent to owner");
+      qc.invalidateQueries({ queryKey: ["mob-provider-subs"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const policyMut = useMutation({
     mutationFn: (v: { acceptsPrivateVehicles: boolean; commissionPct?: number; qualityMin?: number }) =>
       updatePolicy({ data: { providerId: providerId!, ...v } }),
