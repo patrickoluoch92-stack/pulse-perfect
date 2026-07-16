@@ -231,6 +231,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium">{data?.profile?.full_name ?? "—"}</p>
           </div>
+          <NotificationBell />
           <Button variant="ghost" size="icon" onClick={signOut} aria-label="Sign out">
             <LogOut className="h-4 w-4" />
           </Button>
