@@ -10,6 +10,7 @@ import { getWorkspaceContext } from "@/lib/workspace.functions";
 import { planAllows, type Plan } from "@/lib/plans";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "@/components/notification-bell";
 
 import { usePermissions, type Permission } from "@/hooks/use-permissions";
 
