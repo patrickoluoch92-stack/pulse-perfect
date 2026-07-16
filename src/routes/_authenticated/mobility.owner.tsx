@@ -174,9 +174,28 @@ function PartnershipLanding({ onStart }: { onStart: () => void }) {
 }
 
 // ============================================================================
-// APPLICATION — company picker → welcome → guided application → submit
+// APPLICATION — 8-step Vehicle Partnership Application
+// 1 Choose company · 2 Location · 3 About You · 4 Vehicle · 5 Condition
+// 6 Photos & Documents · 7 Partnership Preferences · 8 Review & Submit
 // ============================================================================
-type ApplyStep = "pick" | "welcome" | "about" | "vehicle" | "photos" | "docs" | "review" | "done";
+type ApplyStep =
+  | "pick" | "welcome"
+  | "location" | "about" | "vehicle" | "condition" | "media" | "prefs"
+  | "review" | "done";
+
+const STEP_ORDER: ApplyStep[] = ["location", "about", "vehicle", "condition", "media", "prefs", "review"];
+const STEP_LABELS: Record<ApplyStep, string> = {
+  pick: "Choose company",
+  welcome: "Welcome",
+  location: "Vehicle location",
+  about: "About you",
+  vehicle: "Vehicle info",
+  condition: "Condition",
+  media: "Photos & documents",
+  prefs: "Preferences",
+  review: "Review & submit",
+  done: "Submitted",
+};
 
 function PartnershipApplication({
   existingOwner, onCancel, onSubmitted,
@@ -195,6 +214,15 @@ function PartnershipApplication({
   const [county, setCounty] = useState("");
   const [selected, setSelected] = useState<any | null>(null);
 
+  // Vehicle location (Step 2)
+  const [loc, setLoc] = useState({
+    countyCode: "",
+    town: "",
+    pickupLocation: "",
+    branchId: "",
+  });
+
+  // About you (Step 3)
   const [p, setP] = useState({
     legalName: existingOwner?.legal_name ?? "",
     idNumber: existingOwner?.id_number ?? "",
@@ -208,17 +236,46 @@ function PartnershipApplication({
     kraPin: existingOwner?.kra_pin ?? "",
   });
 
+  // Vehicle info (Step 4)
   const [v, setV] = useState({
+    registrationNo: "",
     make: "", model: "", year: new Date().getFullYear(),
-    variant: "", bodyType: "", color: "", registrationNo: "",
+    variant: "", bodyType: "", color: "",
     transmission: "automatic", fuelType: "petrol",
     seats: 5, mileageKm: 0,
-    description: "", proposedDailyRateKes: 0,
     features: [] as string[],
+    description: "",
+  });
+
+  // Condition (Step 5)
+  const [cond, setCond] = useState({
+    overallCondition: "good" as "excellent" | "good" | "fair",
+    insured: true,
+    roadworthy: true,
+    availableImmediately: true,
+  });
+
+  // Media (Step 6)
+  const [m, setM] = useState({
     coverPhoto: "",
-    images: "" as string,
+    rearPhoto: "",
+    sidePhotos: "",
+    interiorPhotos: "",
+    additionalImages: "",
     videoUrl: "",
-    docLogbook: "", docInsurance: "", docInspection: "", docService: "",
+    docLogbook: "",
+    docInsurance: "",
+    docNationalId: "",
+    docInspection: "",
+  });
+
+  // Preferences (Step 7)
+  const [prefs, setPrefs] = useState({
+    serviceType: "both" as "self_drive" | "chauffeur" | "both",
+    availability: "full_time" as "full_time" | "weekends" | "seasonal" | "specific_dates",
+    availabilityDates: "",
+    minRentalDays: 1,
+    proposedDailyRateKes: 0,
   });
 
   const filtered = useMemo(() => {
@@ -235,16 +292,22 @@ function PartnershipApplication({
     features: prev.features.includes(f) ? prev.features.filter((x) => x !== f) : [...prev.features, f],
   }));
 
+  const parseUrls = (s: string) => s.split(/[\n,]/).map((x) => x.trim()).filter((x) => /^https?:\/\//i.test(x));
+
   const submitMut = useMutation({
     mutationFn: async () => {
       if (!selected) throw new Error("Choose a rental company first");
       await saveOwner({ data: p });
-      const images = v.images.split(/[\n,]/).map((s) => s.trim()).filter((s) => /^https?:\/\//i.test(s)).slice(0, 20);
+      const rear = parseUrls(m.rearPhoto);
+      const sides = parseUrls(m.sidePhotos);
+      const interior = parseUrls(m.interiorPhotos);
+      const extra = parseUrls(m.additionalImages);
+      const images = [...rear, ...sides, ...interior, ...extra].slice(0, 20);
       const documents = {
-        logbookUrl: v.docLogbook || undefined,
-        insuranceUrl: v.docInsurance || undefined,
-        inspectionUrl: v.docInspection || undefined,
-        serviceHistoryUrl: v.docService || undefined,
+        logbookUrl: m.docLogbook || undefined,
+        insuranceUrl: m.docInsurance || undefined,
+        nationalIdUrl: m.docNationalId || undefined,
+        inspectionUrl: m.docInspection || undefined,
       };
       return submitVehicle({
         data: {
@@ -261,18 +324,43 @@ function PartnershipApplication({
             mileageKm: Number(v.mileageKm) || undefined,
             description: v.description || undefined,
             features: v.features.length ? v.features : undefined,
-            coverPhoto: v.coverPhoto || undefined,
+            coverPhoto: m.coverPhoto || undefined,
             images: images.length ? images : undefined,
-            videoUrl: v.videoUrl || undefined,
+            videoUrl: m.videoUrl || undefined,
             documents: Object.values(documents).some(Boolean) ? documents : undefined,
+            // Extended partnership metadata (persisted in vehicle_snapshot JSONB)
+            location: {
+              countyCode: loc.countyCode || undefined,
+              town: loc.town || undefined,
+              pickupLocation: loc.pickupLocation || undefined,
+              branchId: loc.branchId || undefined,
+            },
+            condition: cond,
+            partnership: {
+              serviceType: prefs.serviceType,
+              availability: prefs.availability,
+              availabilityDates: prefs.availabilityDates || undefined,
+              minRentalDays: Number(prefs.minRentalDays) || 1,
+            },
           },
-          proposedDailyRateKes: Number(v.proposedDailyRateKes) || undefined,
+          proposedDailyRateKes: Number(prefs.proposedDailyRateKes) || undefined,
         },
       });
     },
     onSuccess: () => setStep("done"),
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const goto = (s: ApplyStep) => setStep(s);
+  const next = (from: ApplyStep) => {
+    const idx = STEP_ORDER.indexOf(from);
+    if (idx >= 0 && idx < STEP_ORDER.length - 1) goto(STEP_ORDER[idx + 1]);
+  };
+  const back = (from: ApplyStep) => {
+    const idx = STEP_ORDER.indexOf(from);
+    if (idx > 0) goto(STEP_ORDER[idx - 1]);
+    else if (from === "location") goto("welcome");
+  };
 
   return (
     <div className="mx-auto max-w-4xl space-y-4">
@@ -294,8 +382,8 @@ function PartnershipApplication({
               <Building2 className="h-5 w-5" /> Choose a rental company to partner with
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              These verified rental companies are currently accepting private vehicles. Pick the one you'd
-              like to professionally manage your vehicle.
+              These verified HostPulse rental companies are currently accepting private vehicles.
+              You are applying to have your vehicle professionally managed by their fleet team.
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -329,36 +417,71 @@ function PartnershipApplication({
               {selected.logo_url ? <img src={selected.logo_url} alt="" className="h-12 w-12 rounded object-cover" /> : <div className="h-12 w-12 rounded bg-muted" />}
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  Welcome to {selected.name} <ShieldCheck className="h-4 w-4 text-primary" />
+                  Partner with {selected.name} <ShieldCheck className="h-4 w-4 text-primary" />
                 </CardTitle>
                 <p className="text-xs text-muted-foreground">
                   {selected.town ?? "Kenya"}{selected.rating_avg ? ` · ★ ${Number(selected.rating_avg).toFixed(1)}` : ""}
-                  {` · ${selected.private_owner_commission_pct}% commission on rentals`}
+                  {selected.vehicle_count != null ? ` · ${selected.vehicle_count} vehicles under management` : ""}
+                  {` · ${selected.private_owner_commission_pct}% company commission`}
                 </p>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <p>
-              Thank you for choosing to partner with <strong>{selected.name}</strong>. You are applying to
-              have your vehicle professionally managed by their team. If approved, your vehicle will become
-              part of their rental fleet while you retain ownership.
+              You're starting a <strong>Vehicle Partnership Application</strong> with {selected.name}. You
+              retain full ownership of your vehicle — {selected.name}'s fleet team will handle bookings,
+              customer communication, pricing and day-to-day operations once approved.
             </p>
             {selected.bio && <p className="text-muted-foreground">{selected.bio}</p>}
             <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
-              The application takes about 5 minutes. You'll share personal details, vehicle information,
-              photos and required documents. {selected.name}'s fleet team will review your submission and
-              may schedule an inspection before approving the partnership.
+              This is not a business registration. You're joining an established fleet — much like
+              partnering with Avis or Hertz. The application takes about 5–8 minutes.
             </div>
-            <ApplyStepper step={step} />
+            <ApplyStepper step={"location"} />
             <div className="flex justify-between">
               <Button variant="ghost" onClick={() => setStep("pick")}>
                 <ArrowLeft className="mr-1 h-4 w-4" /> Choose a different company
               </Button>
-              <Button onClick={() => setStep("about")}>
-                Start application <ArrowRight className="ml-1 h-4 w-4" />
+              <Button onClick={() => setStep("location")}>
+                Start partnership application <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === "location" && selected && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Vehicle location</CardTitle>
+            <p className="text-xs text-muted-foreground">Where is your vehicle based? {selected.name} uses this to plan pickups and coverage.</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <ApplyStepper step={step} />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Fld label="County *" value={loc.countyCode} onChange={(x) => setLoc({ ...loc, countyCode: x })} placeholder="e.g. 47" />
+              <Fld label="Town / City *" value={loc.town} onChange={(x) => setLoc({ ...loc, town: x })} placeholder="Nairobi" />
+              <div className="sm:col-span-2">
+                <Fld label="Vehicle pickup location (optional)" value={loc.pickupLocation} onChange={(x) => setLoc({ ...loc, pickupLocation: x })} placeholder="Estate / landmark / street" />
+              </div>
+              {(selected.branches ?? []).length > 0 && (
+                <div className="sm:col-span-2">
+                  <Label>Preferred company branch (optional)</Label>
+                  <select
+                    className="mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm"
+                    value={loc.branchId}
+                    onChange={(e) => setLoc({ ...loc, branchId: e.target.value })}
+                  >
+                    <option value="">No preference</option>
+                    {(selected.branches as any[]).map((b) => (
+                      <option key={b.id} value={b.id}>{b.name}{b.town ? ` — ${b.town}` : ""}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+            <NavRow onBack={() => back(step)} onNext={() => next(step)} nextDisabled={!loc.countyCode || !loc.town} />
           </CardContent>
         </Card>
       )}
@@ -373,18 +496,11 @@ function PartnershipApplication({
             <ApplyStepper step={step} />
             <div className="grid gap-3 sm:grid-cols-2">
               <Fld label="Full name *" value={p.legalName} onChange={(x) => setP({ ...p, legalName: x })} />
-              <Fld label="National ID / Passport" value={p.idNumber} onChange={(x) => setP({ ...p, idNumber: x })} />
               <Fld label="Phone number *" value={p.phone} onChange={(x) => setP({ ...p, phone: x })} placeholder="07XXXXXXXX" />
-              <Fld label="Email address" value={p.email} onChange={(x) => setP({ ...p, email: x })} />
-              <Fld label="County" value={p.countyCode} onChange={(x) => setP({ ...p, countyCode: x })} placeholder="e.g. 47" />
-              <Fld label="Town" value={p.town} onChange={(x) => setP({ ...p, town: x })} />
-              <div className="sm:col-span-2">
-                <Label>Residential address (optional)</Label>
-                <Input value={p.address} onChange={(e) => setP({ ...p, address: e.target.value })} />
-              </div>
-              <Fld label="Emergency contact (optional)" value={p.emergencyContact} onChange={(x) => setP({ ...p, emergencyContact: x })} placeholder="Name & phone" />
+              <Fld label="Email address *" value={p.email} onChange={(x) => setP({ ...p, email: x })} />
+              <Fld label="National ID / Passport *" value={p.idNumber} onChange={(x) => setP({ ...p, idNumber: x })} />
               <div>
-                <Label>Preferred payment method</Label>
+                <Label>Preferred payment method *</Label>
                 <select
                   className="mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm"
                   value={p.preferredPaymentMethod}
@@ -395,9 +511,9 @@ function PartnershipApplication({
                   <option value="both">Either M-Pesa or bank</option>
                 </select>
               </div>
-              <Fld label="KRA PIN (kept private)" value={p.kraPin} onChange={(x) => setP({ ...p, kraPin: x })} />
+              <Fld label="Emergency contact (optional)" value={p.emergencyContact} onChange={(x) => setP({ ...p, emergencyContact: x })} placeholder="Name & phone" />
             </div>
-            <NavRow onBack={() => setStep("welcome")} onNext={() => setStep("vehicle")} nextDisabled={!p.legalName || !p.phone} />
+            <NavRow onBack={() => back(step)} onNext={() => next(step)} nextDisabled={!p.legalName || !p.phone || !p.email || !p.idNumber} />
           </CardContent>
         </Card>
       )}
@@ -405,18 +521,18 @@ function PartnershipApplication({
       {step === "vehicle" && selected && (
         <Card>
           <CardHeader>
-            <CardTitle>About your vehicle</CardTitle>
-            <p className="text-xs text-muted-foreground">Details {selected.name} needs to evaluate the partnership.</p>
+            <CardTitle>Vehicle information</CardTitle>
+            <p className="text-xs text-muted-foreground">Essential details about the vehicle you're partnering.</p>
           </CardHeader>
           <CardContent className="space-y-4">
             <ApplyStepper step={step} />
             <div className="grid gap-3 sm:grid-cols-3">
+              <Fld label="Registration number *" value={v.registrationNo} onChange={(x) => setV({ ...v, registrationNo: x })} placeholder="KDA 123A" />
               <Fld label="Make *" value={v.make} onChange={(x) => setV({ ...v, make: x })} placeholder="Toyota" />
               <Fld label="Model *" value={v.model} onChange={(x) => setV({ ...v, model: x })} placeholder="Prado" />
               <Fld label="Year *" value={String(v.year)} onChange={(x) => setV({ ...v, year: Number(x) })} type="number" />
-              <Fld label="Registration number" value={v.registrationNo} onChange={(x) => setV({ ...v, registrationNo: x })} placeholder="KDA 123A" />
-              <Fld label="Colour" value={v.color} onChange={(x) => setV({ ...v, color: x })} />
               <Fld label="Body type" value={v.bodyType} onChange={(x) => setV({ ...v, bodyType: x })} placeholder="SUV, sedan…" />
+              <Fld label="Colour" value={v.color} onChange={(x) => setV({ ...v, color: x })} />
               <div>
                 <Label>Transmission</Label>
                 <select className="mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm"
@@ -437,7 +553,6 @@ function PartnershipApplication({
               </div>
               <Fld label="Seating capacity" type="number" value={String(v.seats)} onChange={(x) => setV({ ...v, seats: Number(x) })} />
               <Fld label="Mileage (km)" type="number" value={String(v.mileageKm)} onChange={(x) => setV({ ...v, mileageKm: Number(x) })} />
-              <Fld label="Suggested daily rate (KES)" type="number" value={String(v.proposedDailyRateKes)} onChange={(x) => setV({ ...v, proposedDailyRateKes: Number(x) })} />
             </div>
             <div className="space-y-2">
               <div className="text-sm font-semibold">Features</div>
@@ -457,48 +572,139 @@ function PartnershipApplication({
               <Label>Notes for {selected.name} (optional)</Label>
               <Textarea rows={3} value={v.description} onChange={(e) => setV({ ...v, description: e.target.value })} placeholder="Anything the fleet team should know about your vehicle." />
             </div>
-            <NavRow onBack={() => setStep("about")} onNext={() => setStep("photos")} nextDisabled={!v.make || !v.model} />
+            <NavRow onBack={() => back(step)} onNext={() => next(step)} nextDisabled={!v.make || !v.model || !v.registrationNo} />
           </CardContent>
         </Card>
       )}
 
-      {step === "photos" && selected && (
+      {step === "condition" && selected && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Camera className="h-5 w-5" /> Vehicle photos</CardTitle>
-            <p className="text-xs text-muted-foreground">Clear exterior and interior photos help {selected.name} approve your partnership faster.</p>
+            <CardTitle>Vehicle condition</CardTitle>
+            <p className="text-xs text-muted-foreground">Help {selected.name} understand the state of your vehicle.</p>
           </CardHeader>
           <CardContent className="space-y-4">
             <ApplyStepper step={step} />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Fld label="Cover photo URL" value={v.coverPhoto} onChange={(x) => setV({ ...v, coverPhoto: x })} placeholder="https://…" />
-              <Fld label="Optional video URL" value={v.videoUrl} onChange={(x) => setV({ ...v, videoUrl: x })} placeholder="https://…" />
-            </div>
             <div>
-              <Label>Additional photo URLs (one per line or comma-separated)</Label>
-              <Textarea rows={4} value={v.images} onChange={(e) => setV({ ...v, images: e.target.value })} placeholder={"https://exterior-1.jpg\nhttps://interior-1.jpg"} />
-              <p className="mt-1 text-xs text-muted-foreground">Include exterior, interior and dashboard photos. Max 20 URLs.</p>
+              <Label>Overall condition</Label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(["excellent", "good", "fair"] as const).map((c) => (
+                  <button key={c} type="button" onClick={() => setCond({ ...cond, overallCondition: c })}
+                    className={`rounded-full border px-4 py-1.5 text-sm capitalize transition ${cond.overallCondition === c ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted"}`}>
+                    {c}
+                  </button>
+                ))}
+              </div>
             </div>
-            <NavRow onBack={() => setStep("vehicle")} onNext={() => setStep("docs")} />
+            <YesNoRow label="Is the vehicle insured?" value={cond.insured} onChange={(b) => setCond({ ...cond, insured: b })} />
+            <YesNoRow label="Is it roadworthy?" value={cond.roadworthy} onChange={(b) => setCond({ ...cond, roadworthy: b })} />
+            <YesNoRow label="Available immediately?" value={cond.availableImmediately} onChange={(b) => setCond({ ...cond, availableImmediately: b })} />
+            <NavRow onBack={() => back(step)} onNext={() => next(step)} />
           </CardContent>
         </Card>
       )}
 
-      {step === "docs" && selected && (
+      {step === "media" && selected && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><FileText className="h-5 w-5" /> Required documents</CardTitle>
-            <p className="text-xs text-muted-foreground">{selected.name} needs these to verify ownership and roadworthiness.</p>
+            <CardTitle className="flex items-center gap-2"><Camera className="h-5 w-5" /> Photos & documents</CardTitle>
+            <p className="text-xs text-muted-foreground">Clear photos and valid documents speed up {selected.name}'s approval.</p>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
             <ApplyStepper step={step} />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Fld label="Vehicle logbook URL" value={v.docLogbook} onChange={(x) => setV({ ...v, docLogbook: x })} />
-              <Fld label="Insurance certificate URL" value={v.docInsurance} onChange={(x) => setV({ ...v, docInsurance: x })} />
-              <Fld label="Inspection certificate URL" value={v.docInspection} onChange={(x) => setV({ ...v, docInspection: x })} />
-              <Fld label="Service history URL (optional)" value={v.docService} onChange={(x) => setV({ ...v, docService: x })} />
+
+            <div className="space-y-3">
+              <div className="text-sm font-semibold">Vehicle photos</div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Fld label="Front photo (cover) *" value={m.coverPhoto} onChange={(x) => setM({ ...m, coverPhoto: x })} placeholder="https://…" />
+                <Fld label="Rear photo" value={m.rearPhoto} onChange={(x) => setM({ ...m, rearPhoto: x })} placeholder="https://…" />
+              </div>
+              <div>
+                <Label>Side photos (one URL per line)</Label>
+                <Textarea rows={2} value={m.sidePhotos} onChange={(e) => setM({ ...m, sidePhotos: e.target.value })} placeholder={"https://left-side.jpg\nhttps://right-side.jpg"} />
+              </div>
+              <div>
+                <Label>Interior photos (one URL per line)</Label>
+                <Textarea rows={2} value={m.interiorPhotos} onChange={(e) => setM({ ...m, interiorPhotos: e.target.value })} placeholder={"https://interior-front.jpg\nhttps://interior-rear.jpg"} />
+              </div>
+              <div>
+                <Label>Additional photos (optional)</Label>
+                <Textarea rows={2} value={m.additionalImages} onChange={(e) => setM({ ...m, additionalImages: e.target.value })} placeholder="Any other angles, dashboard, boot…" />
+                <p className="mt-1 text-xs text-muted-foreground">Max 20 photos total across all sections.</p>
+              </div>
+              <Fld label="Video walk-around (optional)" value={m.videoUrl} onChange={(x) => setM({ ...m, videoUrl: x })} placeholder="https://…" />
             </div>
-            <NavRow onBack={() => setStep("photos")} onNext={() => setStep("review")} />
+
+            <div className="space-y-3">
+              <div className="text-sm font-semibold">Documents</div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Fld label="Logbook / proof of ownership *" value={m.docLogbook} onChange={(x) => setM({ ...m, docLogbook: x })} placeholder="https://…" />
+                <Fld label="Insurance certificate *" value={m.docInsurance} onChange={(x) => setM({ ...m, docInsurance: x })} placeholder="https://…" />
+                <Fld label="National ID *" value={m.docNationalId} onChange={(x) => setM({ ...m, docNationalId: x })} placeholder="https://…" />
+                <Fld label="Inspection certificate (optional)" value={m.docInspection} onChange={(x) => setM({ ...m, docInspection: x })} placeholder="https://…" />
+              </div>
+            </div>
+
+            <NavRow onBack={() => back(step)} onNext={() => next(step)}
+              nextDisabled={!m.coverPhoto || !m.docLogbook || !m.docInsurance || !m.docNationalId} />
+          </CardContent>
+        </Card>
+      )}
+
+      {step === "prefs" && selected && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Partnership preferences</CardTitle>
+            <p className="text-xs text-muted-foreground">Tell {selected.name} how you'd like your vehicle managed.</p>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <ApplyStepper step={step} />
+
+            <div>
+              <Label>Rental service type</Label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {[
+                  { id: "self_drive", label: "Self-drive" },
+                  { id: "chauffeur", label: "Chauffeur service" },
+                  { id: "both", label: "Both" },
+                ].map((o) => (
+                  <button key={o.id} type="button" onClick={() => setPrefs({ ...prefs, serviceType: o.id as any })}
+                    className={`rounded-full border px-4 py-1.5 text-sm transition ${prefs.serviceType === o.id ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted"}`}>
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label>Availability</Label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {[
+                  { id: "full_time", label: "Full-time" },
+                  { id: "weekends", label: "Weekends only" },
+                  { id: "seasonal", label: "Seasonal" },
+                  { id: "specific_dates", label: "Specific dates" },
+                ].map((o) => (
+                  <button key={o.id} type="button" onClick={() => setPrefs({ ...prefs, availability: o.id as any })}
+                    className={`rounded-full border px-4 py-1.5 text-sm transition ${prefs.availability === o.id ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted"}`}>
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+              {prefs.availability === "specific_dates" && (
+                <div className="mt-3">
+                  <Label>Available dates / notes</Label>
+                  <Textarea rows={2} value={prefs.availabilityDates} onChange={(e) => setPrefs({ ...prefs, availabilityDates: e.target.value })} placeholder="e.g. Available 1 Dec – 31 Jan, then weekends" />
+                </div>
+              )}
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Fld label="Minimum rental period (days)" type="number" value={String(prefs.minRentalDays)} onChange={(x) => setPrefs({ ...prefs, minRentalDays: Number(x) })} />
+              <Fld label="Suggested daily rate (KES, optional)" type="number" value={String(prefs.proposedDailyRateKes)} onChange={(x) => setPrefs({ ...prefs, proposedDailyRateKes: Number(x) })} />
+            </div>
+
+            <NavRow onBack={() => back(step)} onNext={() => next(step)} />
           </CardContent>
         </Card>
       )}
@@ -513,41 +719,57 @@ function PartnershipApplication({
             <ApplyStepper step={step} />
             <SelectedCompanyBanner p={selected} onChange={() => setStep("pick")} />
             <div className="grid gap-3 sm:grid-cols-2">
+              <ReviewBlock title="Vehicle location">
+                <div>{loc.town || "—"}{loc.countyCode ? ` · County ${loc.countyCode}` : ""}</div>
+                {loc.pickupLocation && <div className="text-xs text-muted-foreground">Pickup: {loc.pickupLocation}</div>}
+              </ReviewBlock>
               <ReviewBlock title="Applicant">
                 <div>{p.legalName}</div>
-                <div className="text-xs text-muted-foreground">{p.phone} · {p.email || "no email"}</div>
-                <div className="text-xs text-muted-foreground">{p.town || "—"}{p.countyCode ? ` · County ${p.countyCode}` : ""}</div>
+                <div className="text-xs text-muted-foreground">{p.phone} · {p.email || "—"}</div>
+                <div className="text-xs text-muted-foreground">Payment: {p.preferredPaymentMethod}</div>
               </ReviewBlock>
               <ReviewBlock title="Vehicle">
                 <div>{v.make} {v.model} · {v.year}</div>
                 <div className="text-xs text-muted-foreground">
-                  {v.transmission} · {v.fuelType} · {v.seats} seats{v.color ? ` · ${v.color}` : ""}
-                  {v.registrationNo ? ` · ${v.registrationNo}` : ""}
+                  {v.registrationNo || "—"} · {v.transmission} · {v.fuelType} · {v.seats} seats
                 </div>
                 {v.features.length > 0 && <div className="text-xs text-muted-foreground">Features: {v.features.join(", ")}</div>}
               </ReviewBlock>
-              <ReviewBlock title="Media">
-                <div className="text-xs text-muted-foreground">
-                  {v.coverPhoto ? "Cover photo ✓" : "No cover photo"}
-                  {v.images ? " · additional photos ✓" : ""}
-                  {v.videoUrl ? " · video ✓" : ""}
+              <ReviewBlock title="Condition">
+                <div className="text-xs text-muted-foreground capitalize">
+                  {cond.overallCondition}{cond.insured ? " · insured" : ""}{cond.roadworthy ? " · roadworthy" : ""}
+                  {cond.availableImmediately ? " · available now" : ""}
                 </div>
               </ReviewBlock>
-              <ReviewBlock title="Documents">
+              <ReviewBlock title="Photos & documents">
                 <div className="text-xs text-muted-foreground">
-                  {[v.docLogbook && "logbook", v.docInsurance && "insurance", v.docInspection && "inspection", v.docService && "service history"].filter(Boolean).join(" · ") || "No documents attached"}
+                  {m.coverPhoto ? "Front ✓" : "Front ✗"}
+                  {m.rearPhoto ? " · rear ✓" : ""}
+                  {m.sidePhotos ? " · sides ✓" : ""}
+                  {m.interiorPhotos ? " · interior ✓" : ""}
                 </div>
+                <div className="text-xs text-muted-foreground">
+                  {[m.docLogbook && "logbook", m.docInsurance && "insurance", m.docNationalId && "national ID", m.docInspection && "inspection"].filter(Boolean).join(" · ") || "No documents"}
+                </div>
+              </ReviewBlock>
+              <ReviewBlock title="Partnership preferences">
+                <div className="text-xs text-muted-foreground capitalize">
+                  {prefs.serviceType.replace("_", "-")} · {prefs.availability.replace("_", " ")} · min {prefs.minRentalDays} day{prefs.minRentalDays === 1 ? "" : "s"}
+                </div>
+                {prefs.proposedDailyRateKes > 0 && (
+                  <div className="text-xs text-muted-foreground">Suggested rate: KES {prefs.proposedDailyRateKes.toLocaleString()}/day</div>
+                )}
               </ReviewBlock>
             </div>
             <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
-              On submission, your application status becomes <strong>Under review</strong>. Your vehicle
-              will only appear in public search after <strong>{selected.name}</strong> approves the
-              partnership. They will then manage bookings, customer communication and pricing on your behalf.
+              On submission, your vehicle status becomes <strong>Pending company approval</strong>. Your vehicle
+              will not appear publicly until <strong>{selected.name}</strong> approves the partnership. They will
+              then manage bookings, customer communication and pricing on your behalf.
             </div>
             <div className="flex justify-between">
-              <Button variant="ghost" onClick={() => setStep("docs")}><ArrowLeft className="mr-1 h-4 w-4" /> Back</Button>
+              <Button variant="ghost" onClick={() => back(step)}><ArrowLeft className="mr-1 h-4 w-4" /> Back</Button>
               <Button onClick={() => submitMut.mutate()} disabled={submitMut.isPending || !v.make || !v.model || !p.legalName || !p.phone}>
-                {submitMut.isPending ? "Submitting…" : (<><Handshake className="mr-1 h-4 w-4" /> Submit to {selected.name}</>)}
+                {submitMut.isPending ? "Submitting…" : (<><Handshake className="mr-1 h-4 w-4" /> Submit Partnership Application</>)}
               </Button>
             </div>
           </CardContent>
@@ -560,13 +782,13 @@ function PartnershipApplication({
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
               <CheckCircle2 className="h-8 w-8" />
             </div>
-            <h2 className="text-2xl font-semibold">Your partnership application has been submitted</h2>
+            <h2 className="text-2xl font-semibold">Partnership application submitted</h2>
             <p className="mx-auto max-w-xl text-sm text-muted-foreground">
               Your application has been sent to <strong className="text-foreground">{selected.name}</strong>.
-              Their fleet management team will review your vehicle and contact you if additional information
-              or an inspection is required.
+              Their fleet team will review your vehicle and contact you if additional information or an
+              inspection is required. Your vehicle status is now <strong>Pending company approval</strong>.
             </p>
-            <p className="text-xs text-muted-foreground">You can monitor your application status from your dashboard.</p>
+            <p className="text-xs text-muted-foreground">Track progress from My Fleet Partnerships.</p>
             <div className="flex justify-center gap-3 pt-2">
               <Button onClick={onSubmitted}>Go to My Fleet Partnerships</Button>
             </div>
@@ -578,28 +800,36 @@ function PartnershipApplication({
 }
 
 function CompanyCard({ p, onPartner }: { p: any; onPartner: () => void }) {
+  const counties: string[] = Array.isArray(p.service_counties) ? p.service_counties : [];
+  const categories: string[] = Array.isArray(p.service_categories) ? p.service_categories : [];
   return (
-    <div className="rounded-lg border bg-card p-4 transition hover:border-primary hover:shadow-sm">
+    <div className="flex h-full flex-col rounded-lg border bg-card p-4 transition hover:border-primary hover:shadow-sm">
       <div className="flex items-start gap-3">
         {p.logo_url ? <img src={p.logo_url} alt="" className="h-12 w-12 rounded object-cover" /> : <div className="h-12 w-12 rounded bg-muted" />}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1 font-semibold">
             <span className="truncate">{p.name}</span>
-            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-label="Verified" />
           </div>
           <div className="text-xs text-muted-foreground">
             {p.town ?? "Kenya"}{p.county_code ? ` · County ${p.county_code}` : ""}
-            {p.rating_avg ? ` · ★ ${Number(p.rating_avg).toFixed(1)}` : ""}
+            {p.rating_avg ? ` · ★ ${Number(p.rating_avg).toFixed(1)}${p.rating_count ? ` (${p.rating_count})` : ""}` : ""}
           </div>
           {p.bio && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{p.bio}</p>}
         </div>
       </div>
-      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+      <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs">
         <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-700">Accepting private vehicles</Badge>
+        {p.vehicle_count != null && <Badge variant="outline">{p.vehicle_count} vehicles</Badge>}
         <Badge variant="outline">{p.private_owner_commission_pct}% commission</Badge>
-        {p.vehicle_count != null && <Badge variant="outline">{p.vehicle_count} vehicles managed</Badge>}
       </div>
-      <div className="mt-4 flex items-center justify-between">
+      {(counties.length > 0 || categories.length > 0) && (
+        <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+          {counties.length > 0 && <div><span className="font-medium text-foreground">Serves:</span> {counties.slice(0, 4).join(", ")}{counties.length > 4 ? "…" : ""}</div>}
+          {categories.length > 0 && <div><span className="font-medium text-foreground">Categories:</span> {categories.slice(0, 3).map((c) => c.replace(/_/g, " ")).join(", ")}</div>}
+        </div>
+      )}
+      <div className="mt-auto flex items-center justify-between pt-4">
         {p.slug ? (
           <Link to="/mobility/company/$slug" params={{ slug: p.slug }} className="text-xs text-muted-foreground underline-offset-4 hover:underline">
             View company profile
@@ -629,26 +859,20 @@ function SelectedCompanyBanner({ p, onChange }: { p: any; onChange: () => void }
 }
 
 function ApplyStepper({ step }: { step: ApplyStep }) {
-  const steps: { id: ApplyStep; label: string }[] = [
-    { id: "about", label: "About you" },
-    { id: "vehicle", label: "Vehicle" },
-    { id: "photos", label: "Photos" },
-    { id: "docs", label: "Documents" },
-    { id: "review", label: "Review & submit" },
-  ];
-  const currentIndex = steps.findIndex((s) => s.id === step);
+  const steps = STEP_ORDER;
+  const currentIndex = steps.indexOf(step);
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs">
       {steps.map((s, i) => {
         const active = i === currentIndex;
         const done = i < currentIndex;
         return (
-          <div key={s.id} className="flex items-center gap-2">
+          <div key={s} className="flex items-center gap-2">
             <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full border text-[11px] font-medium
               ${done ? "bg-primary text-primary-foreground border-primary" : active ? "border-primary text-primary" : "border-muted-foreground/40 text-muted-foreground"}`}>
               {done ? "✓" : i + 1}
             </span>
-            <span className={active ? "text-foreground font-medium" : "text-muted-foreground"}>{s.label}</span>
+            <span className={active ? "text-foreground font-medium" : "text-muted-foreground"}>{STEP_LABELS[s]}</span>
             {i < steps.length - 1 && <span className="h-px w-4 bg-border" />}
           </div>
         );
@@ -671,6 +895,18 @@ function ReviewBlock({ title, children }: { title: string; children: React.React
     <div className="rounded-md border p-3 text-sm">
       <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</div>
       <div className="mt-1 space-y-0.5">{children}</div>
+    </div>
+  );
+}
+
+function YesNoRow({ label, value, onChange }: { label: string; value: boolean; onChange: (b: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between rounded-md border p-3">
+      <div className="text-sm">{label}</div>
+      <div className="flex gap-2">
+        <Button type="button" size="sm" variant={value ? "default" : "outline"} onClick={() => onChange(true)}>Yes</Button>
+        <Button type="button" size="sm" variant={!value ? "default" : "outline"} onClick={() => onChange(false)}>No</Button>
+      </div>
     </div>
   );
 }

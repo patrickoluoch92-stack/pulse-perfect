@@ -85,7 +85,27 @@ export const listAcceptingProviders = createServerFn({ method: "GET" })
       .eq("verification_status", "approved")
       .order("name");
     if (error) throw new Error(error.message);
-    return data ?? [];
+    const rows = data ?? [];
+    if (rows.length === 0) return rows;
+    // Enrich with fleet size + branches
+    const ids = rows.map((r: any) => r.id);
+    const [{ data: vehicles }, { data: branches }] = await Promise.all([
+      sb.from("mobility_vehicles").select("provider_id, status").in("provider_id", ids),
+      sb.from("mobility_branches").select("id, provider_id, name, town, county_code").in("provider_id", ids),
+    ]);
+    const counts: Record<string, number> = {};
+    for (const v of vehicles ?? []) {
+      if ((v as any).status === "active") counts[(v as any).provider_id] = (counts[(v as any).provider_id] ?? 0) + 1;
+    }
+    const brByProvider: Record<string, any[]> = {};
+    for (const b of branches ?? []) {
+      (brByProvider[(b as any).provider_id] ??= []).push(b);
+    }
+    return rows.map((r: any) => ({
+      ...r,
+      vehicle_count: counts[r.id] ?? 0,
+      branches: brByProvider[r.id] ?? [],
+    }));
   });
 
 
@@ -116,8 +136,9 @@ const submissionInput = z.object({
       insuranceUrl: z.string().url().optional(),
       inspectionUrl: z.string().url().optional(),
       serviceHistoryUrl: z.string().url().optional(),
+      nationalIdUrl: z.string().url().optional(),
     }).optional(),
-  }),
+  }).passthrough(),
   proposedDailyRateKes: z.number().positive().optional(),
 });
 
