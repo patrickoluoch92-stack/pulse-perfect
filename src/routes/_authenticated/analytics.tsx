@@ -2,10 +2,7 @@ import { authPageMeta } from "@/lib/route-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useState } from "react";
-import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
-} from "recharts";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 import { getAnalytics } from "@/lib/analytics.functions";
 import { planAllows, PLAN_LABEL, type Plan } from "@/lib/plans";
@@ -13,6 +10,15 @@ import { BedDouble, DollarSign, TrendingUp, CalendarCheck, Lock, Sparkles } from
 import { Button } from "@/components/ui/button";
 import { LoadingState, EmptyState } from "@/components/ui/states";
 import type { LucideIcon } from "lucide-react";
+
+// Recharts (~110 KB gz) is lazy-loaded so the analytics route's initial
+// chunk doesn't ship it until the charts actually mount.
+const RevenueAreaChart = lazy(() =>
+  import("@/components/lazy/analytics-charts").then((m) => ({ default: m.RevenueAreaChart })),
+);
+const PropertyBarChart = lazy(() =>
+  import("@/components/lazy/analytics-charts").then((m) => ({ default: m.PropertyBarChart })),
+);
 
 export const Route = createFileRoute("/_authenticated/analytics")({
   head: () => ({ meta: authPageMeta({ title: "Analytics", description: "Revenue, occupancy, and booking performance across your portfolio." }) }),
