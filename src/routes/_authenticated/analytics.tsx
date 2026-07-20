@@ -127,29 +127,9 @@ function AnalyticsPage() {
         <h2 className="font-display text-lg font-semibold">Revenue & occupied nights</h2>
         <div className="mt-4 h-72">
           {d && d.series.length > 0 ? (
-            <ResponsiveContainer>
-              <AreaChart data={d.series} margin={{ left: 8, right: 8, top: 8, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" tickFormatter={(v) => v.slice(5)} stroke="var(--muted-foreground)" fontSize={11} />
-                <YAxis stroke="var(--muted-foreground)" fontSize={11} />
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontSize: 12,
-                  }}
-                  formatter={(v: number, name) => [name === "revenue" ? fmtMoney(v) : v, name]}
-                />
-                <Area type="monotone" dataKey="revenue" stroke="var(--primary)" fill="url(#rev)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<EmptyChart loading />}>
+              <RevenueAreaChart data={d.series} fmtMoney={fmtMoney} />
+            </Suspense>
           ) : (
             <EmptyChart loading={q.isLoading} />
           )}
