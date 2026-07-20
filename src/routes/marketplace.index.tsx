@@ -67,8 +67,16 @@ export const Route = createFileRoute("/marketplace/")({
 });
 
 function MarketplaceListing() {
-  const [search, setSearch] = useState("");
   const [draftSearch, setDraftSearch] = useState("");
+  const debouncedDraft = useDebouncedValue(draftSearch, 400);
+  const [search, setSearch] = useState("");
+  useEffect(() => {
+    if (debouncedDraft !== search) {
+      setSearch(debouncedDraft);
+      setPage(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedDraft]);
   const [county, setCounty] = useState<string>("all");
   const [category, setCategory] = useState<string>("all");
   const [priceMin, setPriceMin] = useState<string>("");

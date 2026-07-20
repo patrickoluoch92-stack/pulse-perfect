@@ -133,7 +133,7 @@ function CouponsAdmin() {
                 </p>
                 {c.description && <p className="mt-1 text-sm text-muted-foreground">{c.description}</p>}
               </div>
-              <Button variant="ghost" size="icon" onClick={() => del.mutate(c.id)}><Trash2 className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="icon" aria-label={`Delete coupon ${c.code}`} onClick={() => del.mutate(c.id)}><Trash2 className="h-4 w-4" /></Button>
             </li>
           ))}
         </ul>
