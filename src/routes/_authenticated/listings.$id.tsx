@@ -531,10 +531,11 @@ function EditListing() {
                       {g.url && <img src={g.url} alt={g.alt_text ?? ""} className="h-full w-full object-cover" />}
                       <button
                         type="button"
+                        aria-label="Remove image"
                         onClick={() => removeGalleryImage.mutate(g.id)}
-                        className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white"
+                        className="absolute right-1 top-1 rounded-full bg-foreground/70 p-1 text-background hover:bg-foreground"
                       >
-                        <X className="h-3 w-3" />
+                        <X className="h-3 w-3" aria-hidden />
                       </button>
                     </div>
                   ))}

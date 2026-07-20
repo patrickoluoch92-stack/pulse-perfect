@@ -536,9 +536,10 @@ function Step6Media({ payload, update, orgId }: StepProps & { orgId: string }) {
               <div key={path} className="relative aspect-square overflow-hidden rounded-lg border bg-muted">
                 <MediaPreview path={path} urlFor={urlFor} className="h-full w-full" />
                 <button type="button"
+                  aria-label="Remove image"
                   onClick={() => update({ galleryPaths: (payload.galleryPaths ?? []).filter((_, j) => j !== i) })}
-                  className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white">
-                  <X className="h-3 w-3" />
+                  className="absolute right-1 top-1 rounded-full bg-foreground/70 p-1 text-background hover:bg-foreground">
+                  <X className="h-3 w-3" aria-hidden />
                 </button>
               </div>
             ))}
@@ -617,7 +618,7 @@ function Step8Availability({ payload, update }: StepProps) {
             <Input type="date" value={r.startDate} onChange={(e) => update({ seasonalRates: rates.map((x, j) => j === i ? { ...x, startDate: e.target.value } : x) })} />
             <Input type="date" value={r.endDate} onChange={(e) => update({ seasonalRates: rates.map((x, j) => j === i ? { ...x, endDate: e.target.value } : x) })} />
             <Input type="number" value={r.price} placeholder="Price" onChange={(e) => update({ seasonalRates: rates.map((x, j) => j === i ? { ...x, price: Number(e.target.value) } : x) })} />
-            <Button variant="ghost" size="icon" onClick={() => update({ seasonalRates: rates.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon" aria-label="Remove seasonal rate" onClick={() => update({ seasonalRates: rates.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></Button>
           </div>
         ))}
         <Button variant="outline" size="sm" onClick={() => update({ seasonalRates: [...rates, { label: "", startDate: "", endDate: "", price: 0 }] })}>
@@ -632,7 +633,7 @@ function Step8Availability({ payload, update }: StepProps) {
             <Input type="date" value={b.startDate} onChange={(e) => update({ blockedDates: blocks.map((x, j) => j === i ? { ...x, startDate: e.target.value } : x) })} />
             <Input type="date" value={b.endDate} onChange={(e) => update({ blockedDates: blocks.map((x, j) => j === i ? { ...x, endDate: e.target.value } : x) })} />
             <Input value={b.reason ?? ""} placeholder="Reason" onChange={(e) => update({ blockedDates: blocks.map((x, j) => j === i ? { ...x, reason: e.target.value } : x) })} />
-            <Button variant="ghost" size="icon" onClick={() => update({ blockedDates: blocks.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon" aria-label="Remove blocked date range" onClick={() => update({ blockedDates: blocks.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></Button>
           </div>
         ))}
         <Button variant="outline" size="sm" onClick={() => update({ blockedDates: [...blocks, { startDate: "", endDate: "" }] })}>

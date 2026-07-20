@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
@@ -84,7 +84,7 @@ function SubscriptionPage() {
           )}
           <div className="flex flex-wrap gap-2">
             {!s || s.status !== "active" ? (
-              <Button asChild><a href="/pricing">Choose a plan</a></Button>
+              <Button asChild><Link to="/pricing">Choose a plan</Link></Button>
             ) : s.cancel_at_period_end ? (
               <Button onClick={() => resumeM.mutate()} disabled={resumeM.isPending}>Resume subscription</Button>
             ) : (
@@ -93,7 +93,7 @@ function SubscriptionPage() {
                 <Button variant="destructive" onClick={() => setConfirm("now")}>Cancel immediately</Button>
               </>
             )}
-            <Button variant="secondary" asChild><a href="/pricing">Change plan</a></Button>
+            <Button variant="secondary" asChild><Link to="/pricing">Change plan</Link></Button>
           </div>
           {confirm && (
             <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm">
