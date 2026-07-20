@@ -152,24 +152,9 @@ function AnalyticsPage() {
                 Upgrade to <span className="mx-1 font-medium text-foreground">Business</span> to see revenue split by property.
               </div>
             ) : d && d.propertyChart.length > 0 ? (
-              <ResponsiveContainer>
-                <BarChart data={d.propertyChart} layout="vertical" margin={{ left: 16, right: 16 }}>
-                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" stroke="var(--muted-foreground)" fontSize={11} />
-                  <YAxis type="category" dataKey="name" width={120} stroke="var(--muted-foreground)" fontSize={11} />
-                  <Tooltip
-                    contentStyle={{
-                      background: "var(--card)",
-                      border: "1px solid var(--border)",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                    formatter={(v: number) => fmtMoney(v)}
-                  />
-                  <Bar dataKey="revenue" fill="var(--primary)" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
+              <Suspense fallback={<EmptyChart loading />}>
+                <PropertyBarChart data={d.propertyChart} fmtMoney={fmtMoney} />
+              </Suspense>
               <EmptyChart loading={q.isLoading} />
             )}
           </div>
