@@ -2,10 +2,7 @@ import { authPageMeta } from "@/lib/route-meta";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useState } from "react";
-import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
-} from "recharts";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 import { getAnalytics } from "@/lib/analytics.functions";
 import { planAllows, PLAN_LABEL, type Plan } from "@/lib/plans";
@@ -13,6 +10,15 @@ import { BedDouble, DollarSign, TrendingUp, CalendarCheck, Lock, Sparkles } from
 import { Button } from "@/components/ui/button";
 import { LoadingState, EmptyState } from "@/components/ui/states";
 import type { LucideIcon } from "lucide-react";
+
+// Recharts (~110 KB gz) is lazy-loaded so the analytics route's initial
+// chunk doesn't ship it until the charts actually mount.
+const RevenueAreaChart = lazy(() =>
+  import("@/components/lazy/analytics-charts").then((m) => ({ default: m.RevenueAreaChart })),
+);
+const PropertyBarChart = lazy(() =>
+  import("@/components/lazy/analytics-charts").then((m) => ({ default: m.PropertyBarChart })),
+);
 
 export const Route = createFileRoute("/_authenticated/analytics")({
   head: () => ({ meta: authPageMeta({ title: "Analytics", description: "Revenue, occupancy, and booking performance across your portfolio." }) }),
@@ -121,29 +127,9 @@ function AnalyticsPage() {
         <h2 className="font-display text-lg font-semibold">Revenue & occupied nights</h2>
         <div className="mt-4 h-72">
           {d && d.series.length > 0 ? (
-            <ResponsiveContainer>
-              <AreaChart data={d.series} margin={{ left: 8, right: 8, top: 8, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" tickFormatter={(v) => v.slice(5)} stroke="var(--muted-foreground)" fontSize={11} />
-                <YAxis stroke="var(--muted-foreground)" fontSize={11} />
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontSize: 12,
-                  }}
-                  formatter={(v: number, name) => [name === "revenue" ? fmtMoney(v) : v, name]}
-                />
-                <Area type="monotone" dataKey="revenue" stroke="var(--primary)" fill="url(#rev)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<EmptyChart loading />}>
+              <RevenueAreaChart data={d.series} fmtMoney={fmtMoney} />
+            </Suspense>
           ) : (
             <EmptyChart loading={q.isLoading} />
           )}
@@ -166,23 +152,9 @@ function AnalyticsPage() {
                 Upgrade to <span className="mx-1 font-medium text-foreground">Business</span> to see revenue split by property.
               </div>
             ) : d && d.propertyChart.length > 0 ? (
-              <ResponsiveContainer>
-                <BarChart data={d.propertyChart} layout="vertical" margin={{ left: 16, right: 16 }}>
-                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" stroke="var(--muted-foreground)" fontSize={11} />
-                  <YAxis type="category" dataKey="name" width={120} stroke="var(--muted-foreground)" fontSize={11} />
-                  <Tooltip
-                    contentStyle={{
-                      background: "var(--card)",
-                      border: "1px solid var(--border)",
-                      borderRadius: 8,
-                      fontSize: 12,
-                    }}
-                    formatter={(v: number) => fmtMoney(v)}
-                  />
-                  <Bar dataKey="revenue" fill="var(--primary)" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <Suspense fallback={<EmptyChart loading />}>
+                <PropertyBarChart data={d.propertyChart} fmtMoney={fmtMoney} />
+              </Suspense>
             ) : (
               <EmptyChart loading={q.isLoading} />
             )}

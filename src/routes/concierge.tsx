@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useRef, useEffect } from "react";
+import { lazy, Suspense, useState, useRef, useEffect } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { askConcierge } from "@/lib/concierge.functions";
@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Sparkles, Send } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+
+// react-markdown ships in its own chunk; the concierge shows plain text
+// until it hydrates, so the initial route bundle stays small.
+const Markdown = lazy(() => import("@/components/lazy/markdown"));
 
 export const Route = createFileRoute("/concierge")({
   head: () => ({
@@ -84,7 +87,9 @@ function ConciergePage() {
                 className={m.role === "user" ? "ml-auto max-w-[85%] rounded-2xl bg-primary px-4 py-2 text-primary-foreground" : "mr-auto max-w-[85%] rounded-2xl bg-muted px-4 py-2"}
               >
                 <div className="prose prose-sm max-w-none dark:prose-invert">
-                  <ReactMarkdown>{m.content}</ReactMarkdown>
+                  <Suspense fallback={<span className="whitespace-pre-wrap">{m.content}</span>}>
+                    <Markdown>{m.content}</Markdown>
+                  </Suspense>
                 </div>
               </div>
             ))}
