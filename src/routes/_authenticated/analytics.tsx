@@ -155,6 +155,7 @@ function AnalyticsPage() {
               <Suspense fallback={<EmptyChart loading />}>
                 <PropertyBarChart data={d.propertyChart} fmtMoney={fmtMoney} />
               </Suspense>
+            ) : (
               <EmptyChart loading={q.isLoading} />
             )}
           </div>
