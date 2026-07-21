@@ -7,12 +7,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { getMyProfessional } from "@/lib/professionals.functions";
 import { listMyBookings, updateBookingStatus } from "@/lib/professional-bookings.functions";
 import { listMyThreads, listMessages, sendMessage } from "@/lib/professional-messages.functions";
+import { submitProfessionalReview } from "@/lib/professional-reviews.functions";
+import { submitPaymentReference, confirmPaymentReceived } from "@/lib/professional-payments.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Check, X, MessageCircle } from "lucide-react";
+import { Send, Check, X, MessageCircle, Star, Wallet } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/professionals/dashboard")({
   component: ProDashboard,
