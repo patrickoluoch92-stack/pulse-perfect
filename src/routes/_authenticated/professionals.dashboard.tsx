@@ -150,6 +150,9 @@ function BookingsPanel() {
               {b.status === "in_progress" && (
                 <Button size="sm" onClick={() => act(b.id, "complete")}>Complete</Button>
               )}
+              {["deposit_submitted", "final_submitted"].includes(b.payment_status) && (
+                <ConfirmDepositButton bookingId={b.id} scope={b.payment_status === "final_submitted" ? "final" : "deposit"} reference={b.payment_reference} />
+              )}
             </div>
           </CardContent>
         </Card>
