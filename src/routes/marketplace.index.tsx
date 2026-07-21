@@ -6,6 +6,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { Search, MapPin, Star, SlidersHorizontal } from "lucide-react";
 
 import { listPublicProperties, listCounties } from "@/lib/marketplace.functions";
+import { searchProfessionals } from "@/lib/professionals.functions";
+
 import { PlanWithAI } from "@/components/plan-with-ai";
 import { formatCurrency } from "@/lib/format";
 import { PROPERTY_CATEGORIES, COMMON_AMENITIES, ACTIVITIES, ATTRIBUTES, categoryLabel } from "@/lib/marketplace-constants";
