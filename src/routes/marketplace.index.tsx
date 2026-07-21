@@ -305,11 +305,55 @@ function MarketplaceListing() {
         </section>
       )}
 
+      {featuredPros.data && featuredPros.data.results.length > 0 && (
+        <section className="mx-auto max-w-6xl px-4 py-10">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-2xl font-semibold">Verified professionals</h2>
+            <Link to="/professionals" className="text-sm text-primary hover:underline">
+              Browse all →
+            </Link>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {featuredPros.data.results.slice(0, 6).map((pro: any) => (
+              <Link
+                key={pro.id}
+                to="/professionals/$slug"
+                params={{ slug: pro.slug ?? pro.id }}
+                className="group rounded-xl border bg-card p-4 transition hover:shadow-md"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="line-clamp-1 font-semibold group-hover:text-primary">
+                    {pro.business_name}
+                  </h3>
+                  {pro.is_verified && (
+                    <Badge variant="secondary" className="shrink-0">Verified</Badge>
+                  )}
+                </div>
+                {pro.tagline && (
+                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{pro.tagline}</p>
+                )}
+                <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                  {(pro.town || pro.county_code) && (
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="h-3 w-3" /> {pro.town ?? pro.county_code}
+                    </span>
+                  )}
+                  {pro.starting_price != null && (
+                    <span>From {pro.currency ?? "KES"} {Number(pro.starting_price).toLocaleString()}</span>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="mb-4 flex items-end justify-between">
           <div>
             <h2 className="text-2xl font-semibold">
               {properties.data?.total ?? 0} {properties.data?.total === 1 ? "stay" : "stays"} found
+
             </h2>
             <p className="text-sm text-muted-foreground">
               Browse by county or filter to find your perfect getaway
