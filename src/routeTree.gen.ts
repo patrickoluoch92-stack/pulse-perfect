@@ -64,6 +64,7 @@ import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
 import { Route as AuthenticatedProfessionalsRegisterRouteImport } from './routes/_authenticated/professionals.register'
 import { Route as AuthenticatedProfessionalsDashboardRouteImport } from './routes/_authenticated/professionals.dashboard'
+import { Route as AuthenticatedProfessionalsCatalogRouteImport } from './routes/_authenticated/professionals.catalog'
 import { Route as AuthenticatedMobilitySubmissionsRouteImport } from './routes/_authenticated/mobility.submissions'
 import { Route as AuthenticatedMobilitySettingsRouteImport } from './routes/_authenticated/mobility.settings'
 import { Route as AuthenticatedMobilityRegisterCompanyRouteImport } from './routes/_authenticated/mobility.register-company'
@@ -384,6 +385,12 @@ const AuthenticatedProfessionalsDashboardRoute =
     path: '/professionals/dashboard',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedProfessionalsCatalogRoute =
+  AuthenticatedProfessionalsCatalogRouteImport.update({
+    id: '/professionals/catalog',
+    path: '/professionals/catalog',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMobilitySubmissionsRoute =
   AuthenticatedMobilitySubmissionsRouteImport.update({
     id: '/submissions',
@@ -666,6 +673,7 @@ export interface FileRoutesByFullPath {
   '/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
   '/mobility/settings': typeof AuthenticatedMobilitySettingsRoute
   '/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
+  '/professionals/catalog': typeof AuthenticatedProfessionalsCatalogRoute
   '/professionals/dashboard': typeof AuthenticatedProfessionalsDashboardRoute
   '/professionals/register': typeof AuthenticatedProfessionalsRegisterRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
@@ -756,6 +764,7 @@ export interface FileRoutesByTo {
   '/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
   '/mobility/settings': typeof AuthenticatedMobilitySettingsRoute
   '/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
+  '/professionals/catalog': typeof AuthenticatedProfessionalsCatalogRoute
   '/professionals/dashboard': typeof AuthenticatedProfessionalsDashboardRoute
   '/professionals/register': typeof AuthenticatedProfessionalsRegisterRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
@@ -851,6 +860,7 @@ export interface FileRoutesById {
   '/_authenticated/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
   '/_authenticated/mobility/settings': typeof AuthenticatedMobilitySettingsRoute
   '/_authenticated/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
+  '/_authenticated/professionals/catalog': typeof AuthenticatedProfessionalsCatalogRoute
   '/_authenticated/professionals/dashboard': typeof AuthenticatedProfessionalsDashboardRoute
   '/_authenticated/professionals/register': typeof AuthenticatedProfessionalsRegisterRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
@@ -946,6 +956,7 @@ export interface FileRouteTypes {
     | '/mobility/register-company'
     | '/mobility/settings'
     | '/mobility/submissions'
+    | '/professionals/catalog'
     | '/professionals/dashboard'
     | '/professionals/register'
     | '/properties/$propertyId'
@@ -1036,6 +1047,7 @@ export interface FileRouteTypes {
     | '/mobility/register-company'
     | '/mobility/settings'
     | '/mobility/submissions'
+    | '/professionals/catalog'
     | '/professionals/dashboard'
     | '/professionals/register'
     | '/properties/$propertyId'
@@ -1130,6 +1142,7 @@ export interface FileRouteTypes {
     | '/_authenticated/mobility/register-company'
     | '/_authenticated/mobility/settings'
     | '/_authenticated/mobility/submissions'
+    | '/_authenticated/professionals/catalog'
     | '/_authenticated/professionals/dashboard'
     | '/_authenticated/professionals/register'
     | '/_authenticated/properties/$propertyId'
@@ -1583,6 +1596,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfessionalsDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/professionals/catalog': {
+      id: '/_authenticated/professionals/catalog'
+      path: '/professionals/catalog'
+      fullPath: '/professionals/catalog'
+      preLoaderRoute: typeof AuthenticatedProfessionalsCatalogRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/mobility/submissions': {
       id: '/_authenticated/mobility/submissions'
       path: '/submissions'
@@ -1989,6 +2009,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminFraudRoute: typeof AuthenticatedAdminFraudRoute
   AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
   AuthenticatedAdminProfessionalsRoute: typeof AuthenticatedAdminProfessionalsRoute
+  AuthenticatedProfessionalsCatalogRoute: typeof AuthenticatedProfessionalsCatalogRoute
   AuthenticatedProfessionalsDashboardRoute: typeof AuthenticatedProfessionalsDashboardRoute
   AuthenticatedProfessionalsRegisterRoute: typeof AuthenticatedProfessionalsRegisterRoute
 }
@@ -2026,6 +2047,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminFraudRoute: AuthenticatedAdminFraudRoute,
   AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
   AuthenticatedAdminProfessionalsRoute: AuthenticatedAdminProfessionalsRoute,
+  AuthenticatedProfessionalsCatalogRoute:
+    AuthenticatedProfessionalsCatalogRoute,
   AuthenticatedProfessionalsDashboardRoute:
     AuthenticatedProfessionalsDashboardRoute,
   AuthenticatedProfessionalsRegisterRoute:
