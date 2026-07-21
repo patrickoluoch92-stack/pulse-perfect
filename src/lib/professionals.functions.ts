@@ -416,7 +416,7 @@ export const adminModerateProfessional = createServerFn({ method: "POST" })
       case "unverify": patch.is_verified = false; break;
     }
     const { data: pro, error } = await supabaseAdmin
-      .from("professionals").update(patch).eq("id", data.id)
+      .from("professionals").update(patch as any).eq("id", data.id)
       .select("id, owner_id, business_name, status").single();
     if (error) throw new Error(error.message);
 
