@@ -17,10 +17,12 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RentalsIndexRouteImport } from './routes/rentals.index'
+import { Route as ProfessionalsIndexRouteImport } from './routes/professionals.index'
 import { Route as MobilityIndexRouteImport } from './routes/mobility.index'
 import { Route as MarketplaceIndexRouteImport } from './routes/marketplace.index'
 import { Route as DiscoverIndexRouteImport } from './routes/discover.index'
 import { Route as RentalsChildRouteImport } from './routes/rentals.$child'
+import { Route as ProfessionalsSlugRouteImport } from './routes/professionals.$slug'
 import { Route as MobilityCompaniesRouteImport } from './routes/mobility.companies'
 import { Route as MobilityCategoryRouteImport } from './routes/mobility.$category'
 import { Route as MarketplaceMapRouteImport } from './routes/marketplace.map'
@@ -135,6 +137,11 @@ const RentalsIndexRoute = RentalsIndexRouteImport.update({
   path: '/rentals/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfessionalsIndexRoute = ProfessionalsIndexRouteImport.update({
+  id: '/professionals/',
+  path: '/professionals/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MobilityIndexRoute = MobilityIndexRouteImport.update({
   id: '/mobility/',
   path: '/mobility/',
@@ -153,6 +160,11 @@ const DiscoverIndexRoute = DiscoverIndexRouteImport.update({
 const RentalsChildRoute = RentalsChildRouteImport.update({
   id: '/rentals/$child',
   path: '/rentals/$child',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfessionalsSlugRoute = ProfessionalsSlugRouteImport.update({
+  id: '/professionals/$slug',
+  path: '/professionals/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MobilityCompaniesRoute = MobilityCompaniesRouteImport.update({
@@ -599,10 +611,12 @@ export interface FileRoutesByFullPath {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/mobility/$category': typeof MobilityCategoryRoute
   '/mobility/companies': typeof MobilityCompaniesRoute
+  '/professionals/$slug': typeof ProfessionalsSlugRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/mobility/': typeof MobilityIndexRoute
+  '/professionals/': typeof ProfessionalsIndexRoute
   '/rentals/': typeof RentalsIndexRoute
   '/admin/ai-ops': typeof AuthenticatedAdminAiOpsRoute
   '/admin/cms': typeof AuthenticatedAdminCmsRoute
@@ -684,9 +698,11 @@ export interface FileRoutesByTo {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/mobility/$category': typeof MobilityCategoryRoute
   '/mobility/companies': typeof MobilityCompaniesRoute
+  '/professionals/$slug': typeof ProfessionalsSlugRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
+  '/professionals': typeof ProfessionalsIndexRoute
   '/rentals': typeof RentalsIndexRoute
   '/admin/ai-ops': typeof AuthenticatedAdminAiOpsRoute
   '/admin/cms': typeof AuthenticatedAdminCmsRoute
@@ -772,10 +788,12 @@ export interface FileRoutesById {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/mobility/$category': typeof MobilityCategoryRoute
   '/mobility/companies': typeof MobilityCompaniesRoute
+  '/professionals/$slug': typeof ProfessionalsSlugRoute
   '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
   '/mobility/': typeof MobilityIndexRoute
+  '/professionals/': typeof ProfessionalsIndexRoute
   '/rentals/': typeof RentalsIndexRoute
   '/_authenticated/admin/ai-ops': typeof AuthenticatedAdminAiOpsRoute
   '/_authenticated/admin/cms': typeof AuthenticatedAdminCmsRoute
@@ -861,10 +879,12 @@ export interface FileRouteTypes {
     | '/marketplace/map'
     | '/mobility/$category'
     | '/mobility/companies'
+    | '/professionals/$slug'
     | '/rentals/$child'
     | '/discover/'
     | '/marketplace/'
     | '/mobility/'
+    | '/professionals/'
     | '/rentals/'
     | '/admin/ai-ops'
     | '/admin/cms'
@@ -946,9 +966,11 @@ export interface FileRouteTypes {
     | '/marketplace/map'
     | '/mobility/$category'
     | '/mobility/companies'
+    | '/professionals/$slug'
     | '/rentals/$child'
     | '/discover'
     | '/marketplace'
+    | '/professionals'
     | '/rentals'
     | '/admin/ai-ops'
     | '/admin/cms'
@@ -1033,10 +1055,12 @@ export interface FileRouteTypes {
     | '/marketplace/map'
     | '/mobility/$category'
     | '/mobility/companies'
+    | '/professionals/$slug'
     | '/rentals/$child'
     | '/discover/'
     | '/marketplace/'
     | '/mobility/'
+    | '/professionals/'
     | '/rentals/'
     | '/_authenticated/admin/ai-ops'
     | '/_authenticated/admin/cms'
@@ -1097,9 +1121,11 @@ export interface RootRouteChildren {
   InviteTokenRoute: typeof InviteTokenRoute
   MobilityCategoryRoute: typeof MobilityCategoryRoute
   MobilityCompaniesRoute: typeof MobilityCompaniesRoute
+  ProfessionalsSlugRoute: typeof ProfessionalsSlugRoute
   RentalsChildRoute: typeof RentalsChildRoute
   DiscoverIndexRoute: typeof DiscoverIndexRoute
   MobilityIndexRoute: typeof MobilityIndexRoute
+  ProfessionalsIndexRoute: typeof ProfessionalsIndexRoute
   RentalsIndexRoute: typeof RentalsIndexRoute
   ApiPublicWebVitalsRoute: typeof ApiPublicWebVitalsRoute
   DiscoverCountyCountyRoute: typeof DiscoverCountyCountyRoute
@@ -1177,6 +1203,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RentalsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/professionals/': {
+      id: '/professionals/'
+      path: '/professionals'
+      fullPath: '/professionals/'
+      preLoaderRoute: typeof ProfessionalsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mobility/': {
       id: '/mobility/'
       path: '/mobility'
@@ -1203,6 +1236,13 @@ declare module '@tanstack/react-router' {
       path: '/rentals/$child'
       fullPath: '/rentals/$child'
       preLoaderRoute: typeof RentalsChildRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/professionals/$slug': {
+      id: '/professionals/$slug'
+      path: '/professionals/$slug'
+      fullPath: '/professionals/$slug'
+      preLoaderRoute: typeof ProfessionalsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mobility/companies': {
@@ -1940,9 +1980,11 @@ const rootRouteChildren: RootRouteChildren = {
   InviteTokenRoute: InviteTokenRoute,
   MobilityCategoryRoute: MobilityCategoryRoute,
   MobilityCompaniesRoute: MobilityCompaniesRoute,
+  ProfessionalsSlugRoute: ProfessionalsSlugRoute,
   RentalsChildRoute: RentalsChildRoute,
   DiscoverIndexRoute: DiscoverIndexRoute,
   MobilityIndexRoute: MobilityIndexRoute,
+  ProfessionalsIndexRoute: ProfessionalsIndexRoute,
   RentalsIndexRoute: RentalsIndexRoute,
   ApiPublicWebVitalsRoute: ApiPublicWebVitalsRoute,
   DiscoverCountyCountyRoute: DiscoverCountyCountyRoute,
