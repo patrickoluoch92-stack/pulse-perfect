@@ -2,7 +2,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { createNotification } from "@/lib/notifications.server";
+// notifications.server is imported dynamically inside handlers.
 
 const CreateBookingInput = z.object({
   professional_id: z.string().uuid(),
@@ -76,13 +76,18 @@ export const createProfessionalBooking = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     // Notify professional
-    await createNotification({
-      userId: pro.owner_id,
-      title: "New booking request",
-      body: `A customer requested ${pro.business_name} for ${data.event_date}`,
-      href: `/professionals/dashboard?tab=bookings&id=${booking.id}`,
-      severity: "info",
-    }).catch(() => {});
+    try {
+      const { notify } = await import("@/lib/notifications.server");
+      await notify({
+        userId: pro.owner_id,
+        type: "professional_booking_request",
+        title: "New booking request",
+        body: `A customer requested ${pro.business_name} for ${data.event_date}`,
+        linkUrl: `/professionals/dashboard?tab=bookings&id=${booking.id}`,
+      });
+    } catch {
+      // best-effort
+    }
 
     return booking;
   });
@@ -146,7 +151,7 @@ export const updateBookingStatus = createServerFn({ method: "POST" })
 
     const { data: updated, error } = await supabase
       .from("professional_bookings")
-      .update(patch)
+      .update(patch as any)
       .eq("id", data.id)
       .select()
       .single();
@@ -155,13 +160,18 @@ export const updateBookingStatus = createServerFn({ method: "POST" })
     // Notify the other party
     const notifyUserId = isOwner ? booking.customer_id : pro?.owner_id;
     if (notifyUserId) {
-      await createNotification({
-        userId: notifyUserId,
-        title: `Booking ${step.status.replace("_", " ")}`,
-        body: `${pro?.business_name ?? "Professional"} — ${data.notes ?? step.status}`,
-        href: `/professionals/dashboard?tab=bookings&id=${data.id}`,
-        severity: step.status === "declined" || step.status === "cancelled" ? "warn" : "info",
-      }).catch(() => {});
+      try {
+        const { notify } = await import("@/lib/notifications.server");
+        await notify({
+          userId: notifyUserId,
+          type: "professional_booking_update",
+          title: `Booking ${step.status.replace("_", " ")}`,
+          body: `${pro?.business_name ?? "Professional"} — ${data.notes ?? step.status}`,
+          linkUrl: `/professionals/dashboard?tab=bookings&id=${data.id}`,
+        });
+      } catch {
+        // best-effort
+      }
     }
 
     return updated;

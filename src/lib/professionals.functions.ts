@@ -204,7 +204,7 @@ export const upsertMyProfessional = createServerFn({ method: "POST" })
       if (status) patch.status = status;
       const { data: updated, error } = await supabase
         .from("professionals")
-        .update(patch)
+        .update(patch as any)
         .eq("id", id)
         .eq("owner_id", userId)
         .select()
