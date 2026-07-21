@@ -102,6 +102,7 @@ const groups: NavGroup[] = [
       { to: "/admin/devops", label: "DevOps", icon: Bug },
       { to: "/listings/admin/discovery", label: "Discovery AI", icon: Compass },
       { to: "/listings/admin/coupons", label: "Coupons", icon: Ticket },
+      { to: "/admin/professionals", label: "Professionals", icon: ShieldAlert },
     ],
   },
 ];
