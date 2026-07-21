@@ -119,6 +119,13 @@ function MarketplaceListing() {
     queryFn: () => listFn({ data: { featuredOnly: true, pageSize: 6, page: 1 } }),
   });
 
+  const proFn = useServerFn(searchProfessionals);
+  const featuredPros = useQuery({
+    queryKey: ["mkt-featured-pros"],
+    queryFn: () => proFn({ data: { verifiedOnly: true, limit: 6, offset: 0 } }),
+  });
+
+
   const totalPages = Math.max(1, Math.ceil((properties.data?.total ?? 0) / 12));
 
   return (
