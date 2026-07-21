@@ -7,12 +7,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { getMyProfessional } from "@/lib/professionals.functions";
 import { listMyBookings, updateBookingStatus } from "@/lib/professional-bookings.functions";
 import { listMyThreads, listMessages, sendMessage } from "@/lib/professional-messages.functions";
+import { submitProfessionalReview } from "@/lib/professional-reviews.functions";
+import { submitPaymentReference, confirmPaymentReceived } from "@/lib/professional-payments.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Check, X, MessageCircle } from "lucide-react";
+import { Send, Check, X, MessageCircle, Star, Wallet } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/professionals/dashboard")({
   component: ProDashboard,
@@ -23,14 +26,21 @@ function ProDashboard() {
   const me = useQuery({ queryKey: ["my-professional"], queryFn: () => fetchMe() });
 
   if (me.isLoading) return <div className="p-8 text-muted-foreground">Loading…</div>;
+
+  // Customer-only view when user has no professional profile.
   if (!me.data) {
     return (
-      <div className="mx-auto max-w-2xl space-y-3 p-6 text-center">
-        <h1 className="text-2xl font-bold">You're not a professional yet</h1>
-        <p className="text-muted-foreground">Create your Professional profile to start receiving bookings.</p>
-        <Button asChild>
-          <Link to="/professionals/register">Register as a professional</Link>
-        </Button>
+      <div className="mx-auto max-w-4xl space-y-6 p-4 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold">My Professional Bookings</h1>
+            <p className="text-muted-foreground">Track requests, pay deposits, and leave reviews.</p>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/professionals/register">Register as a professional</Link>
+          </Button>
+        </div>
+        <CustomerBookingsPanel />
       </div>
     );
   }
@@ -61,12 +71,16 @@ function ProDashboard() {
         <TabsList>
           <TabsTrigger value="bookings">Bookings</TabsTrigger>
           <TabsTrigger value="messages">Messages</TabsTrigger>
+          <TabsTrigger value="customer">My purchases</TabsTrigger>
         </TabsList>
         <TabsContent value="bookings" className="mt-4">
           <BookingsPanel />
         </TabsContent>
         <TabsContent value="messages" className="mt-4">
           <MessagesPanel proId={pro.id} />
+        </TabsContent>
+        <TabsContent value="customer" className="mt-4">
+          <CustomerBookingsPanel />
         </TabsContent>
       </Tabs>
     </div>
@@ -135,6 +149,9 @@ function BookingsPanel() {
               )}
               {b.status === "in_progress" && (
                 <Button size="sm" onClick={() => act(b.id, "complete")}>Complete</Button>
+              )}
+              {["deposit_submitted", "final_submitted"].includes(b.payment_status) && (
+                <ConfirmDepositButton bookingId={b.id} scope={b.payment_status === "final_submitted" ? "final" : "deposit"} reference={b.payment_reference} />
               )}
             </div>
           </CardContent>
@@ -281,5 +298,143 @@ export function ChatThread({
         </Button>
       </div>
     </div>
+  );
+}
+
+function ConfirmDepositButton({ bookingId, scope, reference }: { bookingId: string; scope: "deposit" | "final"; reference?: string | null }) {
+  const confirm = useServerFn(confirmPaymentReceived);
+  const qc = useQueryClient();
+  async function onClick() {
+    try {
+      await confirm({ data: { booking_id: bookingId, scope } });
+      toast.success("Payment confirmed");
+      qc.invalidateQueries({ queryKey: ["pro-bookings"] });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed");
+    }
+  }
+  return (
+    <Button size="sm" variant="outline" onClick={onClick} title={reference ? `Ref: ${reference}` : undefined}>
+      <Wallet className="mr-1 h-4 w-4" /> Confirm {scope} received
+    </Button>
+  );
+}
+
+function CustomerBookingsPanel() {
+  const fetchBookings = useServerFn(listMyBookings);
+  const q = useQuery({
+    queryKey: ["pro-bookings", "customer"],
+    queryFn: () => fetchBookings({ data: { role: "customer" } }),
+  });
+  if (q.isLoading) return <div className="text-muted-foreground">Loading…</div>;
+  const rows = q.data ?? [];
+  if (!rows.length) return <p className="text-muted-foreground">No professional bookings yet.</p>;
+  return (
+    <div className="space-y-3">
+      {rows.map((b: any) => (
+        <CustomerBookingCard key={b.id} booking={b} />
+      ))}
+    </div>
+  );
+}
+
+function CustomerBookingCard({ booking }: { booking: any }) {
+  const submitRef = useServerFn(submitPaymentReference);
+  const submitReview = useServerFn(submitProfessionalReview);
+  const qc = useQueryClient();
+  const [ref, setRef] = useState("");
+  const [rating, setRating] = useState(5);
+  const [reviewBody, setReviewBody] = useState("");
+  const [reviewTitle, setReviewTitle] = useState("");
+
+  const showPay = ["accepted", "confirmed", "in_progress"].includes(booking.status) &&
+    !["deposit_paid", "paid", "deposit_submitted", "final_submitted"].includes(booking.payment_status);
+  const showReview = booking.status === "completed";
+
+  async function pay() {
+    if (!ref.trim()) return;
+    try {
+      await submitRef({ data: { booking_id: booking.id, reference: ref.trim(), scope: "deposit" } });
+      toast.success("Reference submitted");
+      setRef("");
+      qc.invalidateQueries({ queryKey: ["pro-bookings"] });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed");
+    }
+  }
+
+  async function review() {
+    try {
+      await submitReview({ data: { booking_id: booking.id, rating, title: reviewTitle || null, body: reviewBody || null } });
+      toast.success("Thanks for your review");
+      setReviewBody("");
+      setReviewTitle("");
+      qc.invalidateQueries({ queryKey: ["pro-bookings"] });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed");
+    }
+  }
+
+  return (
+    <Card>
+      <CardContent className="space-y-3 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="font-medium">
+              {booking.professional?.business_name ?? "Professional"} — {booking.event_date}
+              {booking.event_time ? ` · ${booking.event_time}` : ""}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {booking.location_text ?? "—"} · {booking.quoted_amount ? `${booking.currency} ${Number(booking.quoted_amount).toLocaleString()}` : "Quote pending"}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Badge variant="secondary">{booking.status}</Badge>
+            <Badge variant="outline">{booking.payment_status}</Badge>
+          </div>
+        </div>
+
+        {showPay && booking.deposit_amount && (
+          <div className="rounded border p-3">
+            <div className="text-sm font-medium">
+              <Wallet className="mr-1 inline h-4 w-4" /> Pay deposit ({booking.currency} {Number(booking.deposit_amount).toLocaleString()})
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Send via M-PESA to the professional, then paste your transaction code below.
+            </p>
+            <div className="mt-2 flex gap-2">
+              <Input value={ref} onChange={(e) => setRef(e.target.value)} placeholder="e.g. QAB12CD3EF" />
+              <Button onClick={pay} disabled={!ref.trim()}>Submit reference</Button>
+            </div>
+          </div>
+        )}
+
+        {showReview && (
+          <div className="rounded border p-3">
+            <div className="text-sm font-medium">
+              <Star className="mr-1 inline h-4 w-4" /> Leave a review
+            </div>
+            <div className="mt-2 flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setRating(n)}
+                  className={n <= rating ? "text-amber-500" : "text-muted-foreground"}
+                  aria-label={`Rate ${n}`}
+                >
+                  <Star className="h-5 w-5 fill-current" />
+                </button>
+              ))}
+            </div>
+            <Input className="mt-2" value={reviewTitle} onChange={(e) => setReviewTitle(e.target.value)} placeholder="Title (optional)" />
+            <Textarea className="mt-2" rows={3} value={reviewBody} onChange={(e) => setReviewBody(e.target.value)} placeholder="Share your experience" />
+            <div className="mt-2 flex justify-end">
+              <Button onClick={review}>Post review</Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
