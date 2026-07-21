@@ -76,6 +76,7 @@ import { Route as AuthenticatedListingsAnalyticsRouteImport } from './routes/_au
 import { Route as AuthenticatedListingsAdminRouteImport } from './routes/_authenticated/listings.admin'
 import { Route as AuthenticatedListingsIdRouteImport } from './routes/_authenticated/listings.$id'
 import { Route as AuthenticatedInvoicesInvoiceIdRouteImport } from './routes/_authenticated/invoices.$invoiceId'
+import { Route as AuthenticatedAdminProfessionalsRouteImport } from './routes/_authenticated/admin.professionals'
 import { Route as AuthenticatedAdminPlansRouteImport } from './routes/_authenticated/admin.plans'
 import { Route as AuthenticatedAdminFraudRouteImport } from './routes/_authenticated/admin.fraud'
 import { Route as AuthenticatedAdminFinanceRouteImport } from './routes/_authenticated/admin.finance'
@@ -454,6 +455,12 @@ const AuthenticatedInvoicesInvoiceIdRoute =
     path: '/$invoiceId',
     getParentRoute: () => AuthenticatedInvoicesRoute,
   } as any)
+const AuthenticatedAdminProfessionalsRoute =
+  AuthenticatedAdminProfessionalsRouteImport.update({
+    id: '/admin/professionals',
+    path: '/admin/professionals',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminPlansRoute = AuthenticatedAdminPlansRouteImport.update({
   id: '/admin/plans',
   path: '/admin/plans',
@@ -646,6 +653,7 @@ export interface FileRoutesByFullPath {
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/admin/fraud': typeof AuthenticatedAdminFraudRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
+  '/admin/professionals': typeof AuthenticatedAdminProfessionalsRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
@@ -735,6 +743,7 @@ export interface FileRoutesByTo {
   '/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/admin/fraud': typeof AuthenticatedAdminFraudRoute
   '/admin/plans': typeof AuthenticatedAdminPlansRoute
+  '/admin/professionals': typeof AuthenticatedAdminProfessionalsRoute
   '/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
@@ -829,6 +838,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/finance': typeof AuthenticatedAdminFinanceRoute
   '/_authenticated/admin/fraud': typeof AuthenticatedAdminFraudRoute
   '/_authenticated/admin/plans': typeof AuthenticatedAdminPlansRoute
+  '/_authenticated/admin/professionals': typeof AuthenticatedAdminProfessionalsRoute
   '/_authenticated/invoices/$invoiceId': typeof AuthenticatedInvoicesInvoiceIdRoute
   '/_authenticated/listings/$id': typeof AuthenticatedListingsIdRouteWithChildren
   '/_authenticated/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
@@ -923,6 +933,7 @@ export interface FileRouteTypes {
     | '/admin/finance'
     | '/admin/fraud'
     | '/admin/plans'
+    | '/admin/professionals'
     | '/invoices/$invoiceId'
     | '/listings/$id'
     | '/listings/admin'
@@ -1012,6 +1023,7 @@ export interface FileRouteTypes {
     | '/admin/finance'
     | '/admin/fraud'
     | '/admin/plans'
+    | '/admin/professionals'
     | '/invoices/$invoiceId'
     | '/listings/$id'
     | '/listings/admin'
@@ -1105,6 +1117,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/finance'
     | '/_authenticated/admin/fraud'
     | '/_authenticated/admin/plans'
+    | '/_authenticated/admin/professionals'
     | '/_authenticated/invoices/$invoiceId'
     | '/_authenticated/listings/$id'
     | '/_authenticated/listings/admin'
@@ -1654,6 +1667,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInvoicesInvoiceIdRouteImport
       parentRoute: typeof AuthenticatedInvoicesRoute
     }
+    '/_authenticated/admin/professionals': {
+      id: '/_authenticated/admin/professionals'
+      path: '/admin/professionals'
+      fullPath: '/admin/professionals'
+      preLoaderRoute: typeof AuthenticatedAdminProfessionalsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/plans': {
       id: '/_authenticated/admin/plans'
       path: '/admin/plans'
@@ -1968,6 +1988,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
   AuthenticatedAdminFraudRoute: typeof AuthenticatedAdminFraudRoute
   AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
+  AuthenticatedAdminProfessionalsRoute: typeof AuthenticatedAdminProfessionalsRoute
   AuthenticatedProfessionalsDashboardRoute: typeof AuthenticatedProfessionalsDashboardRoute
   AuthenticatedProfessionalsRegisterRoute: typeof AuthenticatedProfessionalsRegisterRoute
 }
@@ -2004,6 +2025,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
   AuthenticatedAdminFraudRoute: AuthenticatedAdminFraudRoute,
   AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
+  AuthenticatedAdminProfessionalsRoute: AuthenticatedAdminProfessionalsRoute,
   AuthenticatedProfessionalsDashboardRoute:
     AuthenticatedProfessionalsDashboardRoute,
   AuthenticatedProfessionalsRegisterRoute:
