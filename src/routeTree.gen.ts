@@ -55,12 +55,15 @@ import { Route as AuthenticatedBookingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedAiCommandRouteImport } from './routes/_authenticated/ai-command'
 import { Route as AuthenticatedListingsIndexRouteImport } from './routes/_authenticated/listings.index'
+import { Route as ProfessionalsSlugBookRouteImport } from './routes/professionals.$slug.book'
 import { Route as MobilityVSlugRouteImport } from './routes/mobility.v.$slug'
 import { Route as MobilityCompanySlugRouteImport } from './routes/mobility.company.$slug'
 import { Route as MarketplacePSlugRouteImport } from './routes/marketplace.p.$slug'
 import { Route as DiscoverCountyCountyRouteImport } from './routes/discover.county.$county'
 import { Route as ApiPublicWebVitalsRouteImport } from './routes/api/public/web-vitals'
 import { Route as AuthenticatedPropertiesPropertyIdRouteImport } from './routes/_authenticated/properties.$propertyId'
+import { Route as AuthenticatedProfessionalsRegisterRouteImport } from './routes/_authenticated/professionals.register'
+import { Route as AuthenticatedProfessionalsDashboardRouteImport } from './routes/_authenticated/professionals.dashboard'
 import { Route as AuthenticatedMobilitySubmissionsRouteImport } from './routes/_authenticated/mobility.submissions'
 import { Route as AuthenticatedMobilitySettingsRouteImport } from './routes/_authenticated/mobility.settings'
 import { Route as AuthenticatedMobilityRegisterCompanyRouteImport } from './routes/_authenticated/mobility.register-company'
@@ -332,6 +335,11 @@ const AuthenticatedListingsIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedListingsRoute,
   } as any)
+const ProfessionalsSlugBookRoute = ProfessionalsSlugBookRouteImport.update({
+  id: '/book',
+  path: '/book',
+  getParentRoute: () => ProfessionalsSlugRoute,
+} as any)
 const MobilityVSlugRoute = MobilityVSlugRouteImport.update({
   id: '/mobility/v/$slug',
   path: '/mobility/v/$slug',
@@ -362,6 +370,18 @@ const AuthenticatedPropertiesPropertyIdRoute =
     id: '/$propertyId',
     path: '/$propertyId',
     getParentRoute: () => AuthenticatedPropertiesRoute,
+  } as any)
+const AuthenticatedProfessionalsRegisterRoute =
+  AuthenticatedProfessionalsRegisterRouteImport.update({
+    id: '/professionals/register',
+    path: '/professionals/register',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedProfessionalsDashboardRoute =
+  AuthenticatedProfessionalsDashboardRouteImport.update({
+    id: '/professionals/dashboard',
+    path: '/professionals/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedMobilitySubmissionsRoute =
   AuthenticatedMobilitySubmissionsRouteImport.update({
@@ -611,7 +631,7 @@ export interface FileRoutesByFullPath {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/mobility/$category': typeof MobilityCategoryRoute
   '/mobility/companies': typeof MobilityCompaniesRoute
-  '/professionals/$slug': typeof ProfessionalsSlugRoute
+  '/professionals/$slug': typeof ProfessionalsSlugRouteWithChildren
   '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
@@ -638,12 +658,15 @@ export interface FileRoutesByFullPath {
   '/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
   '/mobility/settings': typeof AuthenticatedMobilitySettingsRoute
   '/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
+  '/professionals/dashboard': typeof AuthenticatedProfessionalsDashboardRoute
+  '/professionals/register': typeof AuthenticatedProfessionalsRegisterRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/mobility/company/$slug': typeof MobilityCompanySlugRoute
   '/mobility/v/$slug': typeof MobilityVSlugRoute
+  '/professionals/$slug/book': typeof ProfessionalsSlugBookRoute
   '/listings/': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
@@ -698,7 +721,7 @@ export interface FileRoutesByTo {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/mobility/$category': typeof MobilityCategoryRoute
   '/mobility/companies': typeof MobilityCompaniesRoute
-  '/professionals/$slug': typeof ProfessionalsSlugRoute
+  '/professionals/$slug': typeof ProfessionalsSlugRouteWithChildren
   '/rentals/$child': typeof RentalsChildRoute
   '/discover': typeof DiscoverIndexRoute
   '/marketplace': typeof MarketplaceIndexRoute
@@ -724,12 +747,15 @@ export interface FileRoutesByTo {
   '/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
   '/mobility/settings': typeof AuthenticatedMobilitySettingsRoute
   '/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
+  '/professionals/dashboard': typeof AuthenticatedProfessionalsDashboardRoute
+  '/professionals/register': typeof AuthenticatedProfessionalsRegisterRoute
   '/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/mobility/company/$slug': typeof MobilityCompanySlugRoute
   '/mobility/v/$slug': typeof MobilityVSlugRoute
+  '/professionals/$slug/book': typeof ProfessionalsSlugBookRoute
   '/listings': typeof AuthenticatedListingsIndexRoute
   '/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
@@ -788,7 +814,7 @@ export interface FileRoutesById {
   '/marketplace/map': typeof MarketplaceMapRoute
   '/mobility/$category': typeof MobilityCategoryRoute
   '/mobility/companies': typeof MobilityCompaniesRoute
-  '/professionals/$slug': typeof ProfessionalsSlugRoute
+  '/professionals/$slug': typeof ProfessionalsSlugRouteWithChildren
   '/rentals/$child': typeof RentalsChildRoute
   '/discover/': typeof DiscoverIndexRoute
   '/marketplace/': typeof MarketplaceIndexRoute
@@ -815,12 +841,15 @@ export interface FileRoutesById {
   '/_authenticated/mobility/register-company': typeof AuthenticatedMobilityRegisterCompanyRoute
   '/_authenticated/mobility/settings': typeof AuthenticatedMobilitySettingsRoute
   '/_authenticated/mobility/submissions': typeof AuthenticatedMobilitySubmissionsRoute
+  '/_authenticated/professionals/dashboard': typeof AuthenticatedProfessionalsDashboardRoute
+  '/_authenticated/professionals/register': typeof AuthenticatedProfessionalsRegisterRoute
   '/_authenticated/properties/$propertyId': typeof AuthenticatedPropertiesPropertyIdRoute
   '/api/public/web-vitals': typeof ApiPublicWebVitalsRoute
   '/discover/county/$county': typeof DiscoverCountyCountyRoute
   '/marketplace/p/$slug': typeof MarketplacePSlugRoute
   '/mobility/company/$slug': typeof MobilityCompanySlugRoute
   '/mobility/v/$slug': typeof MobilityVSlugRoute
+  '/professionals/$slug/book': typeof ProfessionalsSlugBookRoute
   '/_authenticated/listings/': typeof AuthenticatedListingsIndexRoute
   '/_authenticated/listings/$id/availability': typeof AuthenticatedListingsIdAvailabilityRoute
   '/_authenticated/listings/admin/coupons': typeof AuthenticatedListingsAdminCouponsRoute
@@ -906,12 +935,15 @@ export interface FileRouteTypes {
     | '/mobility/register-company'
     | '/mobility/settings'
     | '/mobility/submissions'
+    | '/professionals/dashboard'
+    | '/professionals/register'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
     | '/discover/county/$county'
     | '/marketplace/p/$slug'
     | '/mobility/company/$slug'
     | '/mobility/v/$slug'
+    | '/professionals/$slug/book'
     | '/listings/'
     | '/listings/$id/availability'
     | '/listings/admin/coupons'
@@ -992,12 +1024,15 @@ export interface FileRouteTypes {
     | '/mobility/register-company'
     | '/mobility/settings'
     | '/mobility/submissions'
+    | '/professionals/dashboard'
+    | '/professionals/register'
     | '/properties/$propertyId'
     | '/api/public/web-vitals'
     | '/discover/county/$county'
     | '/marketplace/p/$slug'
     | '/mobility/company/$slug'
     | '/mobility/v/$slug'
+    | '/professionals/$slug/book'
     | '/listings'
     | '/listings/$id/availability'
     | '/listings/admin/coupons'
@@ -1082,12 +1117,15 @@ export interface FileRouteTypes {
     | '/_authenticated/mobility/register-company'
     | '/_authenticated/mobility/settings'
     | '/_authenticated/mobility/submissions'
+    | '/_authenticated/professionals/dashboard'
+    | '/_authenticated/professionals/register'
     | '/_authenticated/properties/$propertyId'
     | '/api/public/web-vitals'
     | '/discover/county/$county'
     | '/marketplace/p/$slug'
     | '/mobility/company/$slug'
     | '/mobility/v/$slug'
+    | '/professionals/$slug/book'
     | '/_authenticated/listings/'
     | '/_authenticated/listings/$id/availability'
     | '/_authenticated/listings/admin/coupons'
@@ -1121,7 +1159,7 @@ export interface RootRouteChildren {
   InviteTokenRoute: typeof InviteTokenRoute
   MobilityCategoryRoute: typeof MobilityCategoryRoute
   MobilityCompaniesRoute: typeof MobilityCompaniesRoute
-  ProfessionalsSlugRoute: typeof ProfessionalsSlugRoute
+  ProfessionalsSlugRoute: typeof ProfessionalsSlugRouteWithChildren
   RentalsChildRoute: typeof RentalsChildRoute
   DiscoverIndexRoute: typeof DiscoverIndexRoute
   MobilityIndexRoute: typeof MobilityIndexRoute
@@ -1469,6 +1507,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedListingsIndexRouteImport
       parentRoute: typeof AuthenticatedListingsRoute
     }
+    '/professionals/$slug/book': {
+      id: '/professionals/$slug/book'
+      path: '/book'
+      fullPath: '/professionals/$slug/book'
+      preLoaderRoute: typeof ProfessionalsSlugBookRouteImport
+      parentRoute: typeof ProfessionalsSlugRoute
+    }
     '/mobility/v/$slug': {
       id: '/mobility/v/$slug'
       path: '/mobility/v/$slug'
@@ -1510,6 +1555,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/properties/$propertyId'
       preLoaderRoute: typeof AuthenticatedPropertiesPropertyIdRouteImport
       parentRoute: typeof AuthenticatedPropertiesRoute
+    }
+    '/_authenticated/professionals/register': {
+      id: '/_authenticated/professionals/register'
+      path: '/professionals/register'
+      fullPath: '/professionals/register'
+      preLoaderRoute: typeof AuthenticatedProfessionalsRegisterRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/professionals/dashboard': {
+      id: '/_authenticated/professionals/dashboard'
+      path: '/professionals/dashboard'
+      fullPath: '/professionals/dashboard'
+      preLoaderRoute: typeof AuthenticatedProfessionalsDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/mobility/submissions': {
       id: '/_authenticated/mobility/submissions'
@@ -1909,6 +1968,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminFinanceRoute: typeof AuthenticatedAdminFinanceRoute
   AuthenticatedAdminFraudRoute: typeof AuthenticatedAdminFraudRoute
   AuthenticatedAdminPlansRoute: typeof AuthenticatedAdminPlansRoute
+  AuthenticatedProfessionalsDashboardRoute: typeof AuthenticatedProfessionalsDashboardRoute
+  AuthenticatedProfessionalsRegisterRoute: typeof AuthenticatedProfessionalsRegisterRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -1943,6 +2004,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminFinanceRoute: AuthenticatedAdminFinanceRoute,
   AuthenticatedAdminFraudRoute: AuthenticatedAdminFraudRoute,
   AuthenticatedAdminPlansRoute: AuthenticatedAdminPlansRoute,
+  AuthenticatedProfessionalsDashboardRoute:
+    AuthenticatedProfessionalsDashboardRoute,
+  AuthenticatedProfessionalsRegisterRoute:
+    AuthenticatedProfessionalsRegisterRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -1966,6 +2031,17 @@ const MarketplaceRouteWithChildren = MarketplaceRoute._addFileChildren(
   MarketplaceRouteChildren,
 )
 
+interface ProfessionalsSlugRouteChildren {
+  ProfessionalsSlugBookRoute: typeof ProfessionalsSlugBookRoute
+}
+
+const ProfessionalsSlugRouteChildren: ProfessionalsSlugRouteChildren = {
+  ProfessionalsSlugBookRoute: ProfessionalsSlugBookRoute,
+}
+
+const ProfessionalsSlugRouteWithChildren =
+  ProfessionalsSlugRoute._addFileChildren(ProfessionalsSlugRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -1980,7 +2056,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteTokenRoute: InviteTokenRoute,
   MobilityCategoryRoute: MobilityCategoryRoute,
   MobilityCompaniesRoute: MobilityCompaniesRoute,
-  ProfessionalsSlugRoute: ProfessionalsSlugRoute,
+  ProfessionalsSlugRoute: ProfessionalsSlugRouteWithChildren,
   RentalsChildRoute: RentalsChildRoute,
   DiscoverIndexRoute: DiscoverIndexRoute,
   MobilityIndexRoute: MobilityIndexRoute,
