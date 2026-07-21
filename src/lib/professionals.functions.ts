@@ -331,3 +331,115 @@ export const deletePortfolioItem = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const deletePackage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { id: string }) => i)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("professional_packages").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---------------------------------------------------------------------------
+// Owner: list my services/packages/portfolio (bypasses public status filter)
+// ---------------------------------------------------------------------------
+export const getMyProfessionalWorkspace = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: pro, error } = await supabase
+      .from("professionals").select("*").eq("owner_id", userId).maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!pro) return null;
+    const [services, packages, portfolio] = await Promise.all([
+      supabase.from("professional_services").select("*").eq("professional_id", pro.id).order("display_order"),
+      supabase.from("professional_packages").select("*").eq("professional_id", pro.id).order("display_order"),
+      supabase.from("professional_portfolio").select("*").eq("professional_id", pro.id).order("display_order"),
+    ]);
+    return {
+      professional: pro,
+      services: services.data ?? [],
+      packages: packages.data ?? [],
+      portfolio: portfolio.data ?? [],
+    };
+  });
+
+// ---------------------------------------------------------------------------
+// Admin moderation
+// ---------------------------------------------------------------------------
+async function assertAdmin(ctx: { supabase: any; userId: string }) {
+  const { data } = await ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "admin" });
+  if (!data) throw new Error("Forbidden");
+}
+
+export const adminListProfessionals = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: { status?: string; q?: string; limit?: number }) => i)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let query = supabaseAdmin
+      .from("professionals")
+      .select("id, slug, business_name, professional_name, category_id, county_code, town, status, is_verified, is_featured, quality_score, avg_rating, review_count, created_at, owner_id, email, phone")
+      .order("created_at", { ascending: false })
+      .limit(Math.min(data.limit ?? 100, 200));
+    if (data.status) query = query.eq("status", data.status);
+    if (data.q) {
+      const q = sanitizePostgrestTerm(data.q, 40);
+      if (q) query = query.or(`business_name.ilike.%${q}%,professional_name.ilike.%${q}%,slug.ilike.%${q}%`);
+    }
+    const { data: rows, error } = await query;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const adminModerateProfessional = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: {
+    id: string;
+    action: "approve" | "reject" | "suspend" | "reinstate" | "feature" | "unfeature" | "verify" | "unverify";
+    reason?: string;
+  }) => i)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const patch: Record<string, any> = {};
+    switch (data.action) {
+      case "approve": patch.status = "approved"; patch.approved_at = new Date().toISOString(); break;
+      case "reject": patch.status = "rejected"; patch.rejection_reason = data.reason ?? null; break;
+      case "suspend": patch.status = "suspended"; patch.rejection_reason = data.reason ?? null; break;
+      case "reinstate": patch.status = "approved"; break;
+      case "feature": patch.is_featured = true; break;
+      case "unfeature": patch.is_featured = false; break;
+      case "verify": patch.is_verified = true; break;
+      case "unverify": patch.is_verified = false; break;
+    }
+    const { data: pro, error } = await supabaseAdmin
+      .from("professionals").update(patch).eq("id", data.id)
+      .select("id, owner_id, business_name, status").single();
+    if (error) throw new Error(error.message);
+
+    // notify owner
+    try {
+      const { notify } = await import("@/lib/notifications.server");
+      const titles: Record<string, string> = {
+        approve: "Your professional profile was approved",
+        reject: "Your professional profile needs changes",
+        suspend: "Your professional profile was suspended",
+        reinstate: "Your professional profile is active again",
+        verify: "You're now a verified professional",
+        unverify: "Verification badge removed",
+        feature: "You're featured on HostPulse ✨",
+        unfeature: "You're no longer featured",
+      };
+      await notify({
+        user_id: pro.owner_id,
+        title: titles[data.action] ?? "Profile updated",
+        body: data.reason ?? pro.business_name,
+        category: "professionals",
+        link: "/professionals/dashboard",
+      });
+    } catch {}
+    return pro;
+  });
