@@ -62,9 +62,14 @@ function ProDashboard() {
             )}
           </div>
         </div>
-        <Button asChild variant="outline">
-          <Link to="/professionals/register">Edit profile</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline">
+            <Link to="/professionals/catalog">Services & portfolio</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/professionals/register">Edit profile</Link>
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="bookings">
