@@ -65,6 +65,7 @@ import { Route as AuthenticatedMobilityRegisterCompanyRouteImport } from './rout
 import { Route as AuthenticatedMobilityOwnerRouteImport } from './routes/_authenticated/mobility.owner'
 import { Route as AuthenticatedMobilityFleetRouteImport } from './routes/_authenticated/mobility.fleet'
 import { Route as AuthenticatedListingsPartnersRouteImport } from './routes/_authenticated/listings.partners'
+import { Route as AuthenticatedListingsIntelligenceRouteImport } from './routes/_authenticated/listings.intelligence'
 import { Route as AuthenticatedListingsImportRouteImport } from './routes/_authenticated/listings.import'
 import { Route as AuthenticatedListingsAnalyticsRouteImport } from './routes/_authenticated/listings.analytics'
 import { Route as AuthenticatedListingsAdminRouteImport } from './routes/_authenticated/listings.admin'
@@ -386,6 +387,12 @@ const AuthenticatedListingsPartnersRoute =
     path: '/partners',
     getParentRoute: () => AuthenticatedListingsRoute,
   } as any)
+const AuthenticatedListingsIntelligenceRoute =
+  AuthenticatedListingsIntelligenceRouteImport.update({
+    id: '/intelligence',
+    path: '/intelligence',
+    getParentRoute: () => AuthenticatedListingsRoute,
+  } as any)
 const AuthenticatedListingsImportRoute =
   AuthenticatedListingsImportRouteImport.update({
     id: '/import',
@@ -610,6 +617,7 @@ export interface FileRoutesByFullPath {
   '/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
+  '/listings/intelligence': typeof AuthenticatedListingsIntelligenceRoute
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/mobility/fleet': typeof AuthenticatedMobilityFleetRoute
   '/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
@@ -693,6 +701,7 @@ export interface FileRoutesByTo {
   '/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
   '/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/listings/import': typeof AuthenticatedListingsImportRoute
+  '/listings/intelligence': typeof AuthenticatedListingsIntelligenceRoute
   '/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/mobility/fleet': typeof AuthenticatedMobilityFleetRoute
   '/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
@@ -781,6 +790,7 @@ export interface FileRoutesById {
   '/_authenticated/listings/admin': typeof AuthenticatedListingsAdminRouteWithChildren
   '/_authenticated/listings/analytics': typeof AuthenticatedListingsAnalyticsRoute
   '/_authenticated/listings/import': typeof AuthenticatedListingsImportRoute
+  '/_authenticated/listings/intelligence': typeof AuthenticatedListingsIntelligenceRoute
   '/_authenticated/listings/partners': typeof AuthenticatedListingsPartnersRoute
   '/_authenticated/mobility/fleet': typeof AuthenticatedMobilityFleetRoute
   '/_authenticated/mobility/owner': typeof AuthenticatedMobilityOwnerRoute
@@ -869,6 +879,7 @@ export interface FileRouteTypes {
     | '/listings/admin'
     | '/listings/analytics'
     | '/listings/import'
+    | '/listings/intelligence'
     | '/listings/partners'
     | '/mobility/fleet'
     | '/mobility/owner'
@@ -952,6 +963,7 @@ export interface FileRouteTypes {
     | '/listings/admin'
     | '/listings/analytics'
     | '/listings/import'
+    | '/listings/intelligence'
     | '/listings/partners'
     | '/mobility/fleet'
     | '/mobility/owner'
@@ -1039,6 +1051,7 @@ export interface FileRouteTypes {
     | '/_authenticated/listings/admin'
     | '/_authenticated/listings/analytics'
     | '/_authenticated/listings/import'
+    | '/_authenticated/listings/intelligence'
     | '/_authenticated/listings/partners'
     | '/_authenticated/mobility/fleet'
     | '/_authenticated/mobility/owner'
@@ -1500,6 +1513,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedListingsPartnersRouteImport
       parentRoute: typeof AuthenticatedListingsRoute
     }
+    '/_authenticated/listings/intelligence': {
+      id: '/_authenticated/listings/intelligence'
+      path: '/intelligence'
+      fullPath: '/listings/intelligence'
+      preLoaderRoute: typeof AuthenticatedListingsIntelligenceRouteImport
+      parentRoute: typeof AuthenticatedListingsRoute
+    }
     '/_authenticated/listings/import': {
       id: '/_authenticated/listings/import'
       path: '/import'
@@ -1757,6 +1777,7 @@ interface AuthenticatedListingsRouteChildren {
   AuthenticatedListingsAdminRoute: typeof AuthenticatedListingsAdminRouteWithChildren
   AuthenticatedListingsAnalyticsRoute: typeof AuthenticatedListingsAnalyticsRoute
   AuthenticatedListingsImportRoute: typeof AuthenticatedListingsImportRoute
+  AuthenticatedListingsIntelligenceRoute: typeof AuthenticatedListingsIntelligenceRoute
   AuthenticatedListingsPartnersRoute: typeof AuthenticatedListingsPartnersRoute
   AuthenticatedListingsIndexRoute: typeof AuthenticatedListingsIndexRoute
 }
@@ -1766,6 +1787,8 @@ const AuthenticatedListingsRouteChildren: AuthenticatedListingsRouteChildren = {
   AuthenticatedListingsAdminRoute: AuthenticatedListingsAdminRouteWithChildren,
   AuthenticatedListingsAnalyticsRoute: AuthenticatedListingsAnalyticsRoute,
   AuthenticatedListingsImportRoute: AuthenticatedListingsImportRoute,
+  AuthenticatedListingsIntelligenceRoute:
+    AuthenticatedListingsIntelligenceRoute,
   AuthenticatedListingsPartnersRoute: AuthenticatedListingsPartnersRoute,
   AuthenticatedListingsIndexRoute: AuthenticatedListingsIndexRoute,
 }
