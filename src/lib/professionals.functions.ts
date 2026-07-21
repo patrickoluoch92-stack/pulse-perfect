@@ -434,11 +434,11 @@ export const adminModerateProfessional = createServerFn({ method: "POST" })
         unfeature: "You're no longer featured",
       };
       await notify({
-        user_id: pro.owner_id,
+        userId: pro.owner_id,
+        type: `professional.${data.action}`,
         title: titles[data.action] ?? "Profile updated",
         body: data.reason ?? pro.business_name,
-        category: "professionals",
-        link: "/professionals/dashboard",
+        linkUrl: "/professionals/dashboard",
       });
     } catch {}
     return pro;
