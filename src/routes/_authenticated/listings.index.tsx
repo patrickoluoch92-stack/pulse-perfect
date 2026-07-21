@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Send, Undo2, Shield, ExternalLink, Calendar, Upload, BarChart3, Building2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Send, Undo2, Shield, ExternalLink, Calendar, Upload, BarChart3, Building2, Sparkles } from "lucide-react";
 import { LoadingState, EmptyState } from "@/components/ui/states";
 
 import { authPageMeta } from "@/lib/route-meta";
@@ -117,6 +117,11 @@ function ListingsPage() {
             <Button asChild variant="outline">
               <Link to="/listings/analytics">
                 <BarChart3 className="mr-2 h-4 w-4" /> Analytics
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/listings/intelligence">
+                <Sparkles className="mr-2 h-4 w-4" /> Intelligence
               </Link>
             </Button>
             <Button asChild variant="outline">

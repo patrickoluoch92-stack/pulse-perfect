@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { aiChat } from "@/lib/ai.server";
+import { cached } from "@/lib/ai-cache.server";
 import { PROPERTY_CATEGORIES } from "./marketplace-constants";
 
 const MODEL = "openai/gpt-5.5";
@@ -72,7 +73,10 @@ export const aiPrefillProperty = createServerFn({ method: "POST" })
     };
 
     const user = `Property name: ${data.name}${data.location ? `\nLocation hint: ${data.location}` : ""}`;
-    return callAI({ system, user, jsonSchema: { name: "PropertyPrefill", schema } });
+    const { value, cached: hit } = await cached("ai_prefill_v1", user, 60 * 60 * 24, () =>
+      callAI({ system, user, jsonSchema: { name: "PropertyPrefill", schema } }),
+    );
+    return { ...value, _cached: hit };
   });
 
 // ---------------------------------------------------------------------------
@@ -102,8 +106,10 @@ export const aiGenerateDescription = createServerFn({ method: "POST" })
       "Weave in the town/county naturally for SEO. End with a soft call to action.",
     ].join(" ");
     const user = JSON.stringify(data);
-    const text = await callAI({ system, user });
-    return { description: String(text).trim() };
+    const { value, cached: hit } = await cached("ai_desc_v1", user, 60 * 60 * 6, () =>
+      callAI({ system, user }),
+    );
+    return { description: String(value).trim(), _cached: hit };
   });
 
 // ---------------------------------------------------------------------------
