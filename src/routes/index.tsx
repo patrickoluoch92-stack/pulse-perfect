@@ -48,6 +48,15 @@ function Landing() {
           </Link>
           <nav className="flex items-center gap-2">
             <Button asChild variant="ghost">
+              <Link to="/marketplace">Stays</Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link to="/mobility">Mobility</Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link to="/professionals">Professionals</Link>
+            </Button>
+            <Button asChild variant="ghost">
               <Link to="/pricing">Pricing</Link>
             </Button>
             <Button asChild variant="ghost">
@@ -57,6 +66,7 @@ function Landing() {
               <Link to="/auth" search={{ mode: "signup" }}>Get started</Link>
             </Button>
           </nav>
+
         </div>
       </header>
 
