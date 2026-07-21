@@ -4378,6 +4378,638 @@ export type Database = {
           },
         ]
       }
+      professional_bookings: {
+        Row: {
+          cancelled_at: string | null
+          cancelled_by: string | null
+          cancelled_reason: string | null
+          commission_amount: number | null
+          created_at: string
+          currency: string
+          customer_id: string
+          customer_notes: string | null
+          deposit_amount: number | null
+          duration_hours: number | null
+          event_date: string
+          event_time: string | null
+          guest_count: number | null
+          id: string
+          location_lat: number | null
+          location_lng: number | null
+          location_text: string | null
+          package_id: string | null
+          payment_provider: string | null
+          payment_reference: string | null
+          payment_status: string
+          payout_status: string
+          professional_id: string
+          professional_notes: string | null
+          proposed_alt_date: string | null
+          proposed_alt_time: string | null
+          quoted_amount: number | null
+          reference_files: Json | null
+          requirements: string | null
+          service_id: string | null
+          status: string
+          total_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          cancelled_reason?: string | null
+          commission_amount?: number | null
+          created_at?: string
+          currency?: string
+          customer_id: string
+          customer_notes?: string | null
+          deposit_amount?: number | null
+          duration_hours?: number | null
+          event_date: string
+          event_time?: string | null
+          guest_count?: number | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          location_text?: string | null
+          package_id?: string | null
+          payment_provider?: string | null
+          payment_reference?: string | null
+          payment_status?: string
+          payout_status?: string
+          professional_id: string
+          professional_notes?: string | null
+          proposed_alt_date?: string | null
+          proposed_alt_time?: string | null
+          quoted_amount?: number | null
+          reference_files?: Json | null
+          requirements?: string | null
+          service_id?: string | null
+          status?: string
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          cancelled_reason?: string | null
+          commission_amount?: number | null
+          created_at?: string
+          currency?: string
+          customer_id?: string
+          customer_notes?: string | null
+          deposit_amount?: number | null
+          duration_hours?: number | null
+          event_date?: string
+          event_time?: string | null
+          guest_count?: number | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          location_text?: string | null
+          package_id?: string | null
+          payment_provider?: string | null
+          payment_reference?: string | null
+          payment_status?: string
+          payout_status?: string
+          professional_id?: string
+          professional_notes?: string | null
+          proposed_alt_date?: string | null
+          proposed_alt_time?: string | null
+          quoted_amount?: number | null
+          reference_files?: Json | null
+          requirements?: string | null
+          service_id?: string | null
+          status?: string
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professional_bookings_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "professional_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professional_bookings_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professional_bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "professional_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      professional_categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          name: string
+          parent_id: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          name: string
+          parent_id?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          name?: string
+          parent_id?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professional_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "professional_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      professional_messages: {
+        Row: {
+          attachments: Json | null
+          body: string | null
+          booking_id: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          professional_id: string
+          read_at: string | null
+          sender_id: string
+        }
+        Insert: {
+          attachments?: Json | null
+          body?: string | null
+          booking_id?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          professional_id: string
+          read_at?: string | null
+          sender_id: string
+        }
+        Update: {
+          attachments?: Json | null
+          body?: string | null
+          booking_id?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          professional_id?: string
+          read_at?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professional_messages_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "professional_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professional_messages_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      professional_packages: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          display_order: number
+          duration_label: string | null
+          id: string
+          inclusions: Json | null
+          name: string
+          price: number
+          professional_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          duration_label?: string | null
+          id?: string
+          inclusions?: Json | null
+          name: string
+          price: number
+          professional_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          duration_label?: string | null
+          id?: string
+          inclusions?: Json | null
+          name?: string
+          price?: number
+          professional_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professional_packages_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      professional_portfolio: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          item_type: string
+          media_path: string | null
+          media_url: string | null
+          metadata: Json | null
+          professional_id: string
+          secondary_media_path: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          item_type: string
+          media_path?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          professional_id: string
+          secondary_media_path?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          item_type?: string
+          media_path?: string | null
+          media_url?: string | null
+          metadata?: Json | null
+          professional_id?: string
+          secondary_media_path?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professional_portfolio_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      professional_reviews: {
+        Row: {
+          body: string | null
+          booking_id: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          is_verified: boolean
+          professional_id: string
+          professional_response: string | null
+          rating: number
+          responded_at: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          booking_id?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          is_verified?: boolean
+          professional_id: string
+          professional_response?: string | null
+          rating: number
+          responded_at?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          booking_id?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          is_verified?: boolean
+          professional_id?: string
+          professional_response?: string | null
+          rating?: number
+          responded_at?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professional_reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "professional_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "professional_reviews_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      professional_services: {
+        Row: {
+          active: boolean
+          base_price: number | null
+          created_at: string
+          description: string | null
+          display_order: number
+          duration_minutes: number | null
+          id: string
+          pricing_type: string | null
+          professional_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          base_price?: number | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          duration_minutes?: number | null
+          id?: string
+          pricing_type?: string | null
+          professional_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          base_price?: number | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          duration_minutes?: number | null
+          id?: string
+          pricing_type?: string | null
+          professional_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professional_services_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      professionals: {
+        Row: {
+          ai_summary: string | null
+          area: string | null
+          avg_rating: number | null
+          avg_response_minutes: number | null
+          booking_count: number
+          booking_lead_hours: number
+          business_name: string
+          cancellation_policy: string | null
+          category_id: string | null
+          city: string | null
+          country: string | null
+          county_code: string | null
+          cover_image_path: string | null
+          created_at: string
+          currency: string
+          deposit_percentage: number | null
+          description: string | null
+          email: string | null
+          emergency_bookings: boolean
+          facebook_url: string | null
+          full_name: string | null
+          id: string
+          id_document_path: string | null
+          instagram_url: string | null
+          is_featured: boolean
+          is_top_rated: boolean
+          is_verified: boolean
+          latitude: number | null
+          logo_path: string | null
+          longitude: number | null
+          max_travel_km: number | null
+          nationwide: boolean
+          online_services: boolean
+          owner_id: string
+          phone: string | null
+          pricing_model: string | null
+          professional_name: string | null
+          profile_image_path: string | null
+          quality_score: number | null
+          registration_number: string | null
+          registration_status: string | null
+          review_count: number
+          slug: string | null
+          starting_price: number | null
+          status: string
+          tagline: string | null
+          tax_pin: string | null
+          tiktok_url: string | null
+          town: string | null
+          travel_charges: number | null
+          travels_to_clients: boolean
+          updated_at: string
+          vacation_mode: boolean
+          website: string | null
+          whatsapp: string | null
+          working_hours: Json | null
+          years_experience: number | null
+          youtube_url: string | null
+        }
+        Insert: {
+          ai_summary?: string | null
+          area?: string | null
+          avg_rating?: number | null
+          avg_response_minutes?: number | null
+          booking_count?: number
+          booking_lead_hours?: number
+          business_name: string
+          cancellation_policy?: string | null
+          category_id?: string | null
+          city?: string | null
+          country?: string | null
+          county_code?: string | null
+          cover_image_path?: string | null
+          created_at?: string
+          currency?: string
+          deposit_percentage?: number | null
+          description?: string | null
+          email?: string | null
+          emergency_bookings?: boolean
+          facebook_url?: string | null
+          full_name?: string | null
+          id?: string
+          id_document_path?: string | null
+          instagram_url?: string | null
+          is_featured?: boolean
+          is_top_rated?: boolean
+          is_verified?: boolean
+          latitude?: number | null
+          logo_path?: string | null
+          longitude?: number | null
+          max_travel_km?: number | null
+          nationwide?: boolean
+          online_services?: boolean
+          owner_id: string
+          phone?: string | null
+          pricing_model?: string | null
+          professional_name?: string | null
+          profile_image_path?: string | null
+          quality_score?: number | null
+          registration_number?: string | null
+          registration_status?: string | null
+          review_count?: number
+          slug?: string | null
+          starting_price?: number | null
+          status?: string
+          tagline?: string | null
+          tax_pin?: string | null
+          tiktok_url?: string | null
+          town?: string | null
+          travel_charges?: number | null
+          travels_to_clients?: boolean
+          updated_at?: string
+          vacation_mode?: boolean
+          website?: string | null
+          whatsapp?: string | null
+          working_hours?: Json | null
+          years_experience?: number | null
+          youtube_url?: string | null
+        }
+        Update: {
+          ai_summary?: string | null
+          area?: string | null
+          avg_rating?: number | null
+          avg_response_minutes?: number | null
+          booking_count?: number
+          booking_lead_hours?: number
+          business_name?: string
+          cancellation_policy?: string | null
+          category_id?: string | null
+          city?: string | null
+          country?: string | null
+          county_code?: string | null
+          cover_image_path?: string | null
+          created_at?: string
+          currency?: string
+          deposit_percentage?: number | null
+          description?: string | null
+          email?: string | null
+          emergency_bookings?: boolean
+          facebook_url?: string | null
+          full_name?: string | null
+          id?: string
+          id_document_path?: string | null
+          instagram_url?: string | null
+          is_featured?: boolean
+          is_top_rated?: boolean
+          is_verified?: boolean
+          latitude?: number | null
+          logo_path?: string | null
+          longitude?: number | null
+          max_travel_km?: number | null
+          nationwide?: boolean
+          online_services?: boolean
+          owner_id?: string
+          phone?: string | null
+          pricing_model?: string | null
+          professional_name?: string | null
+          profile_image_path?: string | null
+          quality_score?: number | null
+          registration_number?: string | null
+          registration_status?: string | null
+          review_count?: number
+          slug?: string | null
+          starting_price?: number | null
+          status?: string
+          tagline?: string | null
+          tax_pin?: string | null
+          tiktok_url?: string | null
+          town?: string | null
+          travel_charges?: number | null
+          travels_to_clients?: boolean
+          updated_at?: string
+          vacation_mode?: boolean
+          website?: string | null
+          whatsapp?: string | null
+          working_hours?: Json | null
+          years_experience?: number | null
+          youtube_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professionals_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "professional_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
