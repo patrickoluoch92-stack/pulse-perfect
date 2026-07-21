@@ -26,14 +26,21 @@ function ProDashboard() {
   const me = useQuery({ queryKey: ["my-professional"], queryFn: () => fetchMe() });
 
   if (me.isLoading) return <div className="p-8 text-muted-foreground">Loading…</div>;
+
+  // Customer-only view when user has no professional profile.
   if (!me.data) {
     return (
-      <div className="mx-auto max-w-2xl space-y-3 p-6 text-center">
-        <h1 className="text-2xl font-bold">You're not a professional yet</h1>
-        <p className="text-muted-foreground">Create your Professional profile to start receiving bookings.</p>
-        <Button asChild>
-          <Link to="/professionals/register">Register as a professional</Link>
-        </Button>
+      <div className="mx-auto max-w-4xl space-y-6 p-4 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold">My Professional Bookings</h1>
+            <p className="text-muted-foreground">Track requests, pay deposits, and leave reviews.</p>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/professionals/register">Register as a professional</Link>
+          </Button>
+        </div>
+        <CustomerBookingsPanel />
       </div>
     );
   }
@@ -64,12 +71,16 @@ function ProDashboard() {
         <TabsList>
           <TabsTrigger value="bookings">Bookings</TabsTrigger>
           <TabsTrigger value="messages">Messages</TabsTrigger>
+          <TabsTrigger value="customer">My purchases</TabsTrigger>
         </TabsList>
         <TabsContent value="bookings" className="mt-4">
           <BookingsPanel />
         </TabsContent>
         <TabsContent value="messages" className="mt-4">
           <MessagesPanel proId={pro.id} />
+        </TabsContent>
+        <TabsContent value="customer" className="mt-4">
+          <CustomerBookingsPanel />
         </TabsContent>
       </Tabs>
     </div>
