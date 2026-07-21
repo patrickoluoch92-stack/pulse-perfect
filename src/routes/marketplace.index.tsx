@@ -127,14 +127,21 @@ function MarketplaceListing() {
             <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
               ← HostPulse
             </Link>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <Link to="/rentals" className="text-sm text-primary hover:underline">
                 Browse rental houses →
+              </Link>
+              <Link to="/mobility" className="text-sm text-primary hover:underline">
+                Car rentals →
+              </Link>
+              <Link to="/professionals" className="text-sm text-primary hover:underline">
+                Professionals →
               </Link>
               <Link to="/marketplace/map" className="flex items-center gap-1 text-sm text-primary hover:underline">
                 <MapPin className="h-4 w-4" /> Map view
               </Link>
             </div>
+
           </div>
           <h1 className="mt-4 font-display text-4xl font-semibold tracking-tight md:text-5xl">
             Stay anywhere in Kenya
