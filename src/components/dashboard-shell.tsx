@@ -55,6 +55,7 @@ const groups: NavGroup[] = [
       { to: "/onboarding", label: "List a property", icon: Rocket },
       { to: "/listings/partners", label: "Partner Sync", icon: Plug },
       { to: "/bookings", label: "My Bookings", icon: Ticket },
+      { to: "/professionals/dashboard", label: "Professionals", icon: Users },
       { to: "/wishlist", label: "Wishlist", icon: Sparkles },
     ],
   },
