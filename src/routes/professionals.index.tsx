@@ -95,7 +95,12 @@ function ProfessionalsIndex() {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
-            <Button asChild>
+            <Button onClick={() => results.refetch()}>
+              <Search className="mr-1 h-4 w-4" /> Search
+            </Button>
+          </div>
+          <div className="mt-3 flex justify-end">
+            <Button asChild variant="outline" size="sm">
               <Link to="/professionals/register">List your services</Link>
             </Button>
           </div>
