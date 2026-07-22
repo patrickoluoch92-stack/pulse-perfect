@@ -109,14 +109,15 @@ function InvoicesPage() {
       ) : rows.length === 0 ? (
         <EmptyState
           title="No invoices yet"
-          description="Generate one from an existing reservation or create a blank invoice."
+          description="Generate one from an existing reservation to bill your guest."
           icon={FileText}
           action={
-            <Button asChild>
-              <Link to="/invoices/new"><Plus className="mr-2 h-4 w-4" aria-hidden /> New invoice</Link>
+            <Button onClick={() => setGenOpen(true)} disabled={!orgId || (reservations.data?.length ?? 0) === 0}>
+              <Plus className="mr-2 h-4 w-4" aria-hidden /> New invoice
             </Button>
           }
         />
+
       ) : (
         <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
           <table className="w-full text-sm">
