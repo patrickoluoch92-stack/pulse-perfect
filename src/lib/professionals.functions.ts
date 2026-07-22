@@ -83,6 +83,8 @@ export const searchProfessionals = createServerFn({ method: "POST" })
     }
     if (data.countyCode) query = query.eq("county_code", data.countyCode);
     if (data.town) query = query.ilike("town", `%${sanitizePostgrestTerm(data.town, 40)}%`);
+    if (data.city) query = query.ilike("city", `%${sanitizePostgrestTerm(data.city, 40)}%`);
+    if (data.area) query = query.ilike("area", `%${sanitizePostgrestTerm(data.area, 40)}%`);
     if (data.minRating) query = query.gte("avg_rating", data.minRating);
     if (data.verifiedOnly) query = query.eq("is_verified", true);
 
