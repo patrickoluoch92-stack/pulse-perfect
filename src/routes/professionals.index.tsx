@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { searchProfessionals, listProfessionalCategories } from "@/lib/professionals.functions";
+import { listCounties } from "@/lib/marketplace.functions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,17 +33,30 @@ export const Route = createFileRoute("/professionals/")({
 function ProfessionalsIndex() {
   const fetchCats = useServerFn(listProfessionalCategories);
   const fetchSearch = useServerFn(searchProfessionals);
+  const fetchCounties = useServerFn(listCounties);
   const [q, setQ] = useState("");
   const [category, setCategory] = useState<string | undefined>();
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [countyCode, setCountyCode] = useState<string>("");
+  const [location, setLocation] = useState("");
   const debouncedQ = useDebouncedValue(q, 300);
+  const debouncedLocation = useDebouncedValue(location, 300);
 
   const cats = useQuery({ queryKey: ["pro-cats"], queryFn: () => fetchCats() });
+  const counties = useQuery({ queryKey: ["counties"], queryFn: () => fetchCounties() });
   const results = useQuery({
-    queryKey: ["pro-search", debouncedQ, category, verifiedOnly],
+    queryKey: ["pro-search", debouncedQ, category, verifiedOnly, countyCode, debouncedLocation],
     queryFn: () =>
       fetchSearch({
-        data: { q: debouncedQ || undefined, categorySlug: category, verifiedOnly, limit: 24, offset: 0 },
+        data: {
+          q: debouncedQ || undefined,
+          categorySlug: category,
+          verifiedOnly,
+          countyCode: countyCode || undefined,
+          location: debouncedLocation || undefined,
+          limit: 24,
+          offset: 0,
+        },
       }),
   });
 
@@ -54,16 +68,33 @@ function ProfessionalsIndex() {
           <p className="mt-2 text-muted-foreground">
             Book verified photographers, event planners, guides, DJs, movers and more across Kenya.
           </p>
-          <div className="mt-6 flex flex-col gap-3 md:flex-row">
-            <div className="relative flex-1">
+          <div className="mt-6 grid gap-3 md:grid-cols-[1fr_200px_200px_auto]">
+            <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 className="pl-9"
-                placeholder="Try 'wedding photographer in Nakuru'"
+                placeholder="Try 'wedding photographer'"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
               />
             </div>
+            <select
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={countyCode}
+              onChange={(e) => setCountyCode(e.target.value)}
+            >
+              <option value="">All counties</option>
+              {(counties.data ?? []).map((c: any) => (
+                <option key={c.code} value={c.code}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <Input
+              placeholder="Town, city or area"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
             <Button asChild>
               <Link to="/professionals/register">List your services</Link>
             </Button>

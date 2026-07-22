@@ -50,6 +50,9 @@ const SearchInput = z.object({
   categorySlug: z.string().max(80).optional(),
   countyCode: z.string().max(10).optional(),
   town: z.string().max(80).optional(),
+  city: z.string().max(80).optional(),
+  area: z.string().max(80).optional(),
+  location: z.string().max(80).optional(),
   minRating: z.number().min(0).max(5).optional(),
   verifiedOnly: z.boolean().optional(),
   limit: z.number().int().min(1).max(48).default(24),
@@ -81,6 +84,12 @@ export const searchProfessionals = createServerFn({ method: "POST" })
     }
     if (data.countyCode) query = query.eq("county_code", data.countyCode);
     if (data.town) query = query.ilike("town", `%${sanitizePostgrestTerm(data.town, 40)}%`);
+    if (data.city) query = query.ilike("city", `%${sanitizePostgrestTerm(data.city, 40)}%`);
+    if (data.area) query = query.ilike("area", `%${sanitizePostgrestTerm(data.area, 40)}%`);
+    if (data.location) {
+      const loc = sanitizePostgrestTerm(data.location, 40);
+      if (loc) query = query.or(`town.ilike.%${loc}%,city.ilike.%${loc}%,area.ilike.%${loc}%`);
+    }
     if (data.minRating) query = query.gte("avg_rating", data.minRating);
     if (data.verifiedOnly) query = query.eq("is_verified", true);
 
