@@ -6307,6 +6307,63 @@ export type Database = {
         }
         Relationships: []
       }
+      public_external_listings: {
+        Row: {
+          country_code: string | null
+          county_code: string | null
+          currency: string | null
+          deeplink_url: string | null
+          external_id: string | null
+          id: string | null
+          image_url: string | null
+          last_synced_at: string | null
+          latitude: number | null
+          longitude: number | null
+          name: string | null
+          price_per_night: number | null
+          provider: string | null
+          rating: number | null
+          review_count: number | null
+          town: string | null
+        }
+        Insert: {
+          country_code?: string | null
+          county_code?: string | null
+          currency?: string | null
+          deeplink_url?: string | null
+          external_id?: string | null
+          id?: string | null
+          image_url?: string | null
+          last_synced_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          price_per_night?: number | null
+          provider?: string | null
+          rating?: number | null
+          review_count?: number | null
+          town?: string | null
+        }
+        Update: {
+          country_code?: string | null
+          county_code?: string | null
+          currency?: string | null
+          deeplink_url?: string | null
+          external_id?: string | null
+          id?: string | null
+          image_url?: string | null
+          last_synced_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          price_per_night?: number | null
+          provider?: string | null
+          rating?: number | null
+          review_count?: number | null
+          town?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_organization_invitation: {

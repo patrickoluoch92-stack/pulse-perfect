@@ -64,7 +64,7 @@ export const listPartnerListings = createServerFn({ method: "GET" })
       process.env.SUPABASE_PUBLISHABLE_KEY!,
       { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
     );
-    let q = (supa.from("external_listings" as never) as any)
+    let q = (supa.from("public_external_listings" as never) as any)
       .select(
         "provider,external_id,name,town,county_code,country_code,image_url,price_per_night,currency,rating,review_count,deeplink_url",
       )
@@ -109,7 +109,7 @@ export const searchExternalInventory = createServerFn({ method: "POST" })
       process.env.SUPABASE_PUBLISHABLE_KEY!,
       { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
     );
-    const { data: rows } = await (supa.from("external_listings" as never) as any)
+    const { data: rows } = await (supa.from("public_external_listings" as never) as any)
       .select(
         "provider,external_id,name,town,county_code,country_code,image_url,price_per_night,currency,rating,review_count,deeplink_url",
       )
