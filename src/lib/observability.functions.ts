@@ -32,7 +32,7 @@ export const reportAppError = createServerFn({ method: "POST" })
     // Derive identity strictly from the authenticated session — never trust
     // client-supplied userId / tenantId (would allow log-poisoning of other orgs).
     const authedId = context.userId;
-    let userId: string | null = authedId;
+    const userId: string | null = authedId;
     let orgId: string | null = null;
     let inboundCorrelation: string | null = data.correlationId ?? null;
 

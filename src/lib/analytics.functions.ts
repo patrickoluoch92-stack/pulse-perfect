@@ -74,7 +74,7 @@ export const getAnalytics = createServerFn({ method: "GET" })
 
     let occupiedNights = 0;
     let revenue = 0;
-    let bookings = reservations.length;
+    const bookings = reservations.length;
     const sourceBreakdown: Record<string, number> = {};
     const propertyRevenue: Record<string, number> = {};
 

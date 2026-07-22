@@ -71,10 +71,12 @@ Deno.test({
   name: "RLS: anon INSERT into mpesa_transactions is rejected",
   ignore: skip,
   fn: async () => {
-    const { error } = await anon().from("mpesa_transactions").insert({
-      checkout_request_id: `rls-test-${crypto.randomUUID()}`,
-      status: "PENDING",
-    });
+    const { error } = await anon()
+      .from("mpesa_transactions")
+      .insert({
+        checkout_request_id: `rls-test-${crypto.randomUUID()}`,
+        status: "PENDING",
+      });
     assert(error, "anon insert should have failed but did not");
     assert(
       /row-level security|permission|denied|policy/i.test(error.message),

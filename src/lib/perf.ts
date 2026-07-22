@@ -39,7 +39,7 @@ function send(metric: Metric) {
         headers: { "content-type": "application/json" },
       }).catch(() => {});
     }
-    // eslint-disable-next-line no-console
+
     if (import.meta.env.DEV)
       console.debug("[perf]", metric.name, Math.round(metric.value), metric.rating);
   } catch {

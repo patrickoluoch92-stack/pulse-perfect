@@ -688,7 +688,7 @@ export const searchMobilityVehicles = createServerFn({ method: "POST" })
       if (clean)
         q = q.or(`make.ilike.%${clean}%,model.ilike.%${clean}%,description.ilike.%${clean}%`);
     }
-    let { data: rows, error } = await q;
+    const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     let vehicles = rows ?? [];
     if (data.priceMaxKes) {

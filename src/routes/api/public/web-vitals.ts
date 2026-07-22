@@ -9,7 +9,6 @@ export const Route = createFileRoute("/api/public/web-vitals")({
         try {
           const payload = await request.json().catch(() => null);
           if (payload && typeof payload === "object") {
-            // eslint-disable-next-line no-console
             console.log("[web-vitals]", JSON.stringify(payload));
           }
         } catch {

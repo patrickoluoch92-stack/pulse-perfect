@@ -46,7 +46,7 @@ export const getAiOpsOverview = createServerFn({ method: "GET" })
         dead: 0,
       };
     }
-    let latencySum: Record<string, { n: number; ms: number }> = {};
+    const latencySum: Record<string, { n: number; ms: number }> = {};
     for (const r of recentRuns ?? []) {
       const s = summaryBySlug[r.agent_slug];
       if (!s) continue;

@@ -171,23 +171,19 @@ export const getExecutiveOverview = createServerFn({ method: "GET" })
 
     // Activity feed (recent bookings + new users + errors, merged)
     const activity = [
-      ...bList
-        .slice(-15)
-        .map((b) => ({
-          type: "booking",
-          at: b.created_at,
-          message: `Booking ${b.status} · KES ${Number(b.total_amount ?? 0).toLocaleString()}`,
-        })),
+      ...bList.slice(-15).map((b) => ({
+        type: "booking",
+        at: b.created_at,
+        message: `Booking ${b.status} · KES ${Number(b.total_amount ?? 0).toLocaleString()}`,
+      })),
       ...((users.data ?? []) as any[])
         .slice(-10)
         .map((u) => ({ type: "signup", at: u.created_at, message: "New user registered" })),
-      ...errRecent
-        .slice(0, 10)
-        .map((e) => ({
-          type: "error",
-          at: e.created_at,
-          message: `System ${e.severity ?? "info"}`,
-        })),
+      ...errRecent.slice(0, 10).map((e) => ({
+        type: "error",
+        at: e.created_at,
+        message: `System ${e.severity ?? "info"}`,
+      })),
     ]
       .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
       .slice(0, 25);
