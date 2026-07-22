@@ -4,10 +4,18 @@ import { getMyPermissions } from "@/lib/rbac.functions";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 
 export type Permission =
-  | "bookings.read" | "bookings.write" | "bookings.refund"
-  | "pricing.write" | "availability.write" | "reviews.moderate"
-  | "finance.read" | "finance.payout" | "marketing.write"
-  | "guests.pii.read" | "team.invite" | "reports.read";
+  | "bookings.read"
+  | "bookings.write"
+  | "bookings.refund"
+  | "pricing.write"
+  | "availability.write"
+  | "reviews.moderate"
+  | "finance.read"
+  | "finance.payout"
+  | "marketing.write"
+  | "guests.pii.read"
+  | "team.invite"
+  | "reports.read";
 
 /**
  * Client-side permission hook. UI-only; the server re-checks everything.

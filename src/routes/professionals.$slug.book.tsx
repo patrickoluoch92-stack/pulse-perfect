@@ -26,7 +26,10 @@ function BookRoute() {
   const fetchOne = useServerFn(getProfessionalBySlug);
   const create = useServerFn(createProfessionalBooking);
 
-  const q = useQuery({ queryKey: ["professional", slug], queryFn: () => fetchOne({ data: { slug } }) });
+  const q = useQuery({
+    queryKey: ["professional", slug],
+    queryFn: () => fetchOne({ data: { slug } }),
+  });
   const [form, setForm] = useState<Record<string, any>>({ event_date: "" });
   const [submitting, setSubmitting] = useState(false);
 
@@ -77,7 +80,11 @@ function BookRoute() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-4 md:p-6">
       <div>
-        <Link to="/professionals/$slug" params={{ slug }} className="text-sm text-primary underline">
+        <Link
+          to="/professionals/$slug"
+          params={{ slug }}
+          className="text-sm text-primary underline"
+        >
           ← Back to {p.business_name}
         </Link>
         <h1 className="mt-2 text-2xl font-bold">Book {p.business_name}</h1>
@@ -88,7 +95,9 @@ function BookRoute() {
 
       {(data.services.length > 0 || data.packages.length > 0) && (
         <Card>
-          <CardHeader><CardTitle className="text-base">Choose a service or package</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">Choose a service or package</CardTitle>
+          </CardHeader>
           <CardContent>
             <RadioGroup
               value={form._selId ?? ""}
@@ -99,25 +108,41 @@ function BookRoute() {
               className="space-y-2"
             >
               {data.services.map((s: any) => (
-                <label key={s.id} className="flex items-start gap-3 rounded border p-3 cursor-pointer">
+                <label
+                  key={s.id}
+                  className="flex items-start gap-3 rounded border p-3 cursor-pointer"
+                >
                   <RadioGroupItem value={s.id} />
                   <div className="flex-1">
                     <div className="font-medium">{s.title}</div>
-                    {s.description && <div className="text-sm text-muted-foreground">{s.description}</div>}
+                    {s.description && (
+                      <div className="text-sm text-muted-foreground">{s.description}</div>
+                    )}
                   </div>
                   {s.base_price != null && (
-                    <div className="text-sm font-medium">{p.currency ?? "KES"} {Number(s.base_price).toLocaleString()}</div>
+                    <div className="text-sm font-medium">
+                      {p.currency ?? "KES"} {Number(s.base_price).toLocaleString()}
+                    </div>
                   )}
                 </label>
               ))}
               {data.packages.map((pk: any) => (
-                <label key={pk.id} className="flex items-start gap-3 rounded border p-3 cursor-pointer">
+                <label
+                  key={pk.id}
+                  className="flex items-start gap-3 rounded border p-3 cursor-pointer"
+                >
                   <RadioGroupItem value={pk.id} />
                   <div className="flex-1">
-                    <div className="font-medium">{pk.name} <span className="text-xs text-muted-foreground">(package)</span></div>
-                    {pk.description && <div className="text-sm text-muted-foreground">{pk.description}</div>}
+                    <div className="font-medium">
+                      {pk.name} <span className="text-xs text-muted-foreground">(package)</span>
+                    </div>
+                    {pk.description && (
+                      <div className="text-sm text-muted-foreground">{pk.description}</div>
+                    )}
                   </div>
-                  <div className="text-sm font-medium">{p.currency ?? "KES"} {Number(pk.price).toLocaleString()}</div>
+                  <div className="text-sm font-medium">
+                    {p.currency ?? "KES"} {Number(pk.price).toLocaleString()}
+                  </div>
                 </label>
               ))}
             </RadioGroup>
@@ -126,33 +151,62 @@ function BookRoute() {
       )}
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Event details</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-base">Event details</CardTitle>
+        </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-1.5">
               <Label>Date *</Label>
-              <Input type="date" value={form.event_date ?? ""} onChange={(e) => set("event_date", e.target.value)} />
+              <Input
+                type="date"
+                value={form.event_date ?? ""}
+                onChange={(e) => set("event_date", e.target.value)}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Time</Label>
-              <Input type="time" value={form.event_time ?? ""} onChange={(e) => set("event_time", e.target.value)} />
+              <Input
+                type="time"
+                value={form.event_time ?? ""}
+                onChange={(e) => set("event_time", e.target.value)}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Duration (hours)</Label>
-              <Input type="number" min={0} value={form.duration_hours ?? ""} onChange={(e) => set("duration_hours", e.target.value)} />
+              <Input
+                type="number"
+                min={0}
+                value={form.duration_hours ?? ""}
+                onChange={(e) => set("duration_hours", e.target.value)}
+              />
             </div>
           </div>
           <div className="space-y-1.5">
             <Label>Location</Label>
-            <Input value={form.location_text ?? ""} onChange={(e) => set("location_text", e.target.value)} placeholder="Venue, address or area" />
+            <Input
+              value={form.location_text ?? ""}
+              onChange={(e) => set("location_text", e.target.value)}
+              placeholder="Venue, address or area"
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Guest count</Label>
-            <Input type="number" min={0} value={form.guest_count ?? ""} onChange={(e) => set("guest_count", e.target.value)} />
+            <Input
+              type="number"
+              min={0}
+              value={form.guest_count ?? ""}
+              onChange={(e) => set("guest_count", e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Requirements</Label>
-            <Textarea rows={5} value={form.requirements ?? ""} onChange={(e) => set("requirements", e.target.value)} placeholder="Tell the professional what you need." />
+            <Textarea
+              rows={5}
+              value={form.requirements ?? ""}
+              onChange={(e) => set("requirements", e.target.value)}
+              placeholder="Tell the professional what you need."
+            />
           </div>
         </CardContent>
       </Card>

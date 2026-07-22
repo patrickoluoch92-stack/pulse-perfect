@@ -43,7 +43,8 @@ export async function autoCreateTurnoverTasks() {
       .select("user_id, org_id")
       .in("user_id", ownerIds);
     const orgByOwner = new Map<string, string>();
-    for (const m of memberships ?? []) if (!orgByOwner.has(m.user_id)) orgByOwner.set(m.user_id, m.org_id);
+    for (const m of memberships ?? [])
+      if (!orgByOwner.has(m.user_id)) orgByOwner.set(m.user_id, m.org_id);
     for (const p of props ?? []) {
       const org = orgByOwner.get(p.owner_id);
       if (org) orgByProp.set(p.id, { org_id: org, title: p.title });

@@ -58,7 +58,8 @@ export async function aiVisionJSON<T>(opts: {
   schema: { name: string; schema: Record<string, unknown> };
   model?: string;
 }): Promise<T> {
-  const imageUrl = "url" in opts.image ? opts.image.url : `data:${opts.image.mime};base64,${opts.image.base64}`;
+  const imageUrl =
+    "url" in opts.image ? opts.image.url : `data:${opts.image.mime};base64,${opts.image.base64}`;
   const body = {
     model: opts.model ?? "google/gemini-2.5-flash",
     messages: [
@@ -116,7 +117,10 @@ export async function aiJSON<T>(opts: {
  * Generate a single embedding vector. Defaults to google/gemini-embedding-2 (3072-dim).
  * Truncates input at ~7500 chars (safe under the 2048-token cap after tokenization).
  */
-export async function aiEmbed(text: string, model: string = DEFAULT_EMBED_MODEL): Promise<number[]> {
+export async function aiEmbed(
+  text: string,
+  model: string = DEFAULT_EMBED_MODEL,
+): Promise<number[]> {
   const clean = (text ?? "").trim().slice(0, 7500);
   if (!clean) throw new Error("aiEmbed: empty input");
   const res = await fetch(EMBED_URL, {
@@ -134,7 +138,10 @@ export async function aiEmbed(text: string, model: string = DEFAULT_EMBED_MODEL)
 /**
  * Batch embed up to 100 inputs in a single Gemini request. Preserves input order.
  */
-export async function aiEmbedBatch(texts: string[], model: string = DEFAULT_EMBED_MODEL): Promise<number[][]> {
+export async function aiEmbedBatch(
+  texts: string[],
+  model: string = DEFAULT_EMBED_MODEL,
+): Promise<number[][]> {
   if (!texts.length) return [];
   if (texts.length > 100) throw new Error("aiEmbedBatch: max 100 inputs per call");
   const cleaned = texts.map((t) => (t ?? "").trim().slice(0, 7500) || " ");
@@ -147,7 +154,8 @@ export async function aiEmbedBatch(texts: string[], model: string = DEFAULT_EMBE
   const json = (await res.json()) as { data?: Array<{ index?: number; embedding?: number[] }> };
   const out: number[][] = new Array(cleaned.length);
   for (const row of json?.data ?? []) {
-    if (typeof row.index === "number" && Array.isArray(row.embedding)) out[row.index] = row.embedding;
+    if (typeof row.index === "number" && Array.isArray(row.embedding))
+      out[row.index] = row.embedding;
   }
   return out;
 }

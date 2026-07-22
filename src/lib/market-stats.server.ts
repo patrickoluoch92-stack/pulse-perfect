@@ -32,9 +32,14 @@ export async function rollupCountyMarketStats() {
   const since30 = new Date(Date.now() - 30 * 86400_000).toISOString();
 
   const [propsRes, discoveredRes, bookingsRes] = await Promise.all([
-    supabase.from("marketplace_properties").select("id, county, property_type, base_price, is_published"),
+    supabase
+      .from("marketplace_properties")
+      .select("id, county, property_type, base_price, is_published"),
     supabase.from("discovered_properties").select("id, county, property_type, status"),
-    supabase.from("marketplace_bookings").select("id, property_id, total_amount, created_at").gte("created_at", since30),
+    supabase
+      .from("marketplace_bookings")
+      .select("id, property_id, total_amount, created_at")
+      .gte("created_at", since30),
   ]);
 
   const props = (propsRes.data ?? []).filter((p: any) => p.is_published);
@@ -62,7 +67,13 @@ export async function rollupCountyMarketStats() {
     if (!county) return null;
     const key = `${county.toLowerCase()}::${category ?? "any"}`;
     if (!buckets.has(key)) {
-      buckets.set(key, { county: county.toLowerCase(), category, listings: [], discovered: [], bookings: [] });
+      buckets.set(key, {
+        county: county.toLowerCase(),
+        category,
+        listings: [],
+        discovered: [],
+        bookings: [],
+      });
     }
     return key;
   }
@@ -91,7 +102,9 @@ export async function rollupCountyMarketStats() {
 
   const rows: any[] = [];
   for (const bkt of buckets.values()) {
-    const prices = bkt.listings.map((l) => Number(l.base_price)).filter((x) => Number.isFinite(x) && x > 0);
+    const prices = bkt.listings
+      .map((l) => Number(l.base_price))
+      .filter((x) => Number.isFinite(x) && x > 0);
     const gmv = bkt.bookings.reduce((a, b) => a + Number(b.total_amount ?? 0), 0);
     const listingCount = bkt.listings.length;
     const bookingCount = bkt.bookings.length;
@@ -155,7 +168,14 @@ export async function rollupHeatmapCells() {
 
   const cells = new Map<
     string,
-    { latBucket: number; lngBucket: number; county: string | null; prices: number[]; listings: number; bookings: number }
+    {
+      latBucket: number;
+      lngBucket: number;
+      county: string | null;
+      prices: number[];
+      listings: number;
+      bookings: number;
+    }
   >();
 
   for (const p of (props ?? []).filter((x: any) => x.is_published)) {
@@ -177,9 +197,9 @@ export async function rollupHeatmapCells() {
     cells.set(key, cell);
   }
 
-
   let maxIntensity = 1;
-  for (const c of cells.values()) maxIntensity = Math.max(maxIntensity, c.listings + c.bookings * 2);
+  for (const c of cells.values())
+    maxIntensity = Math.max(maxIntensity, c.listings + c.bookings * 2);
 
   const rows = Array.from(cells.entries()).map(([key, c]) => ({
     cell_key: key,

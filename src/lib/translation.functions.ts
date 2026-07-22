@@ -46,8 +46,10 @@ Return JSON: { "translations": string[] } in the same order.`;
       },
     });
 
-
-    if (!Array.isArray(result?.translations) || result.translations.length !== data.strings.length) {
+    if (
+      !Array.isArray(result?.translations) ||
+      result.translations.length !== data.strings.length
+    ) {
       throw new Error("Translation output shape mismatch");
     }
     return { translations: result.translations, locale: data.targetLocale };

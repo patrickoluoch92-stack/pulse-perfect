@@ -80,7 +80,13 @@ const listSchema = z
     source: z.string().max(255).optional().nullable(),
     level: z.enum(["error", "warn", "info"]).optional().nullable(),
     search: z.string().max(200).optional().nullable(),
-    sinceMinutes: z.number().int().min(1).max(60 * 24 * 30).optional().nullable(),
+    sinceMinutes: z
+      .number()
+      .int()
+      .min(1)
+      .max(60 * 24 * 30)
+      .optional()
+      .nullable(),
     limit: z.number().int().min(1).max(500).optional(),
   })
   .partial()

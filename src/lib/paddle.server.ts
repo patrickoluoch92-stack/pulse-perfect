@@ -27,7 +27,11 @@ export function getPaddleClient(env: PaddleEnv): Paddle {
   });
 }
 
-export async function gatewayFetch(env: PaddleEnv, path: string, init?: RequestInit): Promise<Response> {
+export async function gatewayFetch(
+  env: PaddleEnv,
+  path: string,
+  init?: RequestInit,
+): Promise<Response> {
   const connectionApiKey = getConnectionApiKey(env);
   const lovableApiKey = getEnv("LOVABLE_API_KEY");
   return fetch(`${GATEWAY_BASE_URL}${path}`, {
@@ -57,7 +61,9 @@ export async function verifyWebhook(req: Request, env: PaddleEnv) {
 }
 
 /** Map Paddle product external_id → app plan enum. */
-export function planFromProductExternalId(externalId: string | null | undefined): "professional" | "business" | null {
+export function planFromProductExternalId(
+  externalId: string | null | undefined,
+): "professional" | "business" | null {
   if (externalId === "professional_plan") return "professional";
   if (externalId === "business_plan") return "business";
   return null;

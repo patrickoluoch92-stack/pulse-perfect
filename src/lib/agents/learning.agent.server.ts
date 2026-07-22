@@ -11,10 +11,18 @@ export async function run(_payload: Record<string, unknown>) {
     .gte("created_at", since)
     .limit(5000);
 
-  const perUser = new Map<string, { views: number; saves: number; books: number; lastSeen: string }>();
+  const perUser = new Map<
+    string,
+    { views: number; saves: number; books: number; lastSeen: string }
+  >();
   for (const ev of events ?? []) {
     if (!ev.user_id) continue;
-    const bucket = perUser.get(ev.user_id) ?? { views: 0, saves: 0, books: 0, lastSeen: ev.created_at };
+    const bucket = perUser.get(ev.user_id) ?? {
+      views: 0,
+      saves: 0,
+      books: 0,
+      lastSeen: ev.created_at,
+    };
     if (ev.event_type === "view" || ev.event_type === "click") bucket.views += 1;
     else if (ev.event_type === "save") bucket.saves += 1;
     else if (ev.event_type === "book") bucket.books += 1;

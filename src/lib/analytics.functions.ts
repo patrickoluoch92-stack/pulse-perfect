@@ -12,8 +12,12 @@ function daysBetween(a: string, b: string) {
   const ms = new Date(b + "T00:00:00Z").getTime() - new Date(a + "T00:00:00Z").getTime();
   return Math.max(0, Math.round(ms / 86_400_000));
 }
-function maxDate(a: string, b: string) { return a > b ? a : b; }
-function minDate(a: string, b: string) { return a < b ? a : b; }
+function maxDate(a: string, b: string) {
+  return a > b ? a : b;
+}
+function minDate(a: string, b: string) {
+  return a < b ? a : b;
+}
 function addDays(d: string, n: number) {
   const dt = new Date(d + "T00:00:00Z");
   dt.setUTCDate(dt.getUTCDate() + n);
@@ -110,10 +114,12 @@ export const getAnalytics = createServerFn({ method: "GET" })
         .from("properties")
         .select("id, name")
         .in("id", propIds);
-      propertyChart = (props ?? []).map((p) => ({
-        name: p.name,
-        revenue: Math.round((propertyRevenue[p.id] ?? 0) * 100) / 100,
-      })).sort((a, b) => b.revenue - a.revenue);
+      propertyChart = (props ?? [])
+        .map((p) => ({
+          name: p.name,
+          revenue: Math.round((propertyRevenue[p.id] ?? 0) * 100) / 100,
+        }))
+        .sort((a, b) => b.revenue - a.revenue);
     }
 
     return {

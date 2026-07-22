@@ -20,7 +20,14 @@ export type Permission =
   | "reports.read";
 
 export const PLATFORM_ROLES: AppRole[] = ["super_admin", "admin", "moderator", "support", "user"];
-export const ORG_ROLES: OrgRole[] = ["owner", "enterprise_admin", "admin", "manager", "staff", "guest"];
+export const ORG_ROLES: OrgRole[] = [
+  "owner",
+  "enterprise_admin",
+  "admin",
+  "manager",
+  "staff",
+  "guest",
+];
 
 export class ForbiddenError extends Error {
   status = 403;
@@ -52,7 +59,11 @@ export async function requirePlatformRole(ctx: Ctx, roles: readonly AppRole[]): 
   }
 }
 
-export async function hasOrgRole(ctx: Ctx, orgId: string, roles: readonly OrgRole[]): Promise<boolean> {
+export async function hasOrgRole(
+  ctx: Ctx,
+  orgId: string,
+  roles: readonly OrgRole[],
+): Promise<boolean> {
   const { data } = await ctx.supabase
     .from("organization_members")
     .select("role")
@@ -63,7 +74,11 @@ export async function hasOrgRole(ctx: Ctx, orgId: string, roles: readonly OrgRol
   return Boolean(data);
 }
 
-export async function requireOrgRole(ctx: Ctx, orgId: string, roles: readonly OrgRole[]): Promise<void> {
+export async function requireOrgRole(
+  ctx: Ctx,
+  orgId: string,
+  roles: readonly OrgRole[],
+): Promise<void> {
   // Platform admins bypass org role checks.
   if (await hasPlatformRole(ctx, ["admin", "super_admin"])) return;
   if (!(await hasOrgRole(ctx, orgId, roles))) {
@@ -72,7 +87,11 @@ export async function requireOrgRole(ctx: Ctx, orgId: string, roles: readonly Or
 }
 
 /** Resolves a fine-grained permission via the has_permission SECURITY DEFINER function. */
-export async function hasPermission(ctx: Ctx, orgId: string, permission: Permission): Promise<boolean> {
+export async function hasPermission(
+  ctx: Ctx,
+  orgId: string,
+  permission: Permission,
+): Promise<boolean> {
   const { data, error } = await ctx.supabase.rpc("has_permission", {
     _user_id: ctx.userId,
     _org_id: orgId,
@@ -82,7 +101,11 @@ export async function hasPermission(ctx: Ctx, orgId: string, permission: Permiss
   return data === true;
 }
 
-export async function requirePermission(ctx: Ctx, orgId: string, permission: Permission): Promise<void> {
+export async function requirePermission(
+  ctx: Ctx,
+  orgId: string,
+  permission: Permission,
+): Promise<void> {
   if (!(await hasPermission(ctx, orgId, permission))) {
     throw new ForbiddenError(`missing permission ${permission}`);
   }

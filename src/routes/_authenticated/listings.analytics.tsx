@@ -12,7 +12,10 @@ import { LoadingState, EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/listings/analytics")({
   head: () => ({
-    meta: authPageMeta({ title: "Marketplace analytics", description: "Bookings, revenue and occupancy for your listings." }),
+    meta: authPageMeta({
+      title: "Marketplace analytics",
+      description: "Bookings, revenue and occupancy for your listings.",
+    }),
   }),
   component: AnalyticsPage,
 });
@@ -36,7 +39,10 @@ function AnalyticsPage() {
     <DashboardShell>
       <div className="mx-auto max-w-6xl space-y-6 p-6">
         <div>
-          <Link to="/listings" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/listings"
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="mr-1 h-4 w-4" /> All listings
           </Link>
           <h1 className="mt-2 flex items-center gap-2 font-display text-3xl font-semibold">
@@ -52,10 +58,30 @@ function AnalyticsPage() {
         {s && (
           <>
             <div className="grid gap-4 md:grid-cols-4">
-              <Card icon={BedDouble} label="Properties" value={`${s.approvedProperties}/${s.totalProperties}`} hint="Approved / total" />
-              <Card icon={CalendarCheck} label="Confirmed bookings" value={String(s.confirmedBookings)} hint={`${s.pendingBookings} pending`} />
-              <Card icon={Coins} label="Gross revenue" value={`KES ${Number(s.grossRevenue).toLocaleString()}`} hint="From confirmed & completed" />
-              <Card icon={BarChart3} label="Occupancy (30d)" value={`${s.occupancy30}%`} hint={`${s.last30Bookings} bookings last 30d`} />
+              <Card
+                icon={BedDouble}
+                label="Properties"
+                value={`${s.approvedProperties}/${s.totalProperties}`}
+                hint="Approved / total"
+              />
+              <Card
+                icon={CalendarCheck}
+                label="Confirmed bookings"
+                value={String(s.confirmedBookings)}
+                hint={`${s.pendingBookings} pending`}
+              />
+              <Card
+                icon={Coins}
+                label="Gross revenue"
+                value={`KES ${Number(s.grossRevenue).toLocaleString()}`}
+                hint="From confirmed & completed"
+              />
+              <Card
+                icon={BarChart3}
+                label="Occupancy (30d)"
+                value={`${s.occupancy30}%`}
+                hint={`${s.last30Bookings} bookings last 30d`}
+              />
             </div>
 
             <section className="rounded-xl border bg-card">
@@ -64,7 +90,11 @@ function AnalyticsPage() {
               </header>
               {analytics.data && analytics.data.perProperty.length === 0 && (
                 <div className="p-6">
-                  <EmptyState icon={BedDouble} title="No listings yet" description="Publish a property to see per-listing performance here." />
+                  <EmptyState
+                    icon={BedDouble}
+                    title="No listings yet"
+                    description="Publish a property to see per-listing performance here."
+                  />
                 </div>
               )}
               {analytics.data && analytics.data.perProperty.length > 0 && (
@@ -82,11 +112,17 @@ function AnalyticsPage() {
                     {analytics.data.perProperty.map((p) => (
                       <tr key={p.id} className="border-t">
                         <td className="px-4 py-3">
-                          <Link to="/listings/$id" params={{ id: p.id }} className="font-medium hover:underline">
+                          <Link
+                            to="/listings/$id"
+                            params={{ id: p.id }}
+                            className="font-medium hover:underline"
+                          >
                             {p.name}
                           </Link>
                           {p.is_featured && (
-                            <Badge className="ml-2 bg-yellow-500 text-yellow-50 hover:bg-yellow-500">Featured</Badge>
+                            <Badge className="ml-2 bg-yellow-500 text-yellow-50 hover:bg-yellow-500">
+                              Featured
+                            </Badge>
                           )}
                         </td>
                         <td className="px-4 py-3 capitalize text-muted-foreground">{p.status}</td>
@@ -94,7 +130,10 @@ function AnalyticsPage() {
                           {p.rating_count > 0 ? (
                             <span className="inline-flex items-center gap-1">
                               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              {Number(p.rating_avg).toFixed(1)} <span className="text-xs text-muted-foreground">({p.rating_count})</span>
+                              {Number(p.rating_avg).toFixed(1)}{" "}
+                              <span className="text-xs text-muted-foreground">
+                                ({p.rating_count})
+                              </span>
                             </span>
                           ) : (
                             <span className="text-xs text-muted-foreground">No reviews</span>
@@ -118,9 +157,15 @@ function AnalyticsPage() {
 }
 
 function Card({
-  icon: Icon, label, value, hint,
+  icon: Icon,
+  label,
+  value,
+  hint,
 }: {
-  icon: any; label: string; value: string; hint?: string;
+  icon: any;
+  label: string;
+  value: string;
+  hint?: string;
 }) {
   return (
     <div className="rounded-xl border bg-card p-5">

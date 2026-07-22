@@ -8,7 +8,10 @@ import { getMyProfessional } from "@/lib/professionals.functions";
 import { listMyBookings, updateBookingStatus } from "@/lib/professional-bookings.functions";
 import { listMyThreads, listMessages, sendMessage } from "@/lib/professional-messages.functions";
 import { submitProfessionalReview } from "@/lib/professional-reviews.functions";
-import { submitPaymentReference, confirmPaymentReceived } from "@/lib/professional-payments.functions";
+import {
+  submitPaymentReference,
+  confirmPaymentReceived,
+} from "@/lib/professional-payments.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,7 +37,9 @@ function ProDashboard() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold">My Professional Bookings</h1>
-            <p className="text-muted-foreground">Track requests, pay deposits, and leave reviews.</p>
+            <p className="text-muted-foreground">
+              Track requests, pay deposits, and leave reviews.
+            </p>
           </div>
           <Button asChild variant="outline">
             <Link to="/professionals/register">Register as a professional</Link>
@@ -53,10 +58,16 @@ function ProDashboard() {
         <div>
           <h1 className="text-2xl font-bold">{pro.business_name}</h1>
           <div className="mt-1 flex flex-wrap gap-2">
-            <Badge variant={pro.status === "approved" ? "default" : "secondary"}>{pro.status}</Badge>
+            <Badge variant={pro.status === "approved" ? "default" : "secondary"}>
+              {pro.status}
+            </Badge>
             {pro.is_verified && <Badge>Verified</Badge>}
             {pro.slug && (
-              <Link to="/professionals/$slug" params={{ slug: pro.slug }} className="text-sm text-primary underline">
+              <Link
+                to="/professionals/$slug"
+                params={{ slug: pro.slug }}
+                className="text-sm text-primary underline"
+              >
                 View public profile
               </Link>
             )}
@@ -127,10 +138,14 @@ function BookingsPanel() {
               </div>
               <div className="text-sm text-muted-foreground">
                 {b.guest_count ? `${b.guest_count} guests · ` : ""}
-                {b.quoted_amount ? `${b.currency} ${Number(b.quoted_amount).toLocaleString()}` : "Quote pending"}
+                {b.quoted_amount
+                  ? `${b.currency} ${Number(b.quoted_amount).toLocaleString()}`
+                  : "Quote pending"}
               </div>
               {b.requirements && <p className="mt-1 text-sm">{b.requirements}</p>}
-              <Badge variant="secondary" className="mt-2">{b.status}</Badge>
+              <Badge variant="secondary" className="mt-2">
+                {b.status}
+              </Badge>
             </div>
             <div className="flex flex-wrap gap-2">
               {b.status === "pending" && (
@@ -147,16 +162,26 @@ function BookingsPanel() {
                 </>
               )}
               {b.status === "accepted" && (
-                <Button size="sm" onClick={() => act(b.id, "confirm")}>Mark confirmed</Button>
+                <Button size="sm" onClick={() => act(b.id, "confirm")}>
+                  Mark confirmed
+                </Button>
               )}
               {b.status === "confirmed" && (
-                <Button size="sm" onClick={() => act(b.id, "start")}>Start</Button>
+                <Button size="sm" onClick={() => act(b.id, "start")}>
+                  Start
+                </Button>
               )}
               {b.status === "in_progress" && (
-                <Button size="sm" onClick={() => act(b.id, "complete")}>Complete</Button>
+                <Button size="sm" onClick={() => act(b.id, "complete")}>
+                  Complete
+                </Button>
               )}
               {["deposit_submitted", "final_submitted"].includes(b.payment_status) && (
-                <ConfirmDepositButton bookingId={b.id} scope={b.payment_status === "final_submitted" ? "final" : "deposit"} reference={b.payment_reference} />
+                <ConfirmDepositButton
+                  bookingId={b.id}
+                  scope={b.payment_status === "final_submitted" ? "final" : "deposit"}
+                  reference={b.payment_reference}
+                />
               )}
             </div>
           </CardContent>
@@ -179,9 +204,13 @@ function MessagesPanel({ proId }: { proId: string }) {
   return (
     <div className="grid gap-4 md:grid-cols-[280px_1fr]">
       <Card>
-        <CardHeader><CardTitle className="text-sm">Conversations</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-sm">Conversations</CardTitle>
+        </CardHeader>
         <CardContent className="space-y-1 p-2">
-          {list.length === 0 && <p className="p-2 text-sm text-muted-foreground">No messages yet.</p>}
+          {list.length === 0 && (
+            <p className="p-2 text-sm text-muted-foreground">No messages yet.</p>
+          )}
           {list.map((t: any) => (
             <button
               key={t.customer_id}
@@ -247,7 +276,12 @@ export function ChatThread({
       .channel(`pro-msgs-${professionalId}-${customerId ?? "self"}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "professional_messages", filter: `professional_id=eq.${professionalId}` },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "professional_messages",
+          filter: `professional_id=eq.${professionalId}`,
+        },
         () => qc.invalidateQueries({ queryKey: key }),
       )
       .subscribe();
@@ -267,7 +301,12 @@ export function ChatThread({
     setText("");
     try {
       await send({
-        data: { professional_id: professionalId, customer_id: customerId, booking_id: bookingId, body },
+        data: {
+          professional_id: professionalId,
+          customer_id: customerId,
+          booking_id: bookingId,
+          body,
+        },
       });
       qc.invalidateQueries({ queryKey: key });
     } catch (e: any) {
@@ -306,7 +345,15 @@ export function ChatThread({
   );
 }
 
-function ConfirmDepositButton({ bookingId, scope, reference }: { bookingId: string; scope: "deposit" | "final"; reference?: string | null }) {
+function ConfirmDepositButton({
+  bookingId,
+  scope,
+  reference,
+}: {
+  bookingId: string;
+  scope: "deposit" | "final";
+  reference?: string | null;
+}) {
   const confirm = useServerFn(confirmPaymentReceived);
   const qc = useQueryClient();
   async function onClick() {
@@ -319,7 +366,12 @@ function ConfirmDepositButton({ bookingId, scope, reference }: { bookingId: stri
     }
   }
   return (
-    <Button size="sm" variant="outline" onClick={onClick} title={reference ? `Ref: ${reference}` : undefined}>
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={onClick}
+      title={reference ? `Ref: ${reference}` : undefined}
+    >
       <Wallet className="mr-1 h-4 w-4" /> Confirm {scope} received
     </Button>
   );
@@ -352,14 +404,19 @@ function CustomerBookingCard({ booking }: { booking: any }) {
   const [reviewBody, setReviewBody] = useState("");
   const [reviewTitle, setReviewTitle] = useState("");
 
-  const showPay = ["accepted", "confirmed", "in_progress"].includes(booking.status) &&
-    !["deposit_paid", "paid", "deposit_submitted", "final_submitted"].includes(booking.payment_status);
+  const showPay =
+    ["accepted", "confirmed", "in_progress"].includes(booking.status) &&
+    !["deposit_paid", "paid", "deposit_submitted", "final_submitted"].includes(
+      booking.payment_status,
+    );
   const showReview = booking.status === "completed";
 
   async function pay() {
     if (!ref.trim()) return;
     try {
-      await submitRef({ data: { booking_id: booking.id, reference: ref.trim(), scope: "deposit" } });
+      await submitRef({
+        data: { booking_id: booking.id, reference: ref.trim(), scope: "deposit" },
+      });
       toast.success("Reference submitted");
       setRef("");
       qc.invalidateQueries({ queryKey: ["pro-bookings"] });
@@ -370,7 +427,14 @@ function CustomerBookingCard({ booking }: { booking: any }) {
 
   async function review() {
     try {
-      await submitReview({ data: { booking_id: booking.id, rating, title: reviewTitle || null, body: reviewBody || null } });
+      await submitReview({
+        data: {
+          booking_id: booking.id,
+          rating,
+          title: reviewTitle || null,
+          body: reviewBody || null,
+        },
+      });
       toast.success("Thanks for your review");
       setReviewBody("");
       setReviewTitle("");
@@ -390,7 +454,10 @@ function CustomerBookingCard({ booking }: { booking: any }) {
               {booking.event_time ? ` · ${booking.event_time}` : ""}
             </div>
             <div className="text-sm text-muted-foreground">
-              {booking.location_text ?? "—"} · {booking.quoted_amount ? `${booking.currency} ${Number(booking.quoted_amount).toLocaleString()}` : "Quote pending"}
+              {booking.location_text ?? "—"} ·{" "}
+              {booking.quoted_amount
+                ? `${booking.currency} ${Number(booking.quoted_amount).toLocaleString()}`
+                : "Quote pending"}
             </div>
           </div>
           <div className="flex gap-2">
@@ -402,14 +469,21 @@ function CustomerBookingCard({ booking }: { booking: any }) {
         {showPay && booking.deposit_amount && (
           <div className="rounded border p-3">
             <div className="text-sm font-medium">
-              <Wallet className="mr-1 inline h-4 w-4" /> Pay deposit ({booking.currency} {Number(booking.deposit_amount).toLocaleString()})
+              <Wallet className="mr-1 inline h-4 w-4" /> Pay deposit ({booking.currency}{" "}
+              {Number(booking.deposit_amount).toLocaleString()})
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
               Send via M-PESA to the professional, then paste your transaction code below.
             </p>
             <div className="mt-2 flex gap-2">
-              <Input value={ref} onChange={(e) => setRef(e.target.value)} placeholder="e.g. QAB12CD3EF" />
-              <Button onClick={pay} disabled={!ref.trim()}>Submit reference</Button>
+              <Input
+                value={ref}
+                onChange={(e) => setRef(e.target.value)}
+                placeholder="e.g. QAB12CD3EF"
+              />
+              <Button onClick={pay} disabled={!ref.trim()}>
+                Submit reference
+              </Button>
             </div>
           </div>
         )}
@@ -432,8 +506,19 @@ function CustomerBookingCard({ booking }: { booking: any }) {
                 </button>
               ))}
             </div>
-            <Input className="mt-2" value={reviewTitle} onChange={(e) => setReviewTitle(e.target.value)} placeholder="Title (optional)" />
-            <Textarea className="mt-2" rows={3} value={reviewBody} onChange={(e) => setReviewBody(e.target.value)} placeholder="Share your experience" />
+            <Input
+              className="mt-2"
+              value={reviewTitle}
+              onChange={(e) => setReviewTitle(e.target.value)}
+              placeholder="Title (optional)"
+            />
+            <Textarea
+              className="mt-2"
+              rows={3}
+              value={reviewBody}
+              onChange={(e) => setReviewBody(e.target.value)}
+              placeholder="Share your experience"
+            />
             <div className="mt-2 flex justify-end">
               <Button onClick={review}>Post review</Button>
             </div>

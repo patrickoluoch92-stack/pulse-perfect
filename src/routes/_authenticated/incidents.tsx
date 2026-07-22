@@ -8,19 +8,37 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { LoadingState } from "@/components/ui/states";
 import {
-  Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
 } from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/_authenticated/incidents")({
-  head: () => ({ meta: authPageMeta({ title: "Incidents", description: "Server and client errors with correlation traces, filters, and time ranges." }) }),
+  head: () => ({
+    meta: authPageMeta({
+      title: "Incidents",
+      description: "Server and client errors with correlation traces, filters, and time ranges.",
+    }),
+  }),
   component: IncidentsPage,
 });
 
@@ -68,7 +86,8 @@ function IncidentsPage() {
 
   const groupedByCorrelation = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows) if (r.correlation_id) m.set(r.correlation_id, (m.get(r.correlation_id) ?? 0) + 1);
+    for (const r of rows)
+      if (r.correlation_id) m.set(r.correlation_id, (m.get(r.correlation_id) ?? 0) + 1);
     return m;
   }, [rows]);
 
@@ -77,8 +96,8 @@ function IncidentsPage() {
       <div>
         <h1 className="font-display text-3xl font-semibold tracking-tight">Incidents</h1>
         <p className="text-sm text-muted-foreground">
-          Server & client errors captured via the Sentry-style sink. Filter by action,
-          correlation id, source, or time range.
+          Server & client errors captured via the Sentry-style sink. Filter by action, correlation
+          id, source, or time range.
         </p>
       </div>
 
@@ -112,8 +131,13 @@ function IncidentsPage() {
           />
         </Field>
         <Field label="Level">
-          <Select value={filters.level} onValueChange={(v) => setFilters((f) => ({ ...f, level: v as Filters["level"] }))}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+          <Select
+            value={filters.level}
+            onValueChange={(v) => setFilters((f) => ({ ...f, level: v as Filters["level"] }))}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
               <SelectItem value="error">Error</SelectItem>
@@ -127,7 +151,9 @@ function IncidentsPage() {
             value={String(filters.sinceMinutes)}
             onValueChange={(v) => setFilters((f) => ({ ...f, sinceMinutes: Number(v) }))}
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="15">Last 15 min</SelectItem>
               <SelectItem value="60">Last hour</SelectItem>
@@ -169,7 +195,9 @@ function IncidentsPage() {
                   {new Date(r.created_at).toLocaleString()}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={r.level === "error" ? "destructive" : "secondary"}>{r.level}</Badge>
+                  <Badge variant={r.level === "error" ? "destructive" : "secondary"}>
+                    {r.level}
+                  </Badge>
                 </TableCell>
                 <TableCell className="font-mono text-xs">{r.action ?? "—"}</TableCell>
                 <TableCell className="font-mono text-xs">{r.source ?? "—"}</TableCell>
@@ -185,7 +213,9 @@ function IncidentsPage() {
                     >
                       {r.correlation_id.slice(0, 8)}
                     </button>
-                  ) : "—"}
+                  ) : (
+                    "—"
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -224,10 +254,16 @@ function IncidentsPage() {
                     <code className="text-xs">{selected.correlation_id}</code>
                   </Section>
                 )}
-                {selected.url && <Section label="URL"><code className="text-xs break-all">{selected.url}</code></Section>}
+                {selected.url && (
+                  <Section label="URL">
+                    <code className="text-xs break-all">{selected.url}</code>
+                  </Section>
+                )}
                 {selected.stack && (
                   <Section label="Stack">
-                    <pre className="max-h-80 overflow-auto rounded bg-muted p-3 text-xs">{selected.stack}</pre>
+                    <pre className="max-h-80 overflow-auto rounded bg-muted p-3 text-xs">
+                      {selected.stack}
+                    </pre>
                   </Section>
                 )}
                 {selected.context && Object.keys(selected.context as object).length > 0 && (

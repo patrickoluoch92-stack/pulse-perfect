@@ -3,7 +3,14 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { enforceAuthRateLimit, requireMfa } from "@/lib/security";
 
-export const ORG_ROLES = ["owner", "enterprise_admin", "admin", "manager", "staff", "guest"] as const;
+export const ORG_ROLES = [
+  "owner",
+  "enterprise_admin",
+  "admin",
+  "manager",
+  "staff",
+  "guest",
+] as const;
 const orgIdSchema = z.object({ orgId: z.string().uuid() });
 
 export const listMembers = createServerFn({ method: "GET" })
@@ -49,18 +56,32 @@ export const listInvitations = createServerFn({ method: "GET" })
 export const createInvitation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      orgId: z.string().uuid(),
-      email: z.string().trim().toLowerCase().email().max(255),
-      role: z.enum(ORG_ROLES),
-    }).parse(d),
+    z
+      .object({
+        orgId: z.string().uuid(),
+        email: z.string().trim().toLowerCase().email().max(255),
+        role: z.enum(ORG_ROLES),
+      })
+      .parse(d),
   )
   .handler(async ({ context, data }) => {
-    await enforceAuthRateLimit({ bucket: "invite.create", userId: context.userId, limit: 10, windowSec: 300 });
+    await enforceAuthRateLimit({
+      bucket: "invite.create",
+      userId: context.userId,
+      limit: 10,
+      windowSec: 300,
+    });
     const { data: row, error } = await context.supabase
       .from("organization_invitations")
       .upsert(
-        { org_id: data.orgId, email: data.email, role: data.role, invited_by: context.userId, accepted_at: null, accepted_by: null },
+        {
+          org_id: data.orgId,
+          email: data.email,
+          role: data.role,
+          invited_by: context.userId,
+          accepted_at: null,
+          accepted_by: null,
+        },
         { onConflict: "org_id,email" },
       )
       .select("id, token")
@@ -74,7 +95,9 @@ export const revokeInvitation = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase
-      .from("organization_invitations").delete().eq("id", data.id);
+      .from("organization_invitations")
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { id: data.id };
   });
@@ -88,7 +111,9 @@ export const updateMemberRole = createServerFn({ method: "POST" })
     requireMfa(context.claims);
     await enforceAuthRateLimit({ bucket: "member.update", userId: context.userId });
     const { error } = await context.supabase
-      .from("organization_members").update({ role: data.role }).eq("id", data.id);
+      .from("organization_members")
+      .update({ role: data.role })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { id: data.id };
   });
@@ -100,7 +125,9 @@ export const removeMember = createServerFn({ method: "POST" })
     requireMfa(context.claims);
     await enforceAuthRateLimit({ bucket: "member.remove", userId: context.userId });
     const { error } = await context.supabase
-      .from("organization_members").delete().eq("id", data.id);
+      .from("organization_members")
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { id: data.id };
   });
@@ -110,14 +137,19 @@ export const getInvitationByToken = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({ token: z.string().min(8).max(128) }).parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await (supabaseAdmin as any)
-      .rpc("get_invitation_by_token", { _token: data.token });
+    const { data: rows, error } = await (supabaseAdmin as any).rpc("get_invitation_by_token", {
+      _token: data.token,
+    });
     if (error) throw new Error(error.message);
     const row = Array.isArray(rows) ? rows[0] : rows;
     if (!row) throw new Error("Invitation not found");
     return row as {
-      org_id: string; org_name: string; email: string;
-      role: string; expires_at: string; accepted_at: string | null;
+      org_id: string;
+      org_name: string;
+      email: string;
+      role: string;
+      expires_at: string;
+      accepted_at: string | null;
     };
   });
 
@@ -126,10 +158,17 @@ export const acceptInvitation = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ token: z.string().min(8).max(128) }).parse(d))
   .handler(async ({ context, data }) => {
     // Throttle to block brute-force token guessing.
-    await enforceAuthRateLimit({ bucket: "invite.accept", userId: context.userId, limit: 15, windowSec: 300 });
+    await enforceAuthRateLimit({
+      bucket: "invite.accept",
+      userId: context.userId,
+      limit: 15,
+      windowSec: 300,
+    });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: orgId, error } = await (supabaseAdmin as any)
-      .rpc("accept_organization_invitation_for", { _token: data.token, _user_id: context.userId });
+    const { data: orgId, error } = await (supabaseAdmin as any).rpc(
+      "accept_organization_invitation_for",
+      { _token: data.token, _user_id: context.userId },
+    );
     if (error) throw new Error(error.message);
     return { orgId: orgId as string };
   });

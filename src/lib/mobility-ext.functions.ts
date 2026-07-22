@@ -57,7 +57,6 @@ export const upsertPrivateOwner = createServerFn({ method: "POST" })
     return row;
   });
 
-
 export const getMyPrivateOwner = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -80,7 +79,9 @@ export const listAcceptingProviders = createServerFn({ method: "GET" })
     const sb = context.supabase as SB;
     const { data, error } = await sb
       .from("mobility_providers")
-      .select("id, org_id, name, slug, county_code, town, verification_status, private_owner_commission_pct, private_owner_quality_min, logo_url, cover_image_url, bio, service_categories, rating_avg, rating_count, policies, terms")
+      .select(
+        "id, org_id, name, slug, county_code, town, verification_status, private_owner_commission_pct, private_owner_quality_min, logo_url, cover_image_url, bio, service_categories, rating_avg, rating_count, policies, terms",
+      )
       .eq("accepts_private_vehicles", true)
       .eq("verification_status", "approved")
       .order("name");
@@ -91,11 +92,15 @@ export const listAcceptingProviders = createServerFn({ method: "GET" })
     const ids = rows.map((r: any) => r.id);
     const [{ data: vehicles }, { data: branches }] = await Promise.all([
       sb.from("mobility_vehicles").select("provider_id, status").in("provider_id", ids),
-      sb.from("mobility_branches").select("id, provider_id, name, town, county_code").in("provider_id", ids),
+      sb
+        .from("mobility_branches")
+        .select("id, provider_id, name, town, county_code")
+        .in("provider_id", ids),
     ]);
     const counts: Record<string, number> = {};
     for (const v of vehicles ?? []) {
-      if ((v as any).status === "active") counts[(v as any).provider_id] = (counts[(v as any).provider_id] ?? 0) + 1;
+      if ((v as any).status === "active")
+        counts[(v as any).provider_id] = (counts[(v as any).provider_id] ?? 0) + 1;
     }
     const brByProvider: Record<string, any[]> = {};
     for (const b of branches ?? []) {
@@ -108,40 +113,42 @@ export const listAcceptingProviders = createServerFn({ method: "GET" })
     }));
   });
 
-
 // ---------------------------------------------------------------------------
 // VEHICLE SUBMISSIONS (private owner → rental company)
 // ---------------------------------------------------------------------------
 const submissionInput = z.object({
   providerId: z.string().uuid(),
-  vehicleSnapshot: z.object({
-    make: z.string().min(1),
-    model: z.string().min(1),
-    year: z.number().int().min(1980).max(2100),
-    variant: z.string().optional(),
-    bodyType: z.string().optional(),
-    color: z.string().optional(),
-    registrationNo: z.string().optional(),
-    transmission: z.string().optional(),
-    fuelType: z.string().optional(),
-    seats: z.number().int().min(1).max(80).optional(),
-    mileageKm: z.number().int().min(0).optional(),
-    description: z.string().max(4000).optional(),
-    features: z.array(z.string()).max(40).optional(),
-    coverPhoto: z.string().url().optional(),
-    images: z.array(z.string().url()).max(20).optional(),
-    videoUrl: z.string().url().optional(),
-    documents: z.object({
-      logbookUrl: z.string().url().optional(),
-      insuranceUrl: z.string().url().optional(),
-      inspectionUrl: z.string().url().optional(),
-      serviceHistoryUrl: z.string().url().optional(),
-      nationalIdUrl: z.string().url().optional(),
-    }).optional(),
-  }).passthrough(),
+  vehicleSnapshot: z
+    .object({
+      make: z.string().min(1),
+      model: z.string().min(1),
+      year: z.number().int().min(1980).max(2100),
+      variant: z.string().optional(),
+      bodyType: z.string().optional(),
+      color: z.string().optional(),
+      registrationNo: z.string().optional(),
+      transmission: z.string().optional(),
+      fuelType: z.string().optional(),
+      seats: z.number().int().min(1).max(80).optional(),
+      mileageKm: z.number().int().min(0).optional(),
+      description: z.string().max(4000).optional(),
+      features: z.array(z.string()).max(40).optional(),
+      coverPhoto: z.string().url().optional(),
+      images: z.array(z.string().url()).max(20).optional(),
+      videoUrl: z.string().url().optional(),
+      documents: z
+        .object({
+          logbookUrl: z.string().url().optional(),
+          insuranceUrl: z.string().url().optional(),
+          inspectionUrl: z.string().url().optional(),
+          serviceHistoryUrl: z.string().url().optional(),
+          nationalIdUrl: z.string().url().optional(),
+        })
+        .optional(),
+    })
+    .passthrough(),
   proposedDailyRateKes: z.number().positive().optional(),
 });
-
 
 export const submitVehicleToProvider = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -200,7 +207,6 @@ export const submitVehicleToProvider = createServerFn({ method: "POST" })
     return sub;
   });
 
-
 export const listMySubmissions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -236,7 +242,9 @@ export const withdrawSubmission = createServerFn({ method: "POST" })
 // Provider-side queue
 export const listProviderSubmissions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ providerId: z.string().uuid(), status: z.string().optional() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ providerId: z.string().uuid(), status: z.string().optional() }).parse(d),
+  )
   .handler(async ({ context, data }) => {
     const sb = context.supabase as SB;
     let q = sb
@@ -253,11 +261,13 @@ export const listProviderSubmissions = createServerFn({ method: "GET" })
 export const decideSubmission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      id: z.string().uuid(),
-      decision: z.enum(["approved", "rejected"]),
-      reason: z.string().max(1000).optional(),
-    }).parse(d),
+    z
+      .object({
+        id: z.string().uuid(),
+        decision: z.enum(["approved", "rejected"]),
+        reason: z.string().max(1000).optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ context, data }) => {
     const sb = context.supabase as SB;
@@ -274,8 +284,10 @@ export const decideSubmission = createServerFn({ method: "POST" })
 
     if (data.decision === "approved") {
       const snap = sub.vehicle_snapshot ?? {};
-      const slug = `${(snap.make ?? "vehicle").toString().toLowerCase()}-${(snap.model ?? "").toString().toLowerCase()}-${Math.random().toString(36).slice(2, 7)}`
-        .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      const slug =
+        `${(snap.make ?? "vehicle").toString().toLowerCase()}-${(snap.model ?? "").toString().toLowerCase()}-${Math.random().toString(36).slice(2, 7)}`
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
       const { data: veh, error: vErr } = await sb
         .from("mobility_vehicles")
         .insert({
@@ -351,10 +363,12 @@ export const decideSubmission = createServerFn({ method: "POST" })
 export const requestSubmissionInfo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      id: z.string().uuid(),
-      message: z.string().min(3).max(2000),
-    }).parse(d),
+    z
+      .object({
+        id: z.string().uuid(),
+        message: z.string().min(3).max(2000),
+      })
+      .parse(d),
   )
   .handler(async ({ context, data }) => {
     const sb = context.supabase as SB;
@@ -399,14 +413,21 @@ export const requestSubmissionInfo = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-
 // ---------------------------------------------------------------------------
 // VEHICLE DOCUMENTS
 // ---------------------------------------------------------------------------
 const docInput = z.object({
   vehicleId: z.string().uuid(),
   orgId: z.string().uuid(),
-  docType: z.enum(["insurance", "inspection", "logbook", "roadworthiness", "service_history", "compliance", "other"]),
+  docType: z.enum([
+    "insurance",
+    "inspection",
+    "logbook",
+    "roadworthiness",
+    "service_history",
+    "compliance",
+    "other",
+  ]),
   title: z.string().max(200).optional(),
   fileUrl: z.string().url(),
   issuedAt: z.string().optional(),
@@ -497,12 +518,19 @@ export const upsertMaintenance = createServerFn({ method: "POST" })
     };
     if (data.id) {
       const { data: row, error } = await sb
-        .from("mobility_maintenance").update(payload).eq("id", data.id).select().single();
+        .from("mobility_maintenance")
+        .update(payload)
+        .eq("id", data.id)
+        .select()
+        .single();
       if (error) throw new Error(error.message);
       return row;
     }
     const { data: row, error } = await sb
-      .from("mobility_maintenance").insert(payload).select().single();
+      .from("mobility_maintenance")
+      .insert(payload)
+      .select()
+      .single();
     if (error) throw new Error(error.message);
     return row;
   });
@@ -513,7 +541,9 @@ export const listVehicleMaintenance = createServerFn({ method: "GET" })
   .handler(async ({ context, data }) => {
     const sb = context.supabase as SB;
     const { data: rows, error } = await sb
-      .from("mobility_maintenance").select("*").eq("vehicle_id", data.vehicleId)
+      .from("mobility_maintenance")
+      .select("*")
+      .eq("vehicle_id", data.vehicleId)
       .order("scheduled_at", { ascending: false });
     if (error) throw new Error(error.message);
     return rows ?? [];
@@ -526,7 +556,17 @@ const tierInput = z.object({
   id: z.string().uuid().optional(),
   vehicleId: z.string().uuid(),
   orgId: z.string().uuid(),
-  tier: z.enum(["daily", "weekend", "weekly", "monthly", "lease", "corporate", "holiday", "peak", "promo"]),
+  tier: z.enum([
+    "daily",
+    "weekend",
+    "weekly",
+    "monthly",
+    "lease",
+    "corporate",
+    "holiday",
+    "peak",
+    "promo",
+  ]),
   priceKes: z.number().positive(),
   minUnits: z.number().int().min(1).optional(),
   startsOn: z.string().optional(),
@@ -553,12 +593,19 @@ export const upsertPricingTier = createServerFn({ method: "POST" })
     };
     if (data.id) {
       const { data: row, error } = await sb
-        .from("mobility_pricing_tiers").update(payload).eq("id", data.id).select().single();
+        .from("mobility_pricing_tiers")
+        .update(payload)
+        .eq("id", data.id)
+        .select()
+        .single();
       if (error) throw new Error(error.message);
       return row;
     }
     const { data: row, error } = await sb
-      .from("mobility_pricing_tiers").insert(payload).select().single();
+      .from("mobility_pricing_tiers")
+      .insert(payload)
+      .select()
+      .single();
     if (error) throw new Error(error.message);
     return row;
   });
@@ -569,7 +616,9 @@ export const listPricingTiers = createServerFn({ method: "GET" })
   .handler(async ({ context, data }) => {
     const sb = context.supabase as SB;
     const { data: rows, error } = await sb
-      .from("mobility_pricing_tiers").select("*").eq("vehicle_id", data.vehicleId)
+      .from("mobility_pricing_tiers")
+      .select("*")
+      .eq("vehicle_id", data.vehicleId)
       .order("tier");
     if (error) throw new Error(error.message);
     return rows ?? [];
@@ -627,12 +676,19 @@ export const upsertBranch = createServerFn({ method: "POST" })
     };
     if (data.id) {
       const { data: row, error } = await sb
-        .from("mobility_branches").update(payload).eq("id", data.id).select().single();
+        .from("mobility_branches")
+        .update(payload)
+        .eq("id", data.id)
+        .select()
+        .single();
       if (error) throw new Error(error.message);
       return row;
     }
     const { data: row, error } = await sb
-      .from("mobility_branches").insert(payload).select().single();
+      .from("mobility_branches")
+      .insert(payload)
+      .select()
+      .single();
     if (error) throw new Error(error.message);
     return row;
   });
@@ -643,7 +699,9 @@ export const listBranches = createServerFn({ method: "GET" })
   .handler(async ({ context, data }) => {
     const sb = context.supabase as SB;
     const { data: rows, error } = await sb
-      .from("mobility_branches").select("*").eq("provider_id", data.providerId)
+      .from("mobility_branches")
+      .select("*")
+      .eq("provider_id", data.providerId)
       .order("is_primary", { ascending: false });
     if (error) throw new Error(error.message);
     return rows ?? [];
@@ -665,12 +723,14 @@ export const deleteBranch = createServerFn({ method: "POST" })
 export const updatePrivateVehiclePolicy = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      providerId: z.string().uuid(),
-      acceptsPrivateVehicles: z.boolean(),
-      commissionPct: z.number().min(0).max(100).optional(),
-      qualityMin: z.number().int().min(0).max(100).optional(),
-    }).parse(d),
+    z
+      .object({
+        providerId: z.string().uuid(),
+        acceptsPrivateVehicles: z.boolean(),
+        commissionPct: z.number().min(0).max(100).optional(),
+        qualityMin: z.number().int().min(0).max(100).optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ context, data }) => {
     const sb = context.supabase as SB;
@@ -705,23 +765,34 @@ export const getPrivateOwnerEarnings = createServerFn({ method: "GET" })
 
     const { data: vehicles, error: vErr } = await sb
       .from("mobility_vehicles")
-      .select("id, make, model, year, provider_id, mobility_providers:provider_id (name, private_owner_commission_pct)")
+      .select(
+        "id, make, model, year, provider_id, mobility_providers:provider_id (name, private_owner_commission_pct)",
+      )
       .eq("private_owner_id", owner.id);
     if (vErr) throw new Error(vErr.message);
     const vehicleIds = (vehicles ?? []).map((v: any) => v.id);
-    if (vehicleIds.length === 0) return { totals: { gross: 0, commission: 0, net: 0, count: 0 }, byVehicle: [], bookings: [] };
+    if (vehicleIds.length === 0)
+      return { totals: { gross: 0, commission: 0, net: 0, count: 0 }, byVehicle: [], bookings: [] };
 
     const { data: bookings, error: bErr } = await sb
       .from("mobility_bookings")
-      .select("id, vehicle_id, status, total_kes, pickup_at, dropoff_at, payment_status, created_at")
+      .select(
+        "id, vehicle_id, status, total_kes, pickup_at, dropoff_at, payment_status, created_at",
+      )
       .in("vehicle_id", vehicleIds)
       .order("created_at", { ascending: false })
       .limit(200);
     if (bErr) throw new Error(bErr.message);
 
     const vehById = new Map<string, any>((vehicles ?? []).map((v: any) => [v.id, v]));
-    let gross = 0, commission = 0, net = 0, count = 0;
-    const byVehicleMap = new Map<string, { vehicle: any; gross: number; commission: number; net: number; count: number }>();
+    let gross = 0,
+      commission = 0,
+      net = 0,
+      count = 0;
+    const byVehicleMap = new Map<
+      string,
+      { vehicle: any; gross: number; commission: number; net: number; count: number }
+    >();
 
     for (const b of bookings ?? []) {
       if (!["confirmed", "completed"].includes(b.status)) continue;
@@ -730,10 +801,22 @@ export const getPrivateOwnerEarnings = createServerFn({ method: "GET" })
       const g = Number(b.total_kes ?? 0);
       const c = Math.round((g * pct) / 100);
       const n = g - c;
-      gross += g; commission += c; net += n; count += 1;
+      gross += g;
+      commission += c;
+      net += n;
+      count += 1;
       const key = b.vehicle_id;
-      const cur = byVehicleMap.get(key) ?? { vehicle: veh, gross: 0, commission: 0, net: 0, count: 0 };
-      cur.gross += g; cur.commission += c; cur.net += n; cur.count += 1;
+      const cur = byVehicleMap.get(key) ?? {
+        vehicle: veh,
+        gross: 0,
+        commission: 0,
+        net: 0,
+        count: 0,
+      };
+      cur.gross += g;
+      cur.commission += c;
+      cur.net += n;
+      cur.count += 1;
       byVehicleMap.set(key, cur);
     }
 
@@ -748,7 +831,10 @@ export const getPrivateOwnerEarnings = createServerFn({ method: "GET" })
 // PRIVATE OWNER PAYOUT REQUESTS
 // ---------------------------------------------------------------------------
 // Owners request payouts against their net earnings; platform admins process.
-async function ownerNetAvailable(sb: SB, userId: string): Promise<{ ownerId: string | null; available: number }> {
+async function ownerNetAvailable(
+  sb: SB,
+  userId: string,
+): Promise<{ ownerId: string | null; available: number }> {
   const { data: owner } = await sb
     .from("mobility_private_owners")
     .select("id")
@@ -768,7 +854,8 @@ async function ownerNetAvailable(sb: SB, userId: string): Promise<{ ownerId: str
     .select("vehicle_id, status, total_kes")
     .in("vehicle_id", ids);
   const pctByVeh = new Map<string, number>();
-  for (const v of vehicles ?? []) pctByVeh.set(v.id, Number(v.mobility_providers?.private_owner_commission_pct ?? 20));
+  for (const v of vehicles ?? [])
+    pctByVeh.set(v.id, Number(v.mobility_providers?.private_owner_commission_pct ?? 20));
   let net = 0;
   for (const b of bookings ?? []) {
     if (!["confirmed", "completed"].includes(b.status)) continue;
@@ -783,32 +870,42 @@ async function ownerNetAvailable(sb: SB, userId: string): Promise<{ ownerId: str
     .eq("owner_id", owner.id);
   let reserved = 0;
   for (const r of reqs ?? []) {
-    if (["pending", "approved", "processing", "paid"].includes(r.status)) reserved += Number(r.amount_kes ?? 0);
+    if (["pending", "approved", "processing", "paid"].includes(r.status))
+      reserved += Number(r.amount_kes ?? 0);
   }
   return { ownerId: owner.id, available: Math.max(0, net - reserved) };
 }
 
 export const requestOwnerPayout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({
-    amountKes: z.number().positive(),
-    method: z.enum(["mpesa", "bank"]).default("mpesa"),
-    destination: z.record(z.string(), z.any()).default({}),
-    notes: z.string().max(500).optional(),
-  }).parse(v))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        amountKes: z.number().positive(),
+        method: z.enum(["mpesa", "bank"]).default("mpesa"),
+        destination: z.record(z.string(), z.any()).default({}),
+        notes: z.string().max(500).optional(),
+      })
+      .parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
     const { ownerId, available } = await ownerNetAvailable(sb, context.userId);
     if (!ownerId) throw new Error("Register as a private owner first.");
-    if (data.amountKes > available) throw new Error(`Only KES ${available.toLocaleString()} available for payout.`);
+    if (data.amountKes > available)
+      throw new Error(`Only KES ${available.toLocaleString()} available for payout.`);
 
-    const { data: row, error } = await sb.from("mobility_owner_payout_requests").insert({
-      owner_id: ownerId,
-      amount_kes: data.amountKes,
-      method: data.method,
-      destination: data.destination,
-      notes: data.notes ?? null,
-    }).select("*").single();
+    const { data: row, error } = await sb
+      .from("mobility_owner_payout_requests")
+      .insert({
+        owner_id: ownerId,
+        amount_kes: data.amountKes,
+        method: data.method,
+        destination: data.destination,
+        notes: data.notes ?? null,
+      })
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return { request: row, availableAfter: available - data.amountKes };
   });
@@ -817,10 +914,19 @@ export const listOwnerPayoutRequests = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const sb = context.supabase as SB;
-    const { data: owner } = await sb.from("mobility_private_owners").select("id").eq("user_id", context.userId).maybeSingle();
+    const { data: owner } = await sb
+      .from("mobility_private_owners")
+      .select("id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
     if (!owner) return { requests: [], available: 0 };
     const [{ data: rows }, availability] = await Promise.all([
-      sb.from("mobility_owner_payout_requests").select("*").eq("owner_id", owner.id).order("created_at", { ascending: false }).limit(50),
+      sb
+        .from("mobility_owner_payout_requests")
+        .select("*")
+        .eq("owner_id", owner.id)
+        .order("created_at", { ascending: false })
+        .limit(50),
       ownerNetAvailable(sb, context.userId),
     ]);
     return { requests: rows ?? [], available: availability.available };
@@ -831,7 +937,8 @@ export const cancelOwnerPayoutRequest = createServerFn({ method: "POST" })
   .inputValidator((v: unknown) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const { error } = await sb.from("mobility_owner_payout_requests")
+    const { error } = await sb
+      .from("mobility_owner_payout_requests")
       .update({ status: "cancelled" })
       .eq("id", data.id)
       .eq("status", "pending");

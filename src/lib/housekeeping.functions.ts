@@ -58,7 +58,12 @@ export const createHousekeeping = createServerFn({ method: "POST" })
       .parse(raw),
   )
   .handler(async ({ data, context }) => {
-    await enforceRateLimit({ bucket: "hk.create", userId: context.userId, limit: 120, windowSec: 3600 });
+    await enforceRateLimit({
+      bucket: "hk.create",
+      userId: context.userId,
+      limit: 120,
+      windowSec: 3600,
+    });
     const orgId = await currentOrgId(context.supabase, context.userId);
     const { data: row, error } = await context.supabase
       .from("housekeeping_tasks")
@@ -143,7 +148,12 @@ export const createMaintenance = createServerFn({ method: "POST" })
       .parse(raw),
   )
   .handler(async ({ data, context }) => {
-    await enforceRateLimit({ bucket: "mt.create", userId: context.userId, limit: 60, windowSec: 3600 });
+    await enforceRateLimit({
+      bucket: "mt.create",
+      userId: context.userId,
+      limit: 60,
+      windowSec: 3600,
+    });
     const orgId = await currentOrgId(context.supabase, context.userId);
     const { data: row, error } = await context.supabase
       .from("maintenance_tickets")
@@ -177,9 +187,7 @@ export const updateMaintenanceStatus = createServerFn({ method: "POST" })
     const patch = {
       status: data.status,
       resolved_at:
-        data.status === "resolved" || data.status === "closed"
-          ? new Date().toISOString()
-          : null,
+        data.status === "resolved" || data.status === "closed" ? new Date().toISOString() : null,
     };
     const { error } = await context.supabase
       .from("maintenance_tickets")

@@ -5,8 +5,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 const DEFAULT_DESTINATIONS = [
-  "Nairobi", "Mombasa", "Diani", "Watamu", "Naivasha",
-  "Maasai Mara", "Nanyuki", "Kisumu", "Amboseli", "Lamu",
+  "Nairobi",
+  "Mombasa",
+  "Diani",
+  "Watamu",
+  "Naivasha",
+  "Maasai Mara",
+  "Nanyuki",
+  "Kisumu",
+  "Amboseli",
+  "Lamu",
 ];
 
 const BodySchema = z
@@ -27,7 +35,8 @@ export const Route = createFileRoute("/api/public/hooks/partner-sync")({
         const provided = bearer ?? request.headers.get("x-cron-secret");
         if (!expected || !provided || provided.length !== expected.length) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401, headers: { "Content-Type": "application/json" },
+            status: 401,
+            headers: { "Content-Type": "application/json" },
           });
         }
         // Timing-safe compare
@@ -36,7 +45,8 @@ export const Route = createFileRoute("/api/public/hooks/partner-sync")({
         const b = Buffer.from(expected);
         if (a.length !== b.length || !timingSafeEqual(a, b)) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401, headers: { "Content-Type": "application/json" },
+            status: 401,
+            headers: { "Content-Type": "application/json" },
           });
         }
         let parsed: z.infer<typeof BodySchema> = {};
@@ -45,7 +55,10 @@ export const Route = createFileRoute("/api/public/hooks/partner-sync")({
           parsed = text ? BodySchema.parse(JSON.parse(text)) : {};
         } catch (e) {
           return new Response(
-            JSON.stringify({ error: "Invalid body", detail: e instanceof Error ? e.message : String(e) }),
+            JSON.stringify({
+              error: "Invalid body",
+              detail: e instanceof Error ? e.message : String(e),
+            }),
             { status: 400, headers: { "Content-Type": "application/json" } },
           );
         }
@@ -55,10 +68,9 @@ export const Route = createFileRoute("/api/public/hooks/partner-sync")({
           destinations,
           perDestinationLimit: parsed.perDestinationLimit ?? 20,
         });
-        return new Response(
-          JSON.stringify({ ok: true, ...result }),
-          { headers: { "Content-Type": "application/json" } },
-        );
+        return new Response(JSON.stringify({ ok: true, ...result }), {
+          headers: { "Content-Type": "application/json" },
+        });
       },
     },
   },

@@ -37,19 +37,26 @@ export const Route = createFileRoute("/api/public/hooks/subscription-renewals")(
             if (!end) continue;
             if (end < now) {
               // Expire
-              await (supabaseAdmin as any).from("subscriptions").update({ status: "expired" }).eq("id", s.id);
+              await (supabaseAdmin as any)
+                .from("subscriptions")
+                .update({ status: "expired" })
+                .eq("id", s.id);
               await (supabaseAdmin as any).from("subscription_events").insert({
-                subscription_id: s.id, org_id: s.org_id, event_type: "expired", from_plan: s.plan,
+                subscription_id: s.id,
+                org_id: s.org_id,
+                event_type: "expired",
+                from_plan: s.plan,
               });
               if (s.cancel_at_period_end) {
-                await (supabaseAdmin as any).from("organizations").update({ plan: "starter" }).eq("id", s.org_id);
+                await (supabaseAdmin as any)
+                  .from("organizations")
+                  .update({ plan: "starter" })
+                  .eq("id", s.org_id);
               }
               results.expired++;
               continue;
             }
-            const notice =
-              end <= in1 ? "renewal_1d" :
-              end <= in7 ? "renewal_7d" : null;
+            const notice = end <= in1 ? "renewal_1d" : end <= in7 ? "renewal_7d" : null;
             if (!notice) continue;
             // Idempotent insert; unique(subscription_id, notice_type) prevents dupes.
             const { error } = await (supabaseAdmin as any)
@@ -57,7 +64,9 @@ export const Route = createFileRoute("/api/public/hooks/subscription-renewals")(
               .insert({ subscription_id: s.id, notice_type: notice });
             if (!error) {
               await (supabaseAdmin as any).from("subscription_events").insert({
-                subscription_id: s.id, org_id: s.org_id, event_type: "reminder_sent",
+                subscription_id: s.id,
+                org_id: s.org_id,
+                event_type: "reminder_sent",
                 payload: { notice },
               });
               results[notice]++;

@@ -8,22 +8,41 @@ import { Copy, Mail, Plus, Trash2, Users } from "lucide-react";
 
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 import {
-  listMembers, listInvitations, createInvitation, revokeInvitation,
-  updateMemberRole, removeMember, ORG_ROLES,
+  listMembers,
+  listInvitations,
+  createInvitation,
+  revokeInvitation,
+  updateMemberRole,
+  removeMember,
+  ORG_ROLES,
 } from "@/lib/team.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { LoadingState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/team")({
-  head: () => ({ meta: authPageMeta({ title: "Team", description: "Invite teammates, assign roles, and manage workspace access." }) }),
+  head: () => ({
+    meta: authPageMeta({
+      title: "Team",
+      description: "Invite teammates, assign roles, and manage workspace access.",
+    }),
+  }),
   component: TeamPage,
 });
 
@@ -66,9 +85,12 @@ function TeamPage() {
     mutationFn: () => inviteFn({ data: { orgId: orgId!, email, role } }),
     onSuccess: (row) => {
       toast.success("Invitation created");
-      navigator.clipboard?.writeText(`${window.location.origin}/invite/${row.token}`).catch(() => {});
+      navigator.clipboard
+        ?.writeText(`${window.location.origin}/invite/${row.token}`)
+        .catch(() => {});
       toast.message("Invite link copied to clipboard");
-      setOpen(false); setEmail("");
+      setOpen(false);
+      setEmail("");
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -112,32 +134,45 @@ function TeamPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{m.profile?.full_name ?? "Unnamed user"}</p>
-                  <p className="text-xs text-muted-foreground">Joined {new Date(m.created_at).toLocaleDateString()}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Joined {new Date(m.created_at).toLocaleDateString()}
+                  </p>
                 </div>
                 {canManage && m.role !== "owner" ? (
                   <Select
                     value={m.role}
                     onValueChange={async (r) => {
-                      await updateRoleFn({ data: { id: m.id, role: r as (typeof ORG_ROLES)[number] } });
-                      toast.success("Role updated"); invalidate();
+                      await updateRoleFn({
+                        data: { id: m.id, role: r as (typeof ORG_ROLES)[number] },
+                      });
+                      toast.success("Role updated");
+                      invalidate();
                     }}
                   >
-                    <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       {ORG_ROLES.filter((r) => r !== "owner").map((r) => (
-                        <SelectItem key={r} value={r}>{r}</SelectItem>
+                        <SelectItem key={r} value={r}>
+                          {r}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <span className="rounded-full bg-muted px-2.5 py-1 text-xs capitalize">{m.role}</span>
+                  <span className="rounded-full bg-muted px-2.5 py-1 text-xs capitalize">
+                    {m.role}
+                  </span>
                 )}
                 {canManage && m.role !== "owner" && (
                   <Button
-                    variant="ghost" size="icon"
+                    variant="ghost"
+                    size="icon"
                     onClick={async () => {
                       await removeFn({ data: { id: m.id } });
-                      toast.success("Member removed"); invalidate();
+                      toast.success("Member removed");
+                      invalidate();
                     }}
                     aria-label="Remove"
                   >
@@ -160,32 +195,36 @@ function TeamPage() {
           <p className="p-5 text-sm text-muted-foreground">No pending invitations.</p>
         ) : (
           <ul className="divide-y divide-border/60">
-            {invites.data!.filter((i) => !i.accepted_at).map((i) => (
-              <li key={i.id} className="flex items-center gap-4 px-5 py-3">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{i.email}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {i.role} · expires {new Date(i.expires_at).toLocaleDateString()}
-                  </p>
-                </div>
-                <Button size="sm" variant="outline" onClick={() => copyLink(i.token)}>
-                  <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy link
-                </Button>
-                {canManage && (
-                  <Button
-                    size="icon" variant="ghost"
-                    onClick={async () => {
-                      await revokeFn({ data: { id: i.id } });
-                      toast.success("Invitation revoked"); invalidate();
-                    }}
-                    aria-label="Revoke"
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
+            {invites
+              .data!.filter((i) => !i.accepted_at)
+              .map((i) => (
+                <li key={i.id} className="flex items-center gap-4 px-5 py-3">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">{i.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {i.role} · expires {new Date(i.expires_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => copyLink(i.token)}>
+                    <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy link
                   </Button>
-                )}
-              </li>
-            ))}
+                  {canManage && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={async () => {
+                        await revokeFn({ data: { id: i.id } });
+                        toast.success("Invitation revoked");
+                        invalidate();
+                      }}
+                      aria-label="Revoke"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  )}
+                </li>
+              ))}
           </ul>
         )}
       </section>
@@ -195,32 +234,41 @@ function TeamPage() {
           <DialogHeader>
             <DialogTitle>Invite a teammate</DialogTitle>
             <DialogDescription>
-              They'll get a link to join {ctx.data?.currentOrg?.name}. The link works once and expires in 7 days.
+              They'll get a link to join {ctx.data?.currentOrg?.name}. The link works once and
+              expires in 7 days.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1.5">
               <Label>Email</Label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teammate@example.com" />
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="teammate@example.com"
+              />
             </div>
             <div className="space-y-1.5">
               <Label>Role</Label>
               <Select value={role} onValueChange={(r) => setRole(r as typeof role)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {ORG_ROLES.filter((r) => r !== "owner").map((r) => (
-                    <SelectItem key={r} value={r}>{r}</SelectItem>
+                    <SelectItem key={r} value={r}>
+                      {r}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button
-              onClick={() => inviteMut.mutate()}
-              disabled={!email || inviteMut.isPending}
-            >
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => inviteMut.mutate()} disabled={!email || inviteMut.isPending}>
               {inviteMut.isPending ? "Sending…" : "Create invitation"}
             </Button>
           </DialogFooter>

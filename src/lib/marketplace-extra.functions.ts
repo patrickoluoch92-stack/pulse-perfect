@@ -6,11 +6,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 
 function publicSupabase() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
 }
 
 // ===========================================================================
@@ -46,19 +44,17 @@ export const submitReview = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => submitReviewSchema.parse(data))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { error } = await supabase
-      .from("marketplace_property_reviews")
-      .upsert(
-        {
-          property_id: data.propertyId,
-          reviewer_id: userId,
-          reviewer_name: data.reviewerName,
-          rating: data.rating,
-          title: data.title ?? null,
-          body: data.body,
-        },
-        { onConflict: "property_id,reviewer_id" },
-      );
+    const { error } = await supabase.from("marketplace_property_reviews").upsert(
+      {
+        property_id: data.propertyId,
+        reviewer_id: userId,
+        reviewer_name: data.reviewerName,
+        rating: data.rating,
+        title: data.title ?? null,
+        body: data.body,
+      },
+      { onConflict: "property_id,reviewer_id" },
+    );
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -167,7 +163,10 @@ export const setBookingStatus = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => updateBookingStatus.parse(data))
   .handler(async ({ context, data }) => {
     const { data: prior } = await context.supabase
-      .from("marketplace_bookings").select("status").eq("id", data.id).maybeSingle();
+      .from("marketplace_bookings")
+      .select("status")
+      .eq("id", data.id)
+      .maybeSingle();
     const { error } = await context.supabase
       .from("marketplace_bookings")
       .update({ status: data.status })
@@ -177,15 +176,21 @@ export const setBookingStatus = createServerFn({ method: "POST" })
     // Best-effort finance side effects. Failures are logged but do not block
     // the status update — admins can retry via the finance dashboard.
     try {
-      const { accrueForBooking, settleForBooking, reverseForBooking } = await import("@/lib/finance.server");
+      const { accrueForBooking, settleForBooking, reverseForBooking } =
+        await import("@/lib/finance.server");
       const priorStatus = (prior as any)?.status;
-      const becameConfirmedOrCompleted = (data.status === "confirmed" || data.status === "completed")
-        && priorStatus !== "confirmed" && priorStatus !== "completed";
+      const becameConfirmedOrCompleted =
+        (data.status === "confirmed" || data.status === "completed") &&
+        priorStatus !== "confirmed" &&
+        priorStatus !== "completed";
       if (becameConfirmedOrCompleted) await accrueForBooking(data.id, context.userId);
       if (data.status === "completed" && priorStatus !== "completed") {
         await settleForBooking(data.id, context.userId);
       }
-      if (data.status === "cancelled" && (priorStatus === "confirmed" || priorStatus === "completed")) {
+      if (
+        data.status === "cancelled" &&
+        (priorStatus === "confirmed" || priorStatus === "completed")
+      ) {
         await reverseForBooking(data.id, context.userId);
       }
     } catch (e) {

@@ -20,7 +20,11 @@ const upsertSchema = z.object({
   guest_id: z.string().uuid().nullable().optional(),
   status: z.enum(INVOICE_STATUSES),
   issued_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  due_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")),
+  due_at: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .or(z.literal("")),
   currency: z.string().trim().min(3).max(3),
   tax_amount: z.coerce.number().min(0).max(10_000_000).default(0),
   notes: z.string().trim().max(2000).optional().or(z.literal("")),
@@ -31,7 +35,9 @@ function calcTotals(items: z.infer<typeof itemSchema>[], tax: number) {
   const subtotal = items.reduce((s, i) => s + i.quantity * i.unit_price, 0);
   return { subtotal: round2(subtotal), tax_amount: round2(tax), total: round2(subtotal + tax) };
 }
-function round2(n: number) { return Math.round(n * 100) / 100; }
+function round2(n: number) {
+  return Math.round(n * 100) / 100;
+}
 
 export const listInvoices = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -39,12 +45,14 @@ export const listInvoices = createServerFn({ method: "GET" })
   .handler(async ({ context, data }) => {
     const { data: rows, error } = await context.supabase
       .from("invoices")
-      .select(`
+      .select(
+        `
         id, number, status, issued_at, due_at, subtotal, tax_amount, total, currency,
         reservation_id, guest_id, created_at,
         guests(full_name, email),
         reservations(confirmation_code)
-      `)
+      `,
+      )
       .eq("org_id", data.orgId)
       .order("issued_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -57,14 +65,18 @@ export const getInvoice = createServerFn({ method: "GET" })
   .handler(async ({ context, data }) => {
     const { data: inv, error } = await context.supabase
       .from("invoices")
-      .select(`*, guests(full_name, email, phone), reservations(confirmation_code, check_in, check_out)`)
-      .eq("id", data.id).maybeSingle();
+      .select(
+        `*, guests(full_name, email, phone), reservations(confirmation_code, check_in, check_out)`,
+      )
+      .eq("id", data.id)
+      .maybeSingle();
     if (error) throw new Error(error.message);
     if (!inv) throw new Error("Invoice not found");
     const { data: items } = await context.supabase
       .from("invoice_items")
       .select("id, description, quantity, unit_price, amount, position")
-      .eq("invoice_id", data.id).order("position", { ascending: true });
+      .eq("invoice_id", data.id)
+      .order("position", { ascending: true });
     return { invoice: inv, items: items ?? [] };
   });
 
@@ -79,34 +91,43 @@ export const upsertInvoice = createServerFn({ method: "POST" })
     let invoiceId = data.id;
     if (!invoiceId) {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: numRes, error: numErr } = await (supabaseAdmin as any)
-        .rpc("next_invoice_number", { _org_id: data.orgId, _user_id: context.userId });
+      const { data: numRes, error: numErr } = await (supabaseAdmin as any).rpc(
+        "next_invoice_number",
+        { _org_id: data.orgId, _user_id: context.userId },
+      );
       if (numErr) throw new Error(numErr.message);
-      const { data: row, error } = await supabase.from("invoices").insert({
-        org_id: data.orgId,
-        reservation_id: data.reservation_id ?? null,
-        guest_id: data.guest_id ?? null,
-        number: numRes as string,
-        status: data.status,
-        issued_at: data.issued_at,
-        due_at: due,
-        currency: data.currency,
-        notes: data.notes || null,
-        ...totals,
-      }).select("id").single();
+      const { data: row, error } = await supabase
+        .from("invoices")
+        .insert({
+          org_id: data.orgId,
+          reservation_id: data.reservation_id ?? null,
+          guest_id: data.guest_id ?? null,
+          number: numRes as string,
+          status: data.status,
+          issued_at: data.issued_at,
+          due_at: due,
+          currency: data.currency,
+          notes: data.notes || null,
+          ...totals,
+        })
+        .select("id")
+        .single();
       if (error) throw new Error(error.message);
       invoiceId = row.id;
     } else {
-      const { error } = await supabase.from("invoices").update({
-        reservation_id: data.reservation_id ?? null,
-        guest_id: data.guest_id ?? null,
-        status: data.status,
-        issued_at: data.issued_at,
-        due_at: due,
-        currency: data.currency,
-        notes: data.notes || null,
-        ...totals,
-      }).eq("id", invoiceId);
+      const { error } = await supabase
+        .from("invoices")
+        .update({
+          reservation_id: data.reservation_id ?? null,
+          guest_id: data.guest_id ?? null,
+          status: data.status,
+          issued_at: data.issued_at,
+          due_at: due,
+          currency: data.currency,
+          notes: data.notes || null,
+          ...totals,
+        })
+        .eq("id", invoiceId);
       if (error) throw new Error(error.message);
       await supabase.from("invoice_items").delete().eq("invoice_id", invoiceId);
     }
@@ -142,11 +163,14 @@ export const generateFromReservation = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { data: r, error } = await supabase
       .from("reservations")
-      .select(`
+      .select(
+        `
         id, org_id, guest_id, check_in, check_out, total_amount, currency, confirmation_code,
         units(name), properties(name)
-      `)
-      .eq("id", data.reservationId).maybeSingle();
+      `,
+      )
+      .eq("id", data.reservationId)
+      .maybeSingle();
     if (error) throw new Error(error.message);
     if (!r) throw new Error("Reservation not found");
 
@@ -158,27 +182,44 @@ export const generateFromReservation = createServerFn({ method: "POST" })
     const unitPrice = round2(total / nights);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: numRes, error: numErr } = await (supabaseAdmin as any)
-      .rpc("next_invoice_number", { _org_id: r.org_id, _user_id: context.userId });
+    const { data: numRes, error: numErr } = await (supabaseAdmin as any).rpc(
+      "next_invoice_number",
+      { _org_id: r.org_id, _user_id: context.userId },
+    );
     if (numErr) throw new Error(numErr.message);
 
     const desc = `${r.properties?.name ?? "Stay"} — ${r.units?.name ?? ""} (${r.check_in} → ${r.check_out}) · #${r.confirmation_code}`;
     const subtotal = round2(unitPrice * nights);
 
-    const { data: inv, error: insErr } = await supabase.from("invoices").insert({
-      org_id: r.org_id, reservation_id: r.id, guest_id: r.guest_id,
-      number: numRes as string, status: "draft",
-      issued_at: new Date().toISOString().slice(0, 10),
-      currency: r.currency,
-      subtotal, tax_amount: 0, total: subtotal,
-    }).select("id").single();
+    const { data: inv, error: insErr } = await supabase
+      .from("invoices")
+      .insert({
+        org_id: r.org_id,
+        reservation_id: r.id,
+        guest_id: r.guest_id,
+        number: numRes as string,
+        status: "draft",
+        issued_at: new Date().toISOString().slice(0, 10),
+        currency: r.currency,
+        subtotal,
+        tax_amount: 0,
+        total: subtotal,
+      })
+      .select("id")
+      .single();
     if (insErr) throw new Error(insErr.message);
 
-    const { error: itErr } = await supabase.from("invoice_items").insert([{
-      invoice_id: inv.id, org_id: r.org_id,
-      description: desc, quantity: nights, unit_price: unitPrice,
-      amount: subtotal, position: 0,
-    }]);
+    const { error: itErr } = await supabase.from("invoice_items").insert([
+      {
+        invoice_id: inv.id,
+        org_id: r.org_id,
+        description: desc,
+        quantity: nights,
+        unit_price: unitPrice,
+        amount: subtotal,
+        position: 0,
+      },
+    ]);
     if (itErr) throw new Error(itErr.message);
 
     return { id: inv.id };

@@ -8,7 +8,13 @@ import { listPublicProperties, listCounties } from "@/lib/marketplace.functions"
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PlanWithAI } from "@/components/plan-with-ai";
 import { formatCurrency } from "@/lib/format";
 import { EmptyState, LoadingState } from "@/components/ui/states";
@@ -20,10 +26,13 @@ export const Route = createFileRoute("/rentals/$child")({
     return meta;
   },
   head: ({ loaderData }) => {
-    if (!loaderData) return { meta: [{ title: "Not found" }, { name: "robots", content: "noindex" }] };
+    if (!loaderData)
+      return { meta: [{ title: "Not found" }, { name: "robots", content: "noindex" }] };
     const n = loaderData.node;
     const title = n.seo_title ?? `${n.name} for Rent in Kenya | HostPulse`;
-    const desc = n.seo_description ?? `Browse ${n.name.toLowerCase()} rentals across Kenya. Filter by county, town, budget, and amenities.`;
+    const desc =
+      n.seo_description ??
+      `Browse ${n.name.toLowerCase()} rentals across Kenya. Filter by county, town, budget, and amenities.`;
     return {
       meta: [
         { title },
@@ -39,7 +48,9 @@ export const Route = createFileRoute("/rentals/$child")({
   notFoundComponent: () => (
     <div className="mx-auto max-w-3xl p-12 text-center">
       <h1 className="text-2xl font-semibold">Category not found</h1>
-      <Link to="/rentals" className="mt-4 inline-block text-primary underline">Back to rentals</Link>
+      <Link to="/rentals" className="mt-4 inline-block text-primary underline">
+        Back to rentals
+      </Link>
     </div>
   ),
   errorComponent: ({ error }) => (
@@ -62,15 +73,16 @@ function ChildCategoryPage() {
 
   const results = useQuery({
     queryKey: ["rentals-child", child, county, town, priceMax],
-    queryFn: () => listFn({
-      data: {
-        childSlug: child,
-        county: county === "all" ? undefined : county,
-        search: town || undefined,
-        priceMax: priceMax === "" ? null : Number(priceMax),
-        pageSize: 24,
-      },
-    }),
+    queryFn: () =>
+      listFn({
+        data: {
+          childSlug: child,
+          county: county === "all" ? undefined : county,
+          search: town || undefined,
+          priceMax: priceMax === "" ? null : Number(priceMax),
+          pageSize: 24,
+        },
+      }),
   });
 
   const breadcrumbLd = {
@@ -85,32 +97,49 @@ function ChildCategoryPage() {
 
   return (
     <div className="min-h-dvh bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       <section className="border-b bg-gradient-to-b from-primary/5 to-transparent">
         <div className="mx-auto max-w-6xl px-6 py-10">
           <nav className="mb-3 text-sm text-muted-foreground">
-            <Link to="/" className="hover:underline">Home</Link> /{" "}
-            <Link to="/rentals" className="hover:underline">{parent?.name ?? "Rentals"}</Link> /{" "}
-            <span className="text-foreground">{node.name}</span>
+            <Link to="/" className="hover:underline">
+              Home
+            </Link>{" "}
+            /{" "}
+            <Link to="/rentals" className="hover:underline">
+              {parent?.name ?? "Rentals"}
+            </Link>{" "}
+            / <span className="text-foreground">{node.name}</span>
           </nav>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <h1 className="text-3xl font-semibold tracking-tight">{node.name} for Rent</h1>
               <p className="mt-2 max-w-2xl text-muted-foreground">
-                {node.seo_description ?? `Browse ${node.name.toLowerCase()} listings across Kenya. Filter by county, town, and budget.`}
+                {node.seo_description ??
+                  `Browse ${node.name.toLowerCase()} listings across Kenya. Filter by county, town, and budget.`}
               </p>
             </div>
             <PlanWithAI
               label="Plan with AI"
-              seed={{ seed_intent: `Help me find a ${node.name.toLowerCase()} to rent in Kenya`, module: "rental", child_category: node.slug }}
+              seed={{
+                seed_intent: `Help me find a ${node.name.toLowerCase()} to rent in Kenya`,
+                module: "rental",
+                child_category: node.slug,
+              }}
             />
           </div>
 
           {siblings.length > 1 && (
             <div className="mt-6 flex flex-wrap gap-2">
               {siblings.map((s: any) => (
-                <Link key={s.slug} to="/rentals/$child" params={{ child: s.slug }}
-                  className={`rounded-full border px-3 py-1 text-xs transition-colors ${s.slug === node.slug ? "border-primary bg-primary/10 text-primary" : "hover:bg-accent"}`}>
+                <Link
+                  key={s.slug}
+                  to="/rentals/$child"
+                  params={{ child: s.slug }}
+                  className={`rounded-full border px-3 py-1 text-xs transition-colors ${s.slug === node.slug ? "border-primary bg-primary/10 text-primary" : "hover:bg-accent"}`}
+                >
                   {s.name}
                 </Link>
               ))}
@@ -122,17 +151,35 @@ function ChildCategoryPage() {
       <section className="mx-auto max-w-6xl px-6 py-8">
         <div className="mb-6 grid gap-3 md:grid-cols-4">
           <Select value={county} onValueChange={setCounty}>
-            <SelectTrigger><SelectValue placeholder="County" /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder="County" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All counties</SelectItem>
               {(counties.data ?? []).map((c: any) => (
-                <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                <SelectItem key={c.code} value={c.code}>
+                  {c.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Input placeholder="Town / area" value={town} onChange={e => setTown(e.target.value)} />
-          <Input placeholder="Max budget (KES)" type="number" value={priceMax} onChange={e => setPriceMax(e.target.value)} />
-          <Button variant="outline" onClick={() => { setCounty("all"); setTown(""); setPriceMax(""); }}>Reset</Button>
+          <Input placeholder="Town / area" value={town} onChange={(e) => setTown(e.target.value)} />
+          <Input
+            placeholder="Max budget (KES)"
+            type="number"
+            value={priceMax}
+            onChange={(e) => setPriceMax(e.target.value)}
+          />
+          <Button
+            variant="outline"
+            onClick={() => {
+              setCounty("all");
+              setTown("");
+              setPriceMax("");
+            }}
+          >
+            Reset
+          </Button>
         </div>
 
         {results.isLoading && <LoadingState label="Loading listings…" />}
@@ -140,17 +187,25 @@ function ChildCategoryPage() {
           <EmptyState
             title={`No ${node.name.toLowerCase()} listings match your filters yet`}
             description="Try widening your filters or exploring another category."
-            action={<Link to="/rentals" className="inline-flex items-center gap-1 text-primary underline"><ArrowLeft className="h-4 w-4" /> Try another category</Link>}
+            action={
+              <Link to="/rentals" className="inline-flex items-center gap-1 text-primary underline">
+                <ArrowLeft className="h-4 w-4" /> Try another category
+              </Link>
+            }
           />
         )}
-
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(results.data?.items ?? []).map((p: any) => (
             <Link key={p.id} to="/marketplace/p/$slug" params={{ slug: p.slug }}>
               <Card className="h-full transition-shadow hover:shadow-md">
                 {p.main_image_path && (
-                  <img src={p.main_image_path} alt={p.name} className="h-40 w-full rounded-t-lg object-cover" loading="lazy" />
+                  <img
+                    src={p.main_image_path}
+                    alt={p.name}
+                    className="h-40 w-full rounded-t-lg object-cover"
+                    loading="lazy"
+                  />
                 )}
                 <CardContent className="p-4">
                   <h3 className="font-semibold">{p.name}</h3>
@@ -158,10 +213,13 @@ function ChildCategoryPage() {
                     <MapPin className="h-3 w-3" /> {p.town} · {p.county_code}
                   </p>
                   <div className="mt-2 flex items-center justify-between text-sm">
-                    <span className="font-medium">{formatCurrency(Number(p.price_per_night), p.currency)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(Number(p.price_per_night), p.currency)}
+                    </span>
                     {p.rating_avg > 0 && (
                       <span className="flex items-center gap-1 text-xs">
-                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {Number(p.rating_avg).toFixed(1)}
+                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />{" "}
+                        {Number(p.rating_avg).toFixed(1)}
                       </span>
                     )}
                   </div>

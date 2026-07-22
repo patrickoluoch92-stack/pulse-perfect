@@ -38,9 +38,7 @@ export const Route = createFileRoute("/discover/$slug")({
   notFoundComponent: () => (
     <div className="mx-auto max-w-2xl p-10 text-center">
       <h1 className="text-2xl font-semibold">Property not found</h1>
-      <p className="mt-2 text-muted-foreground">
-        It may have been merged or archived.
-      </p>
+      <p className="mt-2 text-muted-foreground">It may have been merged or archived.</p>
       <Link to="/discover" className="mt-4 inline-block text-primary underline">
         Back to discover
       </Link>
@@ -49,7 +47,9 @@ export const Route = createFileRoute("/discover/$slug")({
   errorComponent: ({ reset }) => (
     <div className="mx-auto max-w-2xl p-10 text-center">
       <h1 className="text-2xl font-semibold">Something went wrong</h1>
-      <Button className="mt-4" onClick={reset}>Retry</Button>
+      <Button className="mt-4" onClick={reset}>
+        Retry
+      </Button>
     </div>
   ),
   component: DiscoverDetail,
@@ -119,7 +119,8 @@ function DiscoverDetail() {
                 <Sparkles className="h-3.5 w-3.5" /> AI-generated overview
               </div>
               <p className="text-sm leading-relaxed">
-                {row.ai_description ?? "No description yet — the AI hasn't visited this property in detail."}
+                {row.ai_description ??
+                  "No description yet — the AI hasn't visited this property in detail."}
               </p>
             </div>
 
@@ -145,20 +146,36 @@ function DiscoverDetail() {
               {claiming && !claimId && (
                 <div className="mt-3 space-y-2">
                   <Label htmlFor="claim-email">Business email</Label>
-                  <Input id="claim-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <Input
+                    id="claim-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                   <Label htmlFor="claim-phone">Phone (optional)</Label>
-                  <Input id="claim-phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
-                  <Button className="w-full" onClick={ensureAuthAndStart}>Send code</Button>
+                  <Input
+                    id="claim-phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                  <Button className="w-full" onClick={ensureAuthAndStart}>
+                    Send code
+                  </Button>
                 </div>
               )}
               {claimId && (
                 <div className="mt-3 space-y-2">
                   <Label htmlFor="claim-code">6-digit code</Label>
-                  <Input id="claim-code" value={code} onChange={(e) => setCode(e.target.value)} maxLength={6} />
-                  {devCode && (
-                    <p className="text-xs text-muted-foreground">Dev code: {devCode}</p>
-                  )}
-                  <Button className="w-full" onClick={submitCode}>Verify & claim</Button>
+                  <Input
+                    id="claim-code"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    maxLength={6}
+                  />
+                  {devCode && <p className="text-xs text-muted-foreground">Dev code: {devCode}</p>}
+                  <Button className="w-full" onClick={submitCode}>
+                    Verify & claim
+                  </Button>
                 </div>
               )}
             </div>
@@ -166,7 +183,12 @@ function DiscoverDetail() {
             {row.website && (
               <div className="rounded-xl border bg-card p-5">
                 <h2 className="text-sm font-semibold">Public info</h2>
-                <a href={row.website} target="_blank" rel="noreferrer" className="mt-2 flex items-center gap-2 text-sm text-primary hover:underline">
+                <a
+                  href={row.website}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 flex items-center gap-2 text-sm text-primary hover:underline"
+                >
                   <Globe className="h-4 w-4" /> Website
                 </a>
               </div>

@@ -4,8 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import * as MarkerClustererPkg from "@googlemaps/markerclusterer";
 const MarkerClusterer =
-  (MarkerClustererPkg as { MarkerClusterer?: typeof MarkerClustererPkg.MarkerClusterer }).MarkerClusterer ??
-  (MarkerClustererPkg as unknown as { default: { MarkerClusterer: typeof MarkerClustererPkg.MarkerClusterer } }).default.MarkerClusterer;
+  (MarkerClustererPkg as { MarkerClusterer?: typeof MarkerClustererPkg.MarkerClusterer })
+    .MarkerClusterer ??
+  (
+    MarkerClustererPkg as unknown as {
+      default: { MarkerClusterer: typeof MarkerClustererPkg.MarkerClusterer };
+    }
+  ).default.MarkerClusterer;
 type MarkerClusterer = InstanceType<typeof MarkerClusterer>;
 
 import { listMapProperties } from "@/lib/marketplace-extra.functions";
@@ -25,8 +30,7 @@ export const Route = createFileRoute("/marketplace/map")({
       { title: "Map view — Kenya Hospitality Marketplace | HostPulse" },
       {
         name: "description",
-        content:
-          "Explore hotels, lodges, camps and villas across Kenya on an interactive map.",
+        content: "Explore hotels, lodges, camps and villas across Kenya on an interactive map.",
       },
     ],
   }),

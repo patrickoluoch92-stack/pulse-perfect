@@ -22,7 +22,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { createBooking } from "@/lib/marketplace-extra.functions";
 import { checkAvailability } from "@/lib/marketplace-ops.functions";
 
-
 interface Props {
   propertyId: string;
   propertyName: string;
@@ -54,8 +53,7 @@ export function BookingDialog({ propertyId, propertyName, pricePerNight, currenc
   const nights = Math.max(
     0,
     Math.round(
-      (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
-        (1000 * 60 * 60 * 24),
+      (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24),
     ),
   );
   const total = (pricePerNight ?? 0) * nights;
@@ -65,7 +63,6 @@ export function BookingDialog({ propertyId, propertyName, pricePerNight, currenc
     queryFn: () => checkFn({ data: { propertyId, checkIn, checkOut } }),
     enabled: open && nights > 0,
   });
-
 
   const submit = useMutation({
     mutationFn: async () => {
@@ -114,71 +111,122 @@ export function BookingDialog({ propertyId, propertyName, pricePerNight, currenc
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label htmlFor="bk-in" className="text-xs"><CalendarDays className="inline h-3 w-3" /> Check-in</Label>
-              <Input id="bk-in" type="date" min={todayISO()} value={checkIn} onChange={(e) => setCheckIn(e.target.value)} />
+              <Label htmlFor="bk-in" className="text-xs">
+                <CalendarDays className="inline h-3 w-3" /> Check-in
+              </Label>
+              <Input
+                id="bk-in"
+                type="date"
+                min={todayISO()}
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+              />
             </div>
             <div>
-              <Label htmlFor="bk-out" className="text-xs"><CalendarDays className="inline h-3 w-3" /> Check-out</Label>
-              <Input id="bk-out" type="date" min={checkIn} value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
+              <Label htmlFor="bk-out" className="text-xs">
+                <CalendarDays className="inline h-3 w-3" /> Check-out
+              </Label>
+              <Input
+                id="bk-out"
+                type="date"
+                min={checkIn}
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
+              />
             </div>
           </div>
           <div>
-            <Label htmlFor="bk-guests" className="text-xs"><Users className="inline h-3 w-3" /> Guests</Label>
-            <Input id="bk-guests" type="number" min={1} max={50} value={guests} onChange={(e) => setGuests(Number(e.target.value))} />
+            <Label htmlFor="bk-guests" className="text-xs">
+              <Users className="inline h-3 w-3" /> Guests
+            </Label>
+            <Input
+              id="bk-guests"
+              type="number"
+              min={1}
+              max={50}
+              value={guests}
+              onChange={(e) => setGuests(Number(e.target.value))}
+            />
           </div>
           <div>
-            <Label htmlFor="bk-name" className="text-xs">Full name</Label>
+            <Label htmlFor="bk-name" className="text-xs">
+              Full name
+            </Label>
             <Input id="bk-name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label htmlFor="bk-email" className="text-xs">Email</Label>
-              <Input id="bk-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Label htmlFor="bk-email" className="text-xs">
+                Email
+              </Label>
+              <Input
+                id="bk-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
             <div>
-              <Label htmlFor="bk-phone" className="text-xs">Phone (optional)</Label>
+              <Label htmlFor="bk-phone" className="text-xs">
+                Phone (optional)
+              </Label>
               <Input id="bk-phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
           </div>
           <div>
-            <Label htmlFor="bk-notes" className="text-xs">Notes (optional)</Label>
-            <Textarea id="bk-notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
+            <Label htmlFor="bk-notes" className="text-xs">
+              Notes (optional)
+            </Label>
+            <Textarea
+              id="bk-notes"
+              rows={2}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
           </div>
 
           {nights > 0 && pricePerNight != null && (
             <div className="rounded-md border bg-muted/40 p-3 text-sm">
               <div className="flex justify-between">
-                <span>{currency} {pricePerNight.toLocaleString()} × {nights} night{nights > 1 ? "s" : ""}</span>
-                <span className="font-semibold">{currency} {total.toLocaleString()}</span>
+                <span>
+                  {currency} {pricePerNight.toLocaleString()} × {nights} night
+                  {nights > 1 ? "s" : ""}
+                </span>
+                <span className="font-semibold">
+                  {currency} {total.toLocaleString()}
+                </span>
               </div>
             </div>
           )}
 
-          {nights > 0 && availability.data && (
-            availability.data.available ? (
+          {nights > 0 &&
+            availability.data &&
+            (availability.data.available ? (
               <p className="flex items-center gap-2 text-xs text-green-700">
                 <CheckCircle2 className="h-3.5 w-3.5" /> Dates are available
               </p>
             ) : (
               <p className="flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                <AlertTriangle className="h-3.5 w-3.5" /> These dates overlap a blocked period. Pick different dates.
+                <AlertTriangle className="h-3.5 w-3.5" /> These dates overlap a blocked period. Pick
+                different dates.
               </p>
-            )
-          )}
+            ))}
         </div>
 
         <DialogFooter>
           <Button
             onClick={() => submit.mutate()}
             disabled={
-              submit.isPending || !name || !email || nights <= 0 ||
+              submit.isPending ||
+              !name ||
+              !email ||
+              nights <= 0 ||
               (availability.data ? !availability.data.available : false)
             }
           >
             {submit.isPending ? "Sending…" : "Send booking request"}
           </Button>
         </DialogFooter>
-
       </DialogContent>
     </Dialog>
   );

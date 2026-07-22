@@ -20,7 +20,9 @@ async function callAI(opts: {
       { role: "system", content: opts.system },
       { role: "user", content: opts.user },
     ],
-    jsonSchema: opts.jsonSchema ? { name: opts.jsonSchema.name, schema: opts.jsonSchema.schema } : undefined,
+    jsonSchema: opts.jsonSchema
+      ? { name: opts.jsonSchema.name, schema: opts.jsonSchema.schema }
+      : undefined,
   });
   if (opts.jsonSchema) {
     try {
@@ -45,7 +47,12 @@ export const aiPrefillProperty = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => prefillInput.parse(data))
   .handler(async ({ context, data }) => {
-    await enforceRateLimit({ bucket: "ai_prefill", userId: context.userId, limit: 10, windowSec: 60 });
+    await enforceRateLimit({
+      bucket: "ai_prefill",
+      userId: context.userId,
+      limit: 10,
+      windowSec: 60,
+    });
 
     const system = [
       "You are HostPulse's property intake assistant for Kenya.",
@@ -124,7 +131,12 @@ export const aiAssistantSuggest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => assistantInput.parse(data))
   .handler(async ({ context, data }) => {
-    await enforceRateLimit({ bucket: "ai_assist", userId: context.userId, limit: 20, windowSec: 60 });
+    await enforceRateLimit({
+      bucket: "ai_assist",
+      userId: context.userId,
+      limit: 20,
+      windowSec: 60,
+    });
 
     const system =
       "You are a concise onboarding coach. Given a partial property draft (JSON), return 3–6 short, specific, actionable suggestions to improve the listing. Focus on missing critical info, weak descriptions, missing images, missing amenities, or SEO wins. Return JSON only.";

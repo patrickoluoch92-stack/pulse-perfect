@@ -33,7 +33,10 @@ function AICommandPage() {
       const [mkt, resv, claims] = await Promise.all([
         supabase.from("marketplace_properties").select("*", { count: "exact", head: true }),
         supabase.from("reservations").select("*", { count: "exact", head: true }),
-        supabase.from("property_claims").select("*", { count: "exact", head: true }).eq("status", "pending"),
+        supabase
+          .from("property_claims")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "pending"),
       ]);
       return {
         marketplace: mkt.count ?? 0,
@@ -61,24 +64,38 @@ function AICommandPage() {
             icon={<Compass className="h-4 w-4" />}
             title="Discovery Engine"
             main={disc.data ? `${disc.data.total ?? 0}` : "—"}
-            sub={disc.data ? `${disc.data.statusCounts?.approved ?? 0} approved · ${disc.data.statusCounts?.pending ?? 0} pending` : "loading"}
+            sub={
+              disc.data
+                ? `${disc.data.statusCounts?.approved ?? 0} approved · ${disc.data.statusCounts?.pending ?? 0} pending`
+                : "loading"
+            }
           />
           <MetricCard
             icon={<TrendingUp className="h-4 w-4" />}
             title="Occupancy (30d)"
             main={occ.data ? `${Math.round((occ.data.summary.avgOccupancy ?? 0) * 100)}%` : "—"}
-            sub={occ.data ? `${occ.data.summary.totalNights ?? 0} nights across ${occ.data.summary.unitCount ?? 0} units` : "loading"}
+            sub={
+              occ.data
+                ? `${occ.data.summary.totalNights ?? 0} nights across ${occ.data.summary.unitCount ?? 0} units`
+                : "loading"
+            }
           />
           <MetricCard
             icon={<Activity className="h-4 w-4" />}
             title="Platform"
             main={platform.data ? `${platform.data.marketplace}` : "—"}
-            sub={platform.data ? `${platform.data.reservations} reservations · ${platform.data.pendingClaims} claims` : "loading"}
+            sub={
+              platform.data
+                ? `${platform.data.reservations} reservations · ${platform.data.pendingClaims} claims`
+                : "loading"
+            }
           />
         </div>
 
         <Card>
-          <CardHeader><CardTitle>Discovery pipeline health</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Discovery pipeline health</CardTitle>
+          </CardHeader>
           <CardContent>
             {disc.data ? (
               <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
@@ -88,15 +105,22 @@ function AICommandPage() {
                 <StatLine label="Claimed" value={disc.data.statusCounts?.claimed ?? 0} />
                 <StatLine label="Rejected" value={disc.data.statusCounts?.rejected ?? 0} />
                 <StatLine label="Merged" value={disc.data.statusCounts?.merged ?? 0} />
-                <StatLine label="Counties covered" value={Object.keys(disc.data.countyCounts ?? {}).length} />
+                <StatLine
+                  label="Counties covered"
+                  value={Object.keys(disc.data.countyCounts ?? {}).length}
+                />
                 <StatLine label="Recent runs" value={disc.data.recentRuns?.length ?? 0} />
               </div>
-            ) : <LoadingState label="Loading…" />}
+            ) : (
+              <LoadingState label="Loading…" />
+            )}
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Occupancy trend (next 30 nights)</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Occupancy trend (next 30 nights)</CardTitle>
+          </CardHeader>
           <CardContent>
             {occ.data ? (
               <div className="flex h-24 items-end gap-[3px]">
@@ -109,7 +133,9 @@ function AICommandPage() {
                   />
                 ))}
               </div>
-            ) : <LoadingState label="Loading…" />}
+            ) : (
+              <LoadingState label="Loading…" />
+            )}
           </CardContent>
         </Card>
 
@@ -158,13 +184,22 @@ function AICommandPage() {
             )}
           </CardContent>
         </Card>
-
       </div>
     </DashboardShell>
   );
 }
 
-function MetricCard({ icon, title, main, sub }: { icon: React.ReactNode; title: string; main: string; sub: string }) {
+function MetricCard({
+  icon,
+  title,
+  main,
+  sub,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  main: string;
+  sub: string;
+}) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">

@@ -16,11 +16,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/invoices/$invoiceId")({
-  head: () => ({ meta: authPageMeta({ title: "Invoice", description: "View and edit invoice details, line items, and payment status." }) }),
+  head: () => ({
+    meta: authPageMeta({
+      title: "Invoice",
+      description: "View and edit invoice details, line items, and payment status.",
+    }),
+  }),
   component: InvoiceEditorPage,
 });
 
@@ -34,11 +43,15 @@ const schema = z.object({
   tax_amount: z.coerce.number().min(0),
   notes: z.string().trim().max(2000),
   guest_id: z.string().uuid().optional().or(z.literal("")),
-  items: z.array(z.object({
-    description: z.string().trim().min(1, "Required"),
-    quantity: z.coerce.number().min(0),
-    unit_price: z.coerce.number().min(0),
-  })).min(1, "Add at least one item"),
+  items: z
+    .array(
+      z.object({
+        description: z.string().trim().min(1, "Required"),
+        quantity: z.coerce.number().min(0),
+        unit_price: z.coerce.number().min(0),
+      }),
+    )
+    .min(1, "Add at least one item"),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -67,12 +80,14 @@ function InvoiceEditorPage() {
   const orgId = ctx.data?.currentOrg?.id;
 
   const guests = useQuery({
-    queryKey: ["guests", orgId], enabled: !!orgId,
+    queryKey: ["guests", orgId],
+    enabled: !!orgId,
     queryFn: () => fetchGuests({ data: { orgId: orgId! } }),
   });
 
   const existing = useQuery({
-    queryKey: ["invoice", invoiceId], enabled: !isNew,
+    queryKey: ["invoice", invoiceId],
+    enabled: !isNew,
     queryFn: () => fetchInv({ data: { id: invoiceId } }),
   });
 
@@ -103,7 +118,10 @@ function InvoiceEditorPage() {
     setReservationId(inv.reservation_id);
   }, [existing.data]);
 
-  const subtotal = values.items.reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0), 0);
+  const subtotal = values.items.reduce(
+    (s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0),
+    0,
+  );
   const total = subtotal + (Number(values.tax_amount) || 0);
 
   const saveMut = useMutation({
@@ -137,69 +155,118 @@ function InvoiceEditorPage() {
       for (const i of parsed.error.issues) {
         fe[i.path.join(".")] = i.message;
       }
-      setErrors(fe); return;
+      setErrors(fe);
+      return;
     }
     setErrors({});
     saveMut.mutate();
   }
 
   function setItem(idx: number, patch: Partial<LineItem>) {
-    setValues((v) => ({ ...v, items: v.items.map((it, i) => i === idx ? { ...it, ...patch } : it) }));
+    setValues((v) => ({
+      ...v,
+      items: v.items.map((it, i) => (i === idx ? { ...it, ...patch } : it)),
+    }));
   }
   function addItem() {
-    setValues((v) => ({ ...v, items: [...v.items, { description: "", quantity: 1, unit_price: 0 }] }));
+    setValues((v) => ({
+      ...v,
+      items: [...v.items, { description: "", quantity: 1, unit_price: 0 }],
+    }));
   }
   function removeItem(idx: number) {
-    setValues((v) => ({ ...v, items: v.items.length > 1 ? v.items.filter((_, i) => i !== idx) : v.items }));
+    setValues((v) => ({
+      ...v,
+      items: v.items.length > 1 ? v.items.filter((_, i) => i !== idx) : v.items,
+    }));
   }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-8">
       <div className="flex items-center justify-between">
-        <button onClick={() => navigate({ to: "/invoices" })} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <button
+          onClick={() => navigate({ to: "/invoices" })}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-4 w-4" /> Back to invoices
         </button>
         {!isNew && existing.data && (
-          <span className="font-mono text-sm text-muted-foreground">{existing.data.invoice.number}</span>
+          <span className="font-mono text-sm text-muted-foreground">
+            {existing.data.invoice.number}
+          </span>
         )}
       </div>
 
       <header>
         <h1 className="font-display text-3xl font-semibold tracking-tight">
-          {isNew ? "New invoice" : existing.data?.invoice.number ?? "Invoice"}
+          {isNew ? "New invoice" : (existing.data?.invoice.number ?? "Invoice")}
         </h1>
       </header>
 
       <section className="grid gap-4 rounded-2xl border border-border/60 bg-card p-6 md:grid-cols-2">
         <Field label="Guest">
-          <Select value={values.guest_id || ""} onValueChange={(v) => setValues((s) => ({ ...s, guest_id: v }))}>
-            <SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger>
+          <Select
+            value={values.guest_id || ""}
+            onValueChange={(v) => setValues((s) => ({ ...s, guest_id: v }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Optional" />
+            </SelectTrigger>
             <SelectContent>
               {(guests.data ?? []).map((g) => (
-                <SelectItem key={g.id} value={g.id}>{g.full_name}</SelectItem>
+                <SelectItem key={g.id} value={g.id}>
+                  {g.full_name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </Field>
         <Field label="Status">
-          <Select value={values.status} onValueChange={(v) => setValues((s) => ({ ...s, status: v as FormValues["status"] }))}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+          <Select
+            value={values.status}
+            onValueChange={(v) => setValues((s) => ({ ...s, status: v as FormValues["status"] }))}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
-              {INVOICE_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              {INVOICE_STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Field>
         <Field label="Issued" error={errors.issued_at}>
-          <Input type="date" value={values.issued_at} onChange={(e) => setValues((s) => ({ ...s, issued_at: e.target.value }))} />
+          <Input
+            type="date"
+            value={values.issued_at}
+            onChange={(e) => setValues((s) => ({ ...s, issued_at: e.target.value }))}
+          />
         </Field>
         <Field label="Due">
-          <Input type="date" value={values.due_at} onChange={(e) => setValues((s) => ({ ...s, due_at: e.target.value }))} />
+          <Input
+            type="date"
+            value={values.due_at}
+            onChange={(e) => setValues((s) => ({ ...s, due_at: e.target.value }))}
+          />
         </Field>
         <Field label="Currency">
-          <Input value={values.currency} maxLength={3} onChange={(e) => setValues((s) => ({ ...s, currency: e.target.value.toUpperCase() }))} />
+          <Input
+            value={values.currency}
+            maxLength={3}
+            onChange={(e) => setValues((s) => ({ ...s, currency: e.target.value.toUpperCase() }))}
+          />
         </Field>
         <Field label="Tax amount">
-          <Input type="number" min={0} step="0.01" value={values.tax_amount} onChange={(e) => setValues((s) => ({ ...s, tax_amount: Number(e.target.value) }))} />
+          <Input
+            type="number"
+            min={0}
+            step="0.01"
+            value={values.tax_amount}
+            onChange={(e) => setValues((s) => ({ ...s, tax_amount: Number(e.target.value) }))}
+          />
         </Field>
       </section>
 
@@ -224,13 +291,42 @@ function InvoiceEditorPage() {
             {values.items.map((it, idx) => (
               <tr key={idx}>
                 <td className="px-4 py-2">
-                  <Input value={it.description} onChange={(e) => setItem(idx, { description: e.target.value })} placeholder="e.g. Nightly rate × 3" />
+                  <Input
+                    value={it.description}
+                    onChange={(e) => setItem(idx, { description: e.target.value })}
+                    placeholder="e.g. Nightly rate × 3"
+                  />
                 </td>
-                <td className="px-4 py-2"><Input type="number" min={0} step="0.01" value={it.quantity} onChange={(e) => setItem(idx, { quantity: Number(e.target.value) })} className="text-right" /></td>
-                <td className="px-4 py-2"><Input type="number" min={0} step="0.01" value={it.unit_price} onChange={(e) => setItem(idx, { unit_price: Number(e.target.value) })} className="text-right" /></td>
-                <td className="px-4 py-2 text-right tabular-nums">{((Number(it.quantity) || 0) * (Number(it.unit_price) || 0)).toFixed(2)}</td>
+                <td className="px-4 py-2">
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={it.quantity}
+                    onChange={(e) => setItem(idx, { quantity: Number(e.target.value) })}
+                    className="text-right"
+                  />
+                </td>
+                <td className="px-4 py-2">
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={it.unit_price}
+                    onChange={(e) => setItem(idx, { unit_price: Number(e.target.value) })}
+                    className="text-right"
+                  />
+                </td>
+                <td className="px-4 py-2 text-right tabular-nums">
+                  {((Number(it.quantity) || 0) * (Number(it.unit_price) || 0)).toFixed(2)}
+                </td>
                 <td className="px-4 py-2 text-right">
-                  <Button size="icon" variant="ghost" onClick={() => removeItem(idx)} aria-label="Remove">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => removeItem(idx)}
+                    aria-label="Remove"
+                  >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </td>
@@ -238,9 +334,29 @@ function InvoiceEditorPage() {
             ))}
           </tbody>
           <tfoot className="border-t border-border/60 text-sm">
-            <tr><td colSpan={3} className="px-4 py-2 text-right text-muted-foreground">Subtotal</td><td className="px-4 py-2 text-right tabular-nums">{subtotal.toFixed(2)}</td><td/></tr>
-            <tr><td colSpan={3} className="px-4 py-2 text-right text-muted-foreground">Tax</td><td className="px-4 py-2 text-right tabular-nums">{Number(values.tax_amount).toFixed(2)}</td><td/></tr>
-            <tr className="font-semibold"><td colSpan={3} className="px-4 py-3 text-right">Total ({values.currency})</td><td className="px-4 py-3 text-right tabular-nums">{total.toFixed(2)}</td><td/></tr>
+            <tr>
+              <td colSpan={3} className="px-4 py-2 text-right text-muted-foreground">
+                Subtotal
+              </td>
+              <td className="px-4 py-2 text-right tabular-nums">{subtotal.toFixed(2)}</td>
+              <td />
+            </tr>
+            <tr>
+              <td colSpan={3} className="px-4 py-2 text-right text-muted-foreground">
+                Tax
+              </td>
+              <td className="px-4 py-2 text-right tabular-nums">
+                {Number(values.tax_amount).toFixed(2)}
+              </td>
+              <td />
+            </tr>
+            <tr className="font-semibold">
+              <td colSpan={3} className="px-4 py-3 text-right">
+                Total ({values.currency})
+              </td>
+              <td className="px-4 py-3 text-right tabular-nums">{total.toFixed(2)}</td>
+              <td />
+            </tr>
           </tfoot>
         </table>
         {errors.items && <p className="px-5 py-2 text-xs text-destructive">{errors.items}</p>}
@@ -248,11 +364,19 @@ function InvoiceEditorPage() {
 
       <section className="rounded-2xl border border-border/60 bg-card p-6">
         <Label>Notes</Label>
-        <Textarea className="mt-1.5" rows={3} maxLength={2000} value={values.notes} onChange={(e) => setValues((s) => ({ ...s, notes: e.target.value }))} />
+        <Textarea
+          className="mt-1.5"
+          rows={3}
+          maxLength={2000}
+          value={values.notes}
+          onChange={(e) => setValues((s) => ({ ...s, notes: e.target.value }))}
+        />
       </section>
 
       <div className="flex justify-end gap-2">
-        <Button variant="ghost" onClick={() => navigate({ to: "/invoices" })}>Cancel</Button>
+        <Button variant="ghost" onClick={() => navigate({ to: "/invoices" })}>
+          Cancel
+        </Button>
         {!isNew && existing.data && existing.data.invoice.status !== "paid" && (
           <Button variant="outline" onClick={() => setMpesaOpen(true)}>
             <Smartphone className="mr-2 h-4 w-4" /> Collect via M-PESA
@@ -278,7 +402,15 @@ function InvoiceEditorPage() {
   );
 }
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function Field({
+  label,
+  error,
+  children,
+}: {
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-1.5">
       <Label>{label}</Label>

@@ -3,17 +3,21 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { enforceAuthRateLimit, requireMfa } from "@/lib/security";
-import {
-  requireOrgRole,
-  isPlatformAdmin,
-  type Permission,
-} from "@/lib/rbac";
+import { requireOrgRole, isPlatformAdmin, type Permission } from "@/lib/rbac";
 
 const PERMISSION_KEYS = [
-  "bookings.read", "bookings.write", "bookings.refund",
-  "pricing.write", "availability.write", "reviews.moderate",
-  "finance.read", "finance.payout", "marketing.write",
-  "guests.pii.read", "team.invite", "reports.read",
+  "bookings.read",
+  "bookings.write",
+  "bookings.refund",
+  "pricing.write",
+  "availability.write",
+  "reviews.moderate",
+  "finance.read",
+  "finance.payout",
+  "marketing.write",
+  "guests.pii.read",
+  "team.invite",
+  "reports.read",
 ] as const;
 
 /** Returns the effective permission set for the current user in the given org. */
@@ -51,7 +55,10 @@ export const listPermissionCatalog = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const [{ data: perms }, { data: defaults }] = await Promise.all([
-      context.supabase.from("rbac_permissions").select("key, category, label, description").order("category"),
+      context.supabase
+        .from("rbac_permissions")
+        .select("key, category, label, description")
+        .order("category"),
       context.supabase.from("rbac_role_defaults").select("role, permission"),
     ]);
     return { permissions: perms ?? [], defaults: defaults ?? [] };
@@ -85,21 +92,24 @@ export const setMemberPermission = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     requireMfa(context.claims);
     await requireOrgRole(context, data.orgId, ["owner", "admin"]);
-    await enforceAuthRateLimit({ bucket: "rbac.grant", userId: context.userId, limit: 30, windowSec: 300 });
+    await enforceAuthRateLimit({
+      bucket: "rbac.grant",
+      userId: context.userId,
+      limit: 30,
+      windowSec: 300,
+    });
 
-    const { error } = await context.supabase
-      .from("organization_member_permissions")
-      .upsert(
-        {
-          org_id: data.orgId,
-          user_id: data.userId,
-          permission: data.permission,
-          effect: data.effect,
-          granted_by: context.userId,
-          granted_at: new Date().toISOString(),
-        },
-        { onConflict: "org_id,user_id,permission" },
-      );
+    const { error } = await context.supabase.from("organization_member_permissions").upsert(
+      {
+        org_id: data.orgId,
+        user_id: data.userId,
+        permission: data.permission,
+        effect: data.effect,
+        granted_by: context.userId,
+        granted_at: new Date().toISOString(),
+      },
+      { onConflict: "org_id,user_id,permission" },
+    );
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -108,11 +118,13 @@ export const setMemberPermission = createServerFn({ method: "POST" })
 export const clearMemberPermission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      orgId: z.string().uuid(),
-      userId: z.string().uuid(),
-      permission: z.enum(PERMISSION_KEYS),
-    }).parse(d),
+    z
+      .object({
+        orgId: z.string().uuid(),
+        userId: z.string().uuid(),
+        permission: z.enum(PERMISSION_KEYS),
+      })
+      .parse(d),
   )
   .handler(async ({ context, data }) => {
     requireMfa(context.claims);

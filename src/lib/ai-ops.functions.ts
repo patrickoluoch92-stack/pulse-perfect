@@ -4,7 +4,10 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 async function assertAdmin(ctx: { supabase: any; userId: string }) {
-  const { data, error } = await ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "admin" });
+  const { data, error } = await ctx.supabase.rpc("has_role", {
+    _user_id: ctx.userId,
+    _role: "admin",
+  });
   if (error || !data) throw new Error("Forbidden");
 }
 
@@ -72,7 +75,9 @@ export const getAiOpsOverview = createServerFn({ method: "GET" })
 
 export const listRecentRuns = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({ limit: z.number().int().min(1).max(200).optional() }).parse(v ?? {}))
+  .inputValidator((v: unknown) =>
+    z.object({ limit: z.number().int().min(1).max(200).optional() }).parse(v ?? {}),
+  )
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -86,7 +91,9 @@ export const listRecentRuns = createServerFn({ method: "GET" })
 
 export const listRecentDecisions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({ limit: z.number().int().min(1).max(200).optional() }).parse(v ?? {}))
+  .inputValidator((v: unknown) =>
+    z.object({ limit: z.number().int().min(1).max(200).optional() }).parse(v ?? {}),
+  )
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -100,11 +107,16 @@ export const listRecentDecisions = createServerFn({ method: "GET" })
 
 export const toggleAgentPaused = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({ slug: z.string().min(1), paused: z.boolean() }).parse(v))
+  .inputValidator((v: unknown) =>
+    z.object({ slug: z.string().min(1), paused: z.boolean() }).parse(v),
+  )
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("ai_agents").update({ paused: data.paused }).eq("slug", data.slug);
+    const { error } = await supabaseAdmin
+      .from("ai_agents")
+      .update({ paused: data.paused })
+      .eq("slug", data.slug);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -115,6 +127,10 @@ export const requeueAgent = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { enqueue } = await import("@/lib/ai-orchestrator.server");
-    await enqueue(data.slug as any, { manual: true }, { priority: 1, dedupeKey: `manual-${Date.now()}` });
+    await enqueue(
+      data.slug as any,
+      { manual: true },
+      { priority: 1, dedupeKey: `manual-${Date.now()}` },
+    );
     return { ok: true };
   });

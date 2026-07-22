@@ -19,7 +19,11 @@ export function MfaSettings() {
   const [loading, setLoading] = useState(true);
 
   // TOTP enroll state
-  const [totpEnroll, setTotpEnroll] = useState<{ factorId: string; qr: string; secret: string } | null>(null);
+  const [totpEnroll, setTotpEnroll] = useState<{
+    factorId: string;
+    qr: string;
+    secret: string;
+  } | null>(null);
   const [totpCode, setTotpCode] = useState("");
 
   // SMS enroll state
@@ -65,7 +69,9 @@ export function MfaSettings() {
     if (!totpEnroll) return;
     setBusy(true);
     try {
-      const { data: ch, error: ce } = await supabase.auth.mfa.challenge({ factorId: totpEnroll.factorId });
+      const { data: ch, error: ce } = await supabase.auth.mfa.challenge({
+        factorId: totpEnroll.factorId,
+      });
       if (ce) throw ce;
       const { error } = await supabase.auth.mfa.verify({
         factorId: totpEnroll.factorId,
@@ -107,7 +113,9 @@ export function MfaSettings() {
     if (!smsEnroll) return;
     setBusy(true);
     try {
-      const { data: ch, error: ce } = await supabase.auth.mfa.challenge({ factorId: smsEnroll.factorId });
+      const { data: ch, error: ce } = await supabase.auth.mfa.challenge({
+        factorId: smsEnroll.factorId,
+      });
       if (ce) throw ce;
       const { error } = await supabase.auth.mfa.verify({
         factorId: smsEnroll.factorId,
@@ -153,11 +161,19 @@ export function MfaSettings() {
       </p>
 
       {loading ? (
-        <div className="mt-6"><LoadingState label="Loading factors…" /></div>
+        <div className="mt-6">
+          <LoadingState label="Loading factors…" />
+        </div>
       ) : (
         <ul className="mt-6 space-y-2">
           {factors.length === 0 && (
-            <li><EmptyState icon={ShieldCheck} title="No factors enrolled yet" description="Add an authenticator app or phone to enable two-factor auth." /></li>
+            <li>
+              <EmptyState
+                icon={ShieldCheck}
+                title="No factors enrolled yet"
+                description="Add an authenticator app or phone to enable two-factor auth."
+              />
+            </li>
           )}
           {factors.map((f) => (
             <li
@@ -170,7 +186,9 @@ export function MfaSettings() {
                 ) : (
                   <Smartphone className="h-4 w-4" />
                 )}
-                <span className="font-medium">{f.friendly_name || f.factor_type.toUpperCase()}</span>
+                <span className="font-medium">
+                  {f.friendly_name || f.factor_type.toUpperCase()}
+                </span>
                 <span
                   className={
                     "rounded-full px-2 py-0.5 text-xs " +
@@ -230,7 +248,12 @@ export function MfaSettings() {
                 <Button size="sm" onClick={verifyTotp} disabled={busy || totpCode.length < 6}>
                   Verify & enable
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => setTotpEnroll(null)} disabled={busy}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setTotpEnroll(null)}
+                  disabled={busy}
+                >
                   Cancel
                 </Button>
               </div>
@@ -269,7 +292,12 @@ export function MfaSettings() {
                 <Button size="sm" onClick={verifySms} disabled={busy || smsCode.length < 6}>
                   Verify & enable
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => setSmsEnroll(null)} disabled={busy}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setSmsEnroll(null)}
+                  disabled={busy}
+                >
                   Cancel
                 </Button>
               </div>

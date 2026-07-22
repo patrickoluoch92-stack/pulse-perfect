@@ -9,7 +9,9 @@ export const listWishlist = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data, error } = await supabase
       .from("guest_wishlists")
-      .select("id, property_id, created_at, marketplace_properties(id, slug, title, town, county_code, price_from, currency, cover_image_url)")
+      .select(
+        "id, property_id, created_at, marketplace_properties(id, slug, title, town, county_code, price_from, currency, cover_image_url)",
+      )
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);

@@ -17,14 +17,28 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/_authenticated/housekeeping")({
-  head: () => ({ meta: authPageMeta({ title: "Housekeeping", description: "Schedule and track cleaning and turnover tasks." }) }),
+  head: () => ({
+    meta: authPageMeta({
+      title: "Housekeeping",
+      description: "Schedule and track cleaning and turnover tasks.",
+    }),
+  }),
   component: HousekeepingPage,
 });
 
@@ -55,17 +69,21 @@ function HousekeepingPage() {
   });
 
   const create = useMutation({
-    mutationFn: () => createFn({ data: { title, notes: notes || undefined, scheduledFor, priority } }),
+    mutationFn: () =>
+      createFn({ data: { title, notes: notes || undefined, scheduledFor, priority } }),
     onSuccess: () => {
       toast.success("Task created");
-      setTitle(""); setNotes(""); setOpen(false);
+      setTitle("");
+      setNotes("");
+      setOpen(false);
       qc.invalidateQueries({ queryKey: ["housekeeping"] });
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
   });
 
   const setStatusMut = useMutation({
-    mutationFn: (v: { id: string; status: "pending" | "in_progress" | "done" | "skipped" }) => updateFn({ data: v }),
+    mutationFn: (v: { id: string; status: "pending" | "in_progress" | "done" | "skipped" }) =>
+      updateFn({ data: v }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["housekeeping"] }),
   });
 
@@ -73,25 +91,55 @@ function HousekeepingPage() {
     <div className="mx-auto max-w-6xl space-y-6 p-6">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-semibold"><Sprout className="h-6 w-6" /> Housekeeping</h1>
-          <p className="text-sm text-muted-foreground">Cleaning and turnover tasks for your properties.</p>
+          <h1 className="flex items-center gap-2 text-2xl font-semibold">
+            <Sprout className="h-6 w-6" /> Housekeeping
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Cleaning and turnover tasks for your properties.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-            <SelectContent>{STATUS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button><Plus className="mr-1 h-4 w-4" /> New task</Button></DialogTrigger>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-1 h-4 w-4" /> New task
+              </Button>
+            </DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>New housekeeping task</DialogTitle></DialogHeader>
+              <DialogHeader>
+                <DialogTitle>New housekeeping task</DialogTitle>
+              </DialogHeader>
               <div className="space-y-3">
-                <div><Label>Title</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} /></div>
-                <div><Label>Scheduled for</Label><Input type="date" value={scheduledFor} onChange={(e) => setScheduledFor(e.target.value)} /></div>
+                <div>
+                  <Label>Title</Label>
+                  <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+                </div>
+                <div>
+                  <Label>Scheduled for</Label>
+                  <Input
+                    type="date"
+                    value={scheduledFor}
+                    onChange={(e) => setScheduledFor(e.target.value)}
+                  />
+                </div>
                 <div>
                   <Label>Priority</Label>
                   <Select value={priority} onValueChange={(v: any) => setPriority(v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="low">Low</SelectItem>
                       <SelectItem value="normal">Normal</SelectItem>
@@ -100,10 +148,15 @@ function HousekeepingPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div><Label>Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
+                <div>
+                  <Label>Notes</Label>
+                  <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} />
+                </div>
               </div>
               <DialogFooter>
-                <Button onClick={() => create.mutate()} disabled={!title || create.isPending}>Create</Button>
+                <Button onClick={() => create.mutate()} disabled={!title || create.isPending}>
+                  Create
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -111,8 +164,14 @@ function HousekeepingPage() {
       </header>
 
       <div className="rounded-xl border bg-card">
-        {list.isLoading && <div className="p-4"><LoadingState label="Loading tasks…" /></div>}
-        {list.data?.rows?.length === 0 && <p className="p-6 text-sm text-muted-foreground">No tasks.</p>}
+        {list.isLoading && (
+          <div className="p-4">
+            <LoadingState label="Loading tasks…" />
+          </div>
+        )}
+        {list.data?.rows?.length === 0 && (
+          <p className="p-6 text-sm text-muted-foreground">No tasks.</p>
+        )}
         <ul className="divide-y">
           {list.data?.rows?.map((t: any) => (
             <li key={t.id} className="flex items-center justify-between gap-4 p-4">
@@ -125,8 +184,13 @@ function HousekeepingPage() {
                 <p className="text-xs text-muted-foreground">Scheduled {t.scheduled_for}</p>
                 {t.notes && <p className="mt-1 text-sm text-muted-foreground">{t.notes}</p>}
               </div>
-              <Select value={t.status} onValueChange={(v: any) => setStatusMut.mutate({ id: t.id, status: v })}>
-                <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+              <Select
+                value={t.status}
+                onValueChange={(v: any) => setStatusMut.mutate({ id: t.id, status: v })}
+              >
+                <SelectTrigger className="w-36">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="in_progress">In progress</SelectItem>

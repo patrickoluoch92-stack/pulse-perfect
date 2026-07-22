@@ -14,7 +14,10 @@ import {
   checkPlatformAdmin,
 } from "@/lib/marketplace.functions";
 import {
-  PROPERTY_CATEGORIES, LISTING_STATUSES, statusLabel, categoryLabel,
+  PROPERTY_CATEGORIES,
+  LISTING_STATUSES,
+  statusLabel,
+  categoryLabel,
 } from "@/lib/marketplace-constants";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { Button } from "@/components/ui/button";
@@ -23,15 +26,28 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { LoadingState, EmptyState } from "@/components/ui/states";
 
 export const Route = createFileRoute("/_authenticated/listings/admin")({
-  head: () => ({ meta: authPageMeta({ title: "Marketplace admin", description: "Approve, reject, feature, and archive marketplace listings." }) }),
+  head: () => ({
+    meta: authPageMeta({
+      title: "Marketplace admin",
+      description: "Approve, reject, feature, and archive marketplace listings.",
+    }),
+  }),
   component: AdminPanel,
 });
 
@@ -78,18 +94,30 @@ function AdminPanel() {
   const setStatus_ = useMutation({
     mutationFn: (input: { id: string; status: string; rejectionReason?: string }) =>
       setStatusFn({ data: input as any }),
-    onSuccess: () => { toast.success("Status updated"); invalidate(); setRejectId(null); setRejectReason(""); },
+    onSuccess: () => {
+      toast.success("Status updated");
+      invalidate();
+      setRejectId(null);
+      setRejectReason("");
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const setFeatured = useMutation({
     mutationFn: (input: { id: string; featured: boolean }) => setFeaturedFn({ data: input }),
-    onSuccess: () => { toast.success("Featured flag updated"); invalidate(); },
+    onSuccess: () => {
+      toast.success("Featured flag updated");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   if (admin.isLoading) {
-    return <DashboardShell><LoadingState label="Checking access…" /></DashboardShell>;
+    return (
+      <DashboardShell>
+        <LoadingState label="Checking access…" />
+      </DashboardShell>
+    );
   }
   if (!admin.data?.isAdmin) {
     return (
@@ -115,7 +143,10 @@ function AdminPanel() {
       <div className="space-y-6 p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <Link to="/listings" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+            <Link
+              to="/listings"
+              className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+            >
               <ArrowLeft className="mr-1 h-4 w-4" /> Listings
             </Link>
             <h1 className="mt-2 font-display text-3xl font-semibold">Marketplace admin</h1>
@@ -128,7 +159,11 @@ function AdminPanel() {
         <div className="flex flex-wrap gap-2 rounded-xl border bg-card p-3">
           <form
             className="flex gap-2"
-            onSubmit={(e) => { e.preventDefault(); setSearch(draftSearch); setPage(1); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              setSearch(draftSearch);
+              setPage(1);
+            }}
           >
             <Input
               placeholder="Search name or town…"
@@ -137,27 +172,65 @@ function AdminPanel() {
               className="w-56"
               maxLength={120}
             />
-            <Button type="submit" variant="secondary">Search</Button>
+            <Button type="submit" variant="secondary">
+              Search
+            </Button>
           </form>
-          <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-            <SelectTrigger className="w-40"><SelectValue placeholder="Status" /></SelectTrigger>
+          <Select
+            value={status}
+            onValueChange={(v) => {
+              setStatus(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Any status</SelectItem>
-              {LISTING_STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+              {LISTING_STATUSES.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          <Select value={county} onValueChange={(v) => { setCounty(v); setPage(1); }}>
-            <SelectTrigger className="w-44"><SelectValue placeholder="County" /></SelectTrigger>
+          <Select
+            value={county}
+            onValueChange={(v) => {
+              setCounty(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="County" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Any county</SelectItem>
-              {counties.data?.map((c) => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+              {counties.data?.map((c) => (
+                <SelectItem key={c.code} value={c.code}>
+                  {c.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          <Select value={category} onValueChange={(v) => { setCategory(v); setPage(1); }}>
-            <SelectTrigger className="w-44"><SelectValue placeholder="Category" /></SelectTrigger>
+          <Select
+            value={category}
+            onValueChange={(v) => {
+              setCategory(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Any category</SelectItem>
-              {PROPERTY_CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+              {PROPERTY_CATEGORIES.map((c) => (
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -166,7 +239,10 @@ function AdminPanel() {
           {list.isLoading && <LoadingState />}
           {list.data && list.data.items.length === 0 && (
             <div className="p-6">
-              <EmptyState title="No listings match" description="Adjust your filters or clear search to see more results." />
+              <EmptyState
+                title="No listings match"
+                description="Adjust your filters or clear search to see more results."
+              />
             </div>
           )}
           {list.data && list.data.items.length > 0 && (
@@ -205,7 +281,8 @@ function AdminPanel() {
                       <div className="flex flex-wrap justify-end gap-1">
                         {p.status !== "approved" && (
                           <Button
-                            size="sm" variant="ghost"
+                            size="sm"
+                            variant="ghost"
                             onClick={() => setStatus_.mutate({ id: p.id, status: "approved" })}
                             disabled={setStatus_.isPending}
                             title="Approve"
@@ -215,7 +292,8 @@ function AdminPanel() {
                         )}
                         {p.status !== "rejected" && (
                           <Button
-                            size="sm" variant="ghost"
+                            size="sm"
+                            variant="ghost"
                             onClick={() => setRejectId(p.id)}
                             title="Reject"
                           >
@@ -223,16 +301,20 @@ function AdminPanel() {
                           </Button>
                         )}
                         <Button
-                          size="sm" variant="ghost"
+                          size="sm"
+                          variant="ghost"
                           onClick={() => setFeatured.mutate({ id: p.id, featured: !p.is_featured })}
                           disabled={setFeatured.isPending}
                           title={p.is_featured ? "Unfeature" : "Feature"}
                         >
-                          <Star className={`h-4 w-4 ${p.is_featured ? "fill-yellow-400 text-yellow-500" : ""}`} />
+                          <Star
+                            className={`h-4 w-4 ${p.is_featured ? "fill-yellow-400 text-yellow-500" : ""}`}
+                          />
                         </Button>
                         {p.status !== "archived" && (
                           <Button
-                            size="sm" variant="ghost"
+                            size="sm"
+                            variant="ghost"
                             onClick={() => setStatus_.mutate({ id: p.id, status: "archived" })}
                             disabled={setStatus_.isPending}
                             title="Archive"
@@ -251,29 +333,49 @@ function AdminPanel() {
 
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-3">
-            <Button variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
-            <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
-            <Button variant="outline" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>Next</Button>
+            <Button variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {page} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </Button>
           </div>
         )}
       </div>
 
       <Dialog open={!!rejectId} onOpenChange={(o) => !o && setRejectId(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Reject listing</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Reject listing</DialogTitle>
+          </DialogHeader>
           <Label className="text-sm">Reason (shown to the host)</Label>
           <Textarea
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
-            rows={4} maxLength={500}
+            rows={4}
+            maxLength={500}
             placeholder="e.g. Please provide clearer photos and complete contact details."
           />
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setRejectId(null)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setRejectId(null)}>
+              Cancel
+            </Button>
             <Button
-              onClick={() => rejectId && setStatus_.mutate({
-                id: rejectId, status: "rejected", rejectionReason: rejectReason,
-              })}
+              onClick={() =>
+                rejectId &&
+                setStatus_.mutate({
+                  id: rejectId,
+                  status: "rejected",
+                  rejectionReason: rejectReason,
+                })
+              }
               disabled={setStatus_.isPending}
               className="bg-destructive hover:bg-destructive/90"
             >

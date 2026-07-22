@@ -19,12 +19,14 @@ function gatewayHeaders(extra: Record<string, string> = {}) {
 export const placesAutocomplete = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      input: z.string().min(1).max(200),
-      sessionToken: z.string().min(1).max(80),
-      // bias toward Kenya by default
-      regionCode: z.string().length(2).optional().default("KE"),
-    }).parse(input),
+    z
+      .object({
+        input: z.string().min(1).max(200),
+        sessionToken: z.string().min(1).max(80),
+        // bias toward Kenya by default
+        regionCode: z.string().length(2).optional().default("KE"),
+      })
+      .parse(input),
   )
   .handler(async ({ data }) => {
     const res = await fetch(`${GATEWAY}/places/v1/places:autocomplete`, {
@@ -69,10 +71,12 @@ export const placesAutocomplete = createServerFn({ method: "POST" })
 export const placeDetails = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
-    z.object({
-      placeId: z.string().min(1).max(200),
-      sessionToken: z.string().min(1).max(80).optional(),
-    }).parse(input),
+    z
+      .object({
+        placeId: z.string().min(1).max(200),
+        sessionToken: z.string().min(1).max(80).optional(),
+      })
+      .parse(input),
   )
   .handler(async ({ data }) => {
     const fields = [
@@ -106,8 +110,7 @@ export const placeDetails = createServerFn({ method: "POST" })
       }>;
       googleMapsUri?: string;
     };
-    const comp = (type: string) =>
-      json.addressComponents?.find((c) => c.types?.includes(type));
+    const comp = (type: string) => json.addressComponents?.find((c) => c.types?.includes(type));
     return {
       placeId: json.id ?? data.placeId,
       name: json.displayName?.text ?? "",

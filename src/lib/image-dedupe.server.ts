@@ -27,7 +27,10 @@ export async function indexImagesForDiscovered(
   supabaseAdmin: any,
   discoveredId: string,
   urls: string[],
-): Promise<{ hashed: number; matches: Array<{ url: string; phash: string; matchedPropertyId: string }> }> {
+): Promise<{
+  hashed: number;
+  matches: Array<{ url: string; phash: string; matchedPropertyId: string }>;
+}> {
   const uniqueUrls = Array.from(new Set(urls)).slice(0, 8);
   let hashed = 0;
   const matches: Array<{ url: string; phash: string; matchedPropertyId: string }> = [];

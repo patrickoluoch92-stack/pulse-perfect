@@ -19,14 +19,19 @@ export const Route = createFileRoute("/discover/county/$county")({
         content: `Discover verified hotels, lodges, camps and homes in county ${loaderData?.county} across Kenya.`,
       },
       { property: "og:title", content: `County ${loaderData?.county} — HostPulse Discover` },
-      { property: "og:description", content: `Verified places to stay in county ${loaderData?.county}.` },
+      {
+        property: "og:description",
+        content: `Verified places to stay in county ${loaderData?.county}.`,
+      },
       { property: "og:type", content: "website" },
     ],
   }),
   notFoundComponent: () => (
     <div className="mx-auto max-w-2xl p-10 text-center">
       <h1 className="text-2xl font-semibold">County not found</h1>
-      <Link to="/discover" className="mt-3 inline-block text-primary underline">Back to discover</Link>
+      <Link to="/discover" className="mt-3 inline-block text-primary underline">
+        Back to discover
+      </Link>
     </div>
   ),
   component: CountyFacet,
@@ -43,7 +48,9 @@ function CountyFacet() {
   return (
     <div className="min-h-dvh bg-background">
       <div className="mx-auto max-w-6xl px-6 py-10">
-        <Link to="/discover" className="text-sm text-muted-foreground hover:underline">← All discoveries</Link>
+        <Link to="/discover" className="text-sm text-muted-foreground hover:underline">
+          ← All discoveries
+        </Link>
         <h1 className="mt-3 flex items-center gap-2 text-3xl font-semibold tracking-tight">
           <MapPin className="h-6 w-6" /> County {county}
         </h1>
@@ -51,9 +58,18 @@ function CountyFacet() {
           Verified and AI-discovered accommodations in this county.
         </p>
 
-        {q.isLoading && <div className="mt-8"><LoadingState label="Loading discoveries…" /></div>}
+        {q.isLoading && (
+          <div className="mt-8">
+            <LoadingState label="Loading discoveries…" />
+          </div>
+        )}
         {!q.isLoading && q.data?.rows?.length === 0 && (
-          <div className="mt-8"><EmptyState title="No properties found yet" description="We're still crawling this county — check back soon." /></div>
+          <div className="mt-8">
+            <EmptyState
+              title="No properties found yet"
+              description="We're still crawling this county — check back soon."
+            />
+          </div>
         )}
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -70,7 +86,12 @@ function CountyFacet() {
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 {r.property_type && <Badge variant="secondary">{r.property_type}</Badge>}
-                {r.town && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{r.town}</span>}
+                {r.town && (
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {r.town}
+                  </span>
+                )}
               </div>
               <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
                 <Sparkles className="mr-1 inline h-3.5 w-3.5" />

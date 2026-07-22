@@ -72,7 +72,9 @@ function DiscoveryAdmin() {
   const runCrawl = useMutation({
     mutationFn: () => crawl(),
     onSuccess: (r: any) => {
-      toast.success(`Crawl done — inserted ${r?.result?.inserted ?? 0}, updated ${r?.result?.updated ?? 0}`);
+      toast.success(
+        `Crawl done — inserted ${r?.result?.inserted ?? 0}, updated ${r?.result?.updated ?? 0}`,
+      );
       rows.refetch();
       s.refetch();
     },
@@ -125,17 +127,26 @@ function DiscoveryAdmin() {
                     <Badge variant="outline">Q {r.quality_score}</Badge>
                     {tab === "pending" && (
                       <>
-                        <Button size="sm" onClick={() => doApprove.mutate(r.id)}>Approve</Button>
-                        <Button size="sm" variant="secondary" onClick={() => doReject.mutate(r.id)}>Reject</Button>
+                        <Button size="sm" onClick={() => doApprove.mutate(r.id)}>
+                          Approve
+                        </Button>
+                        <Button size="sm" variant="secondary" onClick={() => doReject.mutate(r.id)}>
+                          Reject
+                        </Button>
                       </>
                     )}
-                    <Button size="sm" variant="ghost" onClick={() => doArchive.mutate(r.id)}>Archive</Button>
+                    <Button size="sm" variant="ghost" onClick={() => doArchive.mutate(r.id)}>
+                      Archive
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
             {!rows.isLoading && (rows.data?.rows?.length ?? 0) === 0 && (
-              <EmptyState title="Nothing in this queue" description="Discovered properties in this state will appear here." />
+              <EmptyState
+                title="Nothing in this queue"
+                description="Discovered properties in this state will appear here."
+              />
             )}
           </TabsContent>
         </Tabs>
@@ -151,7 +162,9 @@ function DiscoveryAdmin() {
               <ul className="space-y-3">
                 {(dupes.data?.candidates ?? []).map((group: any[]) => (
                   <li key={group[0].dedupe_fingerprint} className="rounded border p-3">
-                    <div className="mb-2 text-xs text-muted-foreground">Group of {group.length}</div>
+                    <div className="mb-2 text-xs text-muted-foreground">
+                      Group of {group.length}
+                    </div>
                     {group.map((g) => (
                       <div key={g.id} className="flex items-center justify-between text-sm">
                         <span>

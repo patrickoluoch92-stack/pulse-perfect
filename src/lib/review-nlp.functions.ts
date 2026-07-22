@@ -5,7 +5,16 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { aiJSON } from "@/lib/ai.server";
 import { isPlatformAdmin } from "@/lib/access";
 
-const ASPECTS = ["cleanliness","host","value","location","comfort","amenities","accuracy","communication"] as const;
+const ASPECTS = [
+  "cleanliness",
+  "host",
+  "value",
+  "location",
+  "comfort",
+  "amenities",
+  "accuracy",
+  "communication",
+] as const;
 
 const ReviewSchema = {
   name: "review_analysis",
@@ -20,7 +29,7 @@ const ReviewSchema = {
       risk_flags: { type: "array", items: { type: "string" } },
       summary: { type: "string" },
     },
-    required: ["sentiment","aspects","risk_flags","summary"],
+    required: ["sentiment", "aspects", "risk_flags", "summary"],
   },
 };
 
@@ -58,19 +67,24 @@ export const analyzeReviews = createServerFn({ method: "POST" })
       if (!body.trim()) continue;
       try {
         const out = await aiJSON<AnalysisOut>({
-          system: "You analyze short-stay/property guest reviews. Return only JSON. sentiment in [-1,1]; each aspect score in [-1,1] where 0 means not mentioned; risk_flags like 'fake_review','abusive','off_topic','pii_leak'.",
+          system:
+            "You analyze short-stay/property guest reviews. Return only JSON. sentiment in [-1,1]; each aspect score in [-1,1] where 0 means not mentioned; risk_flags like 'fake_review','abusive','off_topic','pii_leak'.",
           user: `Rating: ${(r as any).rating ?? "n/a"}\nReview:\n${body}`,
           schema: ReviewSchema,
         });
-        await supabaseAdmin.from("review_ai_analysis").upsert({
-          review_id: (r as any).id,
-          sentiment: out.sentiment,
-          aspects: out.aspects ?? {},
-          risk_flags: out.risk_flags ?? [],
-          summary: out.summary ?? null,
-          model_version: "gpt-5.5",
-        }, { onConflict: "review_id" });
-        await supabaseAdmin.from("marketplace_property_reviews")
+        await supabaseAdmin.from("review_ai_analysis").upsert(
+          {
+            review_id: (r as any).id,
+            sentiment: out.sentiment,
+            aspects: out.aspects ?? {},
+            risk_flags: out.risk_flags ?? [],
+            summary: out.summary ?? null,
+            model_version: "gpt-5.5",
+          },
+          { onConflict: "review_id" },
+        );
+        await supabaseAdmin
+          .from("marketplace_property_reviews")
           .update({ sentiment: out.sentiment, aspects: out.aspects ?? {} })
           .eq("id", (r as any).id);
         ok++;

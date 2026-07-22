@@ -4,21 +4,15 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
-import {
-  PROPERTY_CATEGORIES,
-  AVAILABILITY_OPTIONS,
-  slugify,
-} from "./marketplace-constants";
+import { PROPERTY_CATEGORIES, AVAILABILITY_OPTIONS, slugify } from "./marketplace-constants";
 
 const categoryValues = PROPERTY_CATEGORIES.map((c) => c.value) as [string, ...string[]];
 const availabilityValues = AVAILABILITY_OPTIONS.map((a) => a.value) as [string, ...string[]];
 
 function publicSupabase() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
 }
 
 // ===========================================================================
@@ -54,15 +48,13 @@ export const addAvailabilityBlock = createServerFn({ method: "POST" })
     if (new Date(data.endDate) < new Date(data.startDate)) {
       throw new Error("End date must be on or after start date");
     }
-    const { error } = await context.supabase
-      .from("marketplace_availability_blocks")
-      .insert({
-        property_id: data.propertyId,
-        start_date: data.startDate,
-        end_date: data.endDate,
-        reason: data.reason ?? null,
-        created_by: context.userId,
-      });
+    const { error } = await context.supabase.from("marketplace_availability_blocks").insert({
+      property_id: data.propertyId,
+      start_date: data.startDate,
+      end_date: data.endDate,
+      reason: data.reason ?? null,
+      created_by: context.userId,
+    });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -217,7 +209,9 @@ export const getOwnerAnalytics = createServerFn({ method: "GET" })
     const recent = bookings.filter((b) => new Date(b.created_at).getTime() >= since30);
 
     const totalBookings = bookings.length;
-    const confirmedBookings = bookings.filter((b) => b.status === "confirmed" || b.status === "completed").length;
+    const confirmedBookings = bookings.filter(
+      (b) => b.status === "confirmed" || b.status === "completed",
+    ).length;
     const pendingBookings = bookings.filter((b) => b.status === "pending").length;
     const grossRevenue = bookings
       .filter((b) => b.status === "confirmed" || b.status === "completed")
@@ -229,9 +223,7 @@ export const getOwnerAnalytics = createServerFn({ method: "GET" })
       .reduce((sum, b) => {
         const n = Math.max(
           1,
-          Math.round(
-            (new Date(b.check_out).getTime() - new Date(b.check_in).getTime()) / 86400000,
-          ),
+          Math.round((new Date(b.check_out).getTime() - new Date(b.check_in).getTime()) / 86400000),
         );
         return sum + n;
       }, 0);

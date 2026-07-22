@@ -3,7 +3,20 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Send, Undo2, Shield, ExternalLink, Calendar, Upload, BarChart3, Building2, Sparkles } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Send,
+  Undo2,
+  Shield,
+  ExternalLink,
+  Calendar,
+  Upload,
+  BarChart3,
+  Building2,
+  Sparkles,
+} from "lucide-react";
 import { LoadingState, EmptyState } from "@/components/ui/states";
 
 import { authPageMeta } from "@/lib/route-meta";
@@ -25,14 +38,29 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/listings/")({
@@ -82,17 +110,27 @@ function ListingsPage() {
 
   const submit = useMutation({
     mutationFn: (id: string) => submitFn({ data: { id } }),
-    onSuccess: () => { toast.success("Submitted for review"); invalidate(); },
+    onSuccess: () => {
+      toast.success("Submitted for review");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const withdraw = useMutation({
     mutationFn: (id: string) => withdrawFn({ data: { id } }),
-    onSuccess: () => { toast.success("Moved back to draft"); invalidate(); },
+    onSuccess: () => {
+      toast.success("Moved back to draft");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const remove = useMutation({
     mutationFn: (id: string) => deleteFn({ data: { id } }),
-    onSuccess: () => { toast.success("Listing deleted"); invalidate(); setPendingDelete(null); },
+    onSuccess: () => {
+      toast.success("Listing deleted");
+      invalidate();
+      setPendingDelete(null);
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -133,7 +171,6 @@ function ListingsPage() {
               <Plus className="mr-2 h-4 w-4" /> New listing
             </Button>
           </div>
-
         </header>
 
         {listings.isLoading && <LoadingState label="Loading your listings…" />}
@@ -150,7 +187,6 @@ function ListingsPage() {
             }
           />
         )}
-
 
         {listings.data && listings.data.length > 0 && (
           <div className="overflow-hidden rounded-xl border bg-card">
@@ -170,7 +206,11 @@ function ListingsPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {p.main_image_url ? (
-                          <img src={p.main_image_url} alt="" className="h-12 w-12 rounded object-cover" />
+                          <img
+                            src={p.main_image_url}
+                            alt=""
+                            className="h-12 w-12 rounded object-cover"
+                          />
                         ) : (
                           <div className="h-12 w-12 rounded bg-muted" />
                         )}
@@ -178,7 +218,9 @@ function ListingsPage() {
                           <p className="font-medium">{p.name}</p>
                           <p className="text-xs text-muted-foreground">{p.town}</p>
                           {p.rejection_reason && (
-                            <p className="mt-1 text-xs text-red-600">Rejected: {p.rejection_reason}</p>
+                            <p className="mt-1 text-xs text-red-600">
+                              Rejected: {p.rejection_reason}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -195,18 +237,36 @@ function ListingsPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         {p.status === "approved" && (
-                          <Button asChild variant="ghost" size="sm" title="View public page" aria-label={`View public page for ${p.name}`}>
+                          <Button
+                            asChild
+                            variant="ghost"
+                            size="sm"
+                            title="View public page"
+                            aria-label={`View public page for ${p.name}`}
+                          >
                             <a href={`/marketplace/p/${p.slug}`} target="_blank" rel="noopener">
                               <ExternalLink className="h-4 w-4" aria-hidden />
                             </a>
                           </Button>
                         )}
-                        <Button asChild variant="ghost" size="sm" title="Edit" aria-label={`Edit ${p.name}`}>
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="sm"
+                          title="Edit"
+                          aria-label={`Edit ${p.name}`}
+                        >
                           <Link to="/listings/$id" params={{ id: p.id }}>
                             <Pencil className="h-4 w-4" aria-hidden />
                           </Link>
                         </Button>
-                        <Button asChild variant="ghost" size="sm" title="Availability" aria-label={`Manage availability for ${p.name}`}>
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="sm"
+                          title="Availability"
+                          aria-label={`Manage availability for ${p.name}`}
+                        >
                           <Link to="/listings/$id/availability" params={{ id: p.id }}>
                             <Calendar className="h-4 w-4" aria-hidden />
                           </Link>
@@ -214,7 +274,8 @@ function ListingsPage() {
 
                         {(p.status === "draft" || p.status === "rejected") && (
                           <Button
-                            variant="ghost" size="sm"
+                            variant="ghost"
+                            size="sm"
                             onClick={() => submit.mutate(p.id)}
                             disabled={submit.isPending}
                             title="Submit for review"
@@ -225,7 +286,8 @@ function ListingsPage() {
                         )}
                         {p.status === "pending" && (
                           <Button
-                            variant="ghost" size="sm"
+                            variant="ghost"
+                            size="sm"
                             onClick={() => withdraw.mutate(p.id)}
                             disabled={withdraw.isPending}
                             title="Move back to draft"
@@ -235,7 +297,8 @@ function ListingsPage() {
                           </Button>
                         )}
                         <Button
-                          variant="ghost" size="sm"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setPendingDelete(p.id)}
                           className="text-destructive"
                           title="Delete listing"
@@ -289,7 +352,12 @@ function ListingsPage() {
 }
 
 function CreateDialog({
-  open, onClose, orgId, counties, onCreated, createFn,
+  open,
+  onClose,
+  orgId,
+  counties,
+  onCreated,
+  createFn,
 }: {
   open: boolean;
   onClose: () => void;
@@ -353,27 +421,46 @@ function CreateDialog({
         >
           <div className="space-y-2">
             <Label>Property name</Label>
-            <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required maxLength={120} />
+            <Input
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              required
+              maxLength={120}
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Category</Label>
-              <Select value={form.category} onValueChange={(v) => setForm((f) => ({ ...f, category: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.category}
+                onValueChange={(v) => setForm((f) => ({ ...f, category: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {PROPERTY_CATEGORIES.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                    <SelectItem key={c.value} value={c.value}>
+                      {c.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label>County</Label>
-              <Select value={form.countyCode} onValueChange={(v) => setForm((f) => ({ ...f, countyCode: v }))}>
-                <SelectTrigger><SelectValue placeholder="Choose…" /></SelectTrigger>
+              <Select
+                value={form.countyCode}
+                onValueChange={(v) => setForm((f) => ({ ...f, countyCode: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose…" />
+                </SelectTrigger>
                 <SelectContent>
                   {counties.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                    <SelectItem key={c.code} value={c.code}>
+                      {c.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -381,7 +468,12 @@ function CreateDialog({
           </div>
           <div className="space-y-2">
             <Label>Town / area</Label>
-            <Input value={form.town} onChange={(e) => setForm((f) => ({ ...f, town: e.target.value }))} required maxLength={80} />
+            <Input
+              value={form.town}
+              onChange={(e) => setForm((f) => ({ ...f, town: e.target.value }))}
+              required
+              maxLength={80}
+            />
           </div>
           <div className="space-y-2">
             <Label>Short description</Label>
@@ -395,7 +487,9 @@ function CreateDialog({
             />
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
+            <Button type="button" variant="ghost" onClick={onClose}>
+              Cancel
+            </Button>
             <Button type="submit" disabled={create.isPending || !form.countyCode}>
               {create.isPending ? "Creating…" : "Create draft"}
             </Button>

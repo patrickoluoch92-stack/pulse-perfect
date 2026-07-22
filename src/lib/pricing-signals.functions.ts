@@ -59,7 +59,9 @@ export async function fetchSignals(
 ) {
   let q = supabase
     .from("pricing_signals")
-    .select("signal_type, observed_on, valid_until, price_amount, weight, payload, region_code, property_id")
+    .select(
+      "signal_type, observed_on, valid_until, price_amount, weight, payload, region_code, property_id",
+    )
     .lte("observed_on", opts.to)
     .or(`valid_until.is.null,valid_until.gte.${opts.from}`);
 

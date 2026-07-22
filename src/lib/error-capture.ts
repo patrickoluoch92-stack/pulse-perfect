@@ -32,7 +32,8 @@ const breadcrumbs: Breadcrumb[] = [];
 
 export function addBreadcrumb(b: Omit<Breadcrumb, "ts"> & { ts?: number }): void {
   breadcrumbs.push({ ts: b.ts ?? Date.now(), ...b });
-  if (breadcrumbs.length > BREADCRUMB_MAX) breadcrumbs.splice(0, breadcrumbs.length - BREADCRUMB_MAX);
+  if (breadcrumbs.length > BREADCRUMB_MAX)
+    breadcrumbs.splice(0, breadcrumbs.length - BREADCRUMB_MAX);
 }
 
 export function getBreadcrumbs(): Breadcrumb[] {
@@ -47,7 +48,11 @@ export function clearBreadcrumbs(): void {
 let ambient: ErrorMetadata = {};
 
 export function setErrorContext(meta: ErrorMetadata): void {
-  ambient = { ...ambient, ...meta, context: { ...(ambient.context ?? {}), ...(meta.context ?? {}) } };
+  ambient = {
+    ...ambient,
+    ...meta,
+    context: { ...(ambient.context ?? {}), ...(meta.context ?? {}) },
+  };
 }
 
 export function clearErrorContext(): void {
@@ -128,10 +133,15 @@ if (typeof globalThis.addEventListener === "function" && typeof window !== "unde
   try {
     const origFetch = window.fetch.bind(window);
     window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
-      const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
+      const url =
+        typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+      const method = (
+        init?.method ?? (input instanceof Request ? input.method : "GET")
+      ).toUpperCase();
       const cid = ambient.correlationId ?? newCorrelationId();
-      const headers = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined));
+      const headers = new Headers(
+        init?.headers ?? (input instanceof Request ? input.headers : undefined),
+      );
       if (!headers.has("x-correlation-id")) headers.set("x-correlation-id", cid);
       const t0 = Date.now();
       try {
@@ -199,7 +209,10 @@ async function flush(error: unknown, source: string, meta: ErrorMetadata = {}) {
       context: { ...(ambient.context ?? {}), ...(meta.context ?? {}) },
     };
 
-    const key = `${source}:${merged.action ?? ""}:${message}:${merged.correlationId ?? ""}`.slice(0, 240);
+    const key = `${source}:${merged.action ?? ""}:${message}:${merged.correlationId ?? ""}`.slice(
+      0,
+      240,
+    );
     if (sentRecently.has(key)) return;
     sentRecently.add(key);
     setTimeout(() => sentRecently.delete(key), 10_000);

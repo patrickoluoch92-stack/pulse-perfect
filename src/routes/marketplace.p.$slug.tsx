@@ -44,9 +44,7 @@ export const Route = createFileRoute("/marketplace/p/$slug")({
     }
     return {
       meta,
-      links: [
-        { rel: "canonical", href: `/marketplace/p/${loaderData.slug}` },
-      ],
+      links: [{ rel: "canonical", href: `/marketplace/p/${loaderData.slug}` }],
       scripts: [
         {
           type: "application/ld+json",
@@ -84,14 +82,18 @@ export const Route = createFileRoute("/marketplace/p/$slug")({
   notFoundComponent: () => (
     <div className="mx-auto max-w-2xl p-12 text-center">
       <h1 className="text-2xl font-semibold">Listing not found</h1>
-      <Link to="/marketplace" className="mt-4 inline-block text-primary">Back to marketplace</Link>
+      <Link to="/marketplace" className="mt-4 inline-block text-primary">
+        Back to marketplace
+      </Link>
     </div>
   ),
   errorComponent: ({ error, reset }) => (
     <div className="mx-auto max-w-2xl p-12 text-center">
       <h1 className="text-2xl font-semibold">Could not load listing</h1>
       <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
-      <button onClick={reset} className="mt-4 text-primary underline">Retry</button>
+      <button onClick={reset} className="mt-4 text-primary underline">
+        Retry
+      </button>
     </div>
   ),
   component: PropertyDetail,
@@ -131,11 +133,15 @@ function PropertyDetail() {
             >
               {prop.town}, {prop.county?.name}
             </Link>
-            {prop.is_featured && <Badge className="bg-yellow-500 hover:bg-yellow-500">Featured</Badge>}
+            {prop.is_featured && (
+              <Badge className="bg-yellow-500 hover:bg-yellow-500">Featured</Badge>
+            )}
             {((prop as any).rating_count ?? 0) > 0 && (
               <span className="flex items-center gap-1 text-sm">
                 <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                <span className="font-medium">{Number((prop as any).rating_avg ?? 0).toFixed(1)}</span>
+                <span className="font-medium">
+                  {Number((prop as any).rating_avg ?? 0).toFixed(1)}
+                </span>
                 <span className="text-muted-foreground">({(prop as any).rating_count})</span>
               </span>
             )}
@@ -203,7 +209,9 @@ function PropertyDetail() {
                 <h2 className="text-xl font-semibold">Amenities</h2>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {prop.amenities.map((a) => (
-                    <Badge key={a} variant="secondary">{a}</Badge>
+                    <Badge key={a} variant="secondary">
+                      {a}
+                    </Badge>
                   ))}
                 </div>
               </section>
@@ -215,7 +223,9 @@ function PropertyDetail() {
                 <p className="mt-2 text-sm text-muted-foreground">
                   {prop.town}, {prop.county?.name} county
                 </p>
-                {prop.latitude && prop.longitude && import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY ? (
+                {prop.latitude &&
+                prop.longitude &&
+                import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY ? (
                   <div className="mt-3 overflow-hidden rounded-lg border">
                     <iframe
                       title={`Map of ${prop.name}`}
@@ -272,7 +282,9 @@ function PropertyDetail() {
                   <BookingDialog
                     propertyId={prop.id}
                     propertyName={prop.name}
-                    pricePerNight={prop.price_per_night != null ? Number(prop.price_per_night) : null}
+                    pricePerNight={
+                      prop.price_per_night != null ? Number(prop.price_per_night) : null
+                    }
                     currency={prop.currency ?? "KES"}
                   />
                 </div>

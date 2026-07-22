@@ -72,9 +72,7 @@ export const cancellationRiskReport = createServerFn({ method: "POST" })
       },
       upcomingCount: atRisk.length,
       highRisk: atRisk.slice(0, 20),
-      expectedCancellations: Math.round(
-        atRisk.reduce((s, r) => s + r.cancellationProbability, 0),
-      ),
+      expectedCancellations: Math.round(atRisk.reduce((s, r) => s + r.cancellationProbability, 0)),
     };
   });
 
@@ -95,7 +93,12 @@ export const fraudSignals = createServerFn({ method: "POST" })
       .gte("created_at", since)
       .limit(1000);
 
-    const flags: Array<{ type: string; reservationId: string; detail: string; severity: "low" | "medium" | "high" }> = [];
+    const flags: Array<{
+      type: string;
+      reservationId: string;
+      detail: string;
+      severity: "low" | "medium" | "high";
+    }> = [];
     const byGuest = new Map<string, number>();
     const totals: number[] = [];
 
@@ -135,7 +138,8 @@ export const fraudSignals = createServerFn({ method: "POST" })
     const failed = (mpesa ?? []).filter((t) => t.status === "failed" || t.status === "cancelled");
     const failByPhone = new Map<string, number>();
     for (const t of failed) {
-      if (t.phone_number) failByPhone.set(t.phone_number, (failByPhone.get(t.phone_number) ?? 0) + 1);
+      if (t.phone_number)
+        failByPhone.set(t.phone_number, (failByPhone.get(t.phone_number) ?? 0) + 1);
     }
     for (const [phone, n] of failByPhone) {
       if (n >= 3) {
@@ -189,8 +193,7 @@ export const occupancyAnomaly = createServerFn({ method: "POST" })
     const [current, w1, w2, w3, w4] = weekly;
     const baseline = (w1 + w2 + w3 + w4) / 4;
     const deltaPct = baseline > 0 ? (current - baseline) / baseline : 0;
-    const anomaly =
-      Math.abs(deltaPct) >= 0.35 ? (deltaPct > 0 ? "spike" : "drop") : "normal";
+    const anomaly = Math.abs(deltaPct) >= 0.35 ? (deltaPct > 0 ? "spike" : "drop") : "normal";
 
     return {
       currentWeekNights: current,

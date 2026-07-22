@@ -66,9 +66,7 @@ export const recommendPricing = createServerFn({ method: "POST" })
 
     const today = new Date();
     const start = today.toISOString().slice(0, 10);
-    const end = new Date(today.getTime() + data.horizonDays * 86400_000)
-      .toISOString()
-      .slice(0, 10);
+    const end = new Date(today.getTime() + data.horizonDays * 86400_000).toISOString().slice(0, 10);
 
     const { data: reservations } = await supabase
       .from("reservations")
@@ -232,7 +230,9 @@ export const forecastOccupancy = createServerFn({ method: "POST" })
 
 export const generateRevenueInsights = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ propertyId: z.string().uuid().optional() }).parse(input))
+  .inputValidator((input: unknown) =>
+    z.object({ propertyId: z.string().uuid().optional() }).parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     await enforceRateLimit({ bucket: "revenue.insights", userId, limit: 20, windowSec: 300 });

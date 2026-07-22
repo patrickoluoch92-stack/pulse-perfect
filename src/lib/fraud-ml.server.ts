@@ -15,7 +15,6 @@ export interface RiskItem {
   meta?: Record<string, string | number | null | string[]>;
 }
 
-
 function zscore(x: number, mean: number, std: number) {
   if (std <= 0) return 0;
   return (x - mean) / std;
@@ -62,7 +61,8 @@ export async function scoreRecentBookings(hours = 72, limit = 200): Promise<Risk
 
   // Guest velocity (same email across period)
   const emailCount = new Map<string, number>();
-  for (const b of recent) if (b.guest_email) emailCount.set(b.guest_email, (emailCount.get(b.guest_email) ?? 0) + 1);
+  for (const b of recent)
+    if (b.guest_email) emailCount.set(b.guest_email, (emailCount.get(b.guest_email) ?? 0) + 1);
 
   const items: RiskItem[] = [];
   for (const b of recent) {

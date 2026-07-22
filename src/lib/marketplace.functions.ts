@@ -17,11 +17,9 @@ const SIGNED_URL_TTL = 60 * 60 * 24 * 7; // 7 days
 const PAGE_SIZE_DEFAULT = 12;
 
 function publicSupabase() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
 }
 
 async function signImage(
@@ -81,9 +79,7 @@ export const listPublicProperties = createServerFn({ method: "GET" })
     if (data.childSlug) query = query.eq("child_category_slug", data.childSlug);
     if (data.category) {
       // Match either primary or secondary category so category tags work like facets
-      query = query.or(
-        `category.eq.${data.category},secondary_categories.cs.{${data.category}}`,
-      );
+      query = query.or(`category.eq.${data.category},secondary_categories.cs.{${data.category}}`);
     }
     if (data.featuredOnly) query = query.eq("is_featured", true);
     if (data.priceMin != null) query = query.gte("price_per_night", data.priceMin);
@@ -110,8 +106,11 @@ export const listPublicProperties = createServerFn({ method: "GET" })
       }
     }
 
-
-    const { data: rows, error, count } = await query
+    const {
+      data: rows,
+      error,
+      count,
+    } = await query
       .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false })
       .range(from, to);
@@ -127,7 +126,6 @@ export const listPublicProperties = createServerFn({ method: "GET" })
 
     return { items, total: count ?? 0, page: data.page, pageSize: data.pageSize };
   });
-
 
 export const listCounties = createServerFn({ method: "GET" }).handler(async () => {
   const supabase = publicSupabase();
@@ -280,7 +278,11 @@ const propertyInput = z.object({
   securityDeposit: z.number().nonnegative().max(1_000_000_000).nullable().optional(),
   serviceCharge: z.number().nonnegative().max(1_000_000_000).nullable().optional(),
   leasePeriodMonths: z.number().int().min(0).max(1200).nullable().optional(),
-  availableFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  availableFrom: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .optional(),
   bedrooms: z.number().int().min(0).max(200).nullable().optional(),
   bathrooms: z.number().int().min(0).max(200).nullable().optional(),
   parkingSpaces: z.number().int().min(0).max(500).nullable().optional(),
@@ -293,10 +295,7 @@ const propertyInput = z.object({
   postalAddress: z.string().max(200).nullable().optional(),
 });
 
-async function uniqueSlug(
-  supabase: any,
-  base: string,
-): Promise<string> {
+async function uniqueSlug(supabase: any, base: string): Promise<string> {
   const root = slugify(base) || "property";
   for (let i = 0; i < 6; i++) {
     const candidate = i === 0 ? root : `${root}-${Math.random().toString(36).slice(2, 6)}`;
@@ -506,14 +505,12 @@ export const addPropertyImage = createServerFn({ method: "POST" })
       .from("marketplace_property_images")
       .select("id", { count: "exact", head: true })
       .eq("property_id", data.propertyId);
-    const { error } = await supabase
-      .from("marketplace_property_images")
-      .insert({
-        property_id: data.propertyId,
-        storage_path: data.storagePath,
-        alt_text: data.altText ?? null,
-        sort_order: count ?? 0,
-      });
+    const { error } = await supabase.from("marketplace_property_images").insert({
+      property_id: data.propertyId,
+      storage_path: data.storagePath,
+      alt_text: data.altText ?? null,
+      sort_order: count ?? 0,
+    });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -528,10 +525,7 @@ export const deletePropertyImage = createServerFn({ method: "POST" })
       .select("storage_path")
       .eq("id", data.id)
       .maybeSingle();
-    const { error } = await supabase
-      .from("marketplace_property_images")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await supabase.from("marketplace_property_images").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     if (img?.storage_path) {
       await supabase.storage.from(MARKETPLACE_BUCKET).remove([img.storage_path]);
@@ -588,9 +582,11 @@ export const listAdminProperties = createServerFn({ method: "GET" })
       }
     }
 
-    const { data: rows, error, count } = await query
-      .order("updated_at", { ascending: false })
-      .range(from, to);
+    const {
+      data: rows,
+      error,
+      count,
+    } = await query.order("updated_at", { ascending: false }).range(from, to);
     if (error) throw new Error(error.message);
     return { items: rows ?? [], total: count ?? 0, page: data.page, pageSize: data.pageSize };
   });

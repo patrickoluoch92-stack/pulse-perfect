@@ -108,7 +108,9 @@ export function AddressAutocomplete({ defaultValue = "", placeholder, onSelect }
             <li key={s.placeId}>
               <button
                 type="button"
-                onClick={() => pick(s.placeId, s.description || `${s.mainText} ${s.secondaryText}`.trim())}
+                onClick={() =>
+                  pick(s.placeId, s.description || `${s.mainText} ${s.secondaryText}`.trim())
+                }
                 className="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-accent"
               >
                 <span className="font-medium">{s.mainText || s.description}</span>

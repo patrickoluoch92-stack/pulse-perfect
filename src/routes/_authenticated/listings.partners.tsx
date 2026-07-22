@@ -3,9 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import {
-  AlertCircle, CheckCircle2, Loader2, Plug, RefreshCw, Trash2, XCircle,
-} from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, Plug, RefreshCw, Trash2, XCircle } from "lucide-react";
 
 import { authPageMeta } from "@/lib/route-meta";
 import { DashboardShell } from "@/components/dashboard-shell";
@@ -22,7 +20,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_authenticated/listings/partners")({
-  head: () => ({ meta: authPageMeta({ title: "Partner Sync", description: "Sync inbound inventory from Booking.com and Expedia EPS Rapid." }) }),
+  head: () => ({
+    meta: authPageMeta({
+      title: "Partner Sync",
+      description: "Sync inbound inventory from Booking.com and Expedia EPS Rapid.",
+    }),
+  }),
   component: PartnersAdminPage,
 });
 
@@ -51,7 +54,10 @@ function PartnersAdminPage() {
 
   const syncMut = useMutation({
     mutationFn: async () => {
-      const list = destinations.split(",").map((s) => s.trim()).filter(Boolean);
+      const list = destinations
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
       if (list.length === 0) throw new Error("Add at least one destination");
       return syncFn({ data: { destinations: list, perDestinationLimit: perLimit } });
     },
@@ -82,7 +88,8 @@ function PartnersAdminPage() {
           <div>
             <h1 className="text-2xl font-semibold">Partner Integrations</h1>
             <p className="text-sm text-muted-foreground">
-              Sync inbound inventory from Booking.com and Expedia EPS Rapid. Falls back to mock data when credentials aren't set.
+              Sync inbound inventory from Booking.com and Expedia EPS Rapid. Falls back to mock data
+              when credentials aren't set.
             </p>
           </div>
         </header>
@@ -112,7 +119,8 @@ function PartnersAdminPage() {
           <div className="flex items-center gap-2 rounded-lg border border-amber-300/50 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
             <AlertCircle className="h-4 w-4" />
             <span>
-              <code className="font-mono">PARTNERS_FORCE_MOCK</code> is enabled — all sync runs return deterministic mock data.
+              <code className="font-mono">PARTNERS_FORCE_MOCK</code> is enabled — all sync runs
+              return deterministic mock data.
             </span>
           </div>
         )}
@@ -122,7 +130,9 @@ function PartnersAdminPage() {
             <CardTitle>Manual sync</CardTitle>
             <CardDescription>
               Pull fresh inventory now for the listed destinations. Scheduled syncs run via the
-              <code className="mx-1 rounded bg-muted px-1 py-0.5 font-mono text-xs">/api/public/hooks/partner-sync</code>
+              <code className="mx-1 rounded bg-muted px-1 py-0.5 font-mono text-xs">
+                /api/public/hooks/partner-sync
+              </code>
               cron endpoint.
             </CardDescription>
           </CardHeader>
@@ -148,10 +158,18 @@ function PartnersAdminPage() {
                 />
               </div>
               <Button onClick={() => syncMut.mutate()} disabled={syncMut.isPending}>
-                {syncMut.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                {syncMut.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                )}
                 Run sync now
               </Button>
-              <Button variant="outline" onClick={() => clearMut.mutate(undefined)} disabled={clearMut.isPending}>
+              <Button
+                variant="outline"
+                onClick={() => clearMut.mutate(undefined)}
+                disabled={clearMut.isPending}
+              >
                 <Trash2 className="mr-2 h-4 w-4" /> Clear cache
               </Button>
             </div>
@@ -186,15 +204,23 @@ function PartnersAdminPage() {
                       <td className="px-2 py-2 capitalize">{r.provider}</td>
                       <td className="px-2 py-2">{r.destination ?? "—"}</td>
                       <td className="px-2 py-2">
-                        <Badge variant={r.mode === "mock" ? "secondary" : "default"}>{r.mode}</Badge>
+                        <Badge variant={r.mode === "mock" ? "secondary" : "default"}>
+                          {r.mode}
+                        </Badge>
                       </td>
-                      <td className="px-2 py-2"><StatusPill status={r.status} /></td>
+                      <td className="px-2 py-2">
+                        <StatusPill status={r.status} />
+                      </td>
                       <td className="px-2 py-2 tabular-nums">{r.items_found}</td>
                       <td className="px-2 py-2 tabular-nums">{r.items_upserted}</td>
                     </tr>
                   ))}
                   {!runsQ.isLoading && (runsQ.data?.runs ?? []).length === 0 && (
-                    <tr><td colSpan={7} className="px-2 py-6 text-center text-muted-foreground">No runs yet. Trigger a sync above.</td></tr>
+                    <tr>
+                      <td colSpan={7} className="px-2 py-6 text-center text-muted-foreground">
+                        No runs yet. Trigger a sync above.
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>
@@ -207,7 +233,13 @@ function PartnersAdminPage() {
 }
 
 function ProviderCard({
-  name, mode, hasCreds, count, envHints, onClear, clearing,
+  name,
+  mode,
+  hasCreds,
+  count,
+  envHints,
+  onClear,
+  clearing,
 }: {
   name: string;
   mode?: "live" | "mock" | "disabled";
@@ -236,7 +268,8 @@ function ProviderCard({
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-300">
-              <AlertCircle className="h-3.5 w-3.5" /> Using mock data — set {envHints.join(" and ")} to go live
+              <AlertCircle className="h-3.5 w-3.5" /> Using mock data — set {envHints.join(" and ")}{" "}
+              to go live
             </span>
           )}
         </CardDescription>
@@ -267,7 +300,6 @@ function StatusPill({ status }: { status: "pending" | "success" | "failed" | "sk
         <XCircle className="h-3.5 w-3.5" /> failed
       </span>
     );
-  if (status === "skipped")
-    return <span className="text-muted-foreground">skipped</span>;
+  if (status === "skipped") return <span className="text-muted-foreground">skipped</span>;
   return <span className="text-muted-foreground">pending</span>;
 }

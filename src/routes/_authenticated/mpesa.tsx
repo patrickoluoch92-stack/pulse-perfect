@@ -10,11 +10,21 @@ import { getWorkspaceContext } from "@/lib/workspace.functions";
 import { listMpesaTransactions } from "@/lib/mpesa.functions";
 import { Button } from "@/components/ui/button";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/mpesa")({
-  head: () => ({ meta: authPageMeta({ title: "M-PESA payments", description: "Review STK Push transactions, receipts, and payment status across your organization." }) }),
+  head: () => ({
+    meta: authPageMeta({
+      title: "M-PESA payments",
+      description:
+        "Review STK Push transactions, receipts, and payment status across your organization.",
+    }),
+  }),
   component: MpesaAdminPage,
 });
 
@@ -57,7 +67,9 @@ function MpesaAdminPage() {
         </div>
         <div className="flex items-center gap-2">
           <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-36">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
               <SelectItem value="SUCCESS">Succeeded</SelectItem>
@@ -111,14 +123,18 @@ function MpesaAdminPage() {
                   </td>
                   <td className="px-4 py-3 font-mono text-xs">{t.mpesa_receipt_number ?? "—"}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs ${statusColors[t.status ?? ""] ?? "bg-muted"}`}>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs ${statusColors[t.status ?? ""] ?? "bg-muted"}`}
+                    >
                       {t.status ?? "—"}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">
                     {t.invoice_id ? "Invoice" : t.subscription_id ? "Subscription" : "—"}
                   </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{t.result_desc ?? "—"}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">
+                    {t.result_desc ?? "—"}
+                  </td>
                 </tr>
               ))}
             </tbody>

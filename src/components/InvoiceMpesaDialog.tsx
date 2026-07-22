@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { startMpesaCheckoutForInvoice, getInvoiceMpesaStatus } from "@/lib/mpesa.functions";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -17,7 +24,15 @@ interface Props {
   onPaid?: () => void;
 }
 
-export function InvoiceMpesaDialog({ open, onOpenChange, invoiceId, invoiceNumber, amount, currency, onPaid }: Props) {
+export function InvoiceMpesaDialog({
+  open,
+  onOpenChange,
+  invoiceId,
+  invoiceNumber,
+  amount,
+  currency,
+  onPaid,
+}: Props) {
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const start = useServerFn(startMpesaCheckoutForInvoice);
@@ -60,8 +75,12 @@ export function InvoiceMpesaDialog({ open, onOpenChange, invoiceId, invoiceNumbe
         <DialogHeader>
           <DialogTitle>Collect via M-PESA</DialogTitle>
           <DialogDescription>
-            Charge <strong>{currency} {amount.toLocaleString()}</strong> for invoice{" "}
-            <span className="font-mono">{invoiceNumber}</span>. The customer approves the prompt on their phone.
+            Charge{" "}
+            <strong>
+              {currency} {amount.toLocaleString()}
+            </strong>{" "}
+            for invoice <span className="font-mono">{invoiceNumber}</span>. The customer approves
+            the prompt on their phone.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
@@ -77,7 +96,9 @@ export function InvoiceMpesaDialog({ open, onOpenChange, invoiceId, invoiceNumbe
           <p className="text-xs text-muted-foreground">Safaricom number registered for M-PESA.</p>
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>Cancel</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>
+            Cancel
+          </Button>
           <Button onClick={onPay} disabled={busy || !phone.trim()}>
             {busy ? "Waiting for approval…" : "Send STK push"}
           </Button>

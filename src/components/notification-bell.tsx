@@ -9,9 +9,7 @@ import {
   markAllNotificationsRead,
 } from "@/lib/notifications.functions";
 import { Button } from "@/components/ui/button";
-import {
-  Popover, PopoverContent, PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 
@@ -55,7 +53,12 @@ export function NotificationBell({ className }: { className?: string }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Notifications" className={cn("relative", className)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Notifications"
+          className={cn("relative", className)}
+        >
           <Bell className="h-4 w-4" />
           {unread > 0 && (
             <span className="absolute -top-0.5 -right-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
@@ -89,8 +92,12 @@ export function NotificationBell({ className }: { className?: string }) {
                 const content = (
                   <div className={cn("space-y-1 p-3 text-sm", unreadItem && "bg-accent/30")}>
                     <p className="font-medium leading-tight">{n.title}</p>
-                    {n.body && <p className="whitespace-pre-wrap text-muted-foreground">{n.body}</p>}
-                    <p className="text-[11px] text-muted-foreground">{new Date(n.created_at).toLocaleString()}</p>
+                    {n.body && (
+                      <p className="whitespace-pre-wrap text-muted-foreground">{n.body}</p>
+                    )}
+                    <p className="text-[11px] text-muted-foreground">
+                      {new Date(n.created_at).toLocaleString()}
+                    </p>
                   </div>
                 );
                 return (

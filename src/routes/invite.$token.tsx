@@ -57,7 +57,10 @@ function InvitePage() {
         <p className="mt-2 text-sm text-muted-foreground">
           You need an account to join this workspace.
         </p>
-        <Button className="mt-6" onClick={() => navigate({ to: "/auth", search: { redirect } as never })}>
+        <Button
+          className="mt-6"
+          onClick={() => navigate({ to: "/auth", search: { redirect } as never })}
+        >
           Sign in or create an account
         </Button>
       </Center>
@@ -65,11 +68,21 @@ function InvitePage() {
   }
 
   if (!inv.data) {
-    return <Center><p className="text-sm text-muted-foreground">{inv.error ? (inv.error as Error).message : "Loading…"}</p></Center>;
+    return (
+      <Center>
+        <p className="text-sm text-muted-foreground">
+          {inv.error ? (inv.error as Error).message : "Loading…"}
+        </p>
+      </Center>
+    );
   }
 
   if (inv.data.accepted_at) {
-    return <Center><p>This invitation has already been accepted.</p></Center>;
+    return (
+      <Center>
+        <p>This invitation has already been accepted.</p>
+      </Center>
+    );
   }
 
   return (

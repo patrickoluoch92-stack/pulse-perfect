@@ -45,8 +45,17 @@ export const submitProfessionalReview = createServerFn({ method: "POST" })
     };
 
     const q = existing
-      ? supabase.from("professional_reviews").update(payload as any).eq("id", existing.id).select().single()
-      : supabase.from("professional_reviews").insert(payload as any).select().single();
+      ? supabase
+          .from("professional_reviews")
+          .update(payload as any)
+          .eq("id", existing.id)
+          .select()
+          .single()
+      : supabase
+          .from("professional_reviews")
+          .insert(payload as any)
+          .select()
+          .single();
 
     const { data: row, error } = await q;
     if (error) throw new Error(error.message);
@@ -102,7 +111,10 @@ export const respondToReview = createServerFn({ method: "POST" })
 
     const { data: updated, error } = await supabase
       .from("professional_reviews")
-      .update({ professional_response: data.response, responded_at: new Date().toISOString() } as any)
+      .update({
+        professional_response: data.response,
+        responded_at: new Date().toISOString(),
+      } as any)
       .eq("id", data.review_id)
       .select()
       .single();

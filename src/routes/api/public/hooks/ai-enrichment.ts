@@ -30,7 +30,6 @@ export const Route = createFileRoute("/api/public/hooks/ai-enrichment")({
           const reviews = await runReviewNlpTick(20);
           const seo = await runSeoGenTick(10);
           return Response.json({ vision, reviews, seo });
-
         } catch (err) {
           const message = err instanceof Error ? err.message : "unknown error";
           return new Response(JSON.stringify({ error: message }), { status: 500 });

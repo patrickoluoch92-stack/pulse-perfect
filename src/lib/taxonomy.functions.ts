@@ -27,7 +27,9 @@ export const listCategoryTree = createServerFn({ method: "GET" }).handler(async 
   );
   const { data, error } = await s
     .from("property_category_nodes" as any)
-    .select("id, slug, name, parent_id, legacy_category, description, icon, display_order, seo_title, seo_description")
+    .select(
+      "id, slug, name, parent_id, legacy_category, description, icon, display_order, seo_title, seo_description",
+    )
     .eq("active", true)
     .order("display_order");
   if (error) throw new Error(`Unable to load property categories: ${error.message}`);
@@ -60,7 +62,9 @@ export const getCategoryBySlug = createServerFn({ method: "GET" })
     );
     const { data: node, error } = await s
       .from("property_category_nodes" as any)
-      .select("id, slug, name, parent_id, legacy_category, description, icon, seo_title, seo_description")
+      .select(
+        "id, slug, name, parent_id, legacy_category, description, icon, seo_title, seo_description",
+      )
       .eq("slug", data.slug)
       .eq("active", true)
       .maybeSingle();

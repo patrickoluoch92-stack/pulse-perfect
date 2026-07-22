@@ -12,7 +12,12 @@ export type NotifyInput = {
   email?: string | null; // if provided, best-effort email send
 };
 
-async function sendEmailBestEffort(to: string, subject: string, text: string, linkUrl?: string | null) {
+async function sendEmailBestEffort(
+  to: string,
+  subject: string,
+  text: string,
+  linkUrl?: string | null,
+) {
   // Best-effort: only sends if Resend connector is configured. Silently no-op otherwise.
   const key = process.env.RESEND_API_KEY;
   const lovableKey = process.env.LOVABLE_API_KEY;
@@ -40,7 +45,10 @@ async function sendEmailBestEffort(to: string, subject: string, text: string, li
 }
 
 function escapeHtml(s: string) {
-  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+  return s.replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
+  );
 }
 
 export async function notify(input: NotifyInput | NotifyInput[]) {

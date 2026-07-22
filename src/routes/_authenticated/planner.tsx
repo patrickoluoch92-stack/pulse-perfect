@@ -4,11 +4,25 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import {
-  Bot, Send, Sparkles, Trash2, MapPin, Wallet, Route as RouteIcon, Lightbulb, Loader2, Printer,
+  Bot,
+  Send,
+  Sparkles,
+  Trash2,
+  MapPin,
+  Wallet,
+  Route as RouteIcon,
+  Lightbulb,
+  Loader2,
+  Printer,
 } from "lucide-react";
 import {
-  generatePlan, chatOnPlan, listPlannerSessions, getPlannerSession, deletePlannerSession,
-  PLANNER_MODULES, type PlannerModule,
+  generatePlan,
+  chatOnPlan,
+  listPlannerSessions,
+  getPlannerSession,
+  deletePlannerSession,
+  PLANNER_MODULES,
+  type PlannerModule,
 } from "@/lib/planner.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +30,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -31,30 +49,61 @@ type PlannerSearch = {
 export const Route = createFileRoute("/_authenticated/planner")({
   validateSearch: (search: Record<string, unknown>): PlannerSearch => ({
     seed_intent: typeof search.seed_intent === "string" ? search.seed_intent : undefined,
-    module: (PLANNER_MODULES as readonly string[]).includes(String(search.module)) ? (search.module as PlannerModule) : undefined,
+    module: (PLANNER_MODULES as readonly string[]).includes(String(search.module))
+      ? (search.module as PlannerModule)
+      : undefined,
     county: typeof search.county === "string" ? search.county : undefined,
     property_slug: typeof search.property_slug === "string" ? search.property_slug : undefined,
   }),
   head: () => ({
     meta: authPageMeta({
       title: "HostPulse Planner AI",
-      description: "AI budget & itinerary planner — rentals, travel, events, honeymoons, student stays and more, tuned to Kenyan prices.",
+      description:
+        "AI budget & itinerary planner — rentals, travel, events, honeymoons, student stays and more, tuned to Kenyan prices.",
     }),
   }),
   component: PlannerPage,
 });
 
 const MODULES: { id: PlannerModule; label: string; hint: string }[] = [
-  { id: "rental",   label: "🏠 Rental Budget",     hint: "I earn KES 90,000 — where should I rent in Nairobi?" },
-  { id: "travel",   label: "✈️ Travel",             hint: "Plan a 4-day Diani trip for 2, budget KES 60,000." },
-  { id: "stay",     label: "🏨 Stay",               hint: "Business stay in Kisumu for 5 nights under KES 40,000." },
-  { id: "event",    label: "🎉 Event",              hint: "Wedding for 120 guests in Naivasha, budget KES 800,000." },
-  { id: "business", label: "💼 Business Travel",    hint: "Conference in Mombasa, 3 nights, need hotel near KICC." },
-  { id: "family",   label: "👨‍👩‍👧 Family Vacation",   hint: "Family of 5 to Nakuru for a weekend, kids 6 & 9." },
-  { id: "honeymoon",label: "💑 Honeymoon",          hint: "Romantic 5-night honeymoon, KES 180,000, prefer beach." },
-  { id: "student",  label: "🎓 Student",            hint: "Accommodation near Kenyatta University under KES 12,000." },
-  { id: "weekend",  label: "🧭 Weekend Getaway",    hint: "Weekend road trip from Nairobi, KES 25,000." },
-  { id: "general",  label: "💬 General",            hint: "Ask anything about planning your stay or trip." },
+  {
+    id: "rental",
+    label: "🏠 Rental Budget",
+    hint: "I earn KES 90,000 — where should I rent in Nairobi?",
+  },
+  { id: "travel", label: "✈️ Travel", hint: "Plan a 4-day Diani trip for 2, budget KES 60,000." },
+  { id: "stay", label: "🏨 Stay", hint: "Business stay in Kisumu for 5 nights under KES 40,000." },
+  {
+    id: "event",
+    label: "🎉 Event",
+    hint: "Wedding for 120 guests in Naivasha, budget KES 800,000.",
+  },
+  {
+    id: "business",
+    label: "💼 Business Travel",
+    hint: "Conference in Mombasa, 3 nights, need hotel near KICC.",
+  },
+  {
+    id: "family",
+    label: "👨‍👩‍👧 Family Vacation",
+    hint: "Family of 5 to Nakuru for a weekend, kids 6 & 9.",
+  },
+  {
+    id: "honeymoon",
+    label: "💑 Honeymoon",
+    hint: "Romantic 5-night honeymoon, KES 180,000, prefer beach.",
+  },
+  {
+    id: "student",
+    label: "🎓 Student",
+    hint: "Accommodation near Kenyatta University under KES 12,000.",
+  },
+  {
+    id: "weekend",
+    label: "🧭 Weekend Getaway",
+    hint: "Weekend road trip from Nairobi, KES 25,000.",
+  },
+  { id: "general", label: "💬 General", hint: "Ask anything about planning your stay or trip." },
 ];
 
 const KES = (v: number) => `KES ${Math.round(v || 0).toLocaleString()}`;
@@ -91,8 +140,12 @@ function PlannerPage() {
   });
 
   const gen = useMutation({
-    mutationFn: (vars: { prompt: string; module: PlannerModule; county?: string; sessionId?: string }) =>
-      generateFn({ data: vars }),
+    mutationFn: (vars: {
+      prompt: string;
+      module: PlannerModule;
+      county?: string;
+      sessionId?: string;
+    }) => generateFn({ data: vars }),
     onSuccess: (res) => {
       setActiveId(res.sessionId);
       setPrompt("");
@@ -149,7 +202,10 @@ function PlannerPage() {
   }, [session.data?.session?.messages]);
 
   const plan = (session.data?.session?.plan ?? {}) as any;
-  const messages = ((session.data?.session?.messages ?? []) as any[]) as Array<{ role: string; content: string }>;
+  const messages = (session.data?.session?.messages ?? []) as any[] as Array<{
+    role: string;
+    content: string;
+  }>;
   const selectedHint = MODULES.find((m) => m.id === module)?.hint ?? "";
 
   return (
@@ -171,11 +227,19 @@ function PlannerPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-1 px-2 pb-2">
-            <Button size="sm" variant="outline" className="w-full" onClick={() => setActiveId(undefined)}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full"
+              onClick={() => setActiveId(undefined)}
+            >
               + New plan
             </Button>
             {(sessions.data?.sessions ?? []).map((s: any) => (
-              <div key={s.id} className={`group flex items-center gap-1 rounded-md px-2 py-1.5 text-sm ${activeId === s.id ? "bg-muted" : "hover:bg-muted/50"}`}>
+              <div
+                key={s.id}
+                className={`group flex items-center gap-1 rounded-md px-2 py-1.5 text-sm ${activeId === s.id ? "bg-muted" : "hover:bg-muted/50"}`}
+              >
                 <button className="min-w-0 flex-1 text-left" onClick={() => setActiveId(s.id)}>
                   <div className="truncate font-medium">{s.title ?? "Untitled"}</div>
                   <div className="truncate text-xs text-muted-foreground">{s.module}</div>
@@ -190,7 +254,9 @@ function PlannerPage() {
               </div>
             ))}
             {!sessions.data?.sessions?.length && (
-              <p className="px-2 py-3 text-xs text-muted-foreground">No plans yet — start one on the right.</p>
+              <p className="px-2 py-3 text-xs text-muted-foreground">
+                No plans yet — start one on the right.
+              </p>
             )}
           </CardContent>
         </Card>
@@ -204,7 +270,8 @@ function PlannerPage() {
             Turn your budget into a complete plan
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Tell me your budget and I'll allocate it, suggest properties, and build your itinerary — tuned to Kenyan prices.
+            Tell me your budget and I'll allocate it, suggest properties, and build your itinerary —
+            tuned to Kenyan prices.
           </p>
         </header>
 
@@ -213,10 +280,14 @@ function PlannerPage() {
           <CardContent className="space-y-3 pt-4">
             <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_10rem_10rem]">
               <Select value={module} onValueChange={(v) => setModule(v as PlannerModule)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {MODULES.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>{m.label}</SelectItem>
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -236,7 +307,11 @@ function PlannerPage() {
                   })
                 }
               >
-                {gen.isPending ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1 h-4 w-4" />}
+                {gen.isPending ? (
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="mr-1 h-4 w-4" />
+                )}
                 Generate plan
               </Button>
             </div>
@@ -258,7 +333,12 @@ function PlannerPage() {
                   <span className="flex items-center gap-2">
                     <Bot className="h-5 w-5 text-primary" /> {plan.title ?? "Your plan"}
                   </span>
-                  <Button size="sm" variant="outline" className="no-print" onClick={() => window.print()}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="no-print"
+                    onClick={() => window.print()}
+                  >
                     <Printer className="mr-1 h-4 w-4" /> Print
                   </Button>
                 </CardTitle>
@@ -271,8 +351,12 @@ function PlannerPage() {
                   <div className="grid grid-cols-3 gap-2">
                     {(["budgetFit", "valueScore", "affordability"] as const).map((k) => (
                       <div key={k} className="rounded-md border p-2">
-                        <div className="text-xs capitalize text-muted-foreground">{k.replace(/([A-Z])/g, " $1")}</div>
-                        <div className="text-lg font-semibold">{Math.round(plan.scores?.[k] ?? 0)}</div>
+                        <div className="text-xs capitalize text-muted-foreground">
+                          {k.replace(/([A-Z])/g, " $1")}
+                        </div>
+                        <div className="text-lg font-semibold">
+                          {Math.round(plan.scores?.[k] ?? 0)}
+                        </div>
                         <Progress value={plan.scores?.[k] ?? 0} className="h-1.5" />
                       </div>
                     ))}
@@ -282,13 +366,20 @@ function PlannerPage() {
                 {/* Allocations */}
                 {Array.isArray(plan.allocations) && plan.allocations.length > 0 && (
                   <div>
-                    <h3 className="mb-2 flex items-center gap-2 font-semibold"><Wallet className="h-4 w-4" /> Budget breakdown</h3>
+                    <h3 className="mb-2 flex items-center gap-2 font-semibold">
+                      <Wallet className="h-4 w-4" /> Budget breakdown
+                    </h3>
                     <div className="space-y-1">
                       {plan.allocations.map((a: any, i: number) => (
-                        <div key={i} className="flex items-center justify-between rounded-md border p-2 text-sm">
+                        <div
+                          key={i}
+                          className="flex items-center justify-between rounded-md border p-2 text-sm"
+                        >
                           <div>
                             <div className="font-medium">{a.category}</div>
-                            {a.note && <div className="text-xs text-muted-foreground">{a.note}</div>}
+                            {a.note && (
+                              <div className="text-xs text-muted-foreground">{a.note}</div>
+                            )}
                           </div>
                           <div className="font-semibold">{KES(Number(a.amount) || 0)}</div>
                         </div>
@@ -300,13 +391,17 @@ function PlannerPage() {
                 {/* Itinerary */}
                 {Array.isArray(plan.itinerary) && plan.itinerary.length > 0 && (
                   <div>
-                    <h3 className="mb-2 flex items-center gap-2 font-semibold"><RouteIcon className="h-4 w-4" /> Itinerary</h3>
+                    <h3 className="mb-2 flex items-center gap-2 font-semibold">
+                      <RouteIcon className="h-4 w-4" /> Itinerary
+                    </h3>
                     <div className="space-y-2">
                       {plan.itinerary.map((d: any, i: number) => (
                         <div key={i} className="rounded-md border p-2">
                           <div className="mb-1 text-sm font-semibold">{d.day}</div>
                           <ul className="ml-4 list-disc space-y-0.5 text-sm text-muted-foreground">
-                            {(d.items ?? []).map((it: string, j: number) => <li key={j}>{it}</li>)}
+                            {(d.items ?? []).map((it: string, j: number) => (
+                              <li key={j}>{it}</li>
+                            ))}
                           </ul>
                         </div>
                       ))}
@@ -319,9 +414,13 @@ function PlannerPage() {
                   <div className="grid gap-3 sm:grid-cols-2">
                     {plan.savingsTips?.length > 0 && (
                       <div>
-                        <h4 className="mb-1 flex items-center gap-2 text-sm font-semibold"><Lightbulb className="h-4 w-4" /> Savings tips</h4>
+                        <h4 className="mb-1 flex items-center gap-2 text-sm font-semibold">
+                          <Lightbulb className="h-4 w-4" /> Savings tips
+                        </h4>
                         <ul className="ml-4 list-disc space-y-0.5 text-xs text-muted-foreground">
-                          {plan.savingsTips.map((t: string, i: number) => <li key={i}>{t}</li>)}
+                          {plan.savingsTips.map((t: string, i: number) => (
+                            <li key={i}>{t}</li>
+                          ))}
                         </ul>
                       </div>
                     )}
@@ -329,7 +428,9 @@ function PlannerPage() {
                       <div>
                         <h4 className="mb-1 text-sm font-semibold">Alternatives</h4>
                         <ul className="ml-4 list-disc space-y-0.5 text-xs text-muted-foreground">
-                          {plan.alternatives.map((t: string, i: number) => <li key={i}>{t}</li>)}
+                          {plan.alternatives.map((t: string, i: number) => (
+                            <li key={i}>{t}</li>
+                          ))}
                         </ul>
                       </div>
                     )}
@@ -340,14 +441,20 @@ function PlannerPage() {
                   <div>
                     <h4 className="mb-1 text-sm font-semibold">Packing list</h4>
                     <div className="flex flex-wrap gap-1">
-                      {plan.packingList.map((t: string, i: number) => <Badge key={i} variant="secondary">{t}</Badge>)}
+                      {plan.packingList.map((t: string, i: number) => (
+                        <Badge key={i} variant="secondary">
+                          {t}
+                        </Badge>
+                      ))}
                     </div>
                   </div>
                 )}
 
                 {plan.warnings?.length > 0 && (
                   <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-2 text-xs">
-                    {plan.warnings.map((w: string, i: number) => <div key={i}>⚠️ {w}</div>)}
+                    {plan.warnings.map((w: string, i: number) => (
+                      <div key={i}>⚠️ {w}</div>
+                    ))}
                   </div>
                 )}
               </CardContent>
@@ -355,31 +462,45 @@ function PlannerPage() {
 
             {/* Chat + recommendations */}
             <div className="space-y-3">
-              {Array.isArray(plan.recommendedProperties) && plan.recommendedProperties.length > 0 && (
-                <Card>
-                  <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base"><MapPin className="h-4 w-4" /> Suggested properties</CardTitle></CardHeader>
-                  <CardContent className="space-y-1 text-sm">
-                    {plan.recommendedProperties.slice(0, 8).map((slug: string) => (
-                      <Link
-                        key={slug}
-                        to="/marketplace/p/$slug"
-                        params={{ slug }}
-                        className="block truncate rounded-md border p-2 hover:bg-muted"
-                      >
-                        {slug}
-                      </Link>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
+              {Array.isArray(plan.recommendedProperties) &&
+                plan.recommendedProperties.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center gap-2 text-base">
+                        <MapPin className="h-4 w-4" /> Suggested properties
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-1 text-sm">
+                      {plan.recommendedProperties.slice(0, 8).map((slug: string) => (
+                        <Link
+                          key={slug}
+                          to="/marketplace/p/$slug"
+                          params={{ slug }}
+                          className="block truncate rounded-md border p-2 hover:bg-muted"
+                        >
+                          {slug}
+                        </Link>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
 
               <Card className="no-print">
-                <CardHeader className="pb-2"><CardTitle className="text-base">Refine with AI</CardTitle></CardHeader>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Refine with AI</CardTitle>
+                </CardHeader>
                 <CardContent className="space-y-2">
-                  <div ref={scrollRef} className="max-h-64 space-y-2 overflow-auto rounded-md border bg-muted/30 p-2">
+                  <div
+                    ref={scrollRef}
+                    className="max-h-64 space-y-2 overflow-auto rounded-md border bg-muted/30 p-2"
+                  >
                     {messages.slice(-10).map((m, i) => (
-                      <div key={i} className={`text-sm ${m.role === "user" ? "text-foreground" : "text-muted-foreground"}`}>
-                        <span className="font-medium">{m.role === "user" ? "You" : "AI"}: </span>{m.content}
+                      <div
+                        key={i}
+                        className={`text-sm ${m.role === "user" ? "text-foreground" : "text-muted-foreground"}`}
+                      >
+                        <span className="font-medium">{m.role === "user" ? "You" : "AI"}: </span>
+                        {m.content}
                       </div>
                     ))}
                     {chat.isPending && (
@@ -396,7 +517,12 @@ function PlannerPage() {
                       onChange={(e) => setChatInput(e.target.value)}
                       disabled={chat.isPending}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey && chatInput.trim() && !chat.isPending) {
+                        if (
+                          e.key === "Enter" &&
+                          !e.shiftKey &&
+                          chatInput.trim() &&
+                          !chat.isPending
+                        ) {
                           e.preventDefault();
                           chat.mutate(chatInput.trim());
                         }
@@ -408,7 +534,11 @@ function PlannerPage() {
                       onClick={() => chat.mutate(chatInput.trim())}
                       aria-label="Send"
                     >
-                      {chat.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                      {chat.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </CardContent>

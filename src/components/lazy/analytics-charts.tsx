@@ -1,7 +1,15 @@
 // Isolates recharts so it ships in a lazy chunk, off the initial analytics
 // route bundle. Import only via `React.lazy(() => import(...))`.
 import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
 type SeriesPoint = { date: string; revenue: number };
@@ -24,7 +32,12 @@ export function RevenueAreaChart({
           </linearGradient>
         </defs>
         <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-        <XAxis dataKey="date" tickFormatter={(v: string) => v.slice(5)} stroke="var(--muted-foreground)" fontSize={11} />
+        <XAxis
+          dataKey="date"
+          tickFormatter={(v: string) => v.slice(5)}
+          stroke="var(--muted-foreground)"
+          fontSize={11}
+        />
         <YAxis stroke="var(--muted-foreground)" fontSize={11} />
         <Tooltip
           contentStyle={{
@@ -35,7 +48,13 @@ export function RevenueAreaChart({
           }}
           formatter={(v: number, name) => [name === "revenue" ? fmtMoney(v) : v, name]}
         />
-        <Area type="monotone" dataKey="revenue" stroke="var(--primary)" fill="url(#rev)" strokeWidth={2} />
+        <Area
+          type="monotone"
+          dataKey="revenue"
+          stroke="var(--primary)"
+          fill="url(#rev)"
+          strokeWidth={2}
+        />
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -53,7 +72,13 @@ export function PropertyBarChart({
       <BarChart data={data} layout="vertical" margin={{ left: 16, right: 16 }}>
         <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" horizontal={false} />
         <XAxis type="number" stroke="var(--muted-foreground)" fontSize={11} />
-        <YAxis type="category" dataKey="name" width={120} stroke="var(--muted-foreground)" fontSize={11} />
+        <YAxis
+          type="category"
+          dataKey="name"
+          width={120}
+          stroke="var(--muted-foreground)"
+          fontSize={11}
+        />
         <Tooltip
           contentStyle={{
             background: "var(--card)",

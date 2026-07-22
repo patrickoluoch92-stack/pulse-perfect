@@ -26,8 +26,14 @@ export const generateExecutiveSummary = createServerFn({ method: "POST" })
     const since30 = new Date(Date.now() - 30 * 86400_000).toISOString();
     const [propsRes, bookingsRes, commissionsRes, walletsRes, discoveredRes] = await Promise.all([
       s.from("marketplace_properties").select("id, is_published, verification_status"),
-      s.from("marketplace_bookings").select("id, total_amount, status, created_at").gte("created_at", since30),
-      s.from("booking_commissions").select("commission_amount, status, created_at").gte("created_at", since30),
+      s
+        .from("marketplace_bookings")
+        .select("id, total_amount, status, created_at")
+        .gte("created_at", since30),
+      s
+        .from("booking_commissions")
+        .select("commission_amount, status, created_at")
+        .gte("created_at", since30),
       s.from("owner_wallets").select("available_balance, pending_balance"),
       s.from("discovered_properties").select("id, status"),
     ]);
@@ -51,7 +57,10 @@ export const generateExecutiveSummary = createServerFn({ method: "POST" })
         gmv: bookings.reduce((a: number, b: any) => a + Number(b.total_amount ?? 0), 0),
       },
       revenue30d: {
-        commission: commissions.reduce((a: number, c: any) => a + Number(c.commission_amount ?? 0), 0),
+        commission: commissions.reduce(
+          (a: number, c: any) => a + Number(c.commission_amount ?? 0),
+          0,
+        ),
       },
       wallets: {
         available: wallets.reduce((a: number, w: any) => a + Number(w.available_balance ?? 0), 0),
@@ -92,5 +101,4 @@ Use KES for currency. Be specific with numbers. Avoid generic advice.`;
         },
       },
     });
-
   });

@@ -6,8 +6,22 @@ import { aiVisionJSON } from "@/lib/ai.server";
 import { isPlatformAdmin } from "@/lib/access";
 
 const ROOM_TYPES = [
-  "bedroom","bathroom","kitchen","living_room","dining","exterior","pool",
-  "garden","view","balcony","office","reception","gym","spa","restaurant","other",
+  "bedroom",
+  "bathroom",
+  "kitchen",
+  "living_room",
+  "dining",
+  "exterior",
+  "pool",
+  "garden",
+  "view",
+  "balcony",
+  "office",
+  "reception",
+  "gym",
+  "spa",
+  "restaurant",
+  "other",
 ] as const;
 
 const VisionSchema = {
@@ -22,7 +36,14 @@ const VisionSchema = {
       dominant_colors: { type: "array", items: { type: "string" } },
       caption: { type: "string" },
     },
-    required: ["labels","room_type","quality_score","safety_flags","dominant_colors","caption"],
+    required: [
+      "labels",
+      "room_type",
+      "quality_score",
+      "safety_flags",
+      "dominant_colors",
+      "caption",
+    ],
   },
 };
 
@@ -71,38 +92,46 @@ export const analyzePropertyImages = createServerFn({ method: "POST" })
 
     const ids = (allImages ?? []).map((r: any) => r.id);
     const { data: existing } = await supabaseAdmin
-      .from("image_ai_tags").select("image_id").in("image_id", ids);
+      .from("image_ai_tags")
+      .select("image_id")
+      .in("image_id", ids);
     const done = new Set((existing ?? []).map((r: any) => r.image_id));
 
     // Non-admins may only analyze their own org's images.
-    const pool = (allImages ?? []).filter((r: any) => {
-      if (done.has(r.id)) return false;
-      if (isAdmin) return true;
-      const orgId = r.marketplace_properties?.org_id;
-      return orgId && allowedOrgIds!.has(orgId);
-    }).slice(0, data.limit ?? 10);
+    const pool = (allImages ?? [])
+      .filter((r: any) => {
+        if (done.has(r.id)) return false;
+        if (isAdmin) return true;
+        const orgId = r.marketplace_properties?.org_id;
+        return orgId && allowedOrgIds!.has(orgId);
+      })
+      .slice(0, data.limit ?? 10);
 
     let ok = 0;
     for (const row of pool) {
       try {
         const out = await aiVisionJSON<VisionOut>({
           system: "You analyze property/real-estate photos. Return only JSON.",
-          prompt: "Analyze this listing photo. Identify room type, notable features, dominant colors (as hex or names), a 1-sentence caption, a quality score 0–100 (composition, lighting, resolution, clutter), and safety flags such as 'watermark','stock_photo','low_resolution','inappropriate','person_face_visible'.",
+          prompt:
+            "Analyze this listing photo. Identify room type, notable features, dominant colors (as hex or names), a 1-sentence caption, a quality score 0–100 (composition, lighting, resolution, clutter), and safety flags such as 'watermark','stock_photo','low_resolution','inappropriate','person_face_visible'.",
           image: { url: (row as any).image_url },
           schema: VisionSchema,
           model: "google/gemini-2.5-flash",
         });
-        await supabaseAdmin.from("image_ai_tags").upsert({
-          image_id: (row as any).id,
-          property_id: (row as any).property_id,
-          labels: out.labels ?? [],
-          room_type: out.room_type ?? null,
-          quality_score: out.quality_score ?? null,
-          safety_flags: out.safety_flags ?? [],
-          dominant_colors: out.dominant_colors ?? [],
-          caption: out.caption ?? null,
-          model_version: "gemini-2.5-flash",
-        }, { onConflict: "image_id" });
+        await supabaseAdmin.from("image_ai_tags").upsert(
+          {
+            image_id: (row as any).id,
+            property_id: (row as any).property_id,
+            labels: out.labels ?? [],
+            room_type: out.room_type ?? null,
+            quality_score: out.quality_score ?? null,
+            safety_flags: out.safety_flags ?? [],
+            dominant_colors: out.dominant_colors ?? [],
+            caption: out.caption ?? null,
+            model_version: "gemini-2.5-flash",
+          },
+          { onConflict: "image_id" },
+        );
         ok++;
       } catch (e) {
         // continue with the next image

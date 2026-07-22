@@ -10,7 +10,13 @@ import { searchProfessionals } from "@/lib/professionals.functions";
 
 import { PlanWithAI } from "@/components/plan-with-ai";
 import { formatCurrency } from "@/lib/format";
-import { PROPERTY_CATEGORIES, COMMON_AMENITIES, ACTIVITIES, ATTRIBUTES, categoryLabel } from "@/lib/marketplace-constants";
+import {
+  PROPERTY_CATEGORIES,
+  COMMON_AMENITIES,
+  ACTIVITIES,
+  ATTRIBUTES,
+  categoryLabel,
+} from "@/lib/marketplace-constants";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,11 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover, PopoverContent, PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { PartnerListingsSection } from "@/components/PartnerListingsSection";
-
 
 export const Route = createFileRoute("/marketplace/")({
   head: () => ({
@@ -48,22 +51,24 @@ export const Route = createFileRoute("/marketplace/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: "https://hostpulse-perfection.lovable.app/marketplace" }],
-    scripts: [{
-      type: "application/ld+json",
-      children: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "CollectionPage",
-        name: "Kenya Hospitality Marketplace",
-        description:
-          "Directory of verified hotels, resorts, lodges, camps, guest houses, serviced apartments and villas across all 47 counties of Kenya.",
-        url: "https://hostpulse-perfection.lovable.app/marketplace",
-        isPartOf: {
-          "@type": "WebSite",
-          name: "HostPulse",
-          url: "https://hostpulse-perfection.lovable.app",
-        },
-      }),
-    }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Kenya Hospitality Marketplace",
+          description:
+            "Directory of verified hotels, resorts, lodges, camps, guest houses, serviced apartments and villas across all 47 counties of Kenya.",
+          url: "https://hostpulse-perfection.lovable.app/marketplace",
+          isPartOf: {
+            "@type": "WebSite",
+            name: "HostPulse",
+            url: "https://hostpulse-perfection.lovable.app",
+          },
+        }),
+      },
+    ],
   }),
   component: MarketplaceListing,
 });
@@ -94,7 +99,10 @@ function MarketplaceListing() {
   const counties = useQuery({ queryKey: ["mkt-counties"], queryFn: () => countiesFn() });
 
   const properties = useQuery({
-    queryKey: ["mkt-list", { search, county, category, priceMin, priceMax, amenities, activities, attributes, page }],
+    queryKey: [
+      "mkt-list",
+      { search, county, category, priceMin, priceMax, amenities, activities, attributes, page },
+    ],
     queryFn: () =>
       listFn({
         data: {
@@ -112,8 +120,6 @@ function MarketplaceListing() {
       }),
   });
 
-
-
   const featured = useQuery({
     queryKey: ["mkt-featured"],
     queryFn: () => listFn({ data: { featuredOnly: true, pageSize: 6, page: 1 } }),
@@ -124,7 +130,6 @@ function MarketplaceListing() {
     queryKey: ["mkt-featured-pros"],
     queryFn: () => proFn({ data: { verifiedOnly: true, limit: 6, offset: 0 } }),
   });
-
 
   const totalPages = Math.max(1, Math.ceil((properties.data?.total ?? 0) / 12));
 
@@ -146,18 +151,20 @@ function MarketplaceListing() {
               <Link to="/professionals" className="text-sm text-primary hover:underline">
                 Professionals →
               </Link>
-              <Link to="/marketplace/map" className="flex items-center gap-1 text-sm text-primary hover:underline">
+              <Link
+                to="/marketplace/map"
+                className="flex items-center gap-1 text-sm text-primary hover:underline"
+              >
                 <MapPin className="h-4 w-4" /> Map view
               </Link>
             </div>
-
           </div>
           <h1 className="mt-4 font-display text-4xl font-semibold tracking-tight md:text-5xl">
             Stay anywhere in Kenya
           </h1>
           <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
-            From the Maasai Mara to the Mombasa coast — discover verified hotels, lodges,
-            camps, villas and more across all 47 counties.
+            From the Maasai Mara to the Mombasa coast — discover verified hotels, lodges, camps,
+            villas and more across all 47 counties.
           </p>
 
           <form
@@ -186,11 +193,15 @@ function MarketplaceListing() {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="md:w-52" aria-label="Filter by county"><SelectValue placeholder="County" /></SelectTrigger>
+              <SelectTrigger className="md:w-52" aria-label="Filter by county">
+                <SelectValue placeholder="County" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All counties</SelectItem>
                 {counties.data?.map((c) => (
-                  <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                  <SelectItem key={c.code} value={c.code}>
+                    {c.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -201,11 +212,15 @@ function MarketplaceListing() {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="md:w-52" aria-label="Filter by property category"><SelectValue placeholder="Category" /></SelectTrigger>
+              <SelectTrigger className="md:w-52" aria-label="Filter by property category">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All categories</SelectItem>
                 {PROPERTY_CATEGORIES.map((c) => (
-                  <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                  <SelectItem key={c.value} value={c.value}>
+                    {c.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -213,15 +228,36 @@ function MarketplaceListing() {
               <PopoverTrigger asChild>
                 <Button type="button" variant="outline">
                   <SlidersHorizontal className="mr-2 h-4 w-4" />
-                  Filters{amenities.length + (priceMin ? 1 : 0) + (priceMax ? 1 : 0) > 0 ? ` (${amenities.length + (priceMin ? 1 : 0) + (priceMax ? 1 : 0)})` : ""}
+                  Filters
+                  {amenities.length + (priceMin ? 1 : 0) + (priceMax ? 1 : 0) > 0
+                    ? ` (${amenities.length + (priceMin ? 1 : 0) + (priceMax ? 1 : 0)})`
+                    : ""}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80 space-y-4" align="end">
                 <div className="space-y-2">
                   <Label className="text-xs uppercase tracking-wide">Price per night (KES)</Label>
                   <div className="flex gap-2">
-                    <Input type="number" min={0} placeholder="Min" value={priceMin} onChange={(e) => { setPriceMin(e.target.value); setPage(1); }} />
-                    <Input type="number" min={0} placeholder="Max" value={priceMax} onChange={(e) => { setPriceMax(e.target.value); setPage(1); }} />
+                    <Input
+                      type="number"
+                      min={0}
+                      placeholder="Min"
+                      value={priceMin}
+                      onChange={(e) => {
+                        setPriceMin(e.target.value);
+                        setPage(1);
+                      }}
+                    />
+                    <Input
+                      type="number"
+                      min={0}
+                      placeholder="Max"
+                      value={priceMax}
+                      onChange={(e) => {
+                        setPriceMax(e.target.value);
+                        setPage(1);
+                      }}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -232,7 +268,9 @@ function MarketplaceListing() {
                         <Checkbox
                           checked={amenities.includes(a)}
                           onCheckedChange={(checked) => {
-                            setAmenities((cur) => checked ? [...cur, a] : cur.filter((x) => x !== a));
+                            setAmenities((cur) =>
+                              checked ? [...cur, a] : cur.filter((x) => x !== a),
+                            );
                             setPage(1);
                           }}
                         />
@@ -249,7 +287,9 @@ function MarketplaceListing() {
                         <Checkbox
                           checked={attributes.includes(a.value)}
                           onCheckedChange={(checked) => {
-                            setAttributes((cur) => checked ? [...cur, a.value] : cur.filter((x) => x !== a.value));
+                            setAttributes((cur) =>
+                              checked ? [...cur, a.value] : cur.filter((x) => x !== a.value),
+                            );
                             setPage(1);
                           }}
                         />
@@ -266,7 +306,9 @@ function MarketplaceListing() {
                         <Checkbox
                           checked={activities.includes(a)}
                           onCheckedChange={(checked) => {
-                            setActivities((cur) => checked ? [...cur, a] : cur.filter((x) => x !== a));
+                            setActivities((cur) =>
+                              checked ? [...cur, a] : cur.filter((x) => x !== a),
+                            );
                             setPage(1);
                           }}
                         />
@@ -275,20 +317,31 @@ function MarketplaceListing() {
                     ))}
                   </div>
                 </div>
-                {(amenities.length > 0 || activities.length > 0 || attributes.length > 0 || priceMin || priceMax) && (
+                {(amenities.length > 0 ||
+                  activities.length > 0 ||
+                  attributes.length > 0 ||
+                  priceMin ||
+                  priceMax) && (
                   <Button
-                    type="button" variant="ghost" size="sm"
-                    onClick={() => { setAmenities([]); setActivities([]); setAttributes([]); setPriceMin(""); setPriceMax(""); setPage(1); }}
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setAmenities([]);
+                      setActivities([]);
+                      setAttributes([]);
+                      setPriceMin("");
+                      setPriceMax("");
+                      setPage(1);
+                    }}
                   >
                     Clear filters
                   </Button>
                 )}
-
               </PopoverContent>
             </Popover>
             <Button type="submit">Search</Button>
           </form>
-
         </div>
       </header>
 
@@ -299,7 +352,11 @@ function MarketplaceListing() {
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {featured.data.items.map((p) => (
-              <PropertyCard key={p.id} property={p} countyName={countyName(counties.data, p.county_code)} />
+              <PropertyCard
+                key={p.id}
+                property={p}
+                countyName={countyName(counties.data, p.county_code)}
+              />
             ))}
           </div>
         </section>
@@ -326,7 +383,9 @@ function MarketplaceListing() {
                     {pro.business_name}
                   </h3>
                   {pro.is_verified && (
-                    <Badge variant="secondary" className="shrink-0">Verified</Badge>
+                    <Badge variant="secondary" className="shrink-0">
+                      Verified
+                    </Badge>
                   )}
                 </div>
                 {pro.tagline && (
@@ -339,7 +398,9 @@ function MarketplaceListing() {
                     </span>
                   )}
                   {pro.starting_price != null && (
-                    <span>From {pro.currency ?? "KES"} {Number(pro.starting_price).toLocaleString()}</span>
+                    <span>
+                      From {pro.currency ?? "KES"} {Number(pro.starting_price).toLocaleString()}
+                    </span>
                   )}
                 </div>
               </Link>
@@ -353,7 +414,6 @@ function MarketplaceListing() {
           <div>
             <h2 className="text-2xl font-semibold">
               {properties.data?.total ?? 0} {properties.data?.total === 1 ? "stay" : "stays"} found
-
             </h2>
             <p className="text-sm text-muted-foreground">
               Browse by county or filter to find your perfect getaway
@@ -371,14 +431,20 @@ function MarketplaceListing() {
 
         {properties.data && properties.data.items.length === 0 && (
           <div className="rounded-xl border bg-card p-12 text-center">
-            <p className="text-muted-foreground">No stays match your filters. Try widening the search.</p>
+            <p className="text-muted-foreground">
+              No stays match your filters. Try widening the search.
+            </p>
           </div>
         )}
 
         {properties.data && properties.data.items.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {properties.data.items.map((p) => (
-              <PropertyCard key={p.id} property={p} countyName={countyName(counties.data, p.county_code)} />
+              <PropertyCard
+                key={p.id}
+                property={p}
+                countyName={countyName(counties.data, p.county_code)}
+              />
             ))}
           </div>
         )}
@@ -391,7 +457,11 @@ function MarketplaceListing() {
             <span className="text-sm text-muted-foreground">
               Page {page} of {totalPages}
             </span>
-            <Button variant="outline" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+            <Button
+              variant="outline"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
               Next
             </Button>
           </div>
@@ -477,9 +547,7 @@ export function PropertyCard({
             {categoryLabel(property.category)} · {property.town}
             {countyName ? `, ${countyName}` : ""}
           </p>
-          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-            {property.description}
-          </p>
+          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{property.description}</p>
           {property.price_per_night != null && (
             <p className="mt-3 text-sm">
               <span className="font-semibold">

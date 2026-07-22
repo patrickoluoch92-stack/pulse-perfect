@@ -16,7 +16,11 @@ export const Route = createFileRoute("/concierge")({
   head: () => ({
     meta: [
       { title: "AI Travel Concierge — HostPulse" },
-      { name: "description", content: "Plan your Kenya trip with the HostPulse AI travel concierge. Get accommodation, itinerary, and destination suggestions grounded in real listings." },
+      {
+        name: "description",
+        content:
+          "Plan your Kenya trip with the HostPulse AI travel concierge. Get accommodation, itinerary, and destination suggestions grounded in real listings.",
+      },
       { property: "og:title", content: "AI Travel Concierge — HostPulse" },
       { property: "og:description", content: "AI travel planning for East Africa." },
       { property: "og:type", content: "website" },
@@ -31,7 +35,11 @@ type Msg = { role: "user" | "assistant"; content: string };
 function ConciergePage() {
   const ask = useServerFn(askConcierge);
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "assistant", content: "Habari! I'm the HostPulse travel concierge. Where are you thinking of going, and when?" },
+    {
+      role: "assistant",
+      content:
+        "Habari! I'm the HostPulse travel concierge. Where are you thinking of going, and when?",
+    },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -84,7 +92,11 @@ function ConciergePage() {
             {messages.map((m, i) => (
               <div
                 key={i}
-                className={m.role === "user" ? "ml-auto max-w-[85%] rounded-2xl bg-primary px-4 py-2 text-primary-foreground" : "mr-auto max-w-[85%] rounded-2xl bg-muted px-4 py-2"}
+                className={
+                  m.role === "user"
+                    ? "ml-auto max-w-[85%] rounded-2xl bg-primary px-4 py-2 text-primary-foreground"
+                    : "mr-auto max-w-[85%] rounded-2xl bg-muted px-4 py-2"
+                }
               >
                 <div className="prose prose-sm max-w-none dark:prose-invert">
                   <Suspense fallback={<span className="whitespace-pre-wrap">{m.content}</span>}>
@@ -93,7 +105,9 @@ function ConciergePage() {
                 </div>
               </div>
             ))}
-            {loading && <div className="mr-auto rounded-2xl bg-muted px-4 py-2 text-sm">Thinking…</div>}
+            {loading && (
+              <div className="mr-auto rounded-2xl bg-muted px-4 py-2 text-sm">Thinking…</div>
+            )}
           </div>
           <div className="flex gap-2 border-t p-3">
             <Input

@@ -12,11 +12,9 @@ import { createHash, randomInt } from "crypto";
 import { slugify } from "./discovery-dedupe.server";
 
 function publicClient() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
 }
 
 async function assertAdmin(supabase: any, userId: string) {
@@ -43,7 +41,9 @@ export const listDiscoveredPublic = createServerFn({ method: "GET" })
     const sb = publicClient();
     let q = sb
       .from("public_discovered_properties")
-      .select("id, slug, name, property_type, county_code, town, address, latitude, longitude, ai_description, quality_score, status")
+      .select(
+        "id, slug, name, property_type, county_code, town, address, latitude, longitude, ai_description, quality_score, status",
+      )
       .order("quality_score", { ascending: false })
       .limit(data.limit);
     if (data.county) q = q.eq("county_code", data.county);
@@ -69,10 +69,7 @@ export const getDiscoveredPublic = createServerFn({ method: "GET" })
 
 export const countyCoveragePublic = createServerFn({ method: "GET" }).handler(async () => {
   const sb = publicClient();
-  const { data } = await sb
-    .from("public_discovered_properties")
-    .select("county_code")
-    .limit(5000);
+  const { data } = await sb.from("public_discovered_properties").select("county_code").limit(5000);
   const counts: Record<string, number> = {};
   for (const r of data ?? []) {
     const c = (r as any).county_code ?? "unknown";
@@ -87,11 +84,7 @@ export const countyCoveragePublic = createServerFn({ method: "GET" }).handler(as
 
 export const submitOwnerUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) =>
-    z
-      .object({ url: z.string().url().max(500) })
-      .parse(raw),
-  )
+  .inputValidator((raw: unknown) => z.object({ url: z.string().url().max(500) }).parse(raw))
   .handler(async ({ data, context }) => {
     await enforceRateLimit({
       bucket: "discovery.submit_url",
@@ -148,7 +141,11 @@ export const startClaim = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     // Codes are delivered via the email channel only — never log plaintext codes.
     console.info(`[claim ${claim.id}] verification code dispatched to ${data.email}`);
-    return { ok: true, claimId: claim.id, devCodeHint: process.env.NODE_ENV !== "production" ? code : undefined };
+    return {
+      ok: true,
+      claimId: claim.id,
+      devCodeHint: process.env.NODE_ENV !== "production" ? code : undefined,
+    };
   });
 
 export const verifyClaim = createServerFn({ method: "POST" })
