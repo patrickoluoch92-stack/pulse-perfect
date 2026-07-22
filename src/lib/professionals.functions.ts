@@ -50,6 +50,8 @@ const SearchInput = z.object({
   categorySlug: z.string().max(80).optional(),
   countyCode: z.string().max(10).optional(),
   town: z.string().max(80).optional(),
+  city: z.string().max(80).optional(),
+  area: z.string().max(80).optional(),
   minRating: z.number().min(0).max(5).optional(),
   verifiedOnly: z.boolean().optional(),
   limit: z.number().int().min(1).max(48).default(24),
