@@ -3,10 +3,13 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { searchMobilityVehicles, MOBILITY_CATEGORY_LABELS, MOBILITY_CATEGORIES, MOBILITY_VEHICLE_TYPES, MOBILITY_VEHICLE_TYPE_LABELS, type MobilityCategory, type MobilityVehicleType } from "@/lib/mobility.functions";
+import { listCounties } from "@/lib/marketplace.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadingState, EmptyState } from "@/components/ui/states";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+
 
 export const Route = createFileRoute("/mobility/$category")({
   beforeLoad: ({ params }) => {
@@ -29,13 +32,18 @@ export const Route = createFileRoute("/mobility/$category")({
 function CategoryPage() {
   const { category } = Route.useParams();
   const fetchList = useServerFn(searchMobilityVehicles);
-  const [filters, setFilters] = useState<{ vehicleType?: MobilityVehicleType; make?: string; minSeats?: number; priceMaxKes?: number; transmission?: "automatic" | "manual" }>({});
+  const countiesFn = useServerFn(listCounties);
+  const counties = useQuery({ queryKey: ["mkt-counties"], queryFn: () => countiesFn() });
+  const [filters, setFilters] = useState<{ vehicleType?: MobilityVehicleType; make?: string; minSeats?: number; priceMaxKes?: number; transmission?: "automatic" | "manual"; county?: string; town?: string }>({});
+  const debouncedTown = useDebouncedValue(filters.town ?? "", 350);
+  const debouncedMake = useDebouncedValue(filters.make ?? "", 350);
   const { data, isLoading } = useQuery({
-    queryKey: ["mobility-cat", category, filters],
-    queryFn: () => fetchList({ data: { category: category as MobilityCategory, limit: 30, ...filters } }),
+    queryKey: ["mobility-cat", category, { ...filters, town: debouncedTown, make: debouncedMake }],
+    queryFn: () => fetchList({ data: { category: category as MobilityCategory, limit: 30, ...filters, town: debouncedTown || undefined, make: debouncedMake || undefined } }),
   });
   const vehicles = data?.vehicles ?? [];
   const label = MOBILITY_CATEGORY_LABELS[category as MobilityCategory];
+
 
   return (
     <div className="min-h-dvh bg-background">
@@ -46,7 +54,23 @@ function CategoryPage() {
         <h1 className="text-3xl font-semibold tracking-tight">{label}</h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">Browse available {label.toLowerCase()} across Kenya. Book directly through HostPulse.</p>
 
-        <div className="mt-6 grid gap-3 rounded-lg border bg-card p-4 sm:grid-cols-2 md:grid-cols-5">
+        <div className="mt-6 grid gap-3 rounded-lg border bg-card p-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
+          <div>
+            <Label className="text-xs">County</Label>
+            <select className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              value={filters.county ?? ""}
+              onChange={(e) => setFilters({ ...filters, county: e.target.value || undefined })}>
+              <option value="">Any county</option>
+              {(counties.data ?? []).map((c: any) => (
+                <option key={c.code} value={c.code}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">Town / city / area</Label>
+            <Input className="mt-1" placeholder="e.g. Westlands" value={filters.town ?? ""} onChange={(e) => setFilters({ ...filters, town: e.target.value })} />
+          </div>
+
           <div>
             <Label className="text-xs">Vehicle type</Label>
             <select className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
