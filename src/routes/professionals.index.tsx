@@ -68,16 +68,33 @@ function ProfessionalsIndex() {
           <p className="mt-2 text-muted-foreground">
             Book verified photographers, event planners, guides, DJs, movers and more across Kenya.
           </p>
-          <div className="mt-6 flex flex-col gap-3 md:flex-row">
-            <div className="relative flex-1">
+          <div className="mt-6 grid gap-3 md:grid-cols-[1fr_200px_200px_auto]">
+            <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 className="pl-9"
-                placeholder="Try 'wedding photographer in Nakuru'"
+                placeholder="Try 'wedding photographer'"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
               />
             </div>
+            <select
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={countyCode}
+              onChange={(e) => setCountyCode(e.target.value)}
+            >
+              <option value="">All counties</option>
+              {(counties.data ?? []).map((c: any) => (
+                <option key={c.code} value={c.code}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <Input
+              placeholder="Town, city or area"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
             <Button asChild>
               <Link to="/professionals/register">List your services</Link>
             </Button>
