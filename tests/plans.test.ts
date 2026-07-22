@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  planAllows,
-  requiredPlanFor,
-  PLAN_RANK,
-  type Plan,
-  type Feature,
-} from "@/lib/plans";
+import { planAllows, requiredPlanFor, PLAN_RANK, type Plan, type Feature } from "@/lib/plans";
 
 const PLANS: Plan[] = ["starter", "professional", "business", "enterprise"];
 

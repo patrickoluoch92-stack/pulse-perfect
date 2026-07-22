@@ -13,7 +13,10 @@ test.describe.skip("User Registration Flow", () => {
 
     // Fill registration form
     await page.getByLabel(/email/i).fill("newuser@example.com");
-    await page.getByLabel(/password/i).first().fill("SecurePassword123!");
+    await page
+      .getByLabel(/password/i)
+      .first()
+      .fill("SecurePassword123!");
     await page.getByLabel(/confirm password/i).fill("SecurePassword123!");
 
     // Submit
@@ -74,7 +77,10 @@ test.describe.skip("User Logout Flow", () => {
     await page.goto("/dashboard");
 
     // Open user menu
-    await page.getByRole("button", { name: /profile|menu/i }).first().click();
+    await page
+      .getByRole("button", { name: /profile|menu/i })
+      .first()
+      .click();
 
     // Click logout
     await page.getByRole("menuitem", { name: /logout/i }).click();

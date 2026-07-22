@@ -38,9 +38,7 @@ async function runAnalyticsGate(orgPlan: Plan | null) {
 
 describe("getAnalytics plan gate", () => {
   it("rejects starter orgs before any reservation query runs", async () => {
-    await expect(runAnalyticsGate("starter")).rejects.toThrow(
-      "PLAN_REQUIRED:professional",
-    );
+    await expect(runAnalyticsGate("starter")).rejects.toThrow("PLAN_REQUIRED:professional");
   });
 
   it("rejects orgs with no plan row", async () => {

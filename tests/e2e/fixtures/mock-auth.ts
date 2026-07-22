@@ -114,11 +114,22 @@ export async function installMocks(page: Page, opts: MockOptions) {
         contentType: "application/json",
         body: JSON.stringify({
           result: {
-            profile: { id: FAKE_USER.id, full_name: "Test User", avatar_url: null, current_org_id: "org-1" },
+            profile: {
+              id: FAKE_USER.id,
+              full_name: "Test User",
+              avatar_url: null,
+              current_org_id: "org-1",
+            },
             organizations: [
               { id: "org-1", name: "Test Org", slug: "test-org", plan: opts.plan, role: "owner" },
             ],
-            currentOrg: { id: "org-1", name: "Test Org", slug: "test-org", plan: opts.plan, role: "owner" },
+            currentOrg: {
+              id: "org-1",
+              name: "Test Org",
+              slug: "test-org",
+              plan: opts.plan,
+              role: "owner",
+            },
           },
         }),
       });
@@ -135,7 +146,11 @@ export async function installMocks(page: Page, opts: MockOptions) {
       });
     }
 
-    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ result: null }) });
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ result: null }),
+    });
   });
 
   // Step 2: Seed localStorage AFTER routes are registered
@@ -157,7 +172,9 @@ export async function installMocks(page: Page, opts: MockOptions) {
  */
 export async function waitForAnalyticsPage(page: Page) {
   // Wait for the main heading to be visible
-  await page.getByRole("heading", { name: "Analytics", level: 1 }).waitFor({ state: "visible", timeout: 10000 });
+  await page
+    .getByRole("heading", { name: "Analytics", level: 1 })
+    .waitFor({ state: "visible", timeout: 10000 });
 
   // Wait for at least one KPI card to render
   await page.getByText("Occupancy", { exact: true }).waitFor({ state: "visible", timeout: 10000 });
@@ -170,6 +187,8 @@ export async function waitForAnalyticsPage(page: Page) {
  * Wait for upgrade gate to appear (for restricted plans)
  */
 export async function waitForUpgradeGate(page: Page) {
-  await page.getByRole("heading", { name: /unlock analytics/i }).waitFor({ state: "visible", timeout: 10000 });
+  await page
+    .getByRole("heading", { name: /unlock analytics/i })
+    .waitFor({ state: "visible", timeout: 10000 });
   await page.getByText(/upgrade required/i).waitFor({ state: "visible", timeout: 10000 });
 }

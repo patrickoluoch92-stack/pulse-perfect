@@ -27,7 +27,11 @@ afterEach(() => {
 
 describe("error-capture metadata", () => {
   it("merges ambient context into captured errors", async () => {
-    setErrorContext({ tenantId: "11111111-1111-1111-1111-111111111111", userId: "22222222-2222-2222-2222-222222222222", action: "fromAmbient" });
+    setErrorContext({
+      tenantId: "11111111-1111-1111-1111-111111111111",
+      userId: "22222222-2222-2222-2222-222222222222",
+      action: "fromAmbient",
+    });
     captureError(new Error("boom"), "test");
     await flushMicro();
     expect(reportMock).toHaveBeenCalledTimes(1);

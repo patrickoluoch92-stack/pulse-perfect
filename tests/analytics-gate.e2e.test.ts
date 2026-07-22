@@ -18,11 +18,12 @@
 import { describe, expect, it } from "vitest";
 
 const BASE = process.env.ANALYTICS_E2E_BASE_URL;
-const ready = !!BASE
-  && !!process.env.ANALYTICS_E2E_TOKEN_STARTER
-  && !!process.env.ANALYTICS_E2E_TOKEN_PROFESSIONAL
-  && !!process.env.ANALYTICS_E2E_TOKEN_BUSINESS
-  && !!process.env.ANALYTICS_E2E_TOKEN_ENTERPRISE;
+const ready =
+  !!BASE &&
+  !!process.env.ANALYTICS_E2E_TOKEN_STARTER &&
+  !!process.env.ANALYTICS_E2E_TOKEN_PROFESSIONAL &&
+  !!process.env.ANALYTICS_E2E_TOKEN_BUSINESS &&
+  !!process.env.ANALYTICS_E2E_TOKEN_ENTERPRISE;
 
 const d = describe.skipIf(!ready);
 

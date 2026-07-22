@@ -10,23 +10,46 @@ import { LoadingState, EmptyState } from "@/components/ui/states";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 import { listReservations } from "@/lib/reservations.functions";
 import {
-  listInvoices, deleteInvoice, generateFromReservation, INVOICE_STATUSES,
+  listInvoices,
+  deleteInvoice,
+  generateFromReservation,
+  INVOICE_STATUSES,
 } from "@/lib/invoices.functions";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/format";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/invoices")({
-  head: () => ({ meta: authPageMeta({ title: "Invoices", description: "Create, send, and track invoices for guests across every property." }) }),
+  head: () => ({
+    meta: authPageMeta({
+      title: "Invoices",
+      description: "Create, send, and track invoices for guests across every property.",
+    }),
+  }),
   component: InvoicesPage,
 });
 
@@ -69,16 +92,27 @@ function InvoicesPage() {
 
   const genMut = useMutation({
     mutationFn: () => genFn({ data: { reservationId: genResId } }),
-    onSuccess: () => { toast.success("Invoice generated"); setGenOpen(false); setGenResId(""); invalidate(); },
+    onSuccess: () => {
+      toast.success("Invoice generated");
+      setGenOpen(false);
+      setGenResId("");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const deleteMut = useMutation({
     mutationFn: (id: string) => deleteFn({ data: { id } }),
-    onSuccess: () => { toast.success("Invoice deleted"); setDeleting(null); invalidate(); },
+    onSuccess: () => {
+      toast.success("Invoice deleted");
+      setDeleting(null);
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const rows = (invoices.data ?? []).filter((i) => statusFilter === "all" || i.status === statusFilter);
+  const rows = (invoices.data ?? []).filter(
+    (i) => statusFilter === "all" || i.status === statusFilter,
+  );
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-8">
@@ -91,18 +125,26 @@ function InvoicesPage() {
         </div>
         <div className="flex items-center gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-36">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All statuses</SelectItem>
-              {INVOICE_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+              {INVOICE_STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          <Button onClick={() => setGenOpen(true)} disabled={!orgId || (reservations.data?.length ?? 0) === 0}>
+          <Button
+            onClick={() => setGenOpen(true)}
+            disabled={!orgId || (reservations.data?.length ?? 0) === 0}
+          >
             <Plus className="mr-2 h-4 w-4" /> New invoice
           </Button>
         </div>
       </header>
-
 
       {invoices.isLoading ? (
         <LoadingState label="Loading invoices…" />
@@ -112,12 +154,14 @@ function InvoicesPage() {
           description="Generate one from an existing reservation to bill your guest."
           icon={FileText}
           action={
-            <Button onClick={() => setGenOpen(true)} disabled={!orgId || (reservations.data?.length ?? 0) === 0}>
+            <Button
+              onClick={() => setGenOpen(true)}
+              disabled={!orgId || (reservations.data?.length ?? 0) === 0}
+            >
               <Plus className="mr-2 h-4 w-4" aria-hidden /> New invoice
             </Button>
           }
         />
-
       ) : (
         <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
           <table className="w-full text-sm">
@@ -136,18 +180,26 @@ function InvoicesPage() {
               {rows.map((i) => (
                 <tr key={i.id} className="hover:bg-muted/30">
                   <td className="px-4 py-3 font-medium">
-                    <Link to="/invoices/$invoiceId" params={{ invoiceId: i.id }} className="hover:underline">
+                    <Link
+                      to="/invoices/$invoiceId"
+                      params={{ invoiceId: i.id }}
+                      className="hover:underline"
+                    >
                       {i.number}
                     </Link>
                     {i.reservations?.confirmation_code && (
-                      <div className="text-xs text-muted-foreground">res #{i.reservations.confirmation_code}</div>
+                      <div className="text-xs text-muted-foreground">
+                        res #{i.reservations.confirmation_code}
+                      </div>
                     )}
                   </td>
                   <td className="px-4 py-3">{i.guests?.full_name ?? "—"}</td>
                   <td className="px-4 py-3">{i.issued_at}</td>
                   <td className="px-4 py-3">{i.due_at ?? "—"}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs capitalize ${statusColors[i.status] ?? "bg-muted"}`}>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs capitalize ${statusColors[i.status] ?? "bg-muted"}`}
+                    >
                       {i.status}
                     </span>
                   </td>
@@ -155,7 +207,12 @@ function InvoicesPage() {
                     {formatCurrency(Number(i.total), i.currency)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Button size="icon" variant="ghost" onClick={() => setDeleting({ id: i.id, number: i.number })} aria-label="Delete">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => setDeleting({ id: i.id, number: i.number })}
+                      aria-label="Delete"
+                    >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </td>
@@ -175,7 +232,9 @@ function InvoicesPage() {
             </DialogDescription>
           </DialogHeader>
           <Select value={genResId} onValueChange={setGenResId}>
-            <SelectTrigger><SelectValue placeholder="Select reservation" /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder="Select reservation" />
+            </SelectTrigger>
             <SelectContent>
               {(reservations.data ?? []).map((r) => (
                 <SelectItem key={r.id} value={r.id}>
@@ -185,7 +244,9 @@ function InvoicesPage() {
             </SelectContent>
           </Select>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setGenOpen(false)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setGenOpen(false)}>
+              Cancel
+            </Button>
             <Button onClick={() => genMut.mutate()} disabled={!genResId || genMut.isPending}>
               {genMut.isPending ? "Generating…" : "Generate"}
             </Button>
@@ -204,7 +265,10 @@ function InvoicesPage() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={(e) => { e.preventDefault(); if (deleting) deleteMut.mutate(deleting.id); }}
+              onClick={(e) => {
+                e.preventDefault();
+                if (deleting) deleteMut.mutate(deleting.id);
+              }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteMut.isPending}
             >

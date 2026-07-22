@@ -13,7 +13,10 @@ test.describe("/analytics plan gating", () => {
     await waitForUpgradeGate(page);
 
     await expect(page.getByText(/upgrade required/i)).toBeVisible();
-    await expect(page.getByRole("link", { name: /manage plan/i })).toHaveAttribute("href", "/settings");
+    await expect(page.getByRole("link", { name: /manage plan/i })).toHaveAttribute(
+      "href",
+      "/settings",
+    );
 
     // KPI cards from the real dashboard must not render.
     await expect(page.getByText(/^Occupancy$/)).toHaveCount(0);
@@ -24,7 +27,7 @@ test.describe("/analytics plan gating", () => {
     await installMocks(page, { plan: "professional" });
 
     // Wait for mocks to be ready before navigation
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState("networkidle");
 
     await page.goto("/analytics");
     await expect(page.getByRole("heading", { name: "Analytics", level: 1 })).toBeVisible();
