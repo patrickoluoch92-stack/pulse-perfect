@@ -285,7 +285,7 @@ function PackagesTab({ orgId }: { orgId: string }) {
         {(q.data as PackageRow[] | undefined)?.map((p) => (
           <div key={p.id} className="overflow-hidden rounded-lg border bg-card">
             {p.photo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
+              
               <img src={p.photo_url} alt={p.name} className="h-32 w-full object-cover" />
             ) : (
               <div className="grid h-32 w-full place-items-center bg-muted text-muted-foreground">

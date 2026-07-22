@@ -559,6 +559,6 @@ export const adminModerateProfessional = createServerFn({ method: "POST" })
         body: data.reason ?? pro.business_name,
         linkUrl: "/professionals/dashboard",
       });
-    } catch {}
+    } catch { /* ignore */ }
     return pro;
   });

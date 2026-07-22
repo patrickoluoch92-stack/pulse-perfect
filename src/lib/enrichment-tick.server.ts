@@ -83,7 +83,7 @@ export async function runVisionTick(limit = 10): Promise<{ processed: number; at
         { onConflict: "image_id" },
       );
       ok++;
-    } catch {}
+    } catch { /* ignore */ }
   }
   return { processed: ok, attempted: pool.length };
 }
@@ -152,7 +152,7 @@ export async function runReviewNlpTick(
         .update({ sentiment: out.sentiment ?? 0, aspects: out.aspects ?? {} })
         .eq("id", (r as any).id);
       ok++;
-    } catch {}
+    } catch { /* ignore */ }
   }
   return { processed: ok, attempted: (rows ?? []).length };
 }

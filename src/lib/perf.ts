@@ -66,13 +66,13 @@ export function initWebVitals() {
         id: uid(),
         rating: rate("TTFB", nav.responseStart),
       });
-  } catch {}
+  } catch { /* ignore */ }
 
   const observe = (type: string, cb: (entries: PerformanceEntry[]) => void) => {
     try {
       const obs = new PerformanceObserver((list) => cb(list.getEntries()));
       obs.observe({ type, buffered: true } as PerformanceObserverInit);
-    } catch {}
+    } catch { /* ignore */ }
   };
 
   observe("paint", (entries) => {
