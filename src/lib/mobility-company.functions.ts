@@ -8,8 +8,15 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 type SB = any;
 
 function slugify(input: string): string {
-  return input.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "company";
+  return (
+    input
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || "company"
+  );
 }
 
 // ---------- Registration ----------
@@ -60,14 +67,19 @@ export const registerRentalCompany = createServerFn({ method: "POST" })
         if (orgErr) throw new Error(orgErr.message);
         orgId = org.id;
         await sb.from("organization_members").insert({
-          org_id: orgId, user_id: context.userId, role: "owner",
+          org_id: orgId,
+          user_id: context.userId,
+          role: "owner",
         });
       }
     }
 
     // Provider row (one per org for now)
     const { data: existingProvider } = await sb
-      .from("mobility_providers").select("id").eq("org_id", orgId).maybeSingle();
+      .from("mobility_providers")
+      .select("id")
+      .eq("org_id", orgId)
+      .maybeSingle();
 
     const payload: Record<string, unknown> = {
       org_id: orgId,
@@ -90,15 +102,22 @@ export const registerRentalCompany = createServerFn({ method: "POST" })
     };
 
     if (existingProvider?.id) {
-      const { data: row, error } = await sb.from("mobility_providers")
-        .update(payload).eq("id", existingProvider.id).select("*").single();
+      const { data: row, error } = await sb
+        .from("mobility_providers")
+        .update(payload)
+        .eq("id", existingProvider.id)
+        .select("*")
+        .single();
       if (error) throw new Error(error.message);
       return { provider: row, orgId };
     }
 
     const slug = `${slugify(data.name)}-${Math.random().toString(36).slice(2, 6)}`;
-    const { data: row, error } = await sb.from("mobility_providers")
-      .insert({ ...payload, slug }).select("*").single();
+    const { data: row, error } = await sb
+      .from("mobility_providers")
+      .insert({ ...payload, slug })
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return { provider: row, orgId };
   });
@@ -119,12 +138,15 @@ export const updateCompanyCommissions = createServerFn({ method: "POST" })
     const total = data.companyPct + data.privateOwnerPct + data.platformPct;
     if (Math.abs(total - 100) > 0.01) throw new Error("Commissions must sum to 100%");
     const sb = context.supabase as SB;
-    const { error } = await sb.from("mobility_providers").update({
-      commission_company_pct: data.companyPct,
-      private_owner_commission_pct: data.privateOwnerPct,
-      commission_platform_pct: data.platformPct,
-      payout_schedule: data.payoutSchedule,
-    }).eq("id", data.providerId);
+    const { error } = await sb
+      .from("mobility_providers")
+      .update({
+        commission_company_pct: data.companyPct,
+        private_owner_commission_pct: data.privateOwnerPct,
+        commission_platform_pct: data.platformPct,
+        payout_schedule: data.payoutSchedule,
+      })
+      .eq("id", data.providerId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -132,10 +154,12 @@ export const updateCompanyCommissions = createServerFn({ method: "POST" })
 export const togglePrivateVehicleProgram = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v: unknown) =>
-    z.object({ providerId: z.string().uuid(), enabled: z.boolean() }).parse(v))
+    z.object({ providerId: z.string().uuid(), enabled: z.boolean() }).parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const { error } = await sb.from("mobility_providers")
+    const { error } = await sb
+      .from("mobility_providers")
       .update({ accepts_private_vehicles: data.enabled })
       .eq("id", data.providerId);
     if (error) throw new Error(error.message);
@@ -144,74 +168,112 @@ export const togglePrivateVehicleProgram = createServerFn({ method: "POST" })
 
 export const updateAutoApproveRules = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({
-    providerId: z.string().uuid(),
-    rules: z.object({
-      enabled: z.boolean(),
-      min_photos: z.number().int().min(0).max(20),
-      min_quality_score: z.number().int().min(0).max(100),
-      require_docs: z.array(z.string()).max(10),
-    }),
-  }).parse(v))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        providerId: z.string().uuid(),
+        rules: z.object({
+          enabled: z.boolean(),
+          min_photos: z.number().int().min(0).max(20),
+          min_quality_score: z.number().int().min(0).max(100),
+          require_docs: z.array(z.string()).max(10),
+        }),
+      })
+      .parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const { error } = await sb.from("mobility_providers")
-      .update({ auto_approve_rules: data.rules }).eq("id", data.providerId);
+    const { error } = await sb
+      .from("mobility_providers")
+      .update({ auto_approve_rules: data.rules })
+      .eq("id", data.providerId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
 // ---------- Fleet bucketing ----------
 export type FleetBucket =
-  | "company_owned" | "private_owned" | "pending" | "maintenance"
-  | "booked" | "available" | "inactive" | "archived";
+  | "company_owned"
+  | "private_owned"
+  | "pending"
+  | "maintenance"
+  | "booked"
+  | "available"
+  | "inactive"
+  | "archived";
 
 export const listCompanyFleet = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({
-    providerId: z.string().uuid(),
-    bucket: z.enum([
-      "company_owned", "private_owned", "pending", "maintenance",
-      "booked", "available", "inactive", "archived",
-    ] as const),
-  }).parse(v))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        providerId: z.string().uuid(),
+        bucket: z.enum([
+          "company_owned",
+          "private_owned",
+          "pending",
+          "maintenance",
+          "booked",
+          "available",
+          "inactive",
+          "archived",
+        ] as const),
+      })
+      .parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    let q = sb.from("mobility_vehicles")
-      .select("id, make, model, year, category, slug, status, owner_type, is_archived, quality_score, ai_recommendation, mobility_vehicle_images(url,sort_order)")
+    let q = sb
+      .from("mobility_vehicles")
+      .select(
+        "id, make, model, year, category, slug, status, owner_type, is_archived, quality_score, ai_recommendation, mobility_vehicle_images(url,sort_order)",
+      )
       .eq("provider_id", data.providerId)
       .order("created_at", { ascending: false })
       .limit(200);
 
     switch (data.bucket) {
       case "company_owned":
-        q = q.eq("owner_type", "company").eq("is_archived", false); break;
+        q = q.eq("owner_type", "company").eq("is_archived", false);
+        break;
       case "private_owned":
-        q = q.eq("owner_type", "private").eq("is_archived", false); break;
+        q = q.eq("owner_type", "private").eq("is_archived", false);
+        break;
       case "pending":
-        q = q.in("status", ["draft", "pending"]).eq("is_archived", false); break;
+        q = q.in("status", ["draft", "pending"]).eq("is_archived", false);
+        break;
       case "maintenance": {
-        const { data: maint } = await sb.from("mobility_maintenance")
-          .select("vehicle_id").in("status", ["scheduled", "in_progress"]);
+        const { data: maint } = await sb
+          .from("mobility_maintenance")
+          .select("vehicle_id")
+          .in("status", ["scheduled", "in_progress"]);
         const ids = (maint ?? []).map((r: any) => r.vehicle_id);
         if (ids.length === 0) return { vehicles: [] };
-        q = q.in("id", ids); break;
+        q = q.in("id", ids);
+        break;
       }
       case "booked": {
         const today = new Date().toISOString().slice(0, 10);
-        const { data: bk } = await sb.from("mobility_bookings")
-          .select("vehicle_id").in("status", ["confirmed", "in_progress"])
-          .lte("start_date", today).gte("end_date", today);
+        const { data: bk } = await sb
+          .from("mobility_bookings")
+          .select("vehicle_id")
+          .in("status", ["confirmed", "in_progress"])
+          .lte("start_date", today)
+          .gte("end_date", today);
         const ids = Array.from(new Set((bk ?? []).map((r: any) => r.vehicle_id)));
         if (ids.length === 0) return { vehicles: [] };
-        q = q.in("id", ids); break;
+        q = q.in("id", ids);
+        break;
       }
       case "available":
-        q = q.eq("status", "approved").eq("is_archived", false); break;
+        q = q.eq("status", "approved").eq("is_archived", false);
+        break;
       case "inactive":
-        q = q.in("status", ["rejected", "draft"]).eq("is_archived", false); break;
+        q = q.in("status", ["rejected", "draft"]).eq("is_archived", false);
+        break;
       case "archived":
-        q = q.eq("is_archived", true); break;
+        q = q.eq("is_archived", true);
+        break;
     }
 
     const { data: rows, error } = await q;
@@ -225,13 +287,36 @@ export const getCompanyDashboardKPIs = createServerFn({ method: "POST" })
   .inputValidator((v: unknown) => z.object({ providerId: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const [{ data: prov }, { count: totalVehicles }, { count: activeVehicles },
-      { count: privateVehicles }, { count: pendingSubs }] = await Promise.all([
+    const [
+      { data: prov },
+      { count: totalVehicles },
+      { count: activeVehicles },
+      { count: privateVehicles },
+      { count: pendingSubs },
+    ] = await Promise.all([
       sb.from("mobility_providers").select("*").eq("id", data.providerId).single(),
-      sb.from("mobility_vehicles").select("id", { count: "exact", head: true }).eq("provider_id", data.providerId).eq("is_archived", false),
-      sb.from("mobility_vehicles").select("id", { count: "exact", head: true }).eq("provider_id", data.providerId).eq("status", "approved").eq("is_archived", false),
-      sb.from("mobility_vehicles").select("id", { count: "exact", head: true }).eq("provider_id", data.providerId).eq("owner_type", "private").eq("is_archived", false),
-      sb.from("mobility_vehicle_submissions").select("id", { count: "exact", head: true }).eq("provider_id", data.providerId).eq("status", "pending"),
+      sb
+        .from("mobility_vehicles")
+        .select("id", { count: "exact", head: true })
+        .eq("provider_id", data.providerId)
+        .eq("is_archived", false),
+      sb
+        .from("mobility_vehicles")
+        .select("id", { count: "exact", head: true })
+        .eq("provider_id", data.providerId)
+        .eq("status", "approved")
+        .eq("is_archived", false),
+      sb
+        .from("mobility_vehicles")
+        .select("id", { count: "exact", head: true })
+        .eq("provider_id", data.providerId)
+        .eq("owner_type", "private")
+        .eq("is_archived", false),
+      sb
+        .from("mobility_vehicle_submissions")
+        .select("id", { count: "exact", head: true })
+        .eq("provider_id", data.providerId)
+        .eq("status", "pending"),
     ]);
 
     return {

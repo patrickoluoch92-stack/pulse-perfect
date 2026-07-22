@@ -39,7 +39,11 @@ export const getPropertyIntelligence = createServerFn({ method: "GET" })
     const allowed =
       (await isPlatformAdmin(supabase, userId)) ||
       (await hasOrgRole(supabase, userId, data.orgId, [
-        "owner", "enterprise_admin", "admin", "manager", "staff",
+        "owner",
+        "enterprise_admin",
+        "admin",
+        "manager",
+        "staff",
       ]));
     if (!allowed) throw new Error("Forbidden");
 
@@ -60,7 +64,9 @@ export const getPropertyIntelligence = createServerFn({ method: "GET" })
     // Per-row verification report (deterministic, fast).
     const reports = rows.map((r) => ({ row: r, report: verifyProperty(r) }));
     const scores = reports.map((r) => r.report.score);
-    const avgScore = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+    const avgScore = scores.length
+      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+      : 0;
     const lowScore = reports.filter((r) => r.report.score < 60).length;
     const highScore = reports.filter((r) => r.report.score >= 85).length;
 
@@ -97,7 +103,9 @@ export const getPropertyIntelligence = createServerFn({ method: "GET" })
     const upcoming = ((upcomingRes as any).data ?? []).length;
 
     const searches = ((searchRes as any).data ?? []) as Array<{ latency_ms: number | null }>;
-    const latencies = searches.map((s) => s.latency_ms).filter((n): n is number => typeof n === "number");
+    const latencies = searches
+      .map((s) => s.latency_ms)
+      .filter((n): n is number => typeof n === "number");
     const avgLatency = latencies.length
       ? Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length)
       : null;
@@ -115,12 +123,25 @@ export const getPropertyIntelligence = createServerFn({ method: "GET" })
       }));
 
     const recs: string[] = [];
-    if (lowScore > 0) recs.push(`${lowScore} listing(s) below 60% quality — complete missing fields first.`);
-    if (withCoords < rows.length) recs.push(`${rows.length - withCoords} listing(s) missing GPS pins — add coordinates to boost map search.`);
+    if (lowScore > 0)
+      recs.push(`${lowScore} listing(s) below 60% quality — complete missing fields first.`);
+    if (withCoords < rows.length)
+      recs.push(
+        `${rows.length - withCoords} listing(s) missing GPS pins — add coordinates to boost map search.`,
+      );
     const noPhoto = rows.filter((r) => !r.main_image_path).length;
-    if (noPhoto > 0) recs.push(`${noPhoto} listing(s) missing a main photo — listings with photos convert 3× better.`);
-    if (counties.size < 2 && rows.length > 3) recs.push("Portfolio concentrated in one county — geographic diversification lowers seasonality risk.");
-    if (avgLatency && avgLatency > 2000) recs.push(`Search latency averaging ${avgLatency}ms — enable embedding backfill to speed up guest search.`);
+    if (noPhoto > 0)
+      recs.push(
+        `${noPhoto} listing(s) missing a main photo — listings with photos convert 3× better.`,
+      );
+    if (counties.size < 2 && rows.length > 3)
+      recs.push(
+        "Portfolio concentrated in one county — geographic diversification lowers seasonality risk.",
+      );
+    if (avgLatency && avgLatency > 2000)
+      recs.push(
+        `Search latency averaging ${avgLatency}ms — enable embedding backfill to speed up guest search.`,
+      );
     if (!recs.length) recs.push("Portfolio in great shape. Focus on marketing to lift bookings.");
 
     const totals = {

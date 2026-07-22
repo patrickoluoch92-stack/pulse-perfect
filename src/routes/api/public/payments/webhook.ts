@@ -1,19 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { verifyWebhook, EventName, planFromProductExternalId, type PaddleEnv } from "@/lib/paddle.server";
+import {
+  verifyWebhook,
+  EventName,
+  planFromProductExternalId,
+  type PaddleEnv,
+} from "@/lib/paddle.server";
 
 let _supabase: SupabaseClient<Database> | null = null;
 function getSupabase(): SupabaseClient<Database> {
   if (!_supabase) {
-    _supabase = createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    _supabase = createClient<Database>(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    );
   }
   return _supabase;
 }
 
 /** Sync organization.plan from current Paddle subscription state. */
 async function applyPlanToOrg(orgId: string, plan: "starter" | "professional" | "business") {
-  await getSupabase().from("organizations").update({ plan, updated_at: new Date().toISOString() }).eq("id", orgId);
+  await getSupabase()
+    .from("organizations")
+    .update({ plan, updated_at: new Date().toISOString() })
+    .eq("id", orgId);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,24 +48,26 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
     console.warn("paddle webhook: unknown product", productExternal);
     return;
   }
-  await getSupabase().from("subscriptions").upsert(
-    {
-      user_id: userId,
-      org_id: orgId,
-      provider: "paddle",
-      plan,
-      paddle_subscription_id: id,
-      paddle_customer_id: customerId,
-      paddle_price_id: priceExternal,
-      status,
-      current_period_start: currentBillingPeriod?.startsAt,
-      current_period_end: currentBillingPeriod?.endsAt,
-      cancel_at_period_end: scheduledChange?.action === "cancel",
-      environment: env,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "paddle_subscription_id" },
-  );
+  await getSupabase()
+    .from("subscriptions")
+    .upsert(
+      {
+        user_id: userId,
+        org_id: orgId,
+        provider: "paddle",
+        plan,
+        paddle_subscription_id: id,
+        paddle_customer_id: customerId,
+        paddle_price_id: priceExternal,
+        status,
+        current_period_start: currentBillingPeriod?.startsAt,
+        current_period_end: currentBillingPeriod?.endsAt,
+        cancel_at_period_end: scheduledChange?.action === "cancel",
+        environment: env,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "paddle_subscription_id" },
+    );
   if (status === "active" || status === "trialing") await applyPlanToOrg(orgId, plan);
 }
 

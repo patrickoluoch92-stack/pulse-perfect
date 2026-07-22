@@ -5,11 +5,9 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
 function publicClient() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
 
 const TrackInput = z.object({
@@ -30,7 +28,7 @@ export const trackRecommendationEvent = createServerFn({ method: "POST" })
     const userId = sess.session?.user?.id ?? null;
     const { error } = await supabase.from("recommendation_events").insert({
       user_id: userId,
-      session_id: userId ? null : data.sessionId ?? null,
+      session_id: userId ? null : (data.sessionId ?? null),
       property_id: data.propertyId,
       event_type: data.eventType,
       weight: data.weight ?? defaultWeight(data.eventType),
@@ -42,13 +40,20 @@ export const trackRecommendationEvent = createServerFn({ method: "POST" })
 
 function defaultWeight(t: string) {
   switch (t) {
-    case "book": return 5;
-    case "save": return 3;
-    case "click": return 2;
-    case "view": return 1;
-    case "dismiss": return -2;
-    case "unsave": return -1;
-    default: return 1;
+    case "book":
+      return 5;
+    case "save":
+      return 3;
+    case "click":
+      return 2;
+    case "view":
+      return 1;
+    case "dismiss":
+      return -2;
+    case "unsave":
+      return -1;
+    default:
+      return 1;
   }
 }
 

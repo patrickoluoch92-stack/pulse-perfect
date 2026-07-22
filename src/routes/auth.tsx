@@ -18,7 +18,11 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — HostPulse" },
-      { name: "description", content: "Sign in or create your HostPulse workspace to manage reservations, billing, and operations." },
+      {
+        name: "description",
+        content:
+          "Sign in or create your HostPulse workspace to manage reservations, billing, and operations.",
+      },
       { name: "robots", content: "noindex, follow" },
       { property: "og:title", content: "Sign in — HostPulse" },
       { property: "og:description", content: "Access your HostPulse hospitality workspace." },
@@ -120,18 +124,33 @@ function AuthPage() {
             {mode === "signup" && (
               <div className="space-y-1.5">
                 <Label htmlFor="name">Full name</Label>
-                <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                <Input
+                  id="name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                />
               </div>
             )}
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>
               <Input
-                id="password" type="password" minLength={8}
-                value={password} onChange={(e) => setPassword(e.target.value)} required
+                id="password"
+                type="password"
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
             <Button type="submit" className="w-full" disabled={submitting}>

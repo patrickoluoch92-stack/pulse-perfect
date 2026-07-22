@@ -21,7 +21,12 @@ const PropertyBarChart = lazy(() =>
 );
 
 export const Route = createFileRoute("/_authenticated/analytics")({
-  head: () => ({ meta: authPageMeta({ title: "Analytics", description: "Revenue, occupancy, and booking performance across your portfolio." }) }),
+  head: () => ({
+    meta: authPageMeta({
+      title: "Analytics",
+      description: "Revenue, occupancy, and booking performance across your portfolio.",
+    }),
+  }),
   component: AnalyticsPage,
 });
 
@@ -34,7 +39,9 @@ const RANGES = [
 
 function rangeDates(key: string) {
   const today = new Date();
-  const to = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 1));
+  const to = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 1),
+  );
   let from: Date;
   if (key === "ytd") {
     from = new Date(Date.UTC(today.getUTCFullYear(), 0, 1));
@@ -79,7 +86,11 @@ function AnalyticsPage() {
   const d = q.data;
   const currency = "USD";
   const fmtMoney = (n: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(n);
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(n);
   const fmtPct = (n: number) => `${(n * 100).toFixed(1)}%`;
 
   return (
@@ -99,7 +110,11 @@ function AnalyticsPage() {
                 key={r.key}
                 onClick={() => allowed && setRange(r.key)}
                 disabled={!allowed}
-                title={allowed ? r.label : `Requires ${PLAN_LABEL[r.feature === "analytics.range.ytd" ? "business" : "professional"]} plan`}
+                title={
+                  allowed
+                    ? r.label
+                    : `Requires ${PLAN_LABEL[r.feature === "analytics.range.ytd" ? "business" : "professional"]} plan`
+                }
                 className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-sm transition-colors ${
                   range === r.key
                     ? "bg-primary text-primary-foreground"
@@ -117,10 +132,30 @@ function AnalyticsPage() {
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi icon={CalendarCheck} label="Occupancy" value={d ? fmtPct(d.occupancyRate) : "—"} hint={d ? `${d.occupiedNights} / ${d.availableNights} nights` : ""} />
-        <Kpi icon={DollarSign} label="Revenue" value={d ? fmtMoney(d.revenue) : "—"} hint={d ? `${d.bookings} bookings` : ""} />
-        <Kpi icon={TrendingUp} label="ADR" value={d ? fmtMoney(d.adr) : "—"} hint="Avg daily rate" />
-        <Kpi icon={BedDouble} label="RevPAR" value={d ? fmtMoney(d.revpar) : "—"} hint="Revenue per available unit" />
+        <Kpi
+          icon={CalendarCheck}
+          label="Occupancy"
+          value={d ? fmtPct(d.occupancyRate) : "—"}
+          hint={d ? `${d.occupiedNights} / ${d.availableNights} nights` : ""}
+        />
+        <Kpi
+          icon={DollarSign}
+          label="Revenue"
+          value={d ? fmtMoney(d.revenue) : "—"}
+          hint={d ? `${d.bookings} bookings` : ""}
+        />
+        <Kpi
+          icon={TrendingUp}
+          label="ADR"
+          value={d ? fmtMoney(d.adr) : "—"}
+          hint="Avg daily rate"
+        />
+        <Kpi
+          icon={BedDouble}
+          label="RevPAR"
+          value={d ? fmtMoney(d.revpar) : "—"}
+          hint="Revenue per available unit"
+        />
       </div>
 
       <section className="rounded-2xl border border-border/60 bg-card p-6">
@@ -149,7 +184,8 @@ function AnalyticsPage() {
           <div className="mt-4 h-64">
             {!canPropertyBreakdown ? (
               <div className="grid h-full place-items-center px-6 text-center text-sm text-muted-foreground">
-                Upgrade to <span className="mx-1 font-medium text-foreground">Business</span> to see revenue split by property.
+                Upgrade to <span className="mx-1 font-medium text-foreground">Business</span> to see
+                revenue split by property.
               </div>
             ) : d && d.propertyChart.length > 0 ? (
               <Suspense fallback={<EmptyChart loading />}>
@@ -173,7 +209,9 @@ function AnalyticsPage() {
                     <div key={source}>
                       <div className="mb-1 flex justify-between text-sm">
                         <span className="capitalize">{source.replace("_", " ")}</span>
-                        <span className="text-muted-foreground">{count} · {pct.toFixed(0)}%</span>
+                        <span className="text-muted-foreground">
+                          {count} · {pct.toFixed(0)}%
+                        </span>
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-muted">
                         <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
@@ -183,9 +221,14 @@ function AnalyticsPage() {
                 })
             ) : (
               <div className="py-8">
-                {q.isLoading
-                  ? <LoadingState label="Loading top listings…" />
-                  : <EmptyState title="No bookings in this period" description="Adjust the date range to see performance." />}
+                {q.isLoading ? (
+                  <LoadingState label="Loading top listings…" />
+                ) : (
+                  <EmptyState
+                    title="No bookings in this period"
+                    description="Adjust the date range to see performance."
+                  />
+                )}
               </div>
             )}
           </div>
@@ -195,7 +238,17 @@ function AnalyticsPage() {
   );
 }
 
-function Kpi({ icon: Icon, label, value, hint }: { icon: LucideIcon; label: string; value: string; hint?: string }) {
+function Kpi({
+  icon: Icon,
+  label,
+  value,
+  hint,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  hint?: string;
+}) {
   return (
     <div className="rounded-2xl border border-border/60 bg-card p-5">
       <div className="flex items-center justify-between">
@@ -213,9 +266,11 @@ function Kpi({ icon: Icon, label, value, hint }: { icon: LucideIcon; label: stri
 function EmptyChart({ loading }: { loading: boolean }) {
   return (
     <div className="grid h-full place-items-center">
-      {loading
-        ? <LoadingState label="Loading chart…" />
-        : <EmptyState title="No data yet" description="No data for this period yet." />}
+      {loading ? (
+        <LoadingState label="Loading chart…" />
+      ) : (
+        <EmptyState title="No data yet" description="No data for this period yet." />
+      )}
     </div>
   );
 }

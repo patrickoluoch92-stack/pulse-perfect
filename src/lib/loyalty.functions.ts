@@ -26,7 +26,12 @@ export const getLoyalty = createServerFn({ method: "POST" })
       .order("created_at", { ascending: false })
       .limit(50);
     return {
-      account: account ?? { user_id: userId, points_balance: 0, tier: "bronze", lifetime_points: 0 },
+      account: account ?? {
+        user_id: userId,
+        points_balance: 0,
+        tier: "bronze",
+        lifetime_points: 0,
+      },
       ledger: ledger ?? [],
     };
   });

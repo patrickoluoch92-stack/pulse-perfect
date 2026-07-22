@@ -8,7 +8,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 async function loadBooking(supabase: any, id: string) {
   const { data, error } = await supabase
     .from("professional_bookings")
-    .select("id, customer_id, professional_id, status, payment_status, deposit_amount, total_amount, currency")
+    .select(
+      "id, customer_id, professional_id, status, payment_status, deposit_amount, total_amount, currency",
+    )
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(error.message);

@@ -34,7 +34,10 @@ function AvailabilityPage() {
   const addFn = useServerFn(addAvailabilityBlock);
   const removeFn = useServerFn(removeAvailabilityBlock);
 
-  const prop = useQuery({ queryKey: ["mkt-my-prop", id], queryFn: () => getProp({ data: { id } }) });
+  const prop = useQuery({
+    queryKey: ["mkt-my-prop", id],
+    queryFn: () => getProp({ data: { id } }),
+  });
   const blocks = useQuery({
     queryKey: ["mkt-blocks", id],
     queryFn: () => listFn({ data: { propertyId: id } }),
@@ -49,7 +52,9 @@ function AvailabilityPage() {
       addFn({ data: { propertyId: id, startDate, endDate, reason: reason || undefined } }),
     onSuccess: () => {
       toast.success("Dates blocked");
-      setStartDate(""); setEndDate(""); setReason("");
+      setStartDate("");
+      setEndDate("");
+      setReason("");
       qc.invalidateQueries({ queryKey: ["mkt-blocks", id] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -68,7 +73,10 @@ function AvailabilityPage() {
     <DashboardShell>
       <div className="mx-auto max-w-3xl space-y-6 p-6">
         <div>
-          <Link to="/listings" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/listings"
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="mr-1 h-4 w-4" /> All listings
           </Link>
           <h1 className="mt-2 font-display text-3xl font-semibold">
@@ -76,7 +84,8 @@ function AvailabilityPage() {
             Availability — {prop.data?.name ?? "…"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Block off dates when this property cannot accept guests (renovations, owner stays, third-party bookings).
+            Block off dates when this property cannot accept guests (renovations, owner stays,
+            third-party bookings).
           </p>
         </div>
 
@@ -92,15 +101,30 @@ function AvailabilityPage() {
           >
             <div className="space-y-1">
               <Label>From</Label>
-              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                required
+              />
             </div>
             <div className="space-y-1">
               <Label>To</Label>
-              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                required
+              />
             </div>
             <div className="space-y-1">
               <Label>Reason (optional)</Label>
-              <Input value={reason} onChange={(e) => setReason(e.target.value)} maxLength={200} placeholder="Maintenance, private booking…" />
+              <Input
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                maxLength={200}
+                placeholder="Maintenance, private booking…"
+              />
             </div>
             <div className="flex items-end">
               <Button type="submit" disabled={add.isPending}>
@@ -117,7 +141,11 @@ function AvailabilityPage() {
           {blocks.isLoading && <LoadingState label="Loading blocks…" />}
           {blocks.data && blocks.data.length === 0 && (
             <div className="p-6">
-              <EmptyState icon={CalendarIcon} title="No blocks yet" description="The property is fully open for bookings." />
+              <EmptyState
+                icon={CalendarIcon}
+                title="No blocks yet"
+                description="The property is fully open for bookings."
+              />
             </div>
           )}
           {blocks.data && blocks.data.length > 0 && (
@@ -131,7 +159,9 @@ function AvailabilityPage() {
                     {b.reason && <p className="text-xs text-muted-foreground">{b.reason}</p>}
                   </div>
                   <Button
-                    variant="ghost" size="sm" className="text-destructive"
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive"
                     onClick={() => remove.mutate(b.id)}
                     disabled={remove.isPending}
                   >

@@ -46,7 +46,13 @@ describe("escapeCsvField — overflow", () => {
 
 describe("buildCsv", () => {
   it("prepends BOM and joins header + rows", () => {
-    const out = buildCsv(["name", "score"], [["a", 1], ["b,c", 2]]);
+    const out = buildCsv(
+      ["name", "score"],
+      [
+        ["a", 1],
+        ["b,c", 2],
+      ],
+    );
     expect(out.charCodeAt(0)).toBe(0xfeff);
     expect(out).toContain("name,score");
     expect(out).toContain('"b,c",2');

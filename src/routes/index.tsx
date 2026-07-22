@@ -26,8 +26,7 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "HostPulse",
-          description:
-            "Hospitality operations for hosts, hotels, lodges, and tour operators.",
+          description: "Hospitality operations for hosts, hotels, lodges, and tour operators.",
         }),
       },
     ],
@@ -63,10 +62,11 @@ function Landing() {
               <Link to="/auth">Sign in</Link>
             </Button>
             <Button asChild>
-              <Link to="/auth" search={{ mode: "signup" }}>Get started</Link>
+              <Link to="/auth" search={{ mode: "signup" }}>
+                Get started
+              </Link>
             </Button>
           </nav>
-
         </div>
       </header>
 
@@ -79,12 +79,14 @@ function Landing() {
             Hospitality, <span className="text-primary italic">orchestrated.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            HostPulse brings reservations, rooms, housekeeping, billing, and analytics into a
-            single calm workspace — built for teams that care about the guest experience.
+            HostPulse brings reservations, rooms, housekeeping, billing, and analytics into a single
+            calm workspace — built for teams that care about the guest experience.
           </p>
           <div className="mt-10 flex justify-center gap-3">
             <Button asChild size="lg">
-              <Link to="/auth" search={{ mode: "signup" }}>Start free</Link>
+              <Link to="/auth" search={{ mode: "signup" }}>
+                Start free
+              </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
               <Link to="/auth">Sign in</Link>
@@ -116,7 +118,19 @@ function Landing() {
 }
 
 const features = [
-  { icon: BedDouble, title: "Properties & units", body: "Model hotels, lodges, vacation rentals, and tour slots side by side — multi-tenant from day one." },
-  { icon: Calendar, title: "Reservations", body: "Bookings, modifications, cancellations, no-shows — with guest profiles and check-in flow." },
-  { icon: ChartBar, title: "Analytics", body: "Occupancy, revenue, ADR, RevPAR. Know what's working without spreadsheets." },
+  {
+    icon: BedDouble,
+    title: "Properties & units",
+    body: "Model hotels, lodges, vacation rentals, and tour slots side by side — multi-tenant from day one.",
+  },
+  {
+    icon: Calendar,
+    title: "Reservations",
+    body: "Bookings, modifications, cancellations, no-shows — with guest profiles and check-in flow.",
+  },
+  {
+    icon: ChartBar,
+    title: "Analytics",
+    body: "Occupancy, revenue, ADR, RevPAR. Know what's working without spreadsheets.",
+  },
 ];

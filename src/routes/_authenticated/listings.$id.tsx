@@ -15,8 +15,12 @@ import {
   listCounties,
 } from "@/lib/marketplace.functions";
 import {
-  PROPERTY_CATEGORIES, AVAILABILITY_OPTIONS, COMMON_AMENITIES, MARKETPLACE_BUCKET,
-  LISTING_INTENTS, OCCUPANCY_STATUSES,
+  PROPERTY_CATEGORIES,
+  AVAILABILITY_OPTIONS,
+  COMMON_AMENITIES,
+  MARKETPLACE_BUCKET,
+  LISTING_INTENTS,
+  OCCUPANCY_STATUSES,
 } from "@/lib/marketplace-constants";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
@@ -27,16 +31,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/listings/$id")({
-  head: () => ({ meta: authPageMeta({ title: "Edit listing", description: "Update marketplace listing." }) }),
+  head: () => ({
+    meta: authPageMeta({ title: "Edit listing", description: "Update marketplace listing." }),
+  }),
   notFoundComponent: () => (
     <DashboardShell>
       <div className="p-12 text-center">
         <p>Listing not found.</p>
-        <Link to="/listings" className="text-primary underline">Back to listings</Link>
+        <Link to="/listings" className="text-primary underline">
+          Back to listings
+        </Link>
       </div>
     </DashboardShell>
   ),
@@ -44,7 +56,9 @@ export const Route = createFileRoute("/_authenticated/listings/$id")({
     <DashboardShell>
       <div className="p-12 text-center">
         <p>{error.message}</p>
-        <button onClick={reset} className="text-primary underline">Retry</button>
+        <button onClick={reset} className="text-primary underline">
+          Retry
+        </button>
       </div>
     </DashboardShell>
   ),
@@ -170,7 +184,10 @@ function EditListing() {
     try {
       const { compressImage } = await import("@/lib/image-compress");
       const compressed = await compressImage(file, { maxDim: 1920, quality: 0.82 });
-      const ext = (compressed.type === "image/jpeg" ? "jpg" : compressed.name.split(".").pop()?.toLowerCase()) ?? "jpg";
+      const ext =
+        (compressed.type === "image/jpeg"
+          ? "jpg"
+          : compressed.name.split(".").pop()?.toLowerCase()) ?? "jpg";
       const path = `${prop.org_id}/${prop.id}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage
         .from(MARKETPLACE_BUCKET)
@@ -191,7 +208,6 @@ function EditListing() {
       setUploading(false);
     }
   }
-
 
   const removeGalleryImage = useMutation({
     mutationFn: (imgId: string) => delImgFn({ data: { id: imgId } }),
@@ -214,7 +230,9 @@ function EditListing() {
       <DashboardShell>
         <div className="p-12 text-center">
           <p>Listing not found.</p>
-          <Link to="/listings" className="text-primary underline">Back to listings</Link>
+          <Link to="/listings" className="text-primary underline">
+            Back to listings
+          </Link>
         </div>
       </DashboardShell>
     );
@@ -224,10 +242,15 @@ function EditListing() {
     <DashboardShell>
       <div className="mx-auto max-w-4xl space-y-6 p-6">
         <div>
-          <Link to="/listings" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/listings"
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="mr-1 h-4 w-4" /> All listings
           </Link>
-          <h1 className="mt-2 font-display text-3xl font-semibold">{form.name || "Untitled listing"}</h1>
+          <h1 className="mt-2 font-display text-3xl font-semibold">
+            {form.name || "Untitled listing"}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Status: <Badge variant="secondary">{prop?.status}</Badge>
           </p>
@@ -235,45 +258,90 @@ function EditListing() {
 
         <form
           className="space-y-8"
-          onSubmit={(e) => { e.preventDefault(); save.mutate(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            save.mutate();
+          }}
         >
           <section className="space-y-4 rounded-xl border bg-card p-6">
             <h2 className="text-lg font-semibold">Basics</h2>
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Name">
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={120} required />
+                <Input
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  maxLength={120}
+                  required
+                />
               </Field>
               <Field label="Category">
-                <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={form.category}
+                  onValueChange={(v) => setForm({ ...form, category: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {PROPERTY_CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                    {PROPERTY_CATEGORIES.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Field>
               <Field label="County">
-                <Select value={form.countyCode} onValueChange={(v) => setForm({ ...form, countyCode: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={form.countyCode}
+                  onValueChange={(v) => setForm({ ...form, countyCode: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {(counties.data ?? []).map((c) => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+                    {(counties.data ?? []).map((c) => (
+                      <SelectItem key={c.code} value={c.code}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Field>
               <Field label="Town / area">
-                <Input value={form.town} onChange={(e) => setForm({ ...form, town: e.target.value })} maxLength={80} required />
+                <Input
+                  value={form.town}
+                  onChange={(e) => setForm({ ...form, town: e.target.value })}
+                  maxLength={80}
+                  required
+                />
               </Field>
               <Field label="Availability">
-                <Select value={form.availability} onValueChange={(v) => setForm({ ...form, availability: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={form.availability}
+                  onValueChange={(v) => setForm({ ...form, availability: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {AVAILABILITY_OPTIONS.map((a) => <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>)}
+                    {AVAILABILITY_OPTIONS.map((a) => (
+                      <SelectItem key={a.value} value={a.value}>
+                        {a.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Field>
               <Field label="Price per night">
                 <div className="flex gap-2">
-                  <Select value={form.currency} onValueChange={(v) => setForm({ ...form, currency: v })}>
-                    <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                  <Select
+                    value={form.currency}
+                    onValueChange={(v) => setForm({ ...form, currency: v })}
+                  >
+                    <SelectTrigger className="w-24">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="KES">KES</SelectItem>
                       <SelectItem value="USD">USD</SelectItem>
@@ -281,7 +349,9 @@ function EditListing() {
                     </SelectContent>
                   </Select>
                   <Input
-                    type="number" min={0} step="0.01"
+                    type="number"
+                    min={0}
+                    step="0.01"
                     value={form.pricePerNight}
                     onChange={(e) => setForm({ ...form, pricePerNight: e.target.value })}
                   />
@@ -292,7 +362,9 @@ function EditListing() {
               <Textarea
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                rows={6} maxLength={4000} required
+                rows={6}
+                maxLength={4000}
+                required
               />
               <p className="mt-1 text-xs text-muted-foreground">{form.description.length} / 4000</p>
             </Field>
@@ -343,14 +415,16 @@ function EditListing() {
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Latitude">
                 <Input
-                  type="number" step="0.000001"
+                  type="number"
+                  step="0.000001"
                   value={form.latitude}
                   onChange={(e) => setForm({ ...form, latitude: e.target.value })}
                 />
               </Field>
               <Field label="Longitude">
                 <Input
-                  type="number" step="0.000001"
+                  type="number"
+                  step="0.000001"
                   value={form.longitude}
                   onChange={(e) => setForm({ ...form, longitude: e.target.value })}
                 />
@@ -371,8 +445,8 @@ function EditListing() {
             <div>
               <h2 className="text-lg font-semibold">Rental, sale & property details</h2>
               <p className="text-sm text-muted-foreground">
-                Fill the fields that apply. Use these for residential, commercial, agricultural
-                and land listings — rent, sale price, bedrooms, plot size, occupancy and more.
+                Fill the fields that apply. Use these for residential, commercial, agricultural and
+                land listings — rent, sale price, bedrooms, plot size, occupancy and more.
               </p>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
@@ -384,7 +458,9 @@ function EditListing() {
                 >
                   <option value="">— select —</option>
                   {LISTING_INTENTS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
                   ))}
                 </select>
               </Field>
@@ -396,91 +472,159 @@ function EditListing() {
                 >
                   <option value="">— select —</option>
                   {OCCUPANCY_STATUSES.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
                   ))}
                 </select>
               </Field>
               <Field label="Available from">
-                <Input type="date" value={form.availableFrom}
-                  onChange={(e) => setForm({ ...form, availableFrom: e.target.value })} />
+                <Input
+                  type="date"
+                  value={form.availableFrom}
+                  onChange={(e) => setForm({ ...form, availableFrom: e.target.value })}
+                />
               </Field>
             </div>
             <div className="grid gap-4 md:grid-cols-4">
               <Field label={`Monthly rent (${form.currency})`}>
-                <Input type="number" min="0" value={form.rentMonthly}
-                  onChange={(e) => setForm({ ...form, rentMonthly: e.target.value })} />
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.rentMonthly}
+                  onChange={(e) => setForm({ ...form, rentMonthly: e.target.value })}
+                />
               </Field>
               <Field label={`Weekly rent (${form.currency})`}>
-                <Input type="number" min="0" value={form.rentWeekly}
-                  onChange={(e) => setForm({ ...form, rentWeekly: e.target.value })} />
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.rentWeekly}
+                  onChange={(e) => setForm({ ...form, rentWeekly: e.target.value })}
+                />
               </Field>
               <Field label={`Daily rent (${form.currency})`}>
-                <Input type="number" min="0" value={form.rentDaily}
-                  onChange={(e) => setForm({ ...form, rentDaily: e.target.value })} />
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.rentDaily}
+                  onChange={(e) => setForm({ ...form, rentDaily: e.target.value })}
+                />
               </Field>
               <Field label={`Sale price (${form.currency})`}>
-                <Input type="number" min="0" value={form.salePrice}
-                  onChange={(e) => setForm({ ...form, salePrice: e.target.value })} />
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.salePrice}
+                  onChange={(e) => setForm({ ...form, salePrice: e.target.value })}
+                />
               </Field>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               <Field label={`Security deposit (${form.currency})`}>
-                <Input type="number" min="0" value={form.securityDeposit}
-                  onChange={(e) => setForm({ ...form, securityDeposit: e.target.value })} />
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.securityDeposit}
+                  onChange={(e) => setForm({ ...form, securityDeposit: e.target.value })}
+                />
               </Field>
               <Field label={`Service charge (${form.currency})`}>
-                <Input type="number" min="0" value={form.serviceCharge}
-                  onChange={(e) => setForm({ ...form, serviceCharge: e.target.value })} />
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.serviceCharge}
+                  onChange={(e) => setForm({ ...form, serviceCharge: e.target.value })}
+                />
               </Field>
               <Field label="Lease period (months)">
-                <Input type="number" min="0" value={form.leasePeriodMonths}
-                  onChange={(e) => setForm({ ...form, leasePeriodMonths: e.target.value })} />
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.leasePeriodMonths}
+                  onChange={(e) => setForm({ ...form, leasePeriodMonths: e.target.value })}
+                />
               </Field>
             </div>
             <div className="grid gap-4 md:grid-cols-4">
               <Field label="Bedrooms">
-                <Input type="number" min="0" value={form.bedrooms}
-                  onChange={(e) => setForm({ ...form, bedrooms: e.target.value })} />
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.bedrooms}
+                  onChange={(e) => setForm({ ...form, bedrooms: e.target.value })}
+                />
               </Field>
               <Field label="Bathrooms">
-                <Input type="number" min="0" value={form.bathrooms}
-                  onChange={(e) => setForm({ ...form, bathrooms: e.target.value })} />
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.bathrooms}
+                  onChange={(e) => setForm({ ...form, bathrooms: e.target.value })}
+                />
               </Field>
               <Field label="Parking spaces">
-                <Input type="number" min="0" value={form.parkingSpaces}
-                  onChange={(e) => setForm({ ...form, parkingSpaces: e.target.value })} />
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.parkingSpaces}
+                  onChange={(e) => setForm({ ...form, parkingSpaces: e.target.value })}
+                />
               </Field>
               <Field label="Land size (acres)">
-                <Input type="number" min="0" step="0.01" value={form.landSizeAcres}
-                  onChange={(e) => setForm({ ...form, landSizeAcres: e.target.value })} />
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={form.landSizeAcres}
+                  onChange={(e) => setForm({ ...form, landSizeAcres: e.target.value })}
+                />
               </Field>
             </div>
             <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={!!form.furnished}
-                onChange={(e) => setForm({ ...form, furnished: e.target.checked })} />
+              <input
+                type="checkbox"
+                checked={!!form.furnished}
+                onChange={(e) => setForm({ ...form, furnished: e.target.checked })}
+              />
               Furnished
             </label>
             <div className="grid gap-4 md:grid-cols-2">
               <Field label="Constituency">
-                <Input value={form.constituency}
-                  onChange={(e) => setForm({ ...form, constituency: e.target.value })} maxLength={80} />
+                <Input
+                  value={form.constituency}
+                  onChange={(e) => setForm({ ...form, constituency: e.target.value })}
+                  maxLength={80}
+                />
               </Field>
               <Field label="Ward">
-                <Input value={form.ward}
-                  onChange={(e) => setForm({ ...form, ward: e.target.value })} maxLength={80} />
+                <Input
+                  value={form.ward}
+                  onChange={(e) => setForm({ ...form, ward: e.target.value })}
+                  maxLength={80}
+                />
               </Field>
               <Field label="Estate">
-                <Input value={form.estate}
-                  onChange={(e) => setForm({ ...form, estate: e.target.value })} maxLength={80} />
+                <Input
+                  value={form.estate}
+                  onChange={(e) => setForm({ ...form, estate: e.target.value })}
+                  maxLength={80}
+                />
               </Field>
               <Field label="Neighbourhood">
-                <Input value={form.neighbourhood}
-                  onChange={(e) => setForm({ ...form, neighbourhood: e.target.value })} maxLength={80} />
+                <Input
+                  value={form.neighbourhood}
+                  onChange={(e) => setForm({ ...form, neighbourhood: e.target.value })}
+                  maxLength={80}
+                />
               </Field>
             </div>
             <Field label="Postal address">
-              <Input value={form.postalAddress}
-                onChange={(e) => setForm({ ...form, postalAddress: e.target.value })} maxLength={200} />
+              <Input
+                value={form.postalAddress}
+                onChange={(e) => setForm({ ...form, postalAddress: e.target.value })}
+                maxLength={200}
+              />
             </Field>
           </section>
 
@@ -488,13 +632,26 @@ function EditListing() {
             <h2 className="text-lg font-semibold">Contact</h2>
             <div className="grid gap-4 md:grid-cols-3">
               <Field label="Email">
-                <Input type="email" value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} maxLength={255} />
+                <Input
+                  type="email"
+                  value={form.contactEmail}
+                  onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
+                  maxLength={255}
+                />
               </Field>
               <Field label="Phone">
-                <Input value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} maxLength={40} />
+                <Input
+                  value={form.contactPhone}
+                  onChange={(e) => setForm({ ...form, contactPhone: e.target.value })}
+                  maxLength={40}
+                />
               </Field>
               <Field label="WhatsApp">
-                <Input value={form.contactWhatsapp} onChange={(e) => setForm({ ...form, contactWhatsapp: e.target.value })} maxLength={40} />
+                <Input
+                  value={form.contactWhatsapp}
+                  onChange={(e) => setForm({ ...form, contactWhatsapp: e.target.value })}
+                  maxLength={40}
+                />
               </Field>
             </div>
           </section>
@@ -506,9 +663,15 @@ function EditListing() {
                 <Label>Main image</Label>
                 <div className="mt-2 aspect-video overflow-hidden rounded-lg border bg-muted">
                   {prop?.main_image_url ? (
-                    <img src={prop.main_image_url} alt="Main" className="h-full w-full object-cover" />
+                    <img
+                      src={prop.main_image_url}
+                      alt="Main"
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
-                    <div className="grid h-full place-items-center text-xs text-muted-foreground">No image</div>
+                    <div className="grid h-full place-items-center text-xs text-muted-foreground">
+                      No image
+                    </div>
                   )}
                 </div>
                 <label className="mt-2 inline-flex">
@@ -516,8 +679,12 @@ function EditListing() {
                     <span>
                       <Upload className="mr-2 h-4 w-4" /> {uploading ? "Uploading…" : "Replace"}
                       <input
-                        type="file" accept="image/*" hidden
-                        onChange={(e) => e.target.files?.[0] && uploadImage(e.target.files[0], true)}
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={(e) =>
+                          e.target.files?.[0] && uploadImage(e.target.files[0], true)
+                        }
                       />
                     </span>
                   </Button>
@@ -527,8 +694,17 @@ function EditListing() {
                 <Label>Gallery</Label>
                 <div className="mt-2 grid grid-cols-3 gap-2">
                   {prop?.gallery.map((g) => (
-                    <div key={g.id} className="relative aspect-square overflow-hidden rounded-lg border bg-muted">
-                      {g.url && <img src={g.url} alt={g.alt_text ?? ""} className="h-full w-full object-cover" />}
+                    <div
+                      key={g.id}
+                      className="relative aspect-square overflow-hidden rounded-lg border bg-muted"
+                    >
+                      {g.url && (
+                        <img
+                          src={g.url}
+                          alt={g.alt_text ?? ""}
+                          className="h-full w-full object-cover"
+                        />
+                      )}
                       <button
                         type="button"
                         aria-label="Remove image"
@@ -544,7 +720,9 @@ function EditListing() {
                       <Upload className="mx-auto mb-1 h-4 w-4" /> Add
                     </span>
                     <input
-                      type="file" accept="image/*" hidden
+                      type="file"
+                      accept="image/*"
+                      hidden
                       onChange={(e) => e.target.files?.[0] && uploadImage(e.target.files[0], false)}
                     />
                   </label>

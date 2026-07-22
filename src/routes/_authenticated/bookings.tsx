@@ -73,11 +73,11 @@ function MyBookings() {
                 >
                   {b.marketplace_properties?.name ?? "Property"}
                 </Link>
-                <p className="text-sm text-muted-foreground">
-                  {b.marketplace_properties?.town}
-                </p>
+                <p className="text-sm text-muted-foreground">{b.marketplace_properties?.town}</p>
                 <p className="mt-1 text-sm">
-                  {new Date(b.check_in).toLocaleDateString()} – {new Date(b.check_out).toLocaleDateString()} · {b.guests_count} guest{b.guests_count > 1 ? "s" : ""}
+                  {new Date(b.check_in).toLocaleDateString()} –{" "}
+                  {new Date(b.check_out).toLocaleDateString()} · {b.guests_count} guest
+                  {b.guests_count > 1 ? "s" : ""}
                 </p>
               </div>
               <div className="text-right">

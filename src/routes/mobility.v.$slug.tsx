@@ -26,7 +26,10 @@ export const Route = createFileRoute("/mobility/v/$slug")({
   head: ({ params }) => ({
     meta: [
       { title: `${params.slug.replace(/-/g, " ")} — Car Hire | HostPulse` },
-      { name: "description", content: `Book this vehicle on HostPulse. See specifications, rates, and availability across Kenya.` },
+      {
+        name: "description",
+        content: `Book this vehicle on HostPulse. See specifications, rates, and availability across Kenya.`,
+      },
     ],
   }),
   component: VehicleDetail,
@@ -51,10 +54,23 @@ function VehicleDetail() {
   const [notes, setNotes] = useState("");
 
   const vehicleId = (data?.vehicle as any)?.id;
-  const quoteEnabled = !!(vehicleId && pickupAt && dropoffAt && new Date(dropoffAt) > new Date(pickupAt));
+  const quoteEnabled = !!(
+    vehicleId &&
+    pickupAt &&
+    dropoffAt &&
+    new Date(dropoffAt) > new Date(pickupAt)
+  );
   const quote = useQuery({
     queryKey: ["mobility-quote", vehicleId, pickupAt, dropoffAt, driverOption],
-    queryFn: () => quoteFn({ data: { vehicleId, pickupAt: new Date(pickupAt).toISOString(), dropoffAt: new Date(dropoffAt).toISOString(), driverOption } }),
+    queryFn: () =>
+      quoteFn({
+        data: {
+          vehicleId,
+          pickupAt: new Date(pickupAt).toISOString(),
+          dropoffAt: new Date(dropoffAt).toISOString(),
+          driverOption,
+        },
+      }),
     enabled: quoteEnabled,
     retry: false,
   });
@@ -75,12 +91,18 @@ function VehicleDetail() {
     onError: (err: any) => toast.error(err?.message ?? "Booking failed"),
   });
 
-  if (isLoading) return <div className="p-8"><LoadingState label="Loading vehicle…" /></div>;
+  if (isLoading)
+    return (
+      <div className="p-8">
+        <LoadingState label="Loading vehicle…" />
+      </div>
+    );
   if (!data?.vehicle) throw notFound();
 
-
   const v: any = data.vehicle;
-  const images: any[] = (v.mobility_vehicle_images ?? []).sort((a: any, b: any) => a.sort_order - b.sort_order);
+  const images: any[] = (v.mobility_vehicle_images ?? []).sort(
+    (a: any, b: any) => a.sort_order - b.sort_order,
+  );
   const rates: any[] = v.mobility_vehicle_rates ?? [];
   const provider = v.mobility_providers;
 
@@ -88,10 +110,21 @@ function VehicleDetail() {
     <div className="min-h-dvh bg-background">
       <section className="mx-auto max-w-6xl px-6 py-8">
         <nav className="mb-3 text-sm text-muted-foreground">
-          <Link to="/mobility" className="hover:underline">Mobility</Link> /{" "}
-          <Link to="/mobility/$category" params={{ category: v.category }} className="hover:underline">
+          <Link to="/mobility" className="hover:underline">
+            Mobility
+          </Link>{" "}
+          /{" "}
+          <Link
+            to="/mobility/$category"
+            params={{ category: v.category }}
+            className="hover:underline"
+          >
             {MOBILITY_CATEGORY_LABELS[v.category as MobilityCategory]}
-          </Link> / <span>{v.make} {v.model}</span>
+          </Link>{" "}
+          /{" "}
+          <span>
+            {v.make} {v.model}
+          </span>
         </nav>
 
         <div className="grid gap-8 lg:grid-cols-3">
@@ -101,37 +134,68 @@ function VehicleDetail() {
             </h1>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {images.slice(0, 6).map((img) => (
-                <img key={img.url} src={img.url} alt={img.alt ?? ""} className="aspect-video w-full rounded-md object-cover" loading="lazy" />
+                <img
+                  key={img.url}
+                  src={img.url}
+                  alt={img.alt ?? ""}
+                  className="aspect-video w-full rounded-md object-cover"
+                  loading="lazy"
+                />
               ))}
             </div>
 
             <Card>
-              <CardHeader><CardTitle>Specifications</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle>Specifications</CardTitle>
+              </CardHeader>
               <CardContent className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
                 <Spec icon={Users} label={`${v.seats ?? "?"} seats`} />
                 <Spec icon={Cog} label={v.transmission ?? "—"} />
                 <Spec icon={Fuel} label={v.fuel_type ?? "—"} />
                 <Spec icon={Snowflake} label={v.has_ac ? "Air conditioning" : "No AC"} />
                 <Spec icon={Navigation} label={v.has_gps ? "GPS included" : "No GPS"} />
-                <Spec icon={Shield} label={v.security_deposit_kes ? `Deposit KES ${Number(v.security_deposit_kes).toLocaleString()}` : "No deposit"} />
+                <Spec
+                  icon={Shield}
+                  label={
+                    v.security_deposit_kes
+                      ? `Deposit KES ${Number(v.security_deposit_kes).toLocaleString()}`
+                      : "No deposit"
+                  }
+                />
               </CardContent>
             </Card>
 
             {v.description && (
               <Card>
-                <CardHeader><CardTitle>About this vehicle</CardTitle></CardHeader>
-                <CardContent className="whitespace-pre-wrap text-sm text-muted-foreground">{v.description}</CardContent>
+                <CardHeader>
+                  <CardTitle>About this vehicle</CardTitle>
+                </CardHeader>
+                <CardContent className="whitespace-pre-wrap text-sm text-muted-foreground">
+                  {v.description}
+                </CardContent>
               </Card>
             )}
 
             {provider && (
               <Card>
-                <CardHeader><CardTitle>Provider</CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle>Provider</CardTitle>
+                </CardHeader>
                 <CardContent className="flex items-center gap-3">
-                  {provider.logo_url && <img src={provider.logo_url} alt={provider.name} className="h-12 w-12 rounded object-cover" />}
+                  {provider.logo_url && (
+                    <img
+                      src={provider.logo_url}
+                      alt={provider.name}
+                      className="h-12 w-12 rounded object-cover"
+                    />
+                  )}
                   <div>
                     <div className="font-medium">{provider.name}</div>
-                    {provider.bio && <div className="text-sm text-muted-foreground line-clamp-2">{provider.bio}</div>}
+                    {provider.bio && (
+                      <div className="text-sm text-muted-foreground line-clamp-2">
+                        {provider.bio}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -142,7 +206,9 @@ function VehicleDetail() {
 
           <aside className="space-y-4">
             <Card>
-              <CardHeader><CardTitle>Rates</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle>Rates</CardTitle>
+              </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 {rates.map((r) => (
                   <div key={r.unit} className="flex justify-between border-b pb-1 last:border-0">
@@ -154,42 +220,90 @@ function VehicleDetail() {
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>Book this vehicle</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle>Book this vehicle</CardTitle>
+              </CardHeader>
               <CardContent className="space-y-3">
                 <div>
                   <Label htmlFor="pickup">Pickup date & time</Label>
-                  <Input id="pickup" type="datetime-local" value={pickupAt} onChange={(e) => setPickupAt(e.target.value)} />
+                  <Input
+                    id="pickup"
+                    type="datetime-local"
+                    value={pickupAt}
+                    onChange={(e) => setPickupAt(e.target.value)}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="dropoff">Dropoff date & time</Label>
-                  <Input id="dropoff" type="datetime-local" value={dropoffAt} onChange={(e) => setDropoffAt(e.target.value)} />
+                  <Input
+                    id="dropoff"
+                    type="datetime-local"
+                    value={dropoffAt}
+                    onChange={(e) => setDropoffAt(e.target.value)}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="loc">Pickup location</Label>
-                  <Input id="loc" value={pickupLocation} onChange={(e) => setPickupLocation(e.target.value)} placeholder="e.g. JKIA, Nairobi" />
+                  <Input
+                    id="loc"
+                    value={pickupLocation}
+                    onChange={(e) => setPickupLocation(e.target.value)}
+                    placeholder="e.g. JKIA, Nairobi"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="delivery">Delivery address (optional)</Label>
-                  <Input id="delivery" value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} placeholder="Where should we deliver?" />
+                  <Input
+                    id="delivery"
+                    value={deliveryAddress}
+                    onChange={(e) => setDeliveryAddress(e.target.value)}
+                    placeholder="Where should we deliver?"
+                  />
                 </div>
                 <div className="flex gap-2">
-                  <Button type="button" size="sm" variant={driverOption === "self" ? "default" : "outline"} onClick={() => setDriverOption("self")}>Self-drive</Button>
-                  <Button type="button" size="sm" variant={driverOption === "chauffeur" ? "default" : "outline"} onClick={() => setDriverOption("chauffeur")}>With driver (+25%)</Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={driverOption === "self" ? "default" : "outline"}
+                    onClick={() => setDriverOption("self")}
+                  >
+                    Self-drive
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={driverOption === "chauffeur" ? "default" : "outline"}
+                    onClick={() => setDriverOption("chauffeur")}
+                  >
+                    With driver (+25%)
+                  </Button>
                 </div>
                 <div>
                   <Label htmlFor="notes">Notes for the provider (optional)</Label>
-                  <Textarea id="notes" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Flight number, special requests…" />
+                  <Textarea
+                    id="notes"
+                    rows={2}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Flight number, special requests…"
+                  />
                 </div>
 
                 {quoteEnabled && (
                   <div className="rounded-md border bg-muted/40 p-3 text-sm space-y-1">
-                    {quote.isLoading && <div className="text-muted-foreground">Calculating price…</div>}
-                    {quote.error && <div className="text-destructive">{(quote.error as any).message}</div>}
+                    {quote.isLoading && (
+                      <div className="text-muted-foreground">Calculating price…</div>
+                    )}
+                    {quote.error && (
+                      <div className="text-destructive">{(quote.error as any).message}</div>
+                    )}
                     {quote.data && (
                       <>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">
-                            {quote.data.duration.days} day{quote.data.duration.days === 1 ? "" : "s"} · {quote.data.quote.dailySource}
+                            {quote.data.duration.days} day
+                            {quote.data.duration.days === 1 ? "" : "s"} ·{" "}
+                            {quote.data.quote.dailySource}
                           </span>
                           <span>KES {quote.data.quote.subtotalKes.toLocaleString()}</span>
                         </div>
@@ -231,10 +345,11 @@ function VehicleDetail() {
                 >
                   {book.isPending ? "Booking…" : "Request booking"}
                 </Button>
-                <p className="text-xs text-muted-foreground">Sign in required. Provider confirms availability before payment.</p>
+                <p className="text-xs text-muted-foreground">
+                  Sign in required. Provider confirms availability before payment.
+                </p>
               </CardContent>
             </Card>
-
           </aside>
         </div>
       </section>
@@ -243,14 +358,22 @@ function VehicleDetail() {
 }
 
 function Spec({ icon: Icon, label }: { icon: any; label: string }) {
-  return <div className="flex items-center gap-2"><Icon className="h-4 w-4 text-muted-foreground" /><span>{label}</span></div>;
+  return (
+    <div className="flex items-center gap-2">
+      <Icon className="h-4 w-4 text-muted-foreground" />
+      <span>{label}</span>
+    </div>
+  );
 }
 
 function Stars({ value }: { value: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((n) => (
-        <Star key={n} className={`h-4 w-4 ${n <= Math.round(value) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}`} />
+        <Star
+          key={n}
+          className={`h-4 w-4 ${n <= Math.round(value) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}`}
+        />
       ))}
     </div>
   );
@@ -283,7 +406,11 @@ function ReviewsSection({ vehicleId }: { vehicleId: string }) {
   const submit = useMutation({
     mutationFn: () => submitFn({ data: { vehicleId, rating, comment: comment || undefined } }),
     onSuccess: (res: any) => {
-      toast.success(res?.updated ? "Review updated — pending approval." : "Review submitted — pending approval.");
+      toast.success(
+        res?.updated
+          ? "Review updated — pending approval."
+          : "Review submitted — pending approval.",
+      );
       setComment("");
       qc.invalidateQueries({ queryKey: ["mobility-review-status", vehicleId] });
       qc.invalidateQueries({ queryKey: ["mobility-reviews", vehicleId] });
@@ -301,7 +428,8 @@ function ReviewsSection({ vehicleId }: { vehicleId: string }) {
           <span>Guest reviews</span>
           {list.length > 0 && (
             <span className="flex items-center gap-2 text-sm font-normal text-muted-foreground">
-              <Stars value={avg} /> {avg.toFixed(1)} · {list.length} review{list.length === 1 ? "" : "s"}
+              <Stars value={avg} /> {avg.toFixed(1)} · {list.length} review
+              {list.length === 1 ? "" : "s"}
             </span>
           )}
         </CardTitle>
@@ -310,14 +438,18 @@ function ReviewsSection({ vehicleId }: { vehicleId: string }) {
         {reviews.isLoading ? (
           <LoadingState label="Loading reviews…" />
         ) : list.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No reviews yet. Be the first after your trip.</p>
+          <p className="text-sm text-muted-foreground">
+            No reviews yet. Be the first after your trip.
+          </p>
         ) : (
           <div className="space-y-3">
             {list.map((r: any) => (
               <div key={r.id} className="rounded-md border p-3">
                 <div className="flex items-center justify-between">
                   <Stars value={r.rating} />
-                  <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(r.created_at).toLocaleDateString()}
+                  </span>
                 </div>
                 {r.comment && <p className="mt-1 text-sm">{r.comment}</p>}
                 {r.response && (
@@ -338,14 +470,30 @@ function ReviewsSection({ vehicleId }: { vehicleId: string }) {
             </div>
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((n) => (
-                <button key={n} type="button" onClick={() => setRating(n)} aria-label={`${n} stars`}>
-                  <Star className={`h-6 w-6 ${n <= rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}`} />
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setRating(n)}
+                  aria-label={`${n} stars`}
+                >
+                  <Star
+                    className={`h-6 w-6 ${n <= rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}`}
+                  />
                 </button>
               ))}
             </div>
-            <Textarea rows={3} placeholder="Share your experience…" value={comment} onChange={(e) => setComment(e.target.value)} />
+            <Textarea
+              rows={3}
+              placeholder="Share your experience…"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
             <Button size="sm" onClick={() => submit.mutate()} disabled={submit.isPending}>
-              {submit.isPending ? "Submitting…" : status.data.review ? "Update review" : "Submit review"}
+              {submit.isPending
+                ? "Submitting…"
+                : status.data.review
+                  ? "Update review"
+                  : "Submit review"}
             </Button>
             {status.data.review?.status === "pending" && (
               <p className="text-xs text-muted-foreground">Your review is pending approval.</p>
@@ -353,7 +501,9 @@ function ReviewsSection({ vehicleId }: { vehicleId: string }) {
           </div>
         )}
         {signedIn && status.data && !status.data.eligible && (
-          <p className="text-xs text-muted-foreground">Reviews open after your booking is completed.</p>
+          <p className="text-xs text-muted-foreground">
+            Reviews open after your booking is completed.
+          </p>
         )}
       </CardContent>
     </Card>

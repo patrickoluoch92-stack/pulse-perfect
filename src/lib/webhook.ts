@@ -66,7 +66,13 @@ export async function verifyV1Signature(opts: {
   maxAgeSec?: number;
   now?: () => number;
 }): Promise<boolean> {
-  const { secret, body, signatureHeader, maxAgeSec = 300, now = () => Math.floor(Date.now() / 1000) } = opts;
+  const {
+    secret,
+    body,
+    signatureHeader,
+    maxAgeSec = 300,
+    now = () => Math.floor(Date.now() / 1000),
+  } = opts;
   if (!signatureHeader) return false;
   const parts = Object.fromEntries(
     signatureHeader.split(",").map((p) => p.trim().split("=") as [string, string]),
@@ -101,7 +107,10 @@ const defaultSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 
 export async function deliverWithRetry(opts: DeliverOptions): Promise<DeliveryResult> {
   const {
-    url, secret, event, payload,
+    url,
+    secret,
+    event,
+    payload,
     maxAttempts = 3,
     baseDelayMs = 250,
     timeoutMs = 5_000,
@@ -133,9 +142,10 @@ export async function deliverWithRetry(opts: DeliverOptions): Promise<DeliveryRe
         method: "POST",
         headers,
         body,
-        signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal
-          ? (AbortSignal as { timeout: (ms: number) => AbortSignal }).timeout(timeoutMs)
-          : undefined,
+        signal:
+          typeof AbortSignal !== "undefined" && "timeout" in AbortSignal
+            ? (AbortSignal as { timeout: (ms: number) => AbortSignal }).timeout(timeoutMs)
+            : undefined,
       });
       finalStatus = res.status;
       attempts.push({ attempt: i, ok: res.ok, status: res.status });

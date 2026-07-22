@@ -47,7 +47,9 @@ export const Route = createFileRoute("/marketplace/$county")({
     <div className="mx-auto max-w-2xl p-12 text-center">
       <h1 className="text-2xl font-semibold">Could not load county</h1>
       <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
-      <button onClick={reset} className="mt-4 text-primary underline">Retry</button>
+      <button onClick={reset} className="mt-4 text-primary underline">
+        Retry
+      </button>
     </div>
   ),
   component: CountyPage,
@@ -79,7 +81,10 @@ function CountyPage() {
 
       <section className="mx-auto max-w-6xl px-4 py-10">
         {data.items.length === 0 ? (
-          <EmptyState title="No listings yet" description={`No listings yet in ${data.county.name}. Check back soon.`} />
+          <EmptyState
+            title="No listings yet"
+            description={`No listings yet in ${data.county.name}. Check back soon.`}
+          />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {data.items.map((p) => (

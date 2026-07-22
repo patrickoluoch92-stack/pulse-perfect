@@ -6,7 +6,7 @@ export type ICSEvent = {
   uid: string;
   summary: string | null;
   startsOn: string; // YYYY-MM-DD
-  endsOn: string;   // YYYY-MM-DD (exclusive)
+  endsOn: string; // YYYY-MM-DD (exclusive)
 };
 
 function unfoldLines(text: string): string[] {
@@ -80,11 +80,7 @@ function fold(line: string): string {
   return parts.join("\r\n");
 }
 
-export function buildICS(opts: {
-  prodId: string;
-  calName: string;
-  events: ICSEvent[];
-}): string {
+export function buildICS(opts: { prodId: string; calName: string; events: ICSEvent[] }): string {
   const lines: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -92,7 +88,10 @@ export function buildICS(opts: {
     "CALSCALE:GREGORIAN",
     `X-WR-CALNAME:${opts.calName}`,
   ];
-  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const stamp = new Date()
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
   for (const e of opts.events) {
     lines.push("BEGIN:VEVENT");
     lines.push(`UID:${e.uid}`);

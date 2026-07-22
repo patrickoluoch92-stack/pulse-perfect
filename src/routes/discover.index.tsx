@@ -53,7 +53,9 @@ function DiscoverIndex() {
             Discover accommodation across Kenya
           </h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
-            Hotels, lodges, guest houses, camps, apartments and holiday homes — continuously discovered from public tourism sources and enriched with AI. Own a business here? Claim it in minutes.
+            Hotels, lodges, guest houses, camps, apartments and holiday homes — continuously
+            discovered from public tourism sources and enriched with AI. Own a business here? Claim
+            it in minutes.
           </p>
           <form
             className="mt-6 flex max-w-xl gap-2"
@@ -86,11 +88,7 @@ function DiscoverIndex() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(listing.data?.rows ?? []).map((r: any) => (
             <div key={r.id} className="group relative">
-              <Link
-                to="/discover/$slug"
-                params={{ slug: r.slug }}
-                aria-label={`View ${r.name}`}
-              >
+              <Link to="/discover/$slug" params={{ slug: r.slug }} aria-label={`View ${r.name}`}>
                 <Card className="h-full pb-14 transition hover:shadow-md">
                   <CardHeader>
                     <CardTitle className="line-clamp-2 text-base">{r.name}</CardTitle>
@@ -126,7 +124,9 @@ function DiscoverIndex() {
             </div>
           ))}
           {listing.isLoading && (
-            <div className="col-span-full"><LoadingState label="Loading discoveries…" /></div>
+            <div className="col-span-full">
+              <LoadingState label="Loading discoveries…" />
+            </div>
           )}
           {!listing.isLoading && (listing.data?.rows?.length ?? 0) === 0 && (
             <div className="col-span-full">

@@ -10,11 +10,9 @@ import { aiEmbed, aiEmbedBatch, DEFAULT_EMBED_MODEL } from "@/lib/ai.server";
 import { createHash } from "crypto";
 
 function publicClient() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
 
 /** Compose the text a property is embedded from. Keep stable so hashes stay meaningful. */
@@ -30,7 +28,9 @@ export function composePropertyEmbeddingText(p: {
 }): string {
   const parts: string[] = [];
   if (p.name) parts.push(p.name);
-  const cat = [p.parent_category_slug, p.child_category_slug, p.category].filter(Boolean).join(" / ");
+  const cat = [p.parent_category_slug, p.child_category_slug, p.category]
+    .filter(Boolean)
+    .join(" / ");
   if (cat) parts.push(`Category: ${cat}`);
   const loc = [p.town, p.county_code].filter(Boolean).join(", ");
   if (loc) parts.push(`Location: ${loc}`);
@@ -103,7 +103,10 @@ const BackfillInput = z.object({
 });
 
 async function assertAdmin(context: { supabase: any; userId: string }) {
-  const { data } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+  const { data } = await context.supabase.rpc("has_role", {
+    _user_id: context.userId,
+    _role: "admin",
+  });
   if (!data) throw new Error("Forbidden: admin only");
 }
 
@@ -112,7 +115,12 @@ export const backfillMarketplaceEmbeddings = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => BackfillInput.parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    await enforceRateLimit({ bucket: "embed_backfill", userId: context.userId, limit: 10, windowSec: 60 });
+    await enforceRateLimit({
+      bucket: "embed_backfill",
+      userId: context.userId,
+      limit: 10,
+      windowSec: 60,
+    });
     return runMarketplaceBackfill(data.batchSize, data.force);
   });
 

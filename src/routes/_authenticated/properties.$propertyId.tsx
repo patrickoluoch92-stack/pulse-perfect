@@ -48,7 +48,12 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/properties/$propertyId")({
-  head: () => ({ meta: authPageMeta({ title: "Property", description: "Manage units, photos, amenities, and settings for this property." }) }),
+  head: () => ({
+    meta: authPageMeta({
+      title: "Property",
+      description: "Manage units, photos, amenities, and settings for this property.",
+    }),
+  }),
   component: PropertyDetailPage,
 });
 
@@ -120,19 +125,31 @@ function PropertyDetailPage() {
 
   const createMut = useMutation({
     mutationFn: (data: FormValues) => createFn({ data: { ...data, propertyId } }),
-    onSuccess: () => { toast.success("Unit created"); setOpen(false); invalidate(); },
+    onSuccess: () => {
+      toast.success("Unit created");
+      setOpen(false);
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const updateMut = useMutation({
     mutationFn: (data: FormValues & { id: string }) => updateFn({ data }),
-    onSuccess: () => { toast.success("Unit updated"); setOpen(false); invalidate(); },
+    onSuccess: () => {
+      toast.success("Unit updated");
+      setOpen(false);
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => deleteFn({ data: { id } }),
-    onSuccess: () => { toast.success("Unit deleted"); setDeleting(null); invalidate(); },
+    onSuccess: () => {
+      toast.success("Unit deleted");
+      setDeleting(null);
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -296,10 +313,14 @@ function PropertyDetailPage() {
                   value={values.type}
                   onValueChange={(t) => setValues((v) => ({ ...v, type: t as FormValues["type"] }))}
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {UNIT_TYPES.map((t) => (
-                      <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>
+                      <SelectItem key={t} value={t}>
+                        {t.replace("_", " ")}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -307,12 +328,18 @@ function PropertyDetailPage() {
               <Field label="Status" error={errors.status}>
                 <Select
                   value={values.status}
-                  onValueChange={(s) => setValues((v) => ({ ...v, status: s as FormValues["status"] }))}
+                  onValueChange={(s) =>
+                    setValues((v) => ({ ...v, status: s as FormValues["status"] }))
+                  }
                 >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     {UNIT_STATUSES.map((s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

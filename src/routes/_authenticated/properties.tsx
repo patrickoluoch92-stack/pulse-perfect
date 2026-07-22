@@ -46,7 +46,12 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/properties")({
-  head: () => ({ meta: authPageMeta({ title: "Properties", description: "All your hotels, lodges, and rentals in one place." }) }),
+  head: () => ({
+    meta: authPageMeta({
+      title: "Properties",
+      description: "All your hotels, lodges, and rentals in one place.",
+    }),
+  }),
   component: PropertiesPage,
 });
 
@@ -254,7 +259,9 @@ function PropertiesPage() {
           <DialogHeader>
             <DialogTitle>{editing ? "Edit property" : "New property"}</DialogTitle>
             <DialogDescription>
-              {editing ? "Update the details of this property." : "Add a new property to your workspace."}
+              {editing
+                ? "Update the details of this property."
+                : "Add a new property to your workspace."}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
@@ -271,10 +278,14 @@ function PropertiesPage() {
                 value={values.type}
                 onValueChange={(t) => setValues((v) => ({ ...v, type: t as FormValues["type"] }))}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {PROPERTY_TYPES.map((t) => (
-                    <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>
+                    <SelectItem key={t} value={t}>
+                      {t.replace("_", " ")}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -335,7 +346,8 @@ function PropertiesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {deleting?.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This permanently removes the property and all of its units. This action cannot be undone.
+              This permanently removes the property and all of its units. This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -374,4 +386,3 @@ function Field({
     </div>
   );
 }
-

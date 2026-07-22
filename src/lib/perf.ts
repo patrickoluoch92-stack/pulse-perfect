@@ -27,12 +27,21 @@ function send(metric: Metric) {
   try {
     const body = JSON.stringify({ ...metric, url: location.pathname, ts: Date.now() });
     if (navigator.sendBeacon) {
-      navigator.sendBeacon("/api/public/web-vitals", new Blob([body], { type: "application/json" }));
+      navigator.sendBeacon(
+        "/api/public/web-vitals",
+        new Blob([body], { type: "application/json" }),
+      );
     } else {
-      fetch("/api/public/web-vitals", { method: "POST", body, keepalive: true, headers: { "content-type": "application/json" } }).catch(() => {});
+      fetch("/api/public/web-vitals", {
+        method: "POST",
+        body,
+        keepalive: true,
+        headers: { "content-type": "application/json" },
+      }).catch(() => {});
     }
-    // eslint-disable-next-line no-console
-    if (import.meta.env.DEV) console.debug("[perf]", metric.name, Math.round(metric.value), metric.rating);
+
+    if (import.meta.env.DEV)
+      console.debug("[perf]", metric.name, Math.round(metric.value), metric.rating);
   } catch {
     /* ignore */
   }
@@ -47,15 +56,27 @@ export function initWebVitals() {
 
   // TTFB + FCP via Navigation/Paint entries.
   try {
-    const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
-    if (nav) send({ name: "TTFB", value: nav.responseStart, id: uid(), rating: rate("TTFB", nav.responseStart) });
-  } catch {}
+    const nav = performance.getEntriesByType("navigation")[0] as
+      | PerformanceNavigationTiming
+      | undefined;
+    if (nav)
+      send({
+        name: "TTFB",
+        value: nav.responseStart,
+        id: uid(),
+        rating: rate("TTFB", nav.responseStart),
+      });
+  } catch {
+    /* ignore */
+  }
 
   const observe = (type: string, cb: (entries: PerformanceEntry[]) => void) => {
     try {
       const obs = new PerformanceObserver((list) => cb(list.getEntries()));
       obs.observe({ type, buffered: true } as PerformanceObserverInit);
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   };
 
   observe("paint", (entries) => {
@@ -74,14 +95,18 @@ export function initWebVitals() {
 
   let clsValue = 0;
   observe("layout-shift", (entries) => {
-    for (const e of entries as Array<PerformanceEntry & { value: number; hadRecentInput: boolean }>) {
+    for (const e of entries as Array<
+      PerformanceEntry & { value: number; hadRecentInput: boolean }
+    >) {
       if (!e.hadRecentInput) clsValue += e.value;
     }
   });
 
   let inpValue = 0;
   observe("event", (entries) => {
-    for (const e of entries as Array<PerformanceEntry & { duration: number; interactionId?: number }>) {
+    for (const e of entries as Array<
+      PerformanceEntry & { duration: number; interactionId?: number }
+    >) {
       if (e.interactionId && e.duration > inpValue) inpValue = e.duration;
     }
   });

@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { startMpesaCheckout, getMpesaCheckoutStatus } from "@/lib/mpesa.functions";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -63,7 +70,8 @@ export function MpesaCheckoutDialog({ open, onOpenChange, orgId, plan, amountKes
           <DialogTitle>Pay with M-PESA</DialogTitle>
           <DialogDescription>
             You'll be charged <strong>KES {amountKes.toLocaleString()}</strong> for one month of the{" "}
-            <span className="capitalize">{plan}</span> plan. Approve the prompt on your phone to complete payment.
+            <span className="capitalize">{plan}</span> plan. Approve the prompt on your phone to
+            complete payment.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">

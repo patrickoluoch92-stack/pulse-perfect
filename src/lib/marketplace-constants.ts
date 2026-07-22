@@ -115,7 +115,6 @@ export const OCCUPANCY_STATUSES = [
   { value: "under_offer", label: "Under offer" },
 ] as const;
 
-
 // Experiences / activities available AT a property (not property categories themselves).
 export const ACTIVITIES = [
   "Wildlife safari",

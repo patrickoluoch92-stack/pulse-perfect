@@ -20,11 +20,14 @@ export const getWorkspaceContext = createServerFn({ method: "GET" })
     const orgs = (memberships ?? [])
       .map((m) => m.organizations && { ...m.organizations, role: m.role })
       .filter(Boolean) as Array<{
-        id: string; name: string; slug: string; plan: string; role: string;
-      }>;
+      id: string;
+      name: string;
+      slug: string;
+      plan: string;
+      role: string;
+    }>;
 
-    const currentOrg =
-      orgs.find((o) => o.id === profile?.current_org_id) ?? orgs[0] ?? null;
+    const currentOrg = orgs.find((o) => o.id === profile?.current_org_id) ?? orgs[0] ?? null;
 
     const { data: adminRole } = await supabase
       .from("user_roles")
@@ -36,14 +39,16 @@ export const getWorkspaceContext = createServerFn({ method: "GET" })
     return { profile, organizations: orgs, currentOrg, isPlatformAdmin: Boolean(adminRole) };
   });
 
-
 export const getDashboardStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { orgId: string }) => data)
   .handler(async ({ context, data }) => {
     const { supabase } = context;
     const [properties, units] = await Promise.all([
-      supabase.from("properties").select("id", { count: "exact", head: true }).eq("org_id", data.orgId),
+      supabase
+        .from("properties")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", data.orgId),
       supabase.from("units").select("id, status", { count: "exact" }).eq("org_id", data.orgId),
     ]);
 

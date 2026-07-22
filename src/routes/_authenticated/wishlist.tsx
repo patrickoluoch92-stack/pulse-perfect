@@ -20,7 +20,9 @@ export const Route = createFileRoute("/_authenticated/wishlist")({
   errorComponent: ({ error, reset }) => (
     <div className="p-8">
       <p className="text-destructive">{error.message}</p>
-      <Button onClick={reset} className="mt-3">Retry</Button>
+      <Button onClick={reset} className="mt-3">
+        Retry
+      </Button>
     </div>
   ),
   notFoundComponent: () => <div className="p-8">Not found</div>,
@@ -55,15 +57,21 @@ function WishlistPage() {
           <CardContent className="grid grid-cols-3 gap-4 text-center">
             <div>
               <p className="text-xs uppercase text-muted-foreground">Points</p>
-              <p className="mt-1 font-display text-2xl">{loyaltyQ.data?.account?.points_balance ?? 0}</p>
+              <p className="mt-1 font-display text-2xl">
+                {loyaltyQ.data?.account?.points_balance ?? 0}
+              </p>
             </div>
             <div>
               <p className="text-xs uppercase text-muted-foreground">Tier</p>
-              <p className="mt-1 font-display text-2xl capitalize">{loyaltyQ.data?.account?.tier ?? "bronze"}</p>
+              <p className="mt-1 font-display text-2xl capitalize">
+                {loyaltyQ.data?.account?.tier ?? "bronze"}
+              </p>
             </div>
             <div>
               <p className="text-xs uppercase text-muted-foreground">Lifetime</p>
-              <p className="mt-1 font-display text-2xl">{loyaltyQ.data?.account?.lifetime_points ?? 0}</p>
+              <p className="mt-1 font-display text-2xl">
+                {loyaltyQ.data?.account?.lifetime_points ?? 0}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -80,7 +88,11 @@ function WishlistPage() {
                 title="Nothing saved yet"
                 description="Browse the marketplace and tap the heart to save favourites."
                 icon={Heart}
-                action={<Button asChild size="sm"><Link to="/listings">Browse listings</Link></Button>}
+                action={
+                  <Button asChild size="sm">
+                    <Link to="/listings">Browse listings</Link>
+                  </Button>
+                }
               />
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -90,20 +102,32 @@ function WishlistPage() {
                   return (
                     <div key={it.id} className="overflow-hidden rounded-lg border">
                       {p.cover_image_url ? (
-                        <img src={p.cover_image_url} alt={p.title} className="aspect-video w-full object-cover" />
+                        <img
+                          src={p.cover_image_url}
+                          alt={p.title}
+                          className="aspect-video w-full object-cover"
+                        />
                       ) : (
                         <div className="aspect-video w-full bg-muted" />
                       )}
                       <div className="space-y-2 p-3">
                         <p className="font-medium">{p.title}</p>
                         <p className="text-xs text-muted-foreground">
-                          {p.town ?? p.county_code} · from {p.currency ?? "KES"} {p.price_from ?? "—"}
+                          {p.town ?? p.county_code} · from {p.currency ?? "KES"}{" "}
+                          {p.price_from ?? "—"}
                         </p>
                         <div className="flex gap-2">
                           <Button asChild size="sm" variant="outline" className="flex-1">
-                            <Link to="/discover/$slug" params={{ slug: p.slug }}>View</Link>
+                            <Link to="/discover/$slug" params={{ slug: p.slug }}>
+                              View
+                            </Link>
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={() => remove(p.id)} aria-label="Remove">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => remove(p.id)}
+                            aria-label="Remove"
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>

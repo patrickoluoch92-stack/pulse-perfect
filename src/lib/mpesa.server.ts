@@ -36,10 +36,9 @@ export async function getMpesaAccessToken(): Promise<string> {
   const key = getEnv("MPESA_CONSUMER_KEY");
   const secret = getEnv("MPESA_CONSUMER_SECRET");
   const auth = Buffer.from(`${key}:${secret}`).toString("base64");
-  const res = await fetch(
-    `${getMpesaBaseUrl()}/oauth/v1/generate?grant_type=client_credentials`,
-    { headers: { Authorization: `Basic ${auth}` } },
-  );
+  const res = await fetch(`${getMpesaBaseUrl()}/oauth/v1/generate?grant_type=client_credentials`, {
+    headers: { Authorization: `Basic ${auth}` },
+  });
   if (!res.ok) throw new Error(`M-PESA OAuth failed: ${res.status} ${await res.text()}`);
   const json = (await res.json()) as { access_token: string };
   return json.access_token;
@@ -71,9 +70,9 @@ export function normalizeMsisdn(input: string): string {
 
 export interface StkPushArgs {
   amountKes: number; // integer KES
-  phone: string;     // any format, will be normalized
+  phone: string; // any format, will be normalized
   accountReference: string; // shown to user; max 12 chars
-  description: string;      // max 13 chars
+  description: string; // max 13 chars
 }
 
 export interface StkPushResult {
@@ -114,13 +113,15 @@ export async function initiateStkPush(args: StkPushArgs): Promise<StkPushResult>
   });
   const json = await res.json();
   if (!res.ok || json.ResponseCode !== "0") {
-    throw new Error(`STK push failed: ${json.errorMessage || json.ResponseDescription || res.statusText}`);
+    throw new Error(
+      `STK push failed: ${json.errorMessage || json.ResponseDescription || res.statusText}`,
+    );
   }
   return json as StkPushResult;
 }
 
 /** Plan → KES amount. Approximate USD→KES at ~130 KES/USD. */
 export const MPESA_PLAN_PRICES: Record<"professional" | "business", number> = {
-  professional: 6500,  // ≈ $49
-  business: 19500,     // ≈ $149
+  professional: 6500, // ≈ $49
+  business: 19500, // ≈ $149
 };

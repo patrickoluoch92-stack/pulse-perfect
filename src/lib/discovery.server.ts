@@ -106,7 +106,6 @@ RULES:
 - Return per-record confidence 0-1.
 - Only return items that clearly represent a real, identifiable property or business. Skip advertisements, booking-site listings and duplicates.`;
 
-
 function isHostAllowed(url: string): boolean {
   try {
     const host = new URL(url).hostname.toLowerCase().replace(/^www\./, "");
@@ -131,7 +130,10 @@ async function callAI(text: string): Promise<{ businesses: any[] }> {
     model: MODEL,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: `Extract Kenyan accommodation businesses from this directory page:\n\n${text}` },
+      {
+        role: "user",
+        content: `Extract Kenyan accommodation businesses from this directory page:\n\n${text}`,
+      },
     ],
     jsonSchema: { name: EXTRACT_SCHEMA.name, schema: EXTRACT_SCHEMA.schema as any },
   });
@@ -167,7 +169,9 @@ export async function crawlSource(sourceId: string): Promise<{
     if (!isHostAllowed(source.url)) throw new Error("host blocked");
 
     const resp = await fetch(source.url, {
-      headers: { "User-Agent": "HostPulseDiscoveryBot/1.0 (+https://hostpulse-perfection.lovable.app)" },
+      headers: {
+        "User-Agent": "HostPulseDiscoveryBot/1.0 (+https://hostpulse-perfection.lovable.app)",
+      },
       signal: AbortSignal.timeout(20000),
     });
     if (!resp.ok) throw new Error(`fetch ${source.url} → ${resp.status}`);
@@ -176,7 +180,8 @@ export async function crawlSource(sourceId: string): Promise<{
     if (text.length < 200) throw new Error("page too small to extract");
 
     const { businesses } = await callAI(text);
-    let inserted = 0, updated = 0;
+    let inserted = 0,
+      updated = 0;
 
     for (const b of businesses ?? []) {
       if (!b?.name || typeof b.name !== "string") continue;
@@ -276,7 +281,9 @@ export async function crawlNextSource(): Promise<{ sourceId: string | null; resu
 export async function rescoreAllPending(): Promise<{ processed: number }> {
   const { data } = await supabaseAdmin
     .from("discovered_properties")
-    .select("id, name, property_type, county_code, town, address, latitude, longitude, phone, email, website, amenities, ai_description, status, promoted_property_id")
+    .select(
+      "id, name, property_type, county_code, town, address, latitude, longitude, phone, email, website, amenities, ai_description, status, promoted_property_id",
+    )
     .in("status", ["pending", "approved", "claimed"])
     .limit(500);
   let processed = 0;

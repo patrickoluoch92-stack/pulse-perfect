@@ -8,7 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 import {
-  getMySubscription, listBillingHistory, cancelSubscription, resumeSubscription,
+  getMySubscription,
+  listBillingHistory,
+  cancelSubscription,
+  resumeSubscription,
 } from "@/lib/subscription.functions";
 import { formatKES } from "@/lib/format";
 import { EmptyState } from "@/components/ui/states";
@@ -29,22 +32,32 @@ function SubscriptionPage() {
   const resumeFn = useServerFn(resumeSubscription);
 
   const subQ = useQuery({
-    enabled: !!orgId, queryKey: ["my-sub", orgId],
+    enabled: !!orgId,
+    queryKey: ["my-sub", orgId],
     queryFn: () => subFn({ data: { orgId: orgId! } }),
   });
   const histQ = useQuery({
-    enabled: !!orgId, queryKey: ["billing-hist", orgId],
+    enabled: !!orgId,
+    queryKey: ["billing-hist", orgId],
     queryFn: () => histFn({ data: { orgId: orgId! } }),
   });
 
   const cancelM = useMutation({
     mutationFn: (atPeriodEnd: boolean) => cancelFn({ data: { orgId: orgId!, atPeriodEnd } }),
-    onSuccess: () => { toast.success("Subscription cancelled"); subQ.refetch(); histQ.refetch(); },
+    onSuccess: () => {
+      toast.success("Subscription cancelled");
+      subQ.refetch();
+      histQ.refetch();
+    },
     onError: (e: any) => toast.error(e.message),
   });
   const resumeM = useMutation({
     mutationFn: () => resumeFn({ data: { orgId: orgId! } }),
-    onSuccess: () => { toast.success("Subscription resumed"); subQ.refetch(); histQ.refetch(); },
+    onSuccess: () => {
+      toast.success("Subscription resumed");
+      subQ.refetch();
+      histQ.refetch();
+    },
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -58,21 +71,32 @@ function SubscriptionPage() {
     <div className="mx-auto max-w-5xl space-y-6 p-6">
       <header>
         <h1 className="text-3xl font-semibold tracking-tight">Subscription</h1>
-        <p className="text-muted-foreground">Manage your HostPulse plan and view billing history.</p>
+        <p className="text-muted-foreground">
+          Manage your HostPulse plan and view billing history.
+        </p>
       </header>
 
       <Card>
-        <CardHeader><CardTitle className="text-lg">Current plan</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-lg">Current plan</CardTitle>
+        </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="text-2xl font-semibold">{plan?.name ?? subQ.data?.effectivePlanCode ?? "—"}</div>
-            {s?.status && <Badge variant={s.status === "active" ? "default" : "secondary"}>{s.status}</Badge>}
+            <div className="text-2xl font-semibold">
+              {plan?.name ?? subQ.data?.effectivePlanCode ?? "—"}
+            </div>
+            {s?.status && (
+              <Badge variant={s.status === "active" ? "default" : "secondary"}>{s.status}</Badge>
+            )}
             {s?.cancel_at_period_end && <Badge variant="destructive">Cancels at period end</Badge>}
           </div>
           {plan && (
             <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
               <Metric label="Properties" value={plan.property_limit ?? "Unlimited"} />
-              <Metric label="Photos / property" value={plan.photo_limit_per_property ?? "Unlimited"} />
+              <Metric
+                label="Photos / property"
+                value={plan.photo_limit_per_property ?? "Unlimited"}
+              />
               <Metric label="Team members" value={plan.team_member_limit ?? "Unlimited"} />
               <Metric label="AI calls / month" value={plan.ai_calls_per_month ?? "Unlimited"} />
             </div>
@@ -84,25 +108,51 @@ function SubscriptionPage() {
           )}
           <div className="flex flex-wrap gap-2">
             {!s || s.status !== "active" ? (
-              <Button asChild><Link to="/pricing">Choose a plan</Link></Button>
+              <Button asChild>
+                <Link to="/pricing">Choose a plan</Link>
+              </Button>
             ) : s.cancel_at_period_end ? (
-              <Button onClick={() => resumeM.mutate()} disabled={resumeM.isPending}>Resume subscription</Button>
+              <Button onClick={() => resumeM.mutate()} disabled={resumeM.isPending}>
+                Resume subscription
+              </Button>
             ) : (
               <>
-                <Button variant="outline" onClick={() => setConfirm("period")}>Cancel at period end</Button>
-                <Button variant="destructive" onClick={() => setConfirm("now")}>Cancel immediately</Button>
+                <Button variant="outline" onClick={() => setConfirm("period")}>
+                  Cancel at period end
+                </Button>
+                <Button variant="destructive" onClick={() => setConfirm("now")}>
+                  Cancel immediately
+                </Button>
               </>
             )}
-            <Button variant="secondary" asChild><Link to="/pricing">Change plan</Link></Button>
+            <Button variant="secondary" asChild>
+              <Link to="/pricing">Change plan</Link>
+            </Button>
           </div>
           {confirm && (
             <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm">
-              <p>Are you sure you want to {confirm === "now" ? "cancel immediately (lose access now)" : "cancel at the end of the current period"}?</p>
+              <p>
+                Are you sure you want to{" "}
+                {confirm === "now"
+                  ? "cancel immediately (lose access now)"
+                  : "cancel at the end of the current period"}
+                ?
+              </p>
               <div className="mt-2 flex gap-2">
-                <Button size="sm" variant="destructive"
-                  onClick={() => { cancelM.mutate(confirm === "period"); setConfirm(null); }}
-                  disabled={cancelM.isPending}>Confirm</Button>
-                <Button size="sm" variant="ghost" onClick={() => setConfirm(null)}>Back</Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => {
+                    cancelM.mutate(confirm === "period");
+                    setConfirm(null);
+                  }}
+                  disabled={cancelM.isPending}
+                >
+                  Confirm
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setConfirm(null)}>
+                  Back
+                </Button>
               </div>
             </div>
           )}
@@ -110,17 +160,21 @@ function SubscriptionPage() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-lg">Billing history</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-lg">Billing history</CardTitle>
+        </CardHeader>
         <CardContent className="space-y-3">
-          {(histQ.data?.transactions ?? []).length === 0 && (
-            <EmptyState title="No payments yet" />
-          )}
+          {(histQ.data?.transactions ?? []).length === 0 && <EmptyState title="No payments yet" />}
           {(histQ.data?.transactions ?? []).map((tx: any) => (
-            <div key={tx.id} className="flex items-center justify-between rounded-md border p-3 text-sm">
+            <div
+              key={tx.id}
+              className="flex items-center justify-between rounded-md border p-3 text-sm"
+            >
               <div>
                 <div className="font-medium">{formatKES(Number(tx.amount ?? 0))}</div>
                 <div className="text-xs text-muted-foreground">
-                  {tx.mpesa_receipt_number ?? tx.status} · {new Date(tx.transaction_date ?? tx.created_at).toLocaleString()}
+                  {tx.mpesa_receipt_number ?? tx.status} ·{" "}
+                  {new Date(tx.transaction_date ?? tx.created_at).toLocaleString()}
                 </div>
               </div>
               <Badge variant={tx.status === "SUCCESS" ? "default" : "secondary"}>{tx.status}</Badge>
@@ -130,15 +184,20 @@ function SubscriptionPage() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-lg">Activity</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-lg">Activity</CardTitle>
+        </CardHeader>
         <CardContent className="space-y-2 text-sm">
-          {(histQ.data?.events ?? []).length === 0 && (
-            <EmptyState title="No activity yet" />
-          )}
+          {(histQ.data?.events ?? []).length === 0 && <EmptyState title="No activity yet" />}
           {(histQ.data?.events ?? []).map((ev: any) => (
             <div key={ev.id} className="flex justify-between border-b py-2 last:border-b-0">
-              <span>{ev.event_type}{ev.to_plan ? ` → ${ev.to_plan}` : ""}</span>
-              <span className="text-muted-foreground">{new Date(ev.created_at).toLocaleString()}</span>
+              <span>
+                {ev.event_type}
+                {ev.to_plan ? ` → ${ev.to_plan}` : ""}
+              </span>
+              <span className="text-muted-foreground">
+                {new Date(ev.created_at).toLocaleString()}
+              </span>
             </div>
           ))}
         </CardContent>

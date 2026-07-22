@@ -2,8 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  ArrowLeft, Sparkles, Building2, ShieldCheck, MapPin, Gauge,
-  TrendingUp, AlertTriangle, CheckCircle2,
+  ArrowLeft,
+  Sparkles,
+  Building2,
+  ShieldCheck,
+  MapPin,
+  Gauge,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle2,
 } from "lucide-react";
 
 import { authPageMeta } from "@/lib/route-meta";
@@ -18,7 +25,8 @@ export const Route = createFileRoute("/_authenticated/listings/intelligence")({
   head: () => ({
     meta: authPageMeta({
       title: "Property Intelligence",
-      description: "Real-time quality scores, verification status, geographic reach and AI recommendations across your portfolio.",
+      description:
+        "Real-time quality scores, verification status, geographic reach and AI recommendations across your portfolio.",
     }),
   }),
   component: PropertyIntelligencePage,
@@ -44,20 +52,27 @@ function PropertyIntelligencePage() {
     <DashboardShell>
       <div className="mx-auto max-w-6xl space-y-6 p-6">
         <div>
-          <Link to="/listings" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/listings"
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="mr-1 h-4 w-4" /> All listings
           </Link>
           <h1 className="mt-2 flex items-center gap-2 font-display text-3xl font-semibold">
             <Sparkles className="h-7 w-7 text-ai" /> Property Intelligence
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            AI-powered quality, verification, geographic reach and search performance across your portfolio.
+            AI-powered quality, verification, geographic reach and search performance across your
+            portfolio.
           </p>
         </div>
 
         {intel.isLoading && <LoadingState label="Analyzing your portfolio…" />}
         {intel.isError && (
-          <EmptyState title="Could not load intelligence" description={(intel.error as Error)?.message ?? "Try again shortly."} />
+          <EmptyState
+            title="Could not load intelligence"
+            description={(intel.error as Error)?.message ?? "Try again shortly."}
+          />
         )}
 
         {d && d.totals.listings === 0 && (
@@ -70,16 +85,51 @@ function PropertyIntelligencePage() {
         {d && d.totals.listings > 0 && (
           <>
             <div className="grid gap-4 md:grid-cols-4">
-              <Kpi icon={Building2} label="Listings" value={String(d.totals.listings)} hint={`${d.totals.published} published`} />
-              <Kpi icon={ShieldCheck} label="Verified" value={String(d.totals.verified)} hint={`${d.totals.submitted} awaiting review`} />
-              <Kpi icon={Gauge} label="Avg quality" value={`${d.quality.avg}%`} hint={`${d.quality.high} strong · ${d.quality.low} weak`} />
-              <Kpi icon={MapPin} label="Reach" value={`${d.geo.counties} counties`} hint={`${d.geo.towns} towns · ${d.geo.withCoords} mapped`} />
+              <Kpi
+                icon={Building2}
+                label="Listings"
+                value={String(d.totals.listings)}
+                hint={`${d.totals.published} published`}
+              />
+              <Kpi
+                icon={ShieldCheck}
+                label="Verified"
+                value={String(d.totals.verified)}
+                hint={`${d.totals.submitted} awaiting review`}
+              />
+              <Kpi
+                icon={Gauge}
+                label="Avg quality"
+                value={`${d.quality.avg}%`}
+                hint={`${d.quality.high} strong · ${d.quality.low} weak`}
+              />
+              <Kpi
+                icon={MapPin}
+                label="Reach"
+                value={`${d.geo.counties} counties`}
+                hint={`${d.geo.towns} towns · ${d.geo.withCoords} mapped`}
+              />
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
-              <Kpi icon={TrendingUp} label="Bookings (30d)" value={String(d.bookings.last30)} hint={`${d.bookings.upcoming} upcoming`} />
-              <Kpi icon={TrendingUp} label="Revenue (30d)" value={`KES ${d.bookings.revenueKes30.toLocaleString()}`} hint="Confirmed + completed" />
-              <Kpi icon={Sparkles} label="AI search" value={`${d.search.queriesLast7} queries / 7d`} hint={d.search.avgLatencyMs != null ? `${d.search.avgLatencyMs}ms avg` : "—"} />
+              <Kpi
+                icon={TrendingUp}
+                label="Bookings (30d)"
+                value={String(d.bookings.last30)}
+                hint={`${d.bookings.upcoming} upcoming`}
+              />
+              <Kpi
+                icon={TrendingUp}
+                label="Revenue (30d)"
+                value={`KES ${d.bookings.revenueKes30.toLocaleString()}`}
+                hint="Confirmed + completed"
+              />
+              <Kpi
+                icon={Sparkles}
+                label="AI search"
+                value={`${d.search.queriesLast7} queries / 7d`}
+                hint={d.search.avgLatencyMs != null ? `${d.search.avgLatencyMs}ms avg` : "—"}
+              />
             </div>
 
             <section className="ai-surface rounded-xl border p-5">
@@ -101,7 +151,9 @@ function PropertyIntelligencePage() {
                 <AlertTriangle className="h-5 w-5 text-warning" /> Listings needing attention
               </h2>
               {d.needsAttention.length === 0 ? (
-                <p className="text-sm text-muted-foreground">All listings scoring 85% or higher. 🎉</p>
+                <p className="text-sm text-muted-foreground">
+                  All listings scoring 85% or higher. 🎉
+                </p>
               ) : (
                 <ul className="space-y-3">
                   {d.needsAttention.map((it) => (

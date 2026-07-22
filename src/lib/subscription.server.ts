@@ -32,18 +32,30 @@ export interface PlanRow {
 export async function getPlanForOrg(orgId: string): Promise<PlanRow | null> {
   const a = admin();
   const { data: sub } = await a
-    .from("subscriptions").select("plan, status, current_period_end")
-    .eq("org_id", orgId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+    .from("subscriptions")
+    .select("plan, status, current_period_end")
+    .eq("org_id", orgId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   let code: string | null = null;
   const s = sub as any;
   if (s && s.status === "active") code = s.plan;
 
   if (!code) {
-    const { data: org } = await a.from("organizations").select("plan").eq("id", orgId).maybeSingle();
+    const { data: org } = await a
+      .from("organizations")
+      .select("plan")
+      .eq("id", orgId)
+      .maybeSingle();
     code = (org as any)?.plan ?? "free";
   }
-  const { data: plan } = await a.from("subscription_plans").select("*").eq("code", code!).maybeSingle();
+  const { data: plan } = await a
+    .from("subscription_plans")
+    .select("*")
+    .eq("code", code!)
+    .maybeSingle();
   return (plan as any) ?? null;
 }
 
@@ -53,18 +65,28 @@ export async function currentUsage(orgId: string, feature: UsageFeature): Promis
   const a = admin();
   switch (feature) {
     case "property": {
-      const { count } = await a.from("marketplace_properties").select("id", { count: "exact", head: true }).eq("org_id", orgId);
+      const { count } = await a
+        .from("marketplace_properties")
+        .select("id", { count: "exact", head: true })
+        .eq("org_id", orgId);
       return count ?? 0;
     }
     case "team_member": {
-      const { count } = await a.from("organization_members").select("user_id", { count: "exact", head: true }).eq("org_id", orgId);
+      const { count } = await a
+        .from("organization_members")
+        .select("user_id", { count: "exact", head: true })
+        .eq("org_id", orgId);
       return count ?? 0;
     }
     case "ai_calls": {
-      const since = new Date(); since.setUTCDate(1); since.setUTCHours(0,0,0,0);
-      const { count } = await a.from("knowledge_search_events")
+      const since = new Date();
+      since.setUTCDate(1);
+      since.setUTCHours(0, 0, 0, 0);
+      const { count } = await a
+        .from("knowledge_search_events")
         .select("id", { count: "exact", head: true })
-        .eq("org_id", orgId).gte("created_at", since.toISOString());
+        .eq("org_id", orgId)
+        .gte("created_at", since.toISOString());
       return count ?? 0;
     }
     case "photo_per_property":

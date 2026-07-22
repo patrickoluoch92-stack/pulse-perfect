@@ -52,7 +52,10 @@ test.describe("Property Management", () => {
 
   test("should delete a property with confirmation", async ({ page }) => {
     // Click delete button
-    await page.getByRole("button", { name: /delete/i }).first().click();
+    await page
+      .getByRole("button", { name: /delete/i })
+      .first()
+      .click();
 
     // Confirm deletion
     await page.getByRole("button", { name: /confirm|yes|delete/i }).click();

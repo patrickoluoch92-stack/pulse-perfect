@@ -8,13 +8,22 @@ import { aiJSON, aiChat, aiEmbed, type AIChatMessage } from "@/lib/ai.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const PLANNER_MODULES = [
-  "rental", "travel", "stay", "event", "business",
-  "family", "honeymoon", "student", "weekend", "general",
+  "rental",
+  "travel",
+  "stay",
+  "event",
+  "business",
+  "family",
+  "honeymoon",
+  "student",
+  "weekend",
+  "general",
 ] as const;
 export type PlannerModule = (typeof PLANNER_MODULES)[number];
 
 const MODULE_HINTS: Record<PlannerModule, string> = {
-  rental: "Long-term rental planning — monthly rent, utilities, commute, neighbourhood fit, family size.",
+  rental:
+    "Long-term rental planning — monthly rent, utilities, commute, neighbourhood fit, family size.",
   travel: "Multi-day trip — accommodation, transport, meals, activities, itinerary, packing.",
   stay: "Short/medium accommodation — hotels, apartments, guest houses for defined dates.",
   event: "Event planning — venue, catering, decor, accommodation for guests, timeline.",
@@ -27,11 +36,9 @@ const MODULE_HINTS: Record<PlannerModule, string> = {
 };
 
 function publicSb() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
 
 // ---------- Grounding: fetch relevant HostPulse properties ----------
@@ -49,7 +56,9 @@ async function fetchProperties(query: string, county?: string, limit = 6) {
       ? rows.filter((r) => (r.county_code ?? "").toLowerCase().includes(county.toLowerCase()))
       : rows;
     if (filtered.length) return filtered.slice(0, limit);
-  } catch { /* fall through */ }
+  } catch {
+    /* fall through */
+  }
   const { data } = await sb
     .from("marketplace_properties")
     .select("id,name,slug,town,county_code,category,description")
@@ -143,13 +152,23 @@ export const generatePlan = createServerFn({ method: "POST" })
     const { fetchMobilityForPlan } = await import("@/lib/mobility.functions");
     const [props, vehicles] = await Promise.all([
       fetchProperties(`${data.module} ${data.prompt}`, data.county),
-      fetchMobilityForPlan(`${data.module} ${data.prompt}`, { county: data.county, purpose: data.module, limit: 4 }).catch(() => []),
+      fetchMobilityForPlan(`${data.module} ${data.prompt}`, {
+        county: data.county,
+        purpose: data.module,
+        limit: 4,
+      }).catch(() => []),
     ]);
     const grounding = props
-      .map((p: any) => `- ${p.name} (${p.category}) — ${p.town ?? ""}, ${p.county_code ?? ""} [slug: ${p.slug}]`)
+      .map(
+        (p: any) =>
+          `- ${p.name} (${p.category}) — ${p.town ?? ""}, ${p.county_code ?? ""} [slug: ${p.slug}]`,
+      )
       .join("\n");
     const vehicleGrounding = (vehicles as any[])
-      .map((v) => `- ${v.make} ${v.model} (${v.category}, ${v.seats ?? "?"} seats) — ${v.town ?? ""}, ${v.county_code ?? ""} [slug: ${v.slug}]`)
+      .map(
+        (v) =>
+          `- ${v.make} ${v.model} (${v.category}, ${v.seats ?? "?"} seats) — ${v.town ?? ""}, ${v.county_code ?? ""} [slug: ${v.slug}]`,
+      )
       .join("\n");
 
     const system = `You are HostPulse Planner AI, a Kenyan travel, accommodation, rental, mobility, and event planning assistant. Currency: KES. Module: ${data.module} — ${MODULE_HINTS[data.module]}
@@ -226,7 +245,13 @@ Return a complete plan JSON. Populate recommendedVehicles with vehicle slugs whe
       recVehicles = rows ?? [];
     }
 
-    return { sessionId, plan, messages, recommendedProperties: recProps, recommendedVehicles: recVehicles };
+    return {
+      sessionId,
+      plan,
+      messages,
+      recommendedProperties: recProps,
+      recommendedVehicles: recVehicles,
+    };
   });
 
 // ---------- Chat continuation (free-form Q&A on a plan) ----------

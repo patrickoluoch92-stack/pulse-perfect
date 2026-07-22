@@ -7,7 +7,11 @@ const orgIdSchema = z.object({ orgId: z.string().uuid() });
 const idSchema = z.object({ id: z.string().uuid() });
 
 const cents = z.number().int().min(0).max(100_000_000);
-const currency = z.string().trim().length(3).regex(/^[A-Z]{3}$/);
+const currency = z
+  .string()
+  .trim()
+  .length(3)
+  .regex(/^[A-Z]{3}$/);
 const dateStr = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD");
 
 function nullEmpty<T extends Record<string, unknown>>(o: T): T {
@@ -36,7 +40,9 @@ export const listTourPackages = createServerFn({ method: "GET" })
   .handler(async ({ context, data }) => {
     const { data: rows, error } = await context.supabase
       .from("tour_packages")
-      .select("id, name, description, duration_days, base_price_cents, currency, max_capacity, photo_url, active, created_at")
+      .select(
+        "id, name, description, duration_days, base_price_cents, currency, max_capacity, photo_url, active, created_at",
+      )
       .eq("org_id", data.orgId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -59,7 +65,10 @@ export const createTourPackage = createServerFn({ method: "POST" })
       active: data.active,
     });
     const { data: row, error } = await context.supabase
-      .from("tour_packages").insert(payload).select("id").single();
+      .from("tour_packages")
+      .insert(payload)
+      .select("id")
+      .single();
     if (error) throw new Error(error.message);
     return row;
   });
@@ -79,7 +88,9 @@ export const updateTourPackage = createServerFn({ method: "POST" })
       active: data.active,
     });
     const { error } = await context.supabase
-      .from("tour_packages").update(payload).eq("id", data.id);
+      .from("tour_packages")
+      .update(payload)
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -132,7 +143,10 @@ export const createTourGuide = createServerFn({ method: "POST" })
       active: data.active,
     });
     const { data: row, error } = await context.supabase
-      .from("tour_guides").insert(payload).select("id").single();
+      .from("tour_guides")
+      .insert(payload)
+      .select("id")
+      .single();
     if (error) throw new Error(error.message);
     return row;
   });
@@ -166,30 +180,41 @@ export const deleteTourGuide = createServerFn({ method: "POST" })
 // ============================================================
 // Departures (scheduled instances)
 // ============================================================
-const departureBase = z.object({
-  packageId: z.string().uuid(),
-  startsOn: dateStr,
-  endsOn: dateStr,
-  priceCentsOverride: cents.optional().nullable(),
-  status: z.enum(["scheduled", "confirmed", "cancelled", "completed"]).default("scheduled"),
-  notes: z.string().trim().max(2000).optional().or(z.literal("")),
-}).refine((v) => v.endsOn >= v.startsOn, { message: "End date must be on/after start date", path: ["endsOn"] });
+const departureBase = z
+  .object({
+    packageId: z.string().uuid(),
+    startsOn: dateStr,
+    endsOn: dateStr,
+    priceCentsOverride: cents.optional().nullable(),
+    status: z.enum(["scheduled", "confirmed", "cancelled", "completed"]).default("scheduled"),
+    notes: z.string().trim().max(2000).optional().or(z.literal("")),
+  })
+  .refine((v) => v.endsOn >= v.startsOn, {
+    message: "End date must be on/after start date",
+    path: ["endsOn"],
+  });
 
 export const listTourDepartures = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
-    orgId: z.string().uuid(),
-    packageId: z.string().uuid().optional(),
-    status: z.enum(["scheduled", "confirmed", "cancelled", "completed", "all"]).optional(),
-  }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        orgId: z.string().uuid(),
+        packageId: z.string().uuid().optional(),
+        status: z.enum(["scheduled", "confirmed", "cancelled", "completed", "all"]).optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ context, data }) => {
     let q = context.supabase
       .from("tour_departures")
-      .select(`
+      .select(
+        `
         id, package_id, starts_on, ends_on, price_cents_override, seats_sold, status, notes, created_at,
         tour_packages(name, base_price_cents, currency, max_capacity),
         tour_departure_guides(id, guide_id, role, tour_guides(id, name))
-      `)
+      `,
+      )
       .eq("org_id", data.orgId)
       .order("starts_on", { ascending: true });
     if (data.packageId) q = q.eq("package_id", data.packageId);
@@ -201,7 +226,9 @@ export const listTourDepartures = createServerFn({ method: "GET" })
 
 export const createTourDeparture = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => departureBase.and(z.object({ orgId: z.string().uuid() })).parse(d))
+  .inputValidator((d: unknown) =>
+    departureBase.and(z.object({ orgId: z.string().uuid() })).parse(d),
+  )
   .handler(async ({ context, data }) => {
     const payload = nullEmpty({
       org_id: data.orgId,
@@ -213,7 +240,10 @@ export const createTourDeparture = createServerFn({ method: "POST" })
       notes: data.notes ?? null,
     });
     const { data: row, error } = await context.supabase
-      .from("tour_departures").insert(payload).select("id").single();
+      .from("tour_departures")
+      .insert(payload)
+      .select("id")
+      .single();
     if (error) throw new Error(error.message);
     return row;
   });
@@ -230,7 +260,10 @@ export const updateTourDeparture = createServerFn({ method: "POST" })
       status: data.status,
       notes: data.notes ?? null,
     });
-    const { error } = await context.supabase.from("tour_departures").update(payload).eq("id", data.id);
+    const { error } = await context.supabase
+      .from("tour_departures")
+      .update(payload)
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -247,12 +280,16 @@ export const deleteTourDeparture = createServerFn({ method: "POST" })
 // ----- guide assignments -----
 export const assignGuideToDeparture = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
-    orgId: z.string().uuid(),
-    departureId: z.string().uuid(),
-    guideId: z.string().uuid(),
-    role: z.string().trim().max(60).optional().or(z.literal("")),
-  }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        orgId: z.string().uuid(),
+        departureId: z.string().uuid(),
+        guideId: z.string().uuid(),
+        role: z.string().trim().max(60).optional().or(z.literal("")),
+      })
+      .parse(d),
+  )
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.from("tour_departure_guides").insert({
       org_id: data.orgId,
@@ -268,7 +305,10 @@ export const unassignGuideFromDeparture = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => idSchema.parse(d))
   .handler(async ({ context, data }) => {
-    const { error } = await context.supabase.from("tour_departure_guides").delete().eq("id", data.id);
+    const { error } = await context.supabase
+      .from("tour_departure_guides")
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -290,19 +330,25 @@ const bookingBase = z.object({
 
 export const listTourBookings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
-    orgId: z.string().uuid(),
-    departureId: z.string().uuid().optional(),
-    status: z.enum(["pending", "confirmed", "cancelled", "paid", "all"]).optional(),
-  }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        orgId: z.string().uuid(),
+        departureId: z.string().uuid().optional(),
+        status: z.enum(["pending", "confirmed", "cancelled", "paid", "all"]).optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ context, data }) => {
     let q = context.supabase
       .from("tour_bookings")
-      .select(`
+      .select(
+        `
         id, departure_id, guest_name, guest_email, guest_phone, guests_count,
         total_price_cents, currency, status, notes, created_at,
         tour_departures(starts_on, ends_on, tour_packages(name))
-      `)
+      `,
+      )
       .eq("org_id", data.orgId)
       .order("created_at", { ascending: false });
     if (data.departureId) q = q.eq("departure_id", data.departureId);
@@ -323,7 +369,9 @@ export const createTourBooking = createServerFn({ method: "POST" })
       .eq("id", data.departureId)
       .single();
     if (depErr || !dep) throw new Error("Departure not found");
-    const cap = (dep as unknown as { tour_packages: { max_capacity: number } }).tour_packages?.max_capacity ?? 0;
+    const cap =
+      (dep as unknown as { tour_packages: { max_capacity: number } }).tour_packages?.max_capacity ??
+      0;
     if ((dep.seats_sold ?? 0) + data.guestsCount > cap) {
       throw new Error(`Not enough seats. ${cap - (dep.seats_sold ?? 0)} remaining.`);
     }
@@ -341,12 +389,16 @@ export const createTourBooking = createServerFn({ method: "POST" })
       notes: data.notes ?? null,
     });
     const { data: row, error } = await context.supabase
-      .from("tour_bookings").insert(payload).select("id").single();
+      .from("tour_bookings")
+      .insert(payload)
+      .select("id")
+      .single();
     if (error) throw new Error(error.message);
 
     // Only count non-cancelled bookings toward seats_sold.
     if (data.status !== "cancelled") {
-      await context.supabase.from("tour_departures")
+      await context.supabase
+        .from("tour_departures")
         .update({ seats_sold: (dep.seats_sold ?? 0) + data.guestsCount })
         .eq("id", data.departureId);
     }
@@ -355,31 +407,44 @@ export const createTourBooking = createServerFn({ method: "POST" })
 
 export const updateTourBookingStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
-    id: z.string().uuid(),
-    status: z.enum(["pending", "confirmed", "cancelled", "paid"]),
-  }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.enum(["pending", "confirmed", "cancelled", "paid"]),
+      })
+      .parse(d),
+  )
   .handler(async ({ context, data }) => {
     const { data: existing, error: be } = await context.supabase
       .from("tour_bookings")
       .select("id, departure_id, guests_count, status")
-      .eq("id", data.id).single();
+      .eq("id", data.id)
+      .single();
     if (be || !existing) throw new Error("Booking not found");
 
     const wasActive = existing.status !== "cancelled";
     const willBeActive = data.status !== "cancelled";
-    const delta = (willBeActive ? existing.guests_count : 0) - (wasActive ? existing.guests_count : 0);
+    const delta =
+      (willBeActive ? existing.guests_count : 0) - (wasActive ? existing.guests_count : 0);
 
     const { error } = await context.supabase
-      .from("tour_bookings").update({ status: data.status }).eq("id", data.id);
+      .from("tour_bookings")
+      .update({ status: data.status })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
 
     if (delta !== 0) {
       const { data: dep } = await context.supabase
-        .from("tour_departures").select("seats_sold").eq("id", existing.departure_id).single();
+        .from("tour_departures")
+        .select("seats_sold")
+        .eq("id", existing.departure_id)
+        .single();
       const next = Math.max(0, (dep?.seats_sold ?? 0) + delta);
-      await context.supabase.from("tour_departures")
-        .update({ seats_sold: next }).eq("id", existing.departure_id);
+      await context.supabase
+        .from("tour_departures")
+        .update({ seats_sold: next })
+        .eq("id", existing.departure_id);
     }
     return { ok: true };
   });
@@ -389,15 +454,23 @@ export const deleteTourBooking = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => idSchema.parse(d))
   .handler(async ({ context, data }) => {
     const { data: existing } = await context.supabase
-      .from("tour_bookings").select("departure_id, guests_count, status").eq("id", data.id).single();
+      .from("tour_bookings")
+      .select("departure_id, guests_count, status")
+      .eq("id", data.id)
+      .single();
     const { error } = await context.supabase.from("tour_bookings").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     if (existing && existing.status !== "cancelled") {
       const { data: dep } = await context.supabase
-        .from("tour_departures").select("seats_sold").eq("id", existing.departure_id).single();
+        .from("tour_departures")
+        .select("seats_sold")
+        .eq("id", existing.departure_id)
+        .single();
       const next = Math.max(0, (dep?.seats_sold ?? 0) - existing.guests_count);
-      await context.supabase.from("tour_departures")
-        .update({ seats_sold: next }).eq("id", existing.departure_id);
+      await context.supabase
+        .from("tour_departures")
+        .update({ seats_sold: next })
+        .eq("id", existing.departure_id);
     }
     return { ok: true };
   });

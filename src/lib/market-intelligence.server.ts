@@ -165,5 +165,9 @@ export async function runMarketTick() {
   const demand = await computeRegionalDemand(14);
   const persisted = await persistDemandSignals(demand);
   const comp = await ingestCompetitorRates();
-  return { regions: demand.length, demandSignals: persisted.inserted, competitorSignals: comp.inserted };
+  return {
+    regions: demand.length,
+    demandSignals: persisted.inserted,
+    competitorSignals: comp.inserted,
+  };
 }

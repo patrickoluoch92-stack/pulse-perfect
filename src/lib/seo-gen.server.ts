@@ -62,7 +62,9 @@ export async function runSeoGenTick(batchSize = 15) {
   const supabase = await getAdmin();
   const { data: rows } = await supabase
     .from("discovered_properties")
-    .select("id, name, property_type, county, amenities, description, seo_title, seo_description, status")
+    .select(
+      "id, name, property_type, county, amenities, description, seo_title, seo_description, status",
+    )
     .in("status", ["ready", "moderated"])
     .or("seo_title.is.null,seo_description.is.null")
     .limit(batchSize);

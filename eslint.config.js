@@ -6,7 +6,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", ".output", ".vinxi"] },
+  { ignores: ["dist", ".output", ".vinxi", "supabase/functions/**"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -34,7 +34,11 @@ export default tseslint.config(
       ],
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      // Large codebase interfacing with dynamic Supabase queries, JSON blobs, and
+      // third-party payloads — keep `any` visible as a warning rather than a hard failure.
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
+
   eslintPluginPrettier,
 );

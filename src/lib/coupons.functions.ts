@@ -7,11 +7,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 
 function publicClient() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
 }
 
 async function assertAdmin(supabase: any, userId: string) {
@@ -22,14 +20,14 @@ async function assertAdmin(supabase: any, userId: string) {
 // Public: validate a coupon code at checkout. Uses service-role client server-side
 // because the coupons table is no longer publicly readable (prevents scraping).
 export const validateCoupon = createServerFn({ method: "GET" })
-  .inputValidator((raw: unknown) =>
-    z.object({ code: z.string().min(2).max(60) }).parse(raw),
-  )
+  .inputValidator((raw: unknown) => z.object({ code: z.string().min(2).max(60) }).parse(raw))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await (supabaseAdmin as any)
       .from("coupons")
-      .select("id, code, description, discount_type, discount_value, currency, starts_at, expires_at, max_redemptions, redemptions_count, active")
+      .select(
+        "id, code, description, discount_type, discount_value, currency, starts_at, expires_at, max_redemptions, redemptions_count, active",
+      )
       .eq("code", data.code.trim().toUpperCase())
       .maybeSingle();
     if (error) return { valid: false as const, reason: error.message };
@@ -43,7 +41,6 @@ export const validateCoupon = createServerFn({ method: "GET" })
       return { valid: false as const, reason: "Redemption limit reached" };
     return { valid: true as const, coupon: row };
   });
-
 
 export const adminListCoupons = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -112,10 +109,7 @@ export const adminDeleteCoupon = createServerFn({ method: "POST" })
   .inputValidator((raw: unknown) => z.object({ id: z.string().uuid() }).parse(raw))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { error } = await (context.supabase as any)
-      .from("coupons")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await (context.supabase as any).from("coupons").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

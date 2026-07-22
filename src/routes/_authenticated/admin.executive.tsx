@@ -7,9 +7,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Activity, AlertTriangle, ArrowRight, Bot, Building2, Calendar, CheckCircle2,
-  CreditCard, DollarSign, Gauge, HeartHandshake, Landmark, LifeBuoy, Megaphone,
-  ShieldCheck, Sparkles, Star, TrendingUp, Users, Wallet, Zap,
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  Bot,
+  Building2,
+  Calendar,
+  CheckCircle2,
+  CreditCard,
+  DollarSign,
+  Gauge,
+  HeartHandshake,
+  Landmark,
+  LifeBuoy,
+  Megaphone,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  TrendingUp,
+  Users,
+  Wallet,
+  Zap,
 } from "lucide-react";
 import { LoadingState, EmptyState } from "@/components/ui/states";
 import { formatKES } from "@/lib/format";
@@ -18,7 +36,8 @@ export const Route = createFileRoute("/_authenticated/admin/executive")({
   head: () => ({
     meta: authPageMeta({
       title: "Executive Command Center",
-      description: "HostPulse platform command center — revenue, properties, users, bookings, finance, AI, and system health.",
+      description:
+        "HostPulse platform command center — revenue, properties, users, bookings, finance, AI, and system health.",
     }),
   }),
   component: ExecutiveCenter,
@@ -34,8 +53,18 @@ function ExecutiveCenter() {
     refetchInterval: 60_000,
   });
 
-  if (q.isLoading) return <div className="p-8"><LoadingState label="Loading executive overview…" /></div>;
-  if (q.error) return <div className="p-8"><EmptyState title="Access denied" description="Executive overview unavailable." /></div>;
+  if (q.isLoading)
+    return (
+      <div className="p-8">
+        <LoadingState label="Loading executive overview…" />
+      </div>
+    );
+  if (q.error)
+    return (
+      <div className="p-8">
+        <EmptyState title="Access denied" description="Executive overview unavailable." />
+      </div>
+    );
   const d = q.data!;
 
   return (
@@ -43,7 +72,9 @@ function ExecutiveCenter() {
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 sm:flex sm:flex-wrap sm:justify-between">
         <div className="min-w-0">
           <p className="text-xs uppercase tracking-widest text-muted-foreground">HostPulse HQ</p>
-          <h1 className="truncate font-display text-3xl font-bold tracking-tight sm:text-4xl">Executive Command Center</h1>
+          <h1 className="truncate font-display text-3xl font-bold tracking-tight sm:text-4xl">
+            Executive Command Center
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Live snapshot · updated {new Date(d.generatedAt).toLocaleTimeString()}
           </p>
@@ -58,9 +89,24 @@ function ExecutiveCenter() {
           <Kpi label="This week" value={KES(d.revenue.week)} icon={TrendingUp} />
           <Kpi label="This month (GBV)" value={KES(d.revenue.month)} icon={Landmark} />
           <Kpi label="Year to date" value={KES(d.revenue.year)} icon={Landmark} />
-          <Kpi label="Commission (month)" value={KES(d.revenue.commissionMonth)} icon={DollarSign} tone="accent" />
-          <Kpi label="Subscriptions (month)" value={KES(d.revenue.subscriptionMonth)} icon={CreditCard} tone="accent" />
-          <Kpi label="Net platform (month)" value={KES(d.revenue.netMonth)} icon={Zap} tone="accent" />
+          <Kpi
+            label="Commission (month)"
+            value={KES(d.revenue.commissionMonth)}
+            icon={DollarSign}
+            tone="accent"
+          />
+          <Kpi
+            label="Subscriptions (month)"
+            value={KES(d.revenue.subscriptionMonth)}
+            icon={CreditCard}
+            tone="accent"
+          />
+          <Kpi
+            label="Net platform (month)"
+            value={KES(d.revenue.netMonth)}
+            icon={Zap}
+            tone="accent"
+          />
           <Kpi label="Avg guest rating" value={String(d.support.avgRating ?? "—")} icon={Star} />
         </Grid>
       </Section>
@@ -71,13 +117,18 @@ function ExecutiveCenter() {
           <Grid cols={2}>
             <Kpi label="Total properties" value={String(d.properties.total)} />
             <Kpi label="Published" value={String(d.properties.published)} tone="accent" />
-            <Kpi label="Pending approval" value={String(d.properties.pending)} tone={d.properties.pending > 0 ? "warn" : undefined} />
+            <Kpi
+              label="Pending approval"
+              value={String(d.properties.pending)}
+              tone={d.properties.pending > 0 ? "warn" : undefined}
+            />
             <Kpi label="Verified" value={String(d.properties.verified)} />
             <Kpi label="Featured" value={String(d.properties.featured)} />
             <Kpi label="Rejected" value={String(d.properties.rejected)} />
           </Grid>
           <div className="mt-3 rounded-md bg-muted/40 p-3 text-xs text-muted-foreground">
-            Discovery queue: <b>{d.discovery.pending}</b> pending · <b>{d.discovery.published}</b> published · <b>{d.discovery.claims}</b> ownership claim(s)
+            Discovery queue: <b>{d.discovery.pending}</b> pending · <b>{d.discovery.published}</b>{" "}
+            published · <b>{d.discovery.claims}</b> ownership claim(s)
           </div>
         </Section>
 
@@ -88,7 +139,11 @@ function ExecutiveCenter() {
             <Kpi label="New this month" value={String(d.users.newMonth)} />
             <Kpi label="Total organizations" value={String(d.organizations.total)} />
             <Kpi label="Active subs" value={String(d.subscriptions.active)} tone="accent" />
-            <Kpi label="Past due subs" value={String(d.subscriptions.pastDue)} tone={d.subscriptions.pastDue > 0 ? "warn" : undefined} />
+            <Kpi
+              label="Past due subs"
+              value={String(d.subscriptions.pastDue)}
+              tone={d.subscriptions.pastDue > 0 ? "warn" : undefined}
+            />
           </Grid>
         </Section>
       </div>
@@ -101,7 +156,11 @@ function ExecutiveCenter() {
             <Kpi label="Bookings this month" value={String(d.bookings.month)} />
             <Kpi label="Check-ins (7d)" value={String(d.bookings.upcomingCheckins)} tone="accent" />
             <Kpi label="Check-outs (7d)" value={String(d.bookings.upcomingCheckouts)} />
-            <Kpi label="Pending confirm" value={String(d.bookings.pending)} tone={d.bookings.pending > 0 ? "warn" : undefined} />
+            <Kpi
+              label="Pending confirm"
+              value={String(d.bookings.pending)}
+              tone={d.bookings.pending > 0 ? "warn" : undefined}
+            />
             <Kpi label="Cancellations" value={String(d.bookings.cancelled)} />
           </Grid>
         </Section>
@@ -109,9 +168,17 @@ function ExecutiveCenter() {
         <Section title="Finance & Payouts" icon={Wallet} href="/admin/finance">
           <Grid cols={2}>
             <Kpi label="Wallet outstanding" value={KES(d.finance.walletOutstanding)} />
-            <Kpi label="Payouts pending" value={String(d.finance.pendingPayouts)} tone={d.finance.pendingPayouts > 0 ? "warn" : undefined} />
+            <Kpi
+              label="Payouts pending"
+              value={String(d.finance.pendingPayouts)}
+              tone={d.finance.pendingPayouts > 0 ? "warn" : undefined}
+            />
             <Kpi label="Pending amount" value={KES(d.finance.pendingPayoutAmount)} />
-            <Kpi label="Paid this month" value={KES(d.finance.payoutsProcessedMonth)} tone="accent" />
+            <Kpi
+              label="Paid this month"
+              value={KES(d.finance.payoutsProcessedMonth)}
+              tone="accent"
+            />
           </Grid>
         </Section>
       </div>
@@ -129,7 +196,11 @@ function ExecutiveCenter() {
         <Section title="Support" icon={LifeBuoy} href="/maintenance">
           <Grid cols={2}>
             <Kpi label="Open tickets" value={String(d.support.openTickets)} />
-            <Kpi label="Urgent" value={String(d.support.urgentTickets)} tone={d.support.urgentTickets > 0 ? "warn" : undefined} />
+            <Kpi
+              label="Urgent"
+              value={String(d.support.urgentTickets)}
+              tone={d.support.urgentTickets > 0 ? "warn" : undefined}
+            />
             <Kpi label="Total reviews" value={String(d.support.totalReviews)} />
             <Kpi label="Rating" value={String(d.support.avgRating ?? "—")} />
           </Grid>
@@ -146,14 +217,24 @@ function ExecutiveCenter() {
       <Section title="Recent Activity" icon={Activity}>
         <ul className="divide-y">
           {d.activity.slice(0, 12).map((a, i) => (
-            <li key={i} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-2 text-sm">
+            <li
+              key={i}
+              className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-2 text-sm"
+            >
               <ActivityIcon type={a.type} />
               <span className="truncate">{a.message}</span>
-              <span className="shrink-0 text-xs text-muted-foreground">{new Date(a.at).toLocaleString()}</span>
+              <span className="shrink-0 text-xs text-muted-foreground">
+                {new Date(a.at).toLocaleString()}
+              </span>
             </li>
           ))}
           {d.activity.length === 0 && (
-            <li className="py-2"><EmptyState title="No activity yet" description="Platform events will appear here as they occur." /></li>
+            <li className="py-2">
+              <EmptyState
+                title="No activity yet"
+                description="Platform events will appear here as they occur."
+              />
+            </li>
           )}
         </ul>
       </Section>
@@ -190,7 +271,17 @@ function HealthPill({ health }: { health: any }) {
   );
 }
 
-function Section({ title, icon: Icon, href, children }: { title: string; icon: any; href?: string; children: React.ReactNode }) {
+function Section({
+  title,
+  icon: Icon,
+  href,
+  children,
+}: {
+  title: string;
+  icon: any;
+  href?: string;
+  children: React.ReactNode;
+}) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
@@ -199,7 +290,9 @@ function Section({ title, icon: Icon, href, children }: { title: string; icon: a
         </CardTitle>
         {href && (
           <Button asChild size="sm" variant="ghost">
-            <Link to={href as any}>Open <ArrowRight className="ml-1 h-4 w-4" /></Link>
+            <Link to={href as any}>
+              Open <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
           </Button>
         )}
       </CardHeader>
@@ -209,20 +302,41 @@ function Section({ title, icon: Icon, href, children }: { title: string; icon: a
 }
 
 function Grid({ children, cols = 4 }: { children: React.ReactNode; cols?: 2 | 3 | 4 }) {
-  const cls = cols === 2 ? "sm:grid-cols-2" : cols === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2 lg:grid-cols-4";
+  const cls =
+    cols === 2 ? "sm:grid-cols-2" : cols === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2 lg:grid-cols-4";
   return <div className={`grid gap-3 ${cls}`}>{children}</div>;
 }
 
-function Kpi({ label, value, sub, icon: Icon, tone }: {
-  label: string; value: string; sub?: string; icon?: any; tone?: "accent"|"warn";
+function Kpi({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  tone,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  icon?: any;
+  tone?: "accent" | "warn";
 }) {
   return (
     <div className="rounded-lg border bg-card p-3">
       <div className="flex items-center gap-2">
-        {Icon && <Icon className={`h-3.5 w-3.5 ${
-          tone === "warn" ? "text-amber-500" : tone === "accent" ? "text-emerald-500" : "text-muted-foreground"
-        }`} />}
-        <p className="truncate text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+        {Icon && (
+          <Icon
+            className={`h-3.5 w-3.5 ${
+              tone === "warn"
+                ? "text-amber-500"
+                : tone === "accent"
+                  ? "text-emerald-500"
+                  : "text-muted-foreground"
+            }`}
+          />
+        )}
+        <p className="truncate text-[11px] uppercase tracking-wide text-muted-foreground">
+          {label}
+        </p>
       </div>
       <p className="mt-1 truncate text-xl font-bold">{value}</p>
       {sub && <p className="truncate text-xs text-muted-foreground">{sub}</p>}
@@ -242,7 +356,12 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 function ActivityIcon({ type }: { type: string }) {
   const map: Record<string, any> = { booking: CheckCircle2, signup: Users, error: AlertTriangle };
   const I = map[type] ?? Activity;
-  const cls = type === "error" ? "text-amber-500" : type === "booking" ? "text-emerald-500" : "text-muted-foreground";
+  const cls =
+    type === "error"
+      ? "text-amber-500"
+      : type === "booking"
+        ? "text-emerald-500"
+        : "text-muted-foreground";
   return <I className={`h-4 w-4 shrink-0 ${cls}`} />;
 }
 

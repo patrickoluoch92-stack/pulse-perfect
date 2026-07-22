@@ -10,11 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  listPropertyReviews,
-  submitReview,
-  deleteReview,
-} from "@/lib/marketplace-extra.functions";
+import { listPropertyReviews, submitReview, deleteReview } from "@/lib/marketplace-extra.functions";
 import { EmptyState } from "@/components/ui/states";
 
 function StarBar({
@@ -39,11 +35,7 @@ function StarBar({
         >
           <Star
             size={size}
-            className={
-              n <= value
-                ? "fill-yellow-400 text-yellow-400"
-                : "text-muted-foreground/40"
-            }
+            className={n <= value ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}
           />
         </button>
       ))}
@@ -125,7 +117,8 @@ export function PropertyReviews({
           <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
             <StarBar value={Math.round(Number(ratingAvg) || 0)} size={14} />
             <span>
-              {Number(ratingAvg ?? 0).toFixed(1)} · {ratingCount ?? 0} review{ratingCount === 1 ? "" : "s"}
+              {Number(ratingAvg ?? 0).toFixed(1)} · {ratingCount ?? 0} review
+              {ratingCount === 1 ? "" : "s"}
             </span>
           </div>
         </div>
@@ -145,11 +138,21 @@ export function PropertyReviews({
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <Label htmlFor="rv-name">Display name</Label>
-              <Input id="rv-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane M." />
+              <Input
+                id="rv-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Jane M."
+              />
             </div>
             <div>
               <Label htmlFor="rv-title">Title (optional)</Label>
-              <Input id="rv-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Lovely beachside getaway" />
+              <Input
+                id="rv-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Lovely beachside getaway"
+              />
             </div>
           </div>
           <div>
@@ -163,10 +166,7 @@ export function PropertyReviews({
             />
           </div>
           <div className="flex justify-end">
-            <Button
-              onClick={() => submit.mutate()}
-              disabled={submit.isPending || body.length < 10}
-            >
+            <Button onClick={() => submit.mutate()} disabled={submit.isPending || body.length < 10}>
               {submit.isPending ? "Posting…" : "Post review"}
             </Button>
           </div>
@@ -175,7 +175,11 @@ export function PropertyReviews({
 
       <div className="mt-6 space-y-4">
         {reviews.length === 0 && (
-          <EmptyState icon={Star} title="No reviews yet" description="Be the first to share your experience." />
+          <EmptyState
+            icon={Star}
+            title="No reviews yet"
+            description="Be the first to share your experience."
+          />
         )}
         {reviews.map((r) => (
           <Card key={r.id} className="p-4">

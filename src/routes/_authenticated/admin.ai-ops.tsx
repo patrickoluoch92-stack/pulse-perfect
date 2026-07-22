@@ -19,7 +19,10 @@ export const Route = createFileRoute("/_authenticated/admin/ai-ops")({
   head: () => ({
     meta: [
       { title: "AI Operations — HostPulse" },
-      { name: "description", content: "Live health, queue depth, and decisions for HostPulse AI agents." },
+      {
+        name: "description",
+        content: "Live health, queue depth, and decisions for HostPulse AI agents.",
+      },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -39,7 +42,11 @@ function AiOpsPage() {
     queryFn: () => overviewFn(),
     refetchInterval: 15_000,
   });
-  const runs = useQuery({ queryKey: ["ai-ops-runs"], queryFn: () => runsFn({ data: { limit: 30 } }), refetchInterval: 15_000 });
+  const runs = useQuery({
+    queryKey: ["ai-ops-runs"],
+    queryFn: () => runsFn({ data: { limit: 30 } }),
+    refetchInterval: 15_000,
+  });
   const decisions = useQuery({
     queryKey: ["ai-ops-decisions"],
     queryFn: () => decisionsFn({ data: { limit: 30 } }),
@@ -66,13 +73,24 @@ function AiOpsPage() {
     <div className="p-6 space-y-6">
       <header>
         <h1 className="text-2xl font-semibold">AI Operations</h1>
-        <p className="text-sm text-muted-foreground">Live agent health, queue depth, and recent decisions.</p>
+        <p className="text-sm text-muted-foreground">
+          Live agent health, queue depth, and recent decisions.
+        </p>
       </header>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {overview.isLoading && <div className="md:col-span-2 xl:col-span-3"><LoadingState label="Loading agents…" /></div>}
+        {overview.isLoading && (
+          <div className="md:col-span-2 xl:col-span-3">
+            <LoadingState label="Loading agents…" />
+          </div>
+        )}
         {!overview.isLoading && agents.length === 0 && (
-          <div className="md:col-span-2 xl:col-span-3"><EmptyState title="No agents registered" description="Register agents in the ai_agents table to see them here." /></div>
+          <div className="md:col-span-2 xl:col-span-3">
+            <EmptyState
+              title="No agents registered"
+              description="Register agents in the ai_agents table to see them here."
+            />
+          </div>
         )}
         {agents.map((a: any) => (
           <Card key={a.slug}>
@@ -119,17 +137,25 @@ function AiOpsPage() {
 
       <section className="grid gap-4 lg:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle className="text-base">Recent runs</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">Recent runs</CardTitle>
+          </CardHeader>
           <CardContent className="text-xs">
             <div className="space-y-1 max-h-[420px] overflow-auto">
               {runs.isLoading && <LoadingState label="Loading runs…" />}
               {!runs.isLoading && ((runs.data as any)?.runs ?? []).length === 0 && (
-                <EmptyState title="No recent runs" description="Agent runs will appear here as jobs execute." />
+                <EmptyState
+                  title="No recent runs"
+                  description="Agent runs will appear here as jobs execute."
+                />
               )}
               {((runs.data as any)?.runs ?? []).map((r: any) => (
                 <div key={r.id} className="flex justify-between border-b py-1">
                   <span>
-                    <Badge variant={r.status === "succeeded" ? "default" : "destructive"} className="mr-2">
+                    <Badge
+                      variant={r.status === "succeeded" ? "default" : "destructive"}
+                      className="mr-2"
+                    >
                       {r.status}
                     </Badge>
                     {r.agent_slug}
@@ -141,20 +167,30 @@ function AiOpsPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle className="text-base">Recent decisions</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base">Recent decisions</CardTitle>
+          </CardHeader>
           <CardContent className="text-xs">
             <div className="space-y-1 max-h-[420px] overflow-auto">
               {decisions.isLoading && <LoadingState label="Loading decisions…" />}
               {!decisions.isLoading && ((decisions.data as any)?.decisions ?? []).length === 0 && (
-                <EmptyState title="No decisions logged" description="Agent decisions will appear here." />
+                <EmptyState
+                  title="No decisions logged"
+                  description="Agent decisions will appear here."
+                />
               )}
               {((decisions.data as any)?.decisions ?? []).map((d: any) => (
                 <div key={d.id} className="border-b py-1">
                   <div className="flex justify-between">
-                    <span><Badge className="mr-2">{d.agent_slug}</Badge>{d.action}</span>
+                    <span>
+                      <Badge className="mr-2">{d.agent_slug}</Badge>
+                      {d.action}
+                    </span>
                     <span className="text-muted-foreground">{d.confidence ?? "-"}</span>
                   </div>
-                  {d.rationale && <p className="text-muted-foreground line-clamp-2">{d.rationale}</p>}
+                  {d.rationale && (
+                    <p className="text-muted-foreground line-clamp-2">{d.rationale}</p>
+                  )}
                 </div>
               ))}
             </div>
@@ -165,8 +201,17 @@ function AiOpsPage() {
   );
 }
 
-function Stat({ label, value, tone = "muted" }: { label: string; value: number; tone?: "muted" | "ok" | "warn" }) {
-  const cls = tone === "ok" ? "text-emerald-600" : tone === "warn" ? "text-amber-600" : "text-foreground";
+function Stat({
+  label,
+  value,
+  tone = "muted",
+}: {
+  label: string;
+  value: number;
+  tone?: "muted" | "ok" | "warn";
+}) {
+  const cls =
+    tone === "ok" ? "text-emerald-600" : tone === "warn" ? "text-amber-600" : "text-foreground";
   return (
     <div>
       <div className={`text-lg font-semibold ${cls}`}>{value}</div>

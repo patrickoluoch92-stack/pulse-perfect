@@ -10,7 +10,9 @@ import { enforceRateLimit } from "./rate-limit";
 export function requireMfa(claims: Record<string, unknown> | undefined | null): void {
   const aal = (claims?.["aal"] as string | undefined) ?? "aal1";
   if (aal !== "aal2") {
-    throw new Error("MFA required: enable two-factor authentication and re-sign-in to perform this action");
+    throw new Error(
+      "MFA required: enable two-factor authentication and re-sign-in to perform this action",
+    );
   }
 }
 

@@ -5,16 +5,37 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
-  Pencil, Plus, Trash2, MapPin, Users as UsersIcon, CalendarDays, Ticket, UserPlus, X,
+  Pencil,
+  Plus,
+  Trash2,
+  MapPin,
+  Users as UsersIcon,
+  CalendarDays,
+  Ticket,
+  UserPlus,
+  X,
 } from "lucide-react";
 
 import { getWorkspaceContext } from "@/lib/workspace.functions";
 import {
-  listTourPackages, createTourPackage, updateTourPackage, deleteTourPackage,
-  listTourGuides, createTourGuide, updateTourGuide, deleteTourGuide,
-  listTourDepartures, createTourDeparture, updateTourDeparture, deleteTourDeparture,
-  assignGuideToDeparture, unassignGuideFromDeparture,
-  listTourBookings, createTourBooking, updateTourBookingStatus, deleteTourBooking,
+  listTourPackages,
+  createTourPackage,
+  updateTourPackage,
+  deleteTourPackage,
+  listTourGuides,
+  createTourGuide,
+  updateTourGuide,
+  deleteTourGuide,
+  listTourDepartures,
+  createTourDeparture,
+  updateTourDeparture,
+  deleteTourDeparture,
+  assignGuideToDeparture,
+  unassignGuideFromDeparture,
+  listTourBookings,
+  createTourBooking,
+  updateTourBookingStatus,
+  deleteTourBooking,
 } from "@/lib/tours.functions";
 
 import { Button } from "@/components/ui/button";
@@ -26,20 +47,44 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoadingState, EmptyState } from "@/components/ui/states";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/tours")({
-  head: () => ({ meta: authPageMeta({ title: "Tours", description: "Tour catalog, availability, bookings, and itineraries." }) }),
+  head: () => ({
+    meta: authPageMeta({
+      title: "Tours",
+      description: "Tour catalog, availability, bookings, and itineraries.",
+    }),
+  }),
   component: ToursPage,
-  errorComponent: ({ error }) => <div className="p-8 text-sm text-destructive">{error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-sm text-destructive">{error.message}</div>
+  ),
   notFoundComponent: () => <div className="p-8">Not found</div>,
 });
 
@@ -48,11 +93,17 @@ function fmtMoney(cents: number | null | undefined, currency = "USD") {
   const v = (cents ?? 0) / 100;
   try {
     return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(v);
-  } catch { return `${v.toFixed(2)} ${currency}`; }
+  } catch {
+    return `${v.toFixed(2)} ${currency}`;
+  }
 }
 function fmtDate(s?: string | null) {
   if (!s) return "—";
-  try { return new Date(s).toLocaleDateString(); } catch { return s; }
+  try {
+    return new Date(s).toLocaleDateString();
+  } catch {
+    return s;
+  }
 }
 
 function ToursPage() {
@@ -72,22 +123,40 @@ function ToursPage() {
         </span>
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Tour operator</h1>
-          <p className="text-sm text-muted-foreground">Packages, schedules, guides, and customer bookings.</p>
+          <p className="text-sm text-muted-foreground">
+            Packages, schedules, guides, and customer bookings.
+          </p>
         </div>
       </header>
 
       <Tabs defaultValue="packages" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="packages"><Ticket className="mr-2 h-4 w-4" /> Packages</TabsTrigger>
-          <TabsTrigger value="schedules"><CalendarDays className="mr-2 h-4 w-4" /> Schedules</TabsTrigger>
-          <TabsTrigger value="guides"><UsersIcon className="mr-2 h-4 w-4" /> Guides</TabsTrigger>
-          <TabsTrigger value="bookings"><UserPlus className="mr-2 h-4 w-4" /> Bookings</TabsTrigger>
+          <TabsTrigger value="packages">
+            <Ticket className="mr-2 h-4 w-4" /> Packages
+          </TabsTrigger>
+          <TabsTrigger value="schedules">
+            <CalendarDays className="mr-2 h-4 w-4" /> Schedules
+          </TabsTrigger>
+          <TabsTrigger value="guides">
+            <UsersIcon className="mr-2 h-4 w-4" /> Guides
+          </TabsTrigger>
+          <TabsTrigger value="bookings">
+            <UserPlus className="mr-2 h-4 w-4" /> Bookings
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="packages"><PackagesTab orgId={orgId} /></TabsContent>
-        <TabsContent value="schedules"><SchedulesTab orgId={orgId} /></TabsContent>
-        <TabsContent value="guides"><GuidesTab orgId={orgId} /></TabsContent>
-        <TabsContent value="bookings"><BookingsTab orgId={orgId} /></TabsContent>
+        <TabsContent value="packages">
+          <PackagesTab orgId={orgId} />
+        </TabsContent>
+        <TabsContent value="schedules">
+          <SchedulesTab orgId={orgId} />
+        </TabsContent>
+        <TabsContent value="guides">
+          <GuidesTab orgId={orgId} />
+        </TabsContent>
+        <TabsContent value="bookings">
+          <BookingsTab orgId={orgId} />
+        </TabsContent>
       </Tabs>
     </div>
   );
@@ -97,9 +166,15 @@ function ToursPage() {
 // Packages tab
 // ============================================================
 type PackageRow = {
-  id: string; name: string; description: string | null; duration_days: number;
-  base_price_cents: number; currency: string; max_capacity: number;
-  photo_url: string | null; active: boolean;
+  id: string;
+  name: string;
+  description: string | null;
+  duration_days: number;
+  base_price_cents: number;
+  currency: string;
+  max_capacity: number;
+  photo_url: string | null;
+  active: boolean;
 };
 
 function PackagesTab({ orgId }: { orgId: string }) {
@@ -117,23 +192,41 @@ function PackagesTab({ orgId }: { orgId: string }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<PackageRow | null>(null);
   const [form, setForm] = useState({
-    name: "", description: "", durationDays: "1", basePrice: "0",
-    currency: "USD", maxCapacity: "10", photoUrl: "", active: true,
+    name: "",
+    description: "",
+    durationDays: "1",
+    basePrice: "0",
+    currency: "USD",
+    maxCapacity: "10",
+    photoUrl: "",
+    active: true,
   });
 
   function openCreate() {
     setEditing(null);
-    setForm({ name: "", description: "", durationDays: "1", basePrice: "0", currency: "USD", maxCapacity: "10", photoUrl: "", active: true });
+    setForm({
+      name: "",
+      description: "",
+      durationDays: "1",
+      basePrice: "0",
+      currency: "USD",
+      maxCapacity: "10",
+      photoUrl: "",
+      active: true,
+    });
     setOpen(true);
   }
   function openEdit(p: PackageRow) {
     setEditing(p);
     setForm({
-      name: p.name, description: p.description ?? "",
+      name: p.name,
+      description: p.description ?? "",
       durationDays: String(p.duration_days),
       basePrice: (p.base_price_cents / 100).toFixed(2),
-      currency: p.currency, maxCapacity: String(p.max_capacity),
-      photoUrl: p.photo_url ?? "", active: p.active,
+      currency: p.currency,
+      maxCapacity: String(p.max_capacity),
+      photoUrl: p.photo_url ?? "",
+      active: p.active,
     });
     setOpen(true);
   }
@@ -174,7 +267,9 @@ function PackagesTab({ orgId }: { orgId: string }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{q.data?.length ?? 0} package(s)</p>
-        <Button size="sm" onClick={openCreate}><Plus className="h-4 w-4" /> New package</Button>
+        <Button size="sm" onClick={openCreate}>
+          <Plus className="h-4 w-4" /> New package
+        </Button>
       </div>
 
       {q.isLoading && <LoadingState label="Loading packages…" />}
@@ -190,7 +285,6 @@ function PackagesTab({ orgId }: { orgId: string }) {
         {(q.data as PackageRow[] | undefined)?.map((p) => (
           <div key={p.id} className="overflow-hidden rounded-lg border bg-card">
             {p.photo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img src={p.photo_url} alt={p.name} className="h-32 w-full object-cover" />
             ) : (
               <div className="grid h-32 w-full place-items-center bg-muted text-muted-foreground">
@@ -202,9 +296,13 @@ function PackagesTab({ orgId }: { orgId: string }) {
                 <h3 className="font-semibold leading-tight">{p.name}</h3>
                 {!p.active && <Badge variant="secondary">Inactive</Badge>}
               </div>
-              {p.description && <p className="line-clamp-2 text-xs text-muted-foreground">{p.description}</p>}
+              {p.description && (
+                <p className="line-clamp-2 text-xs text-muted-foreground">{p.description}</p>
+              )}
               <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                <span>{p.duration_days} day{p.duration_days === 1 ? "" : "s"}</span>
+                <span>
+                  {p.duration_days} day{p.duration_days === 1 ? "" : "s"}
+                </span>
                 <span>•</span>
                 <span>{fmtMoney(p.base_price_cents, p.currency)}</span>
                 <span>•</span>
@@ -225,43 +323,86 @@ function PackagesTab({ orgId }: { orgId: string }) {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{editing ? "Edit package" : "New package"}</DialogTitle>
-            <DialogDescription>Catalog item that can be scheduled as a dated departure.</DialogDescription>
+            <DialogDescription>
+              Catalog item that can be scheduled as a dated departure.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-3">
             <Field label="Name">
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Sunset wildlife safari" />
+              <Input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Sunset wildlife safari"
+              />
             </Field>
             <Field label="Description">
-              <Textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              <Textarea
+                rows={3}
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Duration (days)">
-                <Input type="number" min={1} value={form.durationDays} onChange={(e) => setForm({ ...form, durationDays: e.target.value })} />
+                <Input
+                  type="number"
+                  min={1}
+                  value={form.durationDays}
+                  onChange={(e) => setForm({ ...form, durationDays: e.target.value })}
+                />
               </Field>
               <Field label="Max capacity">
-                <Input type="number" min={1} value={form.maxCapacity} onChange={(e) => setForm({ ...form, maxCapacity: e.target.value })} />
+                <Input
+                  type="number"
+                  min={1}
+                  value={form.maxCapacity}
+                  onChange={(e) => setForm({ ...form, maxCapacity: e.target.value })}
+                />
               </Field>
               <Field label="Base price">
-                <Input type="number" min={0} step="0.01" value={form.basePrice} onChange={(e) => setForm({ ...form, basePrice: e.target.value })} />
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.basePrice}
+                  onChange={(e) => setForm({ ...form, basePrice: e.target.value })}
+                />
               </Field>
               <Field label="Currency">
-                <Input maxLength={3} value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })} />
+                <Input
+                  maxLength={3}
+                  value={form.currency}
+                  onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })}
+                />
               </Field>
             </div>
             <Field label="Photo URL (optional)">
-              <Input value={form.photoUrl} onChange={(e) => setForm({ ...form, photoUrl: e.target.value })} placeholder="https://…" />
+              <Input
+                value={form.photoUrl}
+                onChange={(e) => setForm({ ...form, photoUrl: e.target.value })}
+                placeholder="https://…"
+              />
             </Field>
             <div className="flex items-center justify-between rounded-lg border p-3">
               <div>
                 <Label className="text-sm">Active</Label>
-                <p className="text-xs text-muted-foreground">Inactive packages are hidden from scheduling.</p>
+                <p className="text-xs text-muted-foreground">
+                  Inactive packages are hidden from scheduling.
+                </p>
               </div>
-              <Switch checked={form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} />
+              <Switch
+                checked={form.active}
+                onCheckedChange={(v) => setForm({ ...form, active: v })}
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "Saving…" : "Save"}</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => save.mutate()} disabled={save.isPending}>
+              {save.isPending ? "Saving…" : "Save"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -273,8 +414,13 @@ function PackagesTab({ orgId }: { orgId: string }) {
 // Guides tab
 // ============================================================
 type GuideRow = {
-  id: string; name: string; email: string | null; phone: string | null;
-  bio: string | null; languages: string[]; active: boolean;
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  bio: string | null;
+  languages: string[];
+  active: boolean;
 };
 
 function GuidesTab({ orgId }: { orgId: string }) {
@@ -291,7 +437,14 @@ function GuidesTab({ orgId }: { orgId: string }) {
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<GuideRow | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", bio: "", languages: "", active: true });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    bio: "",
+    languages: "",
+    active: true,
+  });
 
   function openCreate() {
     setEditing(null);
@@ -301,8 +454,12 @@ function GuidesTab({ orgId }: { orgId: string }) {
   function openEdit(g: GuideRow) {
     setEditing(g);
     setForm({
-      name: g.name, email: g.email ?? "", phone: g.phone ?? "",
-      bio: g.bio ?? "", languages: (g.languages ?? []).join(", "), active: g.active,
+      name: g.name,
+      email: g.email ?? "",
+      phone: g.phone ?? "",
+      bio: g.bio ?? "",
+      languages: (g.languages ?? []).join(", "),
+      active: g.active,
     });
     setOpen(true);
   }
@@ -314,7 +471,11 @@ function GuidesTab({ orgId }: { orgId: string }) {
         email: form.email.trim(),
         phone: form.phone.trim(),
         bio: form.bio.trim(),
-        languages: form.languages.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 20),
+        languages: form.languages
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .slice(0, 20),
         active: form.active,
       };
       if (editing) return updateFn({ data: { id: editing.id, ...payload } });
@@ -341,12 +502,12 @@ function GuidesTab({ orgId }: { orgId: string }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{q.data?.length ?? 0} guide(s)</p>
-        <Button size="sm" onClick={openCreate}><Plus className="h-4 w-4" /> New guide</Button>
+        <Button size="sm" onClick={openCreate}>
+          <Plus className="h-4 w-4" /> New guide
+        </Button>
       </div>
 
-      {q.data && q.data.length === 0 && (
-        <EmptyState title="No guides yet" />
-      )}
+      {q.data && q.data.length === 0 && <EmptyState title="No guides yet" />}
 
       <div className="grid gap-3 md:grid-cols-2">
         {(q.data as GuideRow[] | undefined)?.map((g) => (
@@ -363,7 +524,11 @@ function GuidesTab({ orgId }: { orgId: string }) {
             {g.bio && <p className="mt-2 line-clamp-3 text-xs text-muted-foreground">{g.bio}</p>}
             {g.languages.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1">
-                {g.languages.map((l) => <Badge key={l} variant="outline" className="text-[10px]">{l}</Badge>)}
+                {g.languages.map((l) => (
+                  <Badge key={l} variant="outline" className="text-[10px]">
+                    {l}
+                  </Badge>
+                ))}
               </div>
             )}
             <div className="mt-3 flex gap-2">
@@ -382,23 +547,56 @@ function GuidesTab({ orgId }: { orgId: string }) {
             <DialogTitle>{editing ? "Edit guide" : "New guide"}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-3">
-            <Field label="Name"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
+            <Field label="Name">
+              <Input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+            </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Email"><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
-              <Field label="Phone"><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
+              <Field label="Email">
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+              </Field>
+              <Field label="Phone">
+                <Input
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
+              </Field>
             </div>
             <Field label="Languages (comma-separated)">
-              <Input value={form.languages} onChange={(e) => setForm({ ...form, languages: e.target.value })} placeholder="English, Spanish, French" />
+              <Input
+                value={form.languages}
+                onChange={(e) => setForm({ ...form, languages: e.target.value })}
+                placeholder="English, Spanish, French"
+              />
             </Field>
-            <Field label="Bio"><Textarea rows={3} value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} /></Field>
+            <Field label="Bio">
+              <Textarea
+                rows={3}
+                value={form.bio}
+                onChange={(e) => setForm({ ...form, bio: e.target.value })}
+              />
+            </Field>
             <div className="flex items-center justify-between rounded-lg border p-3">
               <Label className="text-sm">Active</Label>
-              <Switch checked={form.active} onCheckedChange={(v) => setForm({ ...form, active: v })} />
+              <Switch
+                checked={form.active}
+                onCheckedChange={(v) => setForm({ ...form, active: v })}
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "Saving…" : "Save"}</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => save.mutate()} disabled={save.isPending}>
+              {save.isPending ? "Saving…" : "Save"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -410,10 +608,26 @@ function GuidesTab({ orgId }: { orgId: string }) {
 // Schedules (departures) tab
 // ============================================================
 type DepartureRow = {
-  id: string; package_id: string; starts_on: string; ends_on: string;
-  price_cents_override: number | null; seats_sold: number; status: string; notes: string | null;
-  tour_packages: { name: string; base_price_cents: number; currency: string; max_capacity: number } | null;
-  tour_departure_guides: Array<{ id: string; guide_id: string; role: string | null; tour_guides: { id: string; name: string } | null }>;
+  id: string;
+  package_id: string;
+  starts_on: string;
+  ends_on: string;
+  price_cents_override: number | null;
+  seats_sold: number;
+  status: string;
+  notes: string | null;
+  tour_packages: {
+    name: string;
+    base_price_cents: number;
+    currency: string;
+    max_capacity: number;
+  } | null;
+  tour_departure_guides: Array<{
+    id: string;
+    guide_id: string;
+    role: string | null;
+    tour_guides: { id: string; name: string } | null;
+  }>;
 };
 
 function SchedulesTab({ orgId }: { orgId: string }) {
@@ -444,21 +658,36 @@ function SchedulesTab({ orgId }: { orgId: string }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<DepartureRow | null>(null);
   const [form, setForm] = useState({
-    packageId: "", startsOn: "", endsOn: "", priceOverride: "",
-    status: "scheduled" as "scheduled" | "confirmed" | "cancelled" | "completed", notes: "",
+    packageId: "",
+    startsOn: "",
+    endsOn: "",
+    priceOverride: "",
+    status: "scheduled" as "scheduled" | "confirmed" | "cancelled" | "completed",
+    notes: "",
   });
 
   function openCreate() {
     setEditing(null);
-    setForm({ packageId: pkgs.data?.[0]?.id ?? "", startsOn: "", endsOn: "", priceOverride: "", status: "scheduled", notes: "" });
+    setForm({
+      packageId: pkgs.data?.[0]?.id ?? "",
+      startsOn: "",
+      endsOn: "",
+      priceOverride: "",
+      status: "scheduled",
+      notes: "",
+    });
     setOpen(true);
   }
   function openEdit(d: DepartureRow) {
     setEditing(d);
     setForm({
-      packageId: d.package_id, startsOn: d.starts_on, endsOn: d.ends_on,
-      priceOverride: d.price_cents_override != null ? (d.price_cents_override / 100).toFixed(2) : "",
-      status: d.status as "scheduled", notes: d.notes ?? "",
+      packageId: d.package_id,
+      startsOn: d.starts_on,
+      endsOn: d.ends_on,
+      priceOverride:
+        d.price_cents_override != null ? (d.price_cents_override / 100).toFixed(2) : "",
+      status: d.status as "scheduled",
+      notes: d.notes ?? "",
     });
     setOpen(true);
   }
@@ -469,7 +698,9 @@ function SchedulesTab({ orgId }: { orgId: string }) {
         packageId: form.packageId,
         startsOn: form.startsOn,
         endsOn: form.endsOn,
-        priceCentsOverride: form.priceOverride ? Math.round((parseFloat(form.priceOverride) || 0) * 100) : null,
+        priceCentsOverride: form.priceOverride
+          ? Math.round((parseFloat(form.priceOverride) || 0) * 100)
+          : null,
         status: form.status,
         notes: form.notes.trim(),
       };
@@ -497,12 +728,19 @@ function SchedulesTab({ orgId }: { orgId: string }) {
   const [assignGuideId, setAssignGuideId] = useState<string>("");
   const [assignRole, setAssignRole] = useState<string>("");
   const assign = useMutation({
-    mutationFn: () => assignFn({ data: {
-      orgId, departureId: assignDep!.id, guideId: assignGuideId, role: assignRole,
-    } }),
+    mutationFn: () =>
+      assignFn({
+        data: {
+          orgId,
+          departureId: assignDep!.id,
+          guideId: assignGuideId,
+          role: assignRole,
+        },
+      }),
     onSuccess: () => {
       toast.success("Guide assigned");
-      setAssignGuideId(""); setAssignRole("");
+      setAssignGuideId("");
+      setAssignRole("");
       qc.invalidateQueries({ queryKey: ["tour-departures"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -517,7 +755,9 @@ function SchedulesTab({ orgId }: { orgId: string }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-9 w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-9 w-[180px]">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
             <SelectItem value="scheduled">Scheduled</SelectItem>
@@ -552,19 +792,30 @@ function SchedulesTab({ orgId }: { orgId: string }) {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold">{d.tour_packages?.name ?? "(deleted package)"}</h3>
+                    <h3 className="font-semibold">
+                      {d.tour_packages?.name ?? "(deleted package)"}
+                    </h3>
                     <StatusBadge status={d.status} />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {fmtDate(d.starts_on)} → {fmtDate(d.ends_on)} · {fmtMoney(price, d.tour_packages?.currency)} · {seats}/{cap} seats ({remaining} left)
+                    {fmtDate(d.starts_on)} → {fmtDate(d.ends_on)} ·{" "}
+                    {fmtMoney(price, d.tour_packages?.currency)} · {seats}/{cap} seats ({remaining}{" "}
+                    left)
                   </p>
                   {d.notes && <p className="mt-1 text-xs text-muted-foreground">{d.notes}</p>}
                   {d.tour_departure_guides.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1">
                       {d.tour_departure_guides.map((a) => (
-                        <Badge key={a.id} variant="outline" className="flex items-center gap-1 text-[10px]">
+                        <Badge
+                          key={a.id}
+                          variant="outline"
+                          className="flex items-center gap-1 text-[10px]"
+                        >
                           {a.tour_guides?.name ?? "guide"} {a.role && `· ${a.role}`}
-                          <button onClick={() => unassign.mutate(a.id)} className="ml-1 hover:text-destructive">
+                          <button
+                            onClick={() => unassign.mutate(a.id)}
+                            className="ml-1 hover:text-destructive"
+                          >
                             <X className="h-3 w-3" />
                           </button>
                         </Badge>
@@ -573,7 +824,14 @@ function SchedulesTab({ orgId }: { orgId: string }) {
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button size="sm" variant="outline" onClick={() => { setAssignDep(d); setAssignGuideId(guides.data?.[0]?.id ?? ""); }}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setAssignDep(d);
+                      setAssignGuideId(guides.data?.[0]?.id ?? "");
+                    }}
+                  >
                     <UserPlus className="h-3.5 w-3.5" /> Assign guide
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => openEdit(d)}>
@@ -595,24 +853,56 @@ function SchedulesTab({ orgId }: { orgId: string }) {
           </DialogHeader>
           <div className="grid gap-3">
             <Field label="Package">
-              <Select value={form.packageId} onValueChange={(v) => setForm({ ...form, packageId: v })}>
-                <SelectTrigger><SelectValue placeholder="Select a package" /></SelectTrigger>
+              <Select
+                value={form.packageId}
+                onValueChange={(v) => setForm({ ...form, packageId: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a package" />
+                </SelectTrigger>
                 <SelectContent>
-                  {pkgs.data?.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                  {pkgs.data?.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Start date"><Input type="date" value={form.startsOn} onChange={(e) => setForm({ ...form, startsOn: e.target.value })} /></Field>
-              <Field label="End date"><Input type="date" value={form.endsOn} onChange={(e) => setForm({ ...form, endsOn: e.target.value })} /></Field>
+              <Field label="Start date">
+                <Input
+                  type="date"
+                  value={form.startsOn}
+                  onChange={(e) => setForm({ ...form, startsOn: e.target.value })}
+                />
+              </Field>
+              <Field label="End date">
+                <Input
+                  type="date"
+                  value={form.endsOn}
+                  onChange={(e) => setForm({ ...form, endsOn: e.target.value })}
+                />
+              </Field>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Price override (optional)">
-                <Input type="number" min={0} step="0.01" value={form.priceOverride} onChange={(e) => setForm({ ...form, priceOverride: e.target.value })} />
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.priceOverride}
+                  onChange={(e) => setForm({ ...form, priceOverride: e.target.value })}
+                />
               </Field>
               <Field label="Status">
-                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as "scheduled" })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={form.status}
+                  onValueChange={(v) => setForm({ ...form, status: v as "scheduled" })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="scheduled">Scheduled</SelectItem>
                     <SelectItem value="confirmed">Confirmed</SelectItem>
@@ -622,17 +912,32 @@ function SchedulesTab({ orgId }: { orgId: string }) {
                 </Select>
               </Field>
             </div>
-            <Field label="Notes"><Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
+            <Field label="Notes">
+              <Textarea
+                rows={3}
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              />
+            </Field>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "Saving…" : "Save"}</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => save.mutate()} disabled={save.isPending}>
+              {save.isPending ? "Saving…" : "Save"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Assign guide dialog */}
-      <Dialog open={!!assignDep} onOpenChange={(v) => { if (!v) setAssignDep(null); }}>
+      <Dialog
+        open={!!assignDep}
+        onOpenChange={(v) => {
+          if (!v) setAssignDep(null);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Assign guide</DialogTitle>
@@ -646,22 +951,36 @@ function SchedulesTab({ orgId }: { orgId: string }) {
             <div className="grid gap-3">
               <Field label="Guide">
                 <Select value={assignGuideId} onValueChange={setAssignGuideId}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    {guides.data.filter((g) => g.active).map((g) => (
-                      <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
-                    ))}
+                    {guides.data
+                      .filter((g) => g.active)
+                      .map((g) => (
+                        <SelectItem key={g.id} value={g.id}>
+                          {g.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </Field>
               <Field label="Role (optional)">
-                <Input value={assignRole} onChange={(e) => setAssignRole(e.target.value)} placeholder="Lead, Driver, Translator…" />
+                <Input
+                  value={assignRole}
+                  onChange={(e) => setAssignRole(e.target.value)}
+                  placeholder="Lead, Driver, Translator…"
+                />
               </Field>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAssignDep(null)}>Close</Button>
-            <Button onClick={() => assign.mutate()} disabled={assign.isPending || !assignGuideId}>Assign</Button>
+            <Button variant="outline" onClick={() => setAssignDep(null)}>
+              Close
+            </Button>
+            <Button onClick={() => assign.mutate()} disabled={assign.isPending || !assignGuideId}>
+              Assign
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -673,10 +992,21 @@ function SchedulesTab({ orgId }: { orgId: string }) {
 // Bookings tab
 // ============================================================
 type BookingRow = {
-  id: string; departure_id: string; guest_name: string; guest_email: string | null;
-  guest_phone: string | null; guests_count: number; total_price_cents: number;
-  currency: string; status: string; notes: string | null;
-  tour_departures: { starts_on: string; ends_on: string; tour_packages: { name: string } | null } | null;
+  id: string;
+  departure_id: string;
+  guest_name: string;
+  guest_email: string | null;
+  guest_phone: string | null;
+  guests_count: number;
+  total_price_cents: number;
+  currency: string;
+  status: string;
+  notes: string | null;
+  tour_departures: {
+    starts_on: string;
+    ends_on: string;
+    tour_packages: { name: string } | null;
+  } | null;
 };
 
 function BookingsTab({ orgId }: { orgId: string }) {
@@ -698,41 +1028,57 @@ function BookingsTab({ orgId }: { orgId: string }) {
   });
 
   const upcomingDeps = useMemo(() => {
-    return (deps.data as DepartureRow[] | undefined)?.filter(
-      (d) => d.status !== "cancelled" && d.status !== "completed",
-    ) ?? [];
+    return (
+      (deps.data as DepartureRow[] | undefined)?.filter(
+        (d) => d.status !== "cancelled" && d.status !== "completed",
+      ) ?? []
+    );
   }, [deps.data]);
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
-    departureId: "", guestName: "", guestEmail: "", guestPhone: "",
-    guestsCount: "1", totalPrice: "0", currency: "USD",
-    status: "pending" as "pending" | "confirmed" | "cancelled" | "paid", notes: "",
+    departureId: "",
+    guestName: "",
+    guestEmail: "",
+    guestPhone: "",
+    guestsCount: "1",
+    totalPrice: "0",
+    currency: "USD",
+    status: "pending" as "pending" | "confirmed" | "cancelled" | "paid",
+    notes: "",
   });
 
   function openCreate() {
     setForm({
       departureId: upcomingDeps[0]?.id ?? "",
-      guestName: "", guestEmail: "", guestPhone: "",
-      guestsCount: "1", totalPrice: "0", currency: "USD",
-      status: "pending", notes: "",
+      guestName: "",
+      guestEmail: "",
+      guestPhone: "",
+      guestsCount: "1",
+      totalPrice: "0",
+      currency: "USD",
+      status: "pending",
+      notes: "",
     });
     setOpen(true);
   }
 
   const save = useMutation({
-    mutationFn: () => createFn({ data: {
-      orgId,
-      departureId: form.departureId,
-      guestName: form.guestName.trim(),
-      guestEmail: form.guestEmail.trim(),
-      guestPhone: form.guestPhone.trim(),
-      guestsCount: Math.max(1, parseInt(form.guestsCount, 10) || 1),
-      totalPriceCents: Math.round((parseFloat(form.totalPrice) || 0) * 100),
-      currency: (form.currency || "USD").toUpperCase(),
-      status: form.status,
-      notes: form.notes.trim(),
-    } }),
+    mutationFn: () =>
+      createFn({
+        data: {
+          orgId,
+          departureId: form.departureId,
+          guestName: form.guestName.trim(),
+          guestEmail: form.guestEmail.trim(),
+          guestPhone: form.guestPhone.trim(),
+          guestsCount: Math.max(1, parseInt(form.guestsCount, 10) || 1),
+          totalPriceCents: Math.round((parseFloat(form.totalPrice) || 0) * 100),
+          currency: (form.currency || "USD").toUpperCase(),
+          status: form.status,
+          notes: form.notes.trim(),
+        },
+      }),
     onSuccess: () => {
       toast.success("Booking created");
       setOpen(false);
@@ -766,7 +1112,9 @@ function BookingsTab({ orgId }: { orgId: string }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-9 w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-9 w-[180px]">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
@@ -811,16 +1159,24 @@ function BookingsTab({ orgId }: { orgId: string }) {
                 </td>
                 <td className="px-3 py-2 text-xs">
                   <div>{b.tour_departures?.tour_packages?.name ?? "—"}</div>
-                  <div className="text-muted-foreground">{fmtDate(b.tour_departures?.starts_on)}</div>
+                  <div className="text-muted-foreground">
+                    {fmtDate(b.tour_departures?.starts_on)}
+                  </div>
                 </td>
                 <td className="px-3 py-2 text-right">{b.guests_count}</td>
-                <td className="px-3 py-2 text-right">{fmtMoney(b.total_price_cents, b.currency)}</td>
+                <td className="px-3 py-2 text-right">
+                  {fmtMoney(b.total_price_cents, b.currency)}
+                </td>
                 <td className="px-3 py-2">
                   <Select
                     value={b.status}
-                    onValueChange={(v) => updateStatus.mutate({ id: b.id, status: v as BookingRow["status"] })}
+                    onValueChange={(v) =>
+                      updateStatus.mutate({ id: b.id, status: v as BookingRow["status"] })
+                    }
                   >
-                    <SelectTrigger className="h-7 w-[130px] text-xs"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-7 w-[130px] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="confirmed">Confirmed</SelectItem>
@@ -845,30 +1201,78 @@ function BookingsTab({ orgId }: { orgId: string }) {
           </DialogHeader>
           <div className="grid gap-3">
             <Field label="Departure">
-              <Select value={form.departureId} onValueChange={(v) => setForm({ ...form, departureId: v })}>
-                <SelectTrigger><SelectValue placeholder="Pick a departure" /></SelectTrigger>
+              <Select
+                value={form.departureId}
+                onValueChange={(v) => setForm({ ...form, departureId: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pick a departure" />
+                </SelectTrigger>
                 <SelectContent>
                   {upcomingDeps.map((d) => (
                     <SelectItem key={d.id} value={d.id}>
-                      {d.tour_packages?.name} · {fmtDate(d.starts_on)} ({(d.tour_packages?.max_capacity ?? 0) - (d.seats_sold ?? 0)} left)
+                      {d.tour_packages?.name} · {fmtDate(d.starts_on)} (
+                      {(d.tour_packages?.max_capacity ?? 0) - (d.seats_sold ?? 0)} left)
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Guest name"><Input value={form.guestName} onChange={(e) => setForm({ ...form, guestName: e.target.value })} /></Field>
+            <Field label="Guest name">
+              <Input
+                value={form.guestName}
+                onChange={(e) => setForm({ ...form, guestName: e.target.value })}
+              />
+            </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Email"><Input type="email" value={form.guestEmail} onChange={(e) => setForm({ ...form, guestEmail: e.target.value })} /></Field>
-              <Field label="Phone"><Input value={form.guestPhone} onChange={(e) => setForm({ ...form, guestPhone: e.target.value })} /></Field>
+              <Field label="Email">
+                <Input
+                  type="email"
+                  value={form.guestEmail}
+                  onChange={(e) => setForm({ ...form, guestEmail: e.target.value })}
+                />
+              </Field>
+              <Field label="Phone">
+                <Input
+                  value={form.guestPhone}
+                  onChange={(e) => setForm({ ...form, guestPhone: e.target.value })}
+                />
+              </Field>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <Field label="Guests"><Input type="number" min={1} value={form.guestsCount} onChange={(e) => setForm({ ...form, guestsCount: e.target.value })} /></Field>
-              <Field label="Total"><Input type="number" min={0} step="0.01" value={form.totalPrice} onChange={(e) => setForm({ ...form, totalPrice: e.target.value })} /></Field>
-              <Field label="Currency"><Input maxLength={3} value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })} /></Field>
+              <Field label="Guests">
+                <Input
+                  type="number"
+                  min={1}
+                  value={form.guestsCount}
+                  onChange={(e) => setForm({ ...form, guestsCount: e.target.value })}
+                />
+              </Field>
+              <Field label="Total">
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.totalPrice}
+                  onChange={(e) => setForm({ ...form, totalPrice: e.target.value })}
+                />
+              </Field>
+              <Field label="Currency">
+                <Input
+                  maxLength={3}
+                  value={form.currency}
+                  onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })}
+                />
+              </Field>
             </div>
             <Field label="Status">
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as "pending" })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={form.status}
+                onValueChange={(v) => setForm({ ...form, status: v as "pending" })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="confirmed">Confirmed</SelectItem>
@@ -877,11 +1281,21 @@ function BookingsTab({ orgId }: { orgId: string }) {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Notes"><Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
+            <Field label="Notes">
+              <Textarea
+                rows={2}
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              />
+            </Field>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={() => save.mutate()} disabled={save.isPending}>{save.isPending ? "Saving…" : "Save"}</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => save.mutate()} disabled={save.isPending}>
+              {save.isPending ? "Saving…" : "Save"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -910,7 +1324,13 @@ function StatusBadge({ status }: { status: string }) {
     pending: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
     paid: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
   };
-  return <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${map[status] ?? "bg-muted"}`}>{status}</span>;
+  return (
+    <span
+      className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${map[status] ?? "bg-muted"}`}
+    >
+      {status}
+    </span>
+  );
 }
 
 function ConfirmDelete({ onConfirm, label }: { onConfirm: () => void; label: string }) {

@@ -196,8 +196,17 @@ export const publishDraft = createServerFn({ method: "POST" })
     const p = draftPayloadSchema.parse(draft.payload ?? {});
 
     // Required fields for a valid listing
-    if (!p.name || !p.category || !p.countyCode || !p.town || !p.description || p.description.length < 20) {
-      throw new Error("Please complete the required fields (name, category, county, town, description) before publishing.");
+    if (
+      !p.name ||
+      !p.category ||
+      !p.countyCode ||
+      !p.town ||
+      !p.description ||
+      p.description.length < 20
+    ) {
+      throw new Error(
+        "Please complete the required fields (name, category, county, town, description) before publishing.",
+      );
     }
 
     const amenitiesSet = new Set<string>(p.amenities ?? []);

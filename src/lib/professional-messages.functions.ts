@@ -44,7 +44,9 @@ const SendInput = z.object({
   customer_id: z.string().uuid().optional(),
   booking_id: z.string().uuid().optional(),
   body: z.string().min(1).max(4000),
-  attachments: z.array(z.object({ path: z.string(), name: z.string(), mime: z.string().optional() })).optional(),
+  attachments: z
+    .array(z.object({ path: z.string(), name: z.string(), mime: z.string().optional() }))
+    .optional(),
 });
 
 export const sendMessage = createServerFn({ method: "POST" })
@@ -98,19 +100,31 @@ export const listMyThreads = createServerFn({ method: "GET" })
         .limit(200);
       if (error) throw new Error(error.message);
       const seen = new Set<string>();
-      const threads = [] as Array<{ professional_id: string; customer_id: string; last: string; at: string }>;
+      const threads = [] as Array<{
+        professional_id: string;
+        customer_id: string;
+        last: string;
+        at: string;
+      }>;
       for (const r of rows ?? []) {
         const key = `${r.professional_id}:${r.customer_id}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        threads.push({ professional_id: r.professional_id, customer_id: r.customer_id, last: r.body ?? "", at: r.created_at });
+        threads.push({
+          professional_id: r.professional_id,
+          customer_id: r.customer_id,
+          last: r.body ?? "",
+          at: r.created_at,
+        });
       }
       return { as: "professional" as const, professional: pro, threads };
     }
 
     const { data: rows, error } = await supabase
       .from("professional_messages")
-      .select("professional_id, customer_id, body, created_at, professional:professionals(business_name, profile_image_path, slug)")
+      .select(
+        "professional_id, customer_id, body, created_at, professional:professionals(business_name, profile_image_path, slug)",
+      )
       .eq("customer_id", userId)
       .order("created_at", { ascending: false })
       .limit(200);

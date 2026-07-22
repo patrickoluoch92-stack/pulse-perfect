@@ -79,7 +79,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "HostPulse" },
-      { name: "description", content: "Hospitality operations for hosts, hotels, lodges, and tour operators." },
+      {
+        name: "description",
+        content: "Hospitality operations for hosts, hotels, lodges, and tour operators.",
+      },
       { name: "author", content: "HostPulse" },
       { name: "theme-color", content: "#1E3A8A" },
       { property: "og:site_name", content: "HostPulse" },

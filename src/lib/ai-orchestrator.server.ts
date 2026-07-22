@@ -152,7 +152,11 @@ async function claimJobs(batchSize: number): Promise<JobRow[]> {
   for (const c of candidates ?? []) {
     const { data: upd, error: uerr } = await sb
       .from("ai_agent_jobs")
-      .update({ status: "running", claimed_at: new Date().toISOString(), attempts: (c.attempts ?? 0) + 1 })
+      .update({
+        status: "running",
+        claimed_at: new Date().toISOString(),
+        attempts: (c.attempts ?? 0) + 1,
+      })
       .eq("id", c.id)
       .eq("status", "queued")
       .select("id, agent_slug, payload, attempts, max_attempts")
@@ -162,7 +166,12 @@ async function claimJobs(batchSize: number): Promise<JobRow[]> {
   return claimed;
 }
 
-async function markJob(id: string, status: "succeeded" | "failed" | "queued" | "dead", err?: string, backoffMs?: number) {
+async function markJob(
+  id: string,
+  status: "succeeded" | "failed" | "queued" | "dead",
+  err?: string,
+  backoffMs?: number,
+) {
   const sb = await admin();
   const patch: Record<string, unknown> = {
     status,
@@ -196,7 +205,11 @@ const AGENT_LOADERS: Record<string, () => Promise<{ run: (payload: any) => Promi
 
 async function agentEnabled(slug: string): Promise<boolean> {
   const sb = await admin();
-  const { data } = await sb.from("ai_agents").select("enabled, paused").eq("slug", slug).maybeSingle();
+  const { data } = await sb
+    .from("ai_agents")
+    .select("enabled, paused")
+    .eq("slug", slug)
+    .maybeSingle();
   if (!data) return true;
   return Boolean(data.enabled) && !data.paused;
 }
@@ -205,7 +218,9 @@ async function agentEnabled(slug: string): Promise<boolean> {
  * Drain up to `batchSize` jobs from the queue, execute their agent, log runs,
  * and reschedule with exponential backoff on failure.
  */
-export async function runTick(batchSize = 8): Promise<{ processed: number; succeeded: number; failed: number }> {
+export async function runTick(
+  batchSize = 8,
+): Promise<{ processed: number; succeeded: number; failed: number }> {
   const jobs = await claimJobs(batchSize);
   let succeeded = 0;
   let failed = 0;
@@ -217,7 +232,12 @@ export async function runTick(batchSize = 8): Promise<{ processed: number; succe
     const loader = AGENT_LOADERS[job.agent_slug];
     if (!loader) {
       await markJob(job.id, "dead", `unknown agent: ${job.agent_slug}`);
-      await recordRun({ agentSlug: job.agent_slug as AgentSlug, jobId: job.id, status: "failed", error: "unknown agent" });
+      await recordRun({
+        agentSlug: job.agent_slug as AgentSlug,
+        jobId: job.id,
+        status: "failed",
+        error: "unknown agent",
+      });
       failed++;
       continue;
     }

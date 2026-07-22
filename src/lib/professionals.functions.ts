@@ -7,11 +7,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { sanitizePostgrestTerm } from "@/lib/safe-fetch";
 
 function publicClient() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
 
 function slugify(input: string): string {
@@ -123,10 +121,29 @@ export const getProfessionalBySlug = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!pro) return null;
     const [services, packages, portfolio, reviews] = await Promise.all([
-      sb.from("professional_services").select("*").eq("professional_id", pro.id).eq("active", true).order("display_order"),
-      sb.from("professional_packages").select("*").eq("professional_id", pro.id).eq("active", true).order("display_order"),
-      sb.from("professional_portfolio").select("*").eq("professional_id", pro.id).order("display_order"),
-      sb.from("professional_reviews").select("*").eq("professional_id", pro.id).order("created_at", { ascending: false }).limit(30),
+      sb
+        .from("professional_services")
+        .select("*")
+        .eq("professional_id", pro.id)
+        .eq("active", true)
+        .order("display_order"),
+      sb
+        .from("professional_packages")
+        .select("*")
+        .eq("professional_id", pro.id)
+        .eq("active", true)
+        .order("display_order"),
+      sb
+        .from("professional_portfolio")
+        .select("*")
+        .eq("professional_id", pro.id)
+        .order("display_order"),
+      sb
+        .from("professional_reviews")
+        .select("*")
+        .eq("professional_id", pro.id)
+        .order("created_at", { ascending: false })
+        .limit(30),
     ]);
     return {
       professional: pro,
@@ -163,7 +180,10 @@ const UpsertInput = z.object({
   tagline: z.string().max(160).optional().nullable(),
   description: z.string().max(4000).optional().nullable(),
   years_experience: z.number().int().min(0).max(80).optional().nullable(),
-  registration_status: z.enum(["individual", "registered_business", "agency"]).optional().nullable(),
+  registration_status: z
+    .enum(["individual", "registered_business", "agency"])
+    .optional()
+    .nullable(),
   registration_number: z.string().max(60).optional().nullable(),
   tax_pin: z.string().max(30).optional().nullable(),
   full_name: z.string().max(120).optional().nullable(),
@@ -192,7 +212,10 @@ const UpsertInput = z.object({
   emergency_bookings: z.boolean().optional(),
   vacation_mode: z.boolean().optional(),
   booking_lead_hours: z.number().int().min(0).max(720).optional(),
-  pricing_model: z.enum(["hourly", "half_day", "full_day", "fixed", "starting_from", "custom_quote"]).optional().nullable(),
+  pricing_model: z
+    .enum(["hourly", "half_day", "full_day", "fixed", "starting_from", "custom_quote"])
+    .optional()
+    .nullable(),
   starting_price: z.number().nonnegative().optional().nullable(),
   travel_charges: z.number().nonnegative().optional().nullable(),
   deposit_percentage: z.number().int().min(0).max(100).optional().nullable(),
@@ -258,7 +281,13 @@ const ServiceInput = z.object({
   professional_id: z.string().uuid(),
   title: z.string().min(2).max(120),
   description: z.string().max(1200).optional().nullable(),
-  duration_minutes: z.number().int().min(0).max(60 * 24 * 30).optional().nullable(),
+  duration_minutes: z
+    .number()
+    .int()
+    .min(0)
+    .max(60 * 24 * 30)
+    .optional()
+    .nullable(),
   pricing_type: z.enum(["hourly", "flat", "starting_from", "quote"]).optional().nullable(),
   base_price: z.number().nonnegative().optional().nullable(),
   active: z.boolean().default(true),
@@ -270,7 +299,11 @@ export const upsertService = createServerFn({ method: "POST" })
     const { id, ...body } = data;
     const q = id
       ? context.supabase.from("professional_services").update(body).eq("id", id).select().single()
-      : context.supabase.from("professional_services").insert(body as any).select().single();
+      : context.supabase
+          .from("professional_services")
+          .insert(body as any)
+          .select()
+          .single();
     const { data: row, error } = await q;
     if (error) throw new Error(error.message);
     return row;
@@ -280,7 +313,10 @@ export const deleteService = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => i)
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("professional_services").delete().eq("id", data.id);
+    const { error } = await context.supabase
+      .from("professional_services")
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -302,7 +338,11 @@ export const upsertPackage = createServerFn({ method: "POST" })
     const { id, ...body } = data;
     const q = id
       ? context.supabase.from("professional_packages").update(body).eq("id", id).select().single()
-      : context.supabase.from("professional_packages").insert(body as any).select().single();
+      : context.supabase
+          .from("professional_packages")
+          .insert(body as any)
+          .select()
+          .single();
     const { data: row, error } = await q;
     if (error) throw new Error(error.message);
     return row;
@@ -311,7 +351,15 @@ export const upsertPackage = createServerFn({ method: "POST" })
 const PortfolioInput = z.object({
   id: z.string().uuid().optional(),
   professional_id: z.string().uuid(),
-  item_type: z.enum(["photo", "video", "project", "certificate", "license", "award", "before_after"]),
+  item_type: z.enum([
+    "photo",
+    "video",
+    "project",
+    "certificate",
+    "license",
+    "award",
+    "before_after",
+  ]),
   title: z.string().max(160).optional().nullable(),
   description: z.string().max(1200).optional().nullable(),
   media_path: z.string().max(500).optional().nullable(),
@@ -326,7 +374,11 @@ export const upsertPortfolioItem = createServerFn({ method: "POST" })
     const { id, ...body } = data;
     const q = id
       ? context.supabase.from("professional_portfolio").update(body).eq("id", id).select().single()
-      : context.supabase.from("professional_portfolio").insert(body as any).select().single();
+      : context.supabase
+          .from("professional_portfolio")
+          .insert(body as any)
+          .select()
+          .single();
     const { data: row, error } = await q;
     if (error) throw new Error(error.message);
     return row;
@@ -336,7 +388,10 @@ export const deletePortfolioItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => i)
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("professional_portfolio").delete().eq("id", data.id);
+    const { error } = await context.supabase
+      .from("professional_portfolio")
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -345,7 +400,10 @@ export const deletePackage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: { id: string }) => i)
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("professional_packages").delete().eq("id", data.id);
+    const { error } = await context.supabase
+      .from("professional_packages")
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -358,13 +416,28 @@ export const getMyProfessionalWorkspace = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const { data: pro, error } = await supabase
-      .from("professionals").select("*").eq("owner_id", userId).maybeSingle();
+      .from("professionals")
+      .select("*")
+      .eq("owner_id", userId)
+      .maybeSingle();
     if (error) throw new Error(error.message);
     if (!pro) return null;
     const [services, packages, portfolio] = await Promise.all([
-      supabase.from("professional_services").select("*").eq("professional_id", pro.id).order("display_order"),
-      supabase.from("professional_packages").select("*").eq("professional_id", pro.id).order("display_order"),
-      supabase.from("professional_portfolio").select("*").eq("professional_id", pro.id).order("display_order"),
+      supabase
+        .from("professional_services")
+        .select("*")
+        .eq("professional_id", pro.id)
+        .order("display_order"),
+      supabase
+        .from("professional_packages")
+        .select("*")
+        .eq("professional_id", pro.id)
+        .order("display_order"),
+      supabase
+        .from("professional_portfolio")
+        .select("*")
+        .eq("professional_id", pro.id)
+        .order("display_order"),
     ]);
     return {
       professional: pro,
@@ -390,13 +463,18 @@ export const adminListProfessionals = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let query = supabaseAdmin
       .from("professionals")
-      .select("id, slug, business_name, professional_name, category_id, county_code, town, status, is_verified, is_featured, quality_score, avg_rating, review_count, created_at, owner_id, email, phone")
+      .select(
+        "id, slug, business_name, professional_name, category_id, county_code, town, status, is_verified, is_featured, quality_score, avg_rating, review_count, created_at, owner_id, email, phone",
+      )
       .order("created_at", { ascending: false })
       .limit(Math.min(data.limit ?? 100, 200));
     if (data.status) query = query.eq("status", data.status);
     if (data.q) {
       const q = sanitizePostgrestTerm(data.q, 40);
-      if (q) query = query.or(`business_name.ilike.%${q}%,professional_name.ilike.%${q}%,slug.ilike.%${q}%`);
+      if (q)
+        query = query.or(
+          `business_name.ilike.%${q}%,professional_name.ilike.%${q}%,slug.ilike.%${q}%`,
+        );
     }
     const { data: rows, error } = await query;
     if (error) throw new Error(error.message);
@@ -405,28 +483,60 @@ export const adminListProfessionals = createServerFn({ method: "POST" })
 
 export const adminModerateProfessional = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: {
-    id: string;
-    action: "approve" | "reject" | "suspend" | "reinstate" | "feature" | "unfeature" | "verify" | "unverify";
-    reason?: string;
-  }) => i)
+  .inputValidator(
+    (i: {
+      id: string;
+      action:
+        | "approve"
+        | "reject"
+        | "suspend"
+        | "reinstate"
+        | "feature"
+        | "unfeature"
+        | "verify"
+        | "unverify";
+      reason?: string;
+    }) => i,
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: Record<string, any> = {};
     switch (data.action) {
-      case "approve": patch.status = "approved"; patch.approved_at = new Date().toISOString(); break;
-      case "reject": patch.status = "rejected"; patch.rejection_reason = data.reason ?? null; break;
-      case "suspend": patch.status = "suspended"; patch.rejection_reason = data.reason ?? null; break;
-      case "reinstate": patch.status = "approved"; break;
-      case "feature": patch.is_featured = true; break;
-      case "unfeature": patch.is_featured = false; break;
-      case "verify": patch.is_verified = true; break;
-      case "unverify": patch.is_verified = false; break;
+      case "approve":
+        patch.status = "approved";
+        patch.approved_at = new Date().toISOString();
+        break;
+      case "reject":
+        patch.status = "rejected";
+        patch.rejection_reason = data.reason ?? null;
+        break;
+      case "suspend":
+        patch.status = "suspended";
+        patch.rejection_reason = data.reason ?? null;
+        break;
+      case "reinstate":
+        patch.status = "approved";
+        break;
+      case "feature":
+        patch.is_featured = true;
+        break;
+      case "unfeature":
+        patch.is_featured = false;
+        break;
+      case "verify":
+        patch.is_verified = true;
+        break;
+      case "unverify":
+        patch.is_verified = false;
+        break;
     }
     const { data: pro, error } = await supabaseAdmin
-      .from("professionals").update(patch as any).eq("id", data.id)
-      .select("id, owner_id, business_name, status").single();
+      .from("professionals")
+      .update(patch as any)
+      .eq("id", data.id)
+      .select("id, owner_id, business_name, status")
+      .single();
     if (error) throw new Error(error.message);
 
     // notify owner
@@ -449,6 +559,8 @@ export const adminModerateProfessional = createServerFn({ method: "POST" })
         body: data.reason ?? pro.business_name,
         linkUrl: "/professionals/dashboard",
       });
-    } catch {}
+    } catch {
+      /* ignore */
+    }
     return pro;
   });

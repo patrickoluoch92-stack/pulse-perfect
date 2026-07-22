@@ -29,9 +29,7 @@ export async function enforceRateLimit(opts: {
   if (error) throw new Error(error.message);
 
   if ((count ?? 0) >= opts.limit) {
-    throw new Error(
-      `Rate limit exceeded: ${opts.limit} per ${opts.windowSec}s for ${opts.bucket}`,
-    );
+    throw new Error(`Rate limit exceeded: ${opts.limit} per ${opts.windowSec}s for ${opts.bucket}`);
   }
 
   await supabaseAdmin.from("rate_limit_events").insert({

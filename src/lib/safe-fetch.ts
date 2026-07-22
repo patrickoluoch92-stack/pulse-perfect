@@ -4,11 +4,7 @@
 // metadata endpoints) and caps response size. Use for any server-side fetch
 // whose target URL is derived from untrusted org/user input.
 
-const PRIVATE_HOST_PATTERNS: RegExp[] = [
-  /^localhost$/i,
-  /\.local$/i,
-  /\.internal$/i,
-];
+const PRIVATE_HOST_PATTERNS: RegExp[] = [/^localhost$/i, /\.local$/i, /\.internal$/i];
 
 // IPv4 ranges: 10/8, 127/8, 169.254/16, 172.16/12, 192.168/16, 100.64/10, 0.0.0.0
 function isPrivateIPv4(host: string): boolean {
@@ -26,16 +22,23 @@ function isPrivateIPv4(host: string): boolean {
 
 function isPrivateIPv6(host: string): boolean {
   const h = host.toLowerCase().replace(/^\[|\]$/g, "");
-  if (h === "::1" || h === "::" ) return true;
+  if (h === "::1" || h === "::") return true;
   if (h.startsWith("fc") || h.startsWith("fd")) return true; // ULA
   if (h.startsWith("fe80")) return true; // link-local
   return false;
 }
 
-export function isPublicHttpUrl(rawUrl: string): { ok: true; url: URL } | { ok: false; reason: string } {
+export function isPublicHttpUrl(
+  rawUrl: string,
+): { ok: true; url: URL } | { ok: false; reason: string } {
   let u: URL;
-  try { u = new URL(rawUrl); } catch { return { ok: false, reason: "invalid URL" }; }
-  if (u.protocol !== "http:" && u.protocol !== "https:") return { ok: false, reason: "unsupported protocol" };
+  try {
+    u = new URL(rawUrl);
+  } catch {
+    return { ok: false, reason: "invalid URL" };
+  }
+  if (u.protocol !== "http:" && u.protocol !== "https:")
+    return { ok: false, reason: "unsupported protocol" };
   const host = u.hostname;
   if (!host) return { ok: false, reason: "missing host" };
   if (PRIVATE_HOST_PATTERNS.some((r) => r.test(host))) return { ok: false, reason: "private host" };
@@ -45,9 +48,9 @@ export function isPublicHttpUrl(rawUrl: string): { ok: true; url: URL } | { ok: 
 }
 
 export type SafeFetchOptions = {
-  maxBytes?: number;      // default 5 MB
-  timeoutMs?: number;     // default 15s
-  maxRedirects?: number;  // default 3
+  maxBytes?: number; // default 5 MB
+  timeoutMs?: number; // default 15s
+  maxRedirects?: number; // default 3
   headers?: Record<string, string>;
 };
 
@@ -103,7 +106,11 @@ export async function safeFetchText(rawUrl: string, opts: SafeFetchOptions = {})
       if (done) break;
       total += value.byteLength;
       if (total > maxBytes) {
-        try { await reader.cancel(); } catch { /* ignore */ }
+        try {
+          await reader.cancel();
+        } catch {
+          /* ignore */
+        }
         throw new Error("Response too large");
       }
       chunks.push(value);
@@ -116,7 +123,10 @@ export async function safeFetchText(rawUrl: string, opts: SafeFetchOptions = {})
 function concatChunks(chunks: Uint8Array[], total: number): Uint8Array {
   const out = new Uint8Array(total);
   let offset = 0;
-  for (const c of chunks) { out.set(c, offset); offset += c.byteLength; }
+  for (const c of chunks) {
+    out.set(c, offset);
+    offset += c.byteLength;
+  }
   return out;
 }
 

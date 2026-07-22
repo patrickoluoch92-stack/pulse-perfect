@@ -9,13 +9,20 @@ const CreateBookingInput = z.object({
   service_id: z.string().uuid().optional().nullable(),
   package_id: z.string().uuid().optional().nullable(),
   event_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  event_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/).optional().nullable(),
+  event_time: z
+    .string()
+    .regex(/^\d{2}:\d{2}(:\d{2})?$/)
+    .optional()
+    .nullable(),
   duration_hours: z.number().positive().max(720).optional().nullable(),
   location_text: z.string().max(400).optional().nullable(),
   location_lat: z.number().optional().nullable(),
   location_lng: z.number().optional().nullable(),
   requirements: z.string().max(2000).optional().nullable(),
-  reference_files: z.array(z.object({ path: z.string(), name: z.string() })).optional().nullable(),
+  reference_files: z
+    .array(z.object({ path: z.string(), name: z.string() }))
+    .optional()
+    .nullable(),
   guest_count: z.number().int().min(0).max(100000).optional().nullable(),
   quoted_amount: z.number().nonnegative().optional().nullable(),
 });
@@ -29,11 +36,19 @@ export const createProfessionalBooking = createServerFn({ method: "POST" })
     // Resolve pricing
     let quoted = data.quoted_amount ?? null;
     if (!quoted && data.package_id) {
-      const { data: pkg } = await supabase.from("professional_packages").select("price").eq("id", data.package_id).maybeSingle();
+      const { data: pkg } = await supabase
+        .from("professional_packages")
+        .select("price")
+        .eq("id", data.package_id)
+        .maybeSingle();
       quoted = pkg?.price ?? null;
     }
     if (!quoted && data.service_id) {
-      const { data: svc } = await supabase.from("professional_services").select("base_price").eq("id", data.service_id).maybeSingle();
+      const { data: svc } = await supabase
+        .from("professional_services")
+        .select("base_price")
+        .eq("id", data.service_id)
+        .maybeSingle();
       quoted = svc?.base_price ?? null;
     }
 
@@ -94,10 +109,27 @@ export const createProfessionalBooking = createServerFn({ method: "POST" })
 
 const UpdateStatusInput = z.object({
   id: z.string().uuid(),
-  action: z.enum(["accept", "decline", "request_info", "propose_alt", "confirm", "start", "complete", "cancel"]),
+  action: z.enum([
+    "accept",
+    "decline",
+    "request_info",
+    "propose_alt",
+    "confirm",
+    "start",
+    "complete",
+    "cancel",
+  ]),
   notes: z.string().max(1500).optional().nullable(),
-  proposed_alt_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
-  proposed_alt_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/).optional().nullable(),
+  proposed_alt_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
+  proposed_alt_time: z
+    .string()
+    .regex(/^\d{2}:\d{2}(:\d{2})?$/)
+    .optional()
+    .nullable(),
 });
 
 export const updateBookingStatus = createServerFn({ method: "POST" })
@@ -133,8 +165,10 @@ export const updateBookingStatus = createServerFn({ method: "POST" })
       cancel: { status: "cancelled", who: "any" },
     };
     const step = map[data.action];
-    if (step.who === "owner" && !isOwner) throw new Error("Only the professional can perform this action");
-    if (step.who === "customer" && !isCustomer) throw new Error("Only the customer can perform this action");
+    if (step.who === "owner" && !isOwner)
+      throw new Error("Only the professional can perform this action");
+    if (step.who === "customer" && !isCustomer)
+      throw new Error("Only the customer can perform this action");
 
     const patch: Record<string, unknown> = { status: step.status };
     if (isOwner) patch.professional_notes = data.notes ?? null;
@@ -185,7 +219,9 @@ export const listMyBookings = createServerFn({ method: "GET" })
     if (data.role === "customer") {
       const { data: rows, error } = await supabase
         .from("professional_bookings")
-        .select("*, professional:professionals(id, slug, business_name, profile_image_path, county_code, town)")
+        .select(
+          "*, professional:professionals(id, slug, business_name, profile_image_path, county_code, town)",
+        )
         .eq("customer_id", userId)
         .order("created_at", { ascending: false })
         .limit(100);

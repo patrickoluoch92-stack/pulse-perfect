@@ -12,8 +12,14 @@ async function requireAdmin(context: any) {
   return supabaseAdmin;
 }
 
-function startOfDayUTC(d = new Date()) { const x = new Date(d); x.setUTCHours(0, 0, 0, 0); return x; }
-function addDays(d: Date, n: number) { return new Date(d.getTime() + n * 86400000); }
+function startOfDayUTC(d = new Date()) {
+  const x = new Date(d);
+  x.setUTCHours(0, 0, 0, 0);
+  return x;
+}
+function addDays(d: Date, n: number) {
+  return new Date(d.getTime() + n * 86400000);
+}
 
 // -----------------------------------------------------------------------------
 // Fraud & Compliance
@@ -28,18 +34,38 @@ export const adminFraudOverview = createServerFn({ method: "GET" })
     const weekAgo = addDays(today, -6);
 
     const [bookings, rateEvents, audit, claims, mpesa] = await Promise.all([
-      s.from("marketplace_bookings").select("id, status, total_amount, created_at, guest_id, property_id").order("created_at", { ascending: false }).limit(500),
-      s.from("rate_limit_events").select("bucket, user_id, created_at").order("created_at", { ascending: false }).limit(200),
-      s.from("audit_logs").select("id, action, actor_id, created_at, metadata").order("created_at", { ascending: false }).limit(100),
-      s.from("property_claims").select("id, status, created_at").order("created_at", { ascending: false }).limit(100),
-      s.from("mpesa_transactions").select("id, status, amount, created_at").order("created_at", { ascending: false }).limit(200),
+      s
+        .from("marketplace_bookings")
+        .select("id, status, total_amount, created_at, guest_id, property_id")
+        .order("created_at", { ascending: false })
+        .limit(500),
+      s
+        .from("rate_limit_events")
+        .select("bucket, user_id, created_at")
+        .order("created_at", { ascending: false })
+        .limit(200),
+      s
+        .from("audit_logs")
+        .select("id, action, actor_id, created_at, metadata")
+        .order("created_at", { ascending: false })
+        .limit(100),
+      s
+        .from("property_claims")
+        .select("id, status, created_at")
+        .order("created_at", { ascending: false })
+        .limit(100),
+      s
+        .from("mpesa_transactions")
+        .select("id, status, amount, created_at")
+        .order("created_at", { ascending: false })
+        .limit(200),
     ]);
 
     const bList = (bookings.data ?? []) as any[];
     const cancelRate = (() => {
-      const wk = bList.filter(b => new Date(b.created_at) >= weekAgo);
+      const wk = bList.filter((b) => new Date(b.created_at) >= weekAgo);
       if (wk.length === 0) return 0;
-      return Math.round((wk.filter(b => b.status === "cancelled").length / wk.length) * 100);
+      return Math.round((wk.filter((b) => b.status === "cancelled").length / wk.length) * 100);
     })();
 
     // Simple heuristic: multiple bookings by same guest same day
@@ -51,18 +77,22 @@ export const adminFraudOverview = createServerFn({ method: "GET" })
     const dupGuests = Array.from(dupMap.entries()).filter(([, n]) => n >= 3).length;
 
     const rateList = (rateEvents.data ?? []) as any[];
-    const throttledUsers = new Set(rateList.map(r => r.user_id)).size;
+    const throttledUsers = new Set(rateList.map((r) => r.user_id)).size;
 
     const mList = (mpesa.data ?? []) as any[];
-    const mpesaFailures = mList.filter(m => m.status === "failed").length;
-    const mpesaSuccess = mList.filter(m => m.status === "success" || m.status === "completed").length;
+    const mpesaFailures = mList.filter((m) => m.status === "failed").length;
+    const mpesaSuccess = mList.filter(
+      (m) => m.status === "success" || m.status === "completed",
+    ).length;
 
     return {
       bookings: {
         totalRecent: bList.length,
-        cancelledWeek: bList.filter(b => b.status === "cancelled" && new Date(b.created_at) >= weekAgo).length,
+        cancelledWeek: bList.filter(
+          (b) => b.status === "cancelled" && new Date(b.created_at) >= weekAgo,
+        ).length,
         cancelRateWeek: cancelRate,
-        highValue: bList.filter(b => Number(b.total_amount ?? 0) > 500000).length,
+        highValue: bList.filter((b) => Number(b.total_amount ?? 0) > 500000).length,
         duplicateSameDay: dupGuests,
       },
       throttling: {
@@ -72,11 +102,14 @@ export const adminFraudOverview = createServerFn({ method: "GET" })
       payments: {
         mpesaFailures,
         mpesaSuccess,
-        failureRate: mpesaSuccess + mpesaFailures > 0 ? Math.round((mpesaFailures / (mpesaSuccess + mpesaFailures)) * 100) : 0,
+        failureRate:
+          mpesaSuccess + mpesaFailures > 0
+            ? Math.round((mpesaFailures / (mpesaSuccess + mpesaFailures)) * 100)
+            : 0,
       },
       claims: {
-        pending: ((claims.data ?? []) as any[]).filter(c => c.status === "pending").length,
-        rejected: ((claims.data ?? []) as any[]).filter(c => c.status === "rejected").length,
+        pending: ((claims.data ?? []) as any[]).filter((c) => c.status === "pending").length,
+        rejected: ((claims.data ?? []) as any[]).filter((c) => c.status === "rejected").length,
       },
       audit: (audit.data ?? []) as any[],
       generatedAt: new Date().toISOString(),
@@ -96,7 +129,11 @@ export const adminCmsOverview = createServerFn({ method: "GET" })
       s.from("kenya_counties").select("id, name, slug").order("name"),
       s.from("discovery_sources").select("id, name, kind, active, last_run_at").order("name"),
       s.from("discovered_properties").select("id, status").limit(1000),
-      s.from("marketplace_property_reviews").select("id, rating, created_at").order("created_at", { ascending: false }).limit(50),
+      s
+        .from("marketplace_property_reviews")
+        .select("id, rating, created_at")
+        .order("created_at", { ascending: false })
+        .limit(50),
       s.from("coupons").select("id, code, active, redeemed_count, max_redemptions"),
     ]);
 
@@ -106,9 +143,9 @@ export const adminCmsOverview = createServerFn({ method: "GET" })
       sources: (sources.data ?? []) as any[],
       discovery: {
         total: dp.length,
-        pending: dp.filter(d => d.status === "pending_review").length,
-        published: dp.filter(d => d.status === "published").length,
-        rejected: dp.filter(d => d.status === "rejected").length,
+        pending: dp.filter((d) => d.status === "pending_review").length,
+        published: dp.filter((d) => d.status === "published").length,
+        rejected: dp.filter((d) => d.status === "rejected").length,
       },
       recentReviews: (reviews.data ?? []) as any[],
       coupons: (coupons.data ?? []) as any[],
@@ -129,33 +166,64 @@ export const adminDevopsOverview = createServerFn({ method: "GET" })
     const weekAgo = addDays(today, -6);
 
     const [errors, syncRuns, webhookDeliveries, discoveryRuns, subEvents] = await Promise.all([
-      s.from("app_errors").select("id, severity, message, route, created_at, metadata").order("created_at", { ascending: false }).limit(100),
-      s.from("external_sync_runs").select("id, status, started_at, finished_at, source, items_processed, errors").order("started_at", { ascending: false }).limit(50),
-      s.from("ical_webhook_deliveries").select("id, status, response_status, attempts, created_at").order("created_at", { ascending: false }).limit(50),
-      s.from("discovery_runs").select("id, status, started_at, finished_at, items_found").order("started_at", { ascending: false }).limit(30),
-      s.from("subscription_events").select("id, kind, created_at").order("created_at", { ascending: false }).limit(30),
+      s
+        .from("app_errors")
+        .select("id, severity, message, route, created_at, metadata")
+        .order("created_at", { ascending: false })
+        .limit(100),
+      s
+        .from("external_sync_runs")
+        .select("id, status, started_at, finished_at, source, items_processed, errors")
+        .order("started_at", { ascending: false })
+        .limit(50),
+      s
+        .from("ical_webhook_deliveries")
+        .select("id, status, response_status, attempts, created_at")
+        .order("created_at", { ascending: false })
+        .limit(50),
+      s
+        .from("discovery_runs")
+        .select("id, status, started_at, finished_at, items_found")
+        .order("started_at", { ascending: false })
+        .limit(30),
+      s
+        .from("subscription_events")
+        .select("id, kind, created_at")
+        .order("created_at", { ascending: false })
+        .limit(30),
     ]);
 
     const eList = (errors.data ?? []) as any[];
-    const bySeverity = eList.reduce((acc, e) => {
-      const k = e.severity ?? "info";
-      acc[k] = (acc[k] ?? 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const bySeverity = eList.reduce(
+      (acc, e) => {
+        const k = e.severity ?? "info";
+        acc[k] = (acc[k] ?? 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     const wh = (webhookDeliveries.data ?? []) as any[];
-    const whFailed = wh.filter(w => (w.status ?? "").toLowerCase() === "failed" || (Number(w.response_status ?? 0) >= 400)).length;
+    const whFailed = wh.filter(
+      (w) => (w.status ?? "").toLowerCase() === "failed" || Number(w.response_status ?? 0) >= 400,
+    ).length;
 
     return {
       errors: {
         recent: eList.slice(0, 25),
-        totalWeek: eList.filter(e => new Date(e.created_at) >= weekAgo).length,
+        totalWeek: eList.filter((e) => new Date(e.created_at) >= weekAgo).length,
         bySeverity,
-        criticalWeek: eList.filter(e => new Date(e.created_at) >= weekAgo && (e.severity === "critical" || e.severity === "error")).length,
+        criticalWeek: eList.filter(
+          (e) =>
+            new Date(e.created_at) >= weekAgo &&
+            (e.severity === "critical" || e.severity === "error"),
+        ).length,
       },
       syncs: {
         recent: (syncRuns.data ?? []) as any[],
-        failedWeek: ((syncRuns.data ?? []) as any[]).filter(r => r.status === "failed" && new Date(r.started_at) >= weekAgo).length,
+        failedWeek: ((syncRuns.data ?? []) as any[]).filter(
+          (r) => r.status === "failed" && new Date(r.started_at) >= weekAgo,
+        ).length,
       },
       webhooks: {
         recent: wh.slice(0, 20),
@@ -169,8 +237,9 @@ export const adminDevopsOverview = createServerFn({ method: "GET" })
         recentEvents: (subEvents.data ?? []) as any[],
       },
       health: {
-        errorsCritical: eList.filter(e => e.severity === "critical").length,
-        status: eList.filter(e => e.severity === "critical").length > 5 ? "degraded" : "operational",
+        errorsCritical: eList.filter((e) => e.severity === "critical").length,
+        status:
+          eList.filter((e) => e.severity === "critical").length > 5 ? "degraded" : "operational",
       },
       generatedAt: new Date().toISOString(),
     };

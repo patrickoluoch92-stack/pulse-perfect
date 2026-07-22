@@ -15,9 +15,16 @@ export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
       { title: "Pricing — HostPulse" },
-      { name: "description", content: "Simple, transparent pricing for hosts, hotels, lodges, and tour operators. Start free, scale as you grow. Pay with card or M-PESA." },
+      {
+        name: "description",
+        content:
+          "Simple, transparent pricing for hosts, hotels, lodges, and tour operators. Start free, scale as you grow. Pay with card or M-PESA.",
+      },
       { property: "og:title", content: "Pricing — HostPulse" },
-      { property: "og:description", content: "Simple, transparent pricing. Card or M-PESA. 14-day free trial." },
+      {
+        property: "og:description",
+        content: "Simple, transparent pricing. Card or M-PESA. 14-day free trial.",
+      },
       { property: "og:url", content: "/pricing" },
       { property: "og:type", content: "product" },
     ],
@@ -26,8 +33,11 @@ export const Route = createFileRoute("/pricing")({
       {
         type: "application/ld+json",
         children: JSON.stringify({
-          "@context": "https://schema.org", "@type": "Product", name: "HostPulse",
-          description: "Hospitality operations platform — reservations, housekeeping, billing, analytics, and tours.",
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: "HostPulse",
+          description:
+            "Hospitality operations platform — reservations, housekeeping, billing, analytics, and tours.",
           offers: [
             { "@type": "Offer", name: "Starter", price: "0", priceCurrency: "USD" },
             { "@type": "Offer", name: "Professional", price: "49", priceCurrency: "USD" },
@@ -66,30 +76,83 @@ interface Tier {
 }
 
 const tiers: Tier[] = [
-  { key: "starter", name: "Starter", price: "$0", cadence: "forever",
+  {
+    key: "starter",
+    name: "Starter",
+    price: "$0",
+    cadence: "forever",
     blurb: "For new hosts validating their first property.",
-    features: ["1 property, up to 3 units", "Reservations & calendar", "iCal sync (1 source)", "Community support"] },
-  { key: "professional", name: "Professional", price: "$49", cadence: "per month",
-    blurb: "For operators running a real, growing business.", featured: true,
-    paddlePriceId: "professional_monthly", mpesaPlan: "professional",
-    features: ["Up to 10 properties", "Housekeeping & guest profiles", "Invoicing & payments", "iCal sync + webhooks", "Email support", "14-day free trial"] },
-  { key: "business", name: "Business", price: "$149", cadence: "per month",
+    features: [
+      "1 property, up to 3 units",
+      "Reservations & calendar",
+      "iCal sync (1 source)",
+      "Community support",
+    ],
+  },
+  {
+    key: "professional",
+    name: "Professional",
+    price: "$49",
+    cadence: "per month",
+    blurb: "For operators running a real, growing business.",
+    featured: true,
+    paddlePriceId: "professional_monthly",
+    mpesaPlan: "professional",
+    features: [
+      "Up to 10 properties",
+      "Housekeeping & guest profiles",
+      "Invoicing & payments",
+      "iCal sync + webhooks",
+      "Email support",
+      "14-day free trial",
+    ],
+  },
+  {
+    key: "business",
+    name: "Business",
+    price: "$149",
+    cadence: "per month",
     blurb: "Teams, tour operators, and multi-brand portfolios.",
-    paddlePriceId: "business_monthly", mpesaPlan: "business",
-    features: ["Unlimited properties", "Tour operator module", "Roles, SSO & MFA", "Audit exports & SLAs", "Priority support", "14-day free trial"] },
-  { key: "enterprise", name: "Enterprise", price: "Custom", cadence: "contact sales",
+    paddlePriceId: "business_monthly",
+    mpesaPlan: "business",
+    features: [
+      "Unlimited properties",
+      "Tour operator module",
+      "Roles, SSO & MFA",
+      "Audit exports & SLAs",
+      "Priority support",
+      "14-day free trial",
+    ],
+  },
+  {
+    key: "enterprise",
+    name: "Enterprise",
+    price: "Custom",
+    cadence: "contact sales",
     blurb: "Custom contracts, dedicated infrastructure, and white-glove onboarding.",
-    features: ["Everything in Business", "Dedicated support engineer", "Custom SLAs & DPA", "Volume discount"] },
+    features: [
+      "Everything in Business",
+      "Dedicated support engineer",
+      "Custom SLAs & DPA",
+      "Volume discount",
+    ],
+  },
 ];
 
 function PricingPage() {
   const fetchCtx = useServerFn(getWorkspaceContext);
-  const ctx = useQuery({ queryKey: ["workspace-context-pricing"], queryFn: () => fetchCtx(), retry: false });
+  const ctx = useQuery({
+    queryKey: ["workspace-context-pricing"],
+    queryFn: () => fetchCtx(),
+    retry: false,
+  });
   const user = ctx.data?.profile;
   const orgId = ctx.data?.currentOrg?.id;
 
   const { openCheckout, loading } = usePaddleCheckout();
-  const [mpesa, setMpesa] = useState<{ plan: "professional" | "business"; amount: number } | null>(null);
+  const [mpesa, setMpesa] = useState<{ plan: "professional" | "business"; amount: number } | null>(
+    null,
+  );
 
   const onCardCheckout = async (tier: Tier) => {
     if (!user || !orgId) {
@@ -110,7 +173,10 @@ function PricingPage() {
   };
 
   const onMpesaClick = (tier: Tier) => {
-    if (!user || !orgId) { window.location.href = "/auth?mode=signup"; return; }
+    if (!user || !orgId) {
+      window.location.href = "/auth?mode=signup";
+      return;
+    }
     if (!tier.mpesaPlan) return;
     setMpesa({ plan: tier.mpesaPlan, amount: MPESA_PLAN_PRICES[tier.mpesaPlan] });
   };
@@ -127,18 +193,29 @@ function PricingPage() {
             <span className="font-display text-xl font-semibold tracking-tight">HostPulse</span>
           </Link>
           <nav className="flex items-center gap-2">
-            <Button asChild variant="ghost"><Link to="/pricing">Pricing</Link></Button>
-            <Button asChild variant="ghost"><Link to="/auth">Sign in</Link></Button>
-            <Button asChild><Link to="/auth" search={{ mode: "signup" }}>Get started</Link></Button>
+            <Button asChild variant="ghost">
+              <Link to="/pricing">Pricing</Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link to="/auth">Sign in</Link>
+            </Button>
+            <Button asChild>
+              <Link to="/auth" search={{ mode: "signup" }}>
+                Get started
+              </Link>
+            </Button>
           </nav>
         </div>
       </header>
 
       <main className="mx-auto max-w-6xl px-6 pt-20 pb-24">
         <div className="text-center">
-          <p className="mb-4 text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Pricing</p>
+          <p className="mb-4 text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            Pricing
+          </p>
           <h1 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
-            Simple pricing.<br />
+            Simple pricing.
+            <br />
             <span className="text-primary italic">Honest math.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
@@ -148,12 +225,22 @@ function PricingPage() {
 
         <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {tiers.map((t) => (
-            <div key={t.key}
-              className={"rounded-2xl border p-6 shadow-sm transition-shadow hover:shadow-md " +
-                (t.featured ? "border-primary bg-card ring-2 ring-primary/20" : "border-border/60 bg-card")}>
+            <div
+              key={t.key}
+              className={
+                "rounded-2xl border p-6 shadow-sm transition-shadow hover:shadow-md " +
+                (t.featured
+                  ? "border-primary bg-card ring-2 ring-primary/20"
+                  : "border-border/60 bg-card")
+              }
+            >
               <div className="flex items-baseline justify-between">
                 <h3 className="font-display text-xl font-semibold">{t.name}</h3>
-                {t.featured && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">Popular</span>}
+                {t.featured && (
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                    Popular
+                  </span>
+                )}
               </div>
               <p className="mt-2 text-sm text-muted-foreground">{t.blurb}</p>
               <div className="mt-6 flex items-baseline gap-1">
@@ -171,11 +258,18 @@ function PricingPage() {
               <div className="mt-8 space-y-2">
                 {t.key === "starter" && (
                   <Button asChild className="w-full" variant="outline">
-                    <Link to="/auth" search={{ mode: "signup" }}>Start free</Link>
+                    <Link to="/auth" search={{ mode: "signup" }}>
+                      Start free
+                    </Link>
                   </Button>
                 )}
                 {t.paddlePriceId && (
-                  <Button onClick={() => onCardCheckout(t)} disabled={loading} className="w-full" variant={t.featured ? "default" : "outline"}>
+                  <Button
+                    onClick={() => onCardCheckout(t)}
+                    disabled={loading}
+                    className="w-full"
+                    variant={t.featured ? "default" : "outline"}
+                  >
                     <CreditCard className="h-4 w-4" /> Pay with card
                   </Button>
                 )}
@@ -186,7 +280,9 @@ function PricingPage() {
                 )}
                 {t.key === "enterprise" && (
                   <Button asChild className="w-full" variant="outline">
-                    <a href="mailto:sales@hostpulse.app?subject=Enterprise plan inquiry">Contact sales</a>
+                    <a href="mailto:sales@hostpulse.app?subject=Enterprise plan inquiry">
+                      Contact sales
+                    </a>
                   </Button>
                 )}
               </div>
@@ -195,7 +291,9 @@ function PricingPage() {
         </div>
 
         <section className="mt-24">
-          <h2 className="font-display text-3xl font-semibold tracking-tight">Frequently asked questions</h2>
+          <h2 className="font-display text-3xl font-semibold tracking-tight">
+            Frequently asked questions
+          </h2>
           <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
             {faqs.map((f) => (
               <div key={f.q} className="rounded-xl border border-border/60 bg-card p-5">
@@ -212,16 +310,30 @@ function PricingPage() {
       </footer>
 
       {mpesa && orgId && (
-        <MpesaCheckoutDialog open onOpenChange={(o) => !o && setMpesa(null)}
-          orgId={orgId} plan={mpesa.plan} amountKes={mpesa.amount} />
+        <MpesaCheckoutDialog
+          open
+          onOpenChange={(o) => !o && setMpesa(null)}
+          orgId={orgId}
+          plan={mpesa.plan}
+          amountKes={mpesa.amount}
+        />
       )}
     </div>
   );
 }
 
 const faqs = [
-  { q: "Is there a free trial?", a: "Yes — 14 days on Professional and Business. No card required." },
-  { q: "Can I pay with M-PESA?", a: "Yes. Choose 'Pay with M-PESA' on any paid plan to get an STK Push to your phone. Charged in KES (≈$49 → KES 6,500, $149 → KES 19,500)." },
+  {
+    q: "Is there a free trial?",
+    a: "Yes — 14 days on Professional and Business. No card required.",
+  },
+  {
+    q: "Can I pay with M-PESA?",
+    a: "Yes. Choose 'Pay with M-PESA' on any paid plan to get an STK Push to your phone. Charged in KES (≈$49 → KES 6,500, $149 → KES 19,500).",
+  },
   { q: "Do you charge per booking?", a: "No. Pricing is per workspace, not per reservation." },
-  { q: "Can I cancel anytime?", a: "Yes. Card subscriptions cancel from your billing settings; M-PESA payments are monthly and simply expire if you don't renew." },
+  {
+    q: "Can I cancel anytime?",
+    a: "Yes. Card subscriptions cancel from your billing settings; M-PESA payments are monthly and simply expire if you don't renew.",
+  },
 ];

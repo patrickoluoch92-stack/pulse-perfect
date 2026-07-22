@@ -26,10 +26,7 @@ export const Route = createFileRoute("/api/public/ical/$token")({
         const ua = request.headers.get("user-agent")?.slice(0, 300) ?? null;
         const ip = clientIp(request);
 
-        const log = (
-          status: string,
-          unit: { id?: string; org_id?: string } | null,
-        ) =>
+        const log = (status: string, unit: { id?: string; org_id?: string } | null) =>
           supabaseAdmin
             .from("ical_access_log")
             .insert({
@@ -40,7 +37,10 @@ export const Route = createFileRoute("/api/public/ical/$token")({
               ip,
               user_agent: ua,
             })
-            .then(() => undefined, () => undefined);
+            .then(
+              () => undefined,
+              () => undefined,
+            );
 
         // Strict format check before any DB lookup.
         if (!/^[a-f0-9]{32,128}$/.test(raw)) {

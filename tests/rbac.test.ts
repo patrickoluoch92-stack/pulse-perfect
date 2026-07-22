@@ -22,8 +22,15 @@ function makeCtx(opts: { platformRoles?: string[]; orgRoles?: Record<string, str
       } = { table, eq: {} };
       const builder: any = {
         select: () => builder,
-        eq: (k: string, v: unknown) => { state.eq[k] = v; return builder; },
-        in: (k: string, v: string[]) => { state.inKey = k; state.inValues = v; return builder; },
+        eq: (k: string, v: unknown) => {
+          state.eq[k] = v;
+          return builder;
+        },
+        in: (k: string, v: string[]) => {
+          state.inKey = k;
+          state.inValues = v;
+          return builder;
+        },
         maybeSingle: () => {
           state._maybeSingle = true;
           return runQuery(state, opts).then((rows) => ({ data: rows[0] ?? null }));

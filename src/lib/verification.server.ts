@@ -32,10 +32,10 @@ export type Check = {
 };
 
 export type VerificationReport = {
-  score: number;             // 0-100
-  publishReady: boolean;     // no critical failures
+  score: number; // 0-100
+  publishReady: boolean; // no critical failures
   checks: Check[];
-  missing: string[];         // field ids
+  missing: string[]; // field ids
 };
 
 // Kenya latitude/longitude bounds (approx).
@@ -49,7 +49,10 @@ function priceOf(p: VerificationRow): number | null {
 export function verifyProperty(p: VerificationRow): VerificationReport {
   const checks: Check[] = [];
   const missing: string[] = [];
-  const push = (c: Check) => { checks.push(c); if (!c.ok && c.severity === "critical") missing.push(c.id); };
+  const push = (c: Check) => {
+    checks.push(c);
+    if (!c.ok && c.severity === "critical") missing.push(c.id);
+  };
 
   push({
     id: "name",
@@ -83,9 +86,12 @@ export function verifyProperty(p: VerificationRow): VerificationReport {
   });
 
   const hasCoords = typeof p.latitude === "number" && typeof p.longitude === "number";
-  const inKenya = hasCoords &&
-    p.latitude! >= KE_LAT[0] && p.latitude! <= KE_LAT[1] &&
-    p.longitude! >= KE_LNG[0] && p.longitude! <= KE_LNG[1];
+  const inKenya =
+    hasCoords &&
+    p.latitude! >= KE_LAT[0] &&
+    p.latitude! <= KE_LAT[1] &&
+    p.longitude! >= KE_LNG[0] &&
+    p.longitude! <= KE_LNG[1];
   push({
     id: "coords",
     label: "GPS pin inside Kenya",

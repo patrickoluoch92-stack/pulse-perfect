@@ -13,9 +13,21 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 type SB = any;
 
 export const MOBILITY_CATEGORIES = [
-  "self_drive", "chauffeur", "airport_transfer", "taxi", "shuttle",
-  "executive", "luxury", "wedding", "safari_4x4", "tour_van", "camper",
-  "bus", "motorcycle", "bicycle", "boat",
+  "self_drive",
+  "chauffeur",
+  "airport_transfer",
+  "taxi",
+  "shuttle",
+  "executive",
+  "luxury",
+  "wedding",
+  "safari_4x4",
+  "tour_van",
+  "camper",
+  "bus",
+  "motorcycle",
+  "bicycle",
+  "boat",
 ] as const;
 export type MobilityCategory = (typeof MOBILITY_CATEGORIES)[number];
 
@@ -40,28 +52,74 @@ export const MOBILITY_CATEGORY_LABELS: Record<MobilityCategory, string> = {
 // Granular vehicle body/type classification (what the vehicle *is*),
 // distinct from service categories above (how it's rented out).
 export const MOBILITY_VEHICLE_TYPES = [
-  "economy", "compact", "sedan", "hatchback", "station_wagon",
-  "suv", "crossover", "4x4", "pickup", "van", "minivan", "passenger_van",
-  "tour_van", "safari_land_cruiser", "luxury_sedan", "luxury_suv",
-  "sports", "convertible", "limousine", "wedding_car",
-  "electric", "hybrid", "camper", "bus", "motorcycle", "scooter", "bicycle", "boat",
+  "economy",
+  "compact",
+  "sedan",
+  "hatchback",
+  "station_wagon",
+  "suv",
+  "crossover",
+  "4x4",
+  "pickup",
+  "van",
+  "minivan",
+  "passenger_van",
+  "tour_van",
+  "safari_land_cruiser",
+  "luxury_sedan",
+  "luxury_suv",
+  "sports",
+  "convertible",
+  "limousine",
+  "wedding_car",
+  "electric",
+  "hybrid",
+  "camper",
+  "bus",
+  "motorcycle",
+  "scooter",
+  "bicycle",
+  "boat",
 ] as const;
 export type MobilityVehicleType = (typeof MOBILITY_VEHICLE_TYPES)[number];
 
 export const MOBILITY_VEHICLE_TYPE_LABELS: Record<MobilityVehicleType, string> = {
-  economy: "Economy", compact: "Compact", sedan: "Sedan", hatchback: "Hatchback",
-  station_wagon: "Station wagon", suv: "SUV", crossover: "Crossover", "4x4": "4x4",
-  pickup: "Pickup truck", van: "Van", minivan: "Minivan", passenger_van: "Passenger van",
-  tour_van: "Tour van", safari_land_cruiser: "Safari Land Cruiser",
-  luxury_sedan: "Luxury sedan", luxury_suv: "Luxury SUV", sports: "Sports car",
-  convertible: "Convertible", limousine: "Limousine", wedding_car: "Wedding car",
-  electric: "Electric", hybrid: "Hybrid", camper: "Camper van",
-  bus: "Bus", motorcycle: "Motorcycle", scooter: "Scooter", bicycle: "Bicycle", boat: "Boat",
+  economy: "Economy",
+  compact: "Compact",
+  sedan: "Sedan",
+  hatchback: "Hatchback",
+  station_wagon: "Station wagon",
+  suv: "SUV",
+  crossover: "Crossover",
+  "4x4": "4x4",
+  pickup: "Pickup truck",
+  van: "Van",
+  minivan: "Minivan",
+  passenger_van: "Passenger van",
+  tour_van: "Tour van",
+  safari_land_cruiser: "Safari Land Cruiser",
+  luxury_sedan: "Luxury sedan",
+  luxury_suv: "Luxury SUV",
+  sports: "Sports car",
+  convertible: "Convertible",
+  limousine: "Limousine",
+  wedding_car: "Wedding car",
+  electric: "Electric",
+  hybrid: "Hybrid",
+  camper: "Camper van",
+  bus: "Bus",
+  motorcycle: "Motorcycle",
+  scooter: "Scooter",
+  bicycle: "Bicycle",
+  boat: "Boat",
 };
 
-
 function slugify(s: string) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
 }
 
 function publicSb(): SB {
@@ -71,7 +129,8 @@ function publicSb(): SB {
     global: {
       fetch: (input, init) => {
         const h = new Headers(init?.headers);
-        if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
+        if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`)
+          h.delete("Authorization");
         h.set("apikey", key);
         return fetch(input, { ...init, headers: h });
       },
@@ -90,7 +149,10 @@ const ProviderInput = z.object({
   contactPhone: z.string().max(40).optional(),
   website: z.string().url().optional(),
   serviceAreas: z.array(z.string()).max(50).optional(),
-  serviceCategories: z.array(z.enum(MOBILITY_CATEGORIES)).max(MOBILITY_CATEGORIES.length).optional(),
+  serviceCategories: z
+    .array(z.enum(MOBILITY_CATEGORIES))
+    .max(MOBILITY_CATEGORIES.length)
+    .optional(),
   businessRegNumber: z.string().max(80).optional(),
   licenseNumber: z.string().max(80).optional(),
   taxPin: z.string().max(40).optional(),
@@ -105,10 +167,15 @@ const ProviderInput = z.object({
   policies: z.string().max(6000).optional(),
   terms: z.string().max(6000).optional(),
   coverImageUrl: z.string().url().optional(),
-  verificationDocs: z.array(z.object({
-    label: z.string().max(120),
-    url: z.string().url(),
-  })).max(20).optional(),
+  verificationDocs: z
+    .array(
+      z.object({
+        label: z.string().max(120),
+        url: z.string().url(),
+      }),
+    )
+    .max(20)
+    .optional(),
 });
 
 export const upsertMobilityProvider = createServerFn({ method: "POST" })
@@ -143,14 +210,21 @@ export const upsertMobilityProvider = createServerFn({ method: "POST" })
       cover_image_url: data.coverImageUrl ?? null,
     };
     if (data.id) {
-      const { data: row, error } = await sb.from("mobility_providers")
-        .update(payload).eq("id", data.id).select("*").single();
+      const { data: row, error } = await sb
+        .from("mobility_providers")
+        .update(payload)
+        .eq("id", data.id)
+        .select("*")
+        .single();
       if (error) throw new Error(error.message);
       return { provider: row };
     }
     const slug = `${slugify(data.name)}-${Math.random().toString(36).slice(2, 6)}`;
-    const { data: row, error } = await sb.from("mobility_providers")
-      .insert({ ...payload, slug }).select("*").single();
+    const { data: row, error } = await sb
+      .from("mobility_providers")
+      .insert({ ...payload, slug })
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return { provider: row };
   });
@@ -159,8 +233,10 @@ export const listMyMobilityProviders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const sb = context.supabase as SB;
-    const { data } = await sb.from("mobility_providers")
-      .select("*").order("created_at", { ascending: false });
+    const { data } = await sb
+      .from("mobility_providers")
+      .select("*")
+      .order("created_at", { ascending: false });
     return { providers: data ?? [] };
   });
 
@@ -169,8 +245,10 @@ export const submitMobilityProviderForVerification = createServerFn({ method: "P
   .inputValidator((v: unknown) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const { error } = await sb.from("mobility_providers")
-      .update({ verification_status: "pending" }).eq("id", data.id);
+    const { error } = await sb
+      .from("mobility_providers")
+      .update({ verification_status: "pending" })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -186,7 +264,12 @@ const VehicleInput = z.object({
   model: z.string().min(1).max(80),
   trim: z.string().max(60).optional(),
   color: z.string().max(30).optional(),
-  year: z.number().int().min(1980).max(new Date().getFullYear() + 1).optional(),
+  year: z
+    .number()
+    .int()
+    .min(1980)
+    .max(new Date().getFullYear() + 1)
+    .optional(),
   transmission: z.enum(["automatic", "manual"]).optional(),
   fuelType: z.string().max(30).optional(),
   seats: z.number().int().min(1).max(80).optional(),
@@ -272,14 +355,21 @@ export const upsertMobilityVehicle = createServerFn({ method: "POST" })
       instant_book: data.instantBook ?? false,
     };
     if (data.id) {
-      const { data: row, error } = await sb.from("mobility_vehicles")
-        .update(payload).eq("id", data.id).select("*").single();
+      const { data: row, error } = await sb
+        .from("mobility_vehicles")
+        .update(payload)
+        .eq("id", data.id)
+        .select("*")
+        .single();
       if (error) throw new Error(error.message);
       return { vehicle: row };
     }
     const slug = `${slugify(`${data.make}-${data.model}-${data.year ?? ""}`)}-${Math.random().toString(36).slice(2, 6)}`;
-    const { data: row, error } = await sb.from("mobility_vehicles")
-      .insert({ ...payload, slug, status: "draft" }).select("*").single();
+    const { data: row, error } = await sb
+      .from("mobility_vehicles")
+      .insert({ ...payload, slug, status: "draft" })
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return { vehicle: row };
   });
@@ -289,21 +379,29 @@ export const submitMobilityVehicle = createServerFn({ method: "POST" })
   .inputValidator((v: unknown) => z.object({ id: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const { error } = await sb.from("mobility_vehicles")
-      .update({ status: "pending" }).eq("id", data.id);
+    const { error } = await sb
+      .from("mobility_vehicles")
+      .update({ status: "pending" })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
 export const listMyMobilityVehicles = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({
-    orgId: z.string().uuid().optional(),
-    includeArchived: z.boolean().default(false),
-  }).parse(v ?? {}))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        orgId: z.string().uuid().optional(),
+        includeArchived: z.boolean().default(false),
+      })
+      .parse(v ?? {}),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    let q = sb.from("mobility_vehicles").select("*, mobility_providers(name, slug)")
+    let q = sb
+      .from("mobility_vehicles")
+      .select("*, mobility_providers(name, slug)")
       .order("created_at", { ascending: false });
     if (data.orgId) q = q.eq("org_id", data.orgId);
     if (!data.includeArchived) q = q.eq("is_archived", false);
@@ -313,16 +411,24 @@ export const listMyMobilityVehicles = createServerFn({ method: "POST" })
 
 export const archiveMobilityVehicle = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({
-    id: z.string().uuid(), archived: z.boolean().default(true),
-  }).parse(v))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        archived: z.boolean().default(true),
+      })
+      .parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const { error } = await sb.from("mobility_vehicles").update({
-      is_archived: data.archived,
-      archived_at: data.archived ? new Date().toISOString() : null,
-      status: data.archived ? "archived" : "draft",
-    }).eq("id", data.id);
+    const { error } = await sb
+      .from("mobility_vehicles")
+      .update({
+        is_archived: data.archived,
+        archived_at: data.archived ? new Date().toISOString() : null,
+        status: data.archived ? "archived" : "draft",
+      })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -337,7 +443,6 @@ export const deleteMobilityVehicle = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-
 export const getMyMobilityVehicle = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((v: unknown) => z.object({ id: z.string().uuid() }).parse(v))
@@ -347,7 +452,11 @@ export const getMyMobilityVehicle = createServerFn({ method: "POST" })
       sb.from("mobility_vehicles").select("*").eq("id", data.id).maybeSingle(),
       sb.from("mobility_vehicle_rates").select("*").eq("vehicle_id", data.id).order("unit"),
       sb.from("mobility_vehicle_images").select("*").eq("vehicle_id", data.id).order("sort_order"),
-      sb.from("mobility_availability_blocks").select("*").eq("vehicle_id", data.id).order("start_at"),
+      sb
+        .from("mobility_availability_blocks")
+        .select("*")
+        .eq("vehicle_id", data.id)
+        .order("start_at"),
       sb.from("mobility_seasonal_rates").select("*").eq("vehicle_id", data.id).order("starts_on"),
     ]);
     return {
@@ -362,13 +471,17 @@ export const getMyMobilityVehicle = createServerFn({ method: "POST" })
 // ---------- RATES ----------
 const RatesInput = z.object({
   vehicleId: z.string().uuid(),
-  rates: z.array(z.object({
-    unit: z.enum(["hour", "day", "week", "month"]),
-    priceKes: z.number().nonnegative(),
-    minUnits: z.number().int().min(1).default(1),
-    includedKm: z.number().int().min(0).optional(),
-    extraKmKes: z.number().min(0).optional(),
-  })).max(4),
+  rates: z
+    .array(
+      z.object({
+        unit: z.enum(["hour", "day", "week", "month"]),
+        priceKes: z.number().nonnegative(),
+        minUnits: z.number().int().min(1).default(1),
+        includedKm: z.number().int().min(0).optional(),
+        extraKmKes: z.number().min(0).optional(),
+      }),
+    )
+    .max(4),
 });
 
 export const setMobilityVehicleRates = createServerFn({ method: "POST" })
@@ -378,14 +491,17 @@ export const setMobilityVehicleRates = createServerFn({ method: "POST" })
     const sb = context.supabase as SB;
     // Upsert per unit
     for (const r of data.rates) {
-      const { error } = await sb.from("mobility_vehicle_rates").upsert({
-        vehicle_id: data.vehicleId,
-        unit: r.unit,
-        price_kes: r.priceKes,
-        min_units: r.minUnits,
-        included_km: r.includedKm ?? null,
-        extra_km_kes: r.extraKmKes ?? null,
-      }, { onConflict: "vehicle_id,unit" });
+      const { error } = await sb.from("mobility_vehicle_rates").upsert(
+        {
+          vehicle_id: data.vehicleId,
+          unit: r.unit,
+          price_kes: r.priceKes,
+          min_units: r.minUnits,
+          included_km: r.includedKm ?? null,
+          extra_km_kes: r.extraKmKes ?? null,
+        },
+        { onConflict: "vehicle_id,unit" },
+      );
       if (error) throw new Error(error.message);
     }
     return { ok: true };
@@ -404,7 +520,9 @@ const SeasonalRateInput = z.object({
 
 export const upsertMobilitySeasonalRate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => SeasonalRateInput.extend({ id: z.string().uuid().optional() }).parse(v))
+  .inputValidator((v: unknown) =>
+    SeasonalRateInput.extend({ id: z.string().uuid().optional() }).parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
     const payload = {
@@ -435,22 +553,31 @@ export const deleteMobilitySeasonalRate = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-
-
 // ---------- IMAGES ----------
 export const addMobilityVehicleImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({
-    vehicleId: z.string().uuid(),
-    url: z.string().url(),
-    alt: z.string().max(200).optional(),
-    sortOrder: z.number().int().min(0).default(0),
-  }).parse(v))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        vehicleId: z.string().uuid(),
+        url: z.string().url(),
+        alt: z.string().max(200).optional(),
+        sortOrder: z.number().int().min(0).default(0),
+      })
+      .parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const { data: row, error } = await sb.from("mobility_vehicle_images")
-      .insert({ vehicle_id: data.vehicleId, url: data.url, alt: data.alt ?? null, sort_order: data.sortOrder })
-      .select("*").single();
+    const { data: row, error } = await sb
+      .from("mobility_vehicle_images")
+      .insert({
+        vehicle_id: data.vehicleId,
+        url: data.url,
+        alt: data.alt ?? null,
+        sort_order: data.sortOrder,
+      })
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
     return { image: row };
   });
@@ -467,12 +594,16 @@ export const deleteMobilityVehicleImage = createServerFn({ method: "POST" })
 // ---------- AVAILABILITY ----------
 export const blockMobilityDates = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({
-    vehicleId: z.string().uuid(),
-    startAt: z.string(),
-    endAt: z.string(),
-    reason: z.string().max(200).optional(),
-  }).parse(v))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        vehicleId: z.string().uuid(),
+        startAt: z.string(),
+        endAt: z.string(),
+        reason: z.string().max(200).optional(),
+      })
+      .parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
     const { error } = await sb.from("mobility_availability_blocks").insert({
@@ -524,8 +655,11 @@ export const searchMobilityVehicles = createServerFn({ method: "POST" })
   .inputValidator((v: unknown) => SearchInput.parse(v ?? {}))
   .handler(async ({ data }) => {
     const sb = publicSb();
-    let q = sb.from("mobility_vehicles")
-      .select("id, slug, category, vehicle_type, make, model, trim, color, year, transmission, fuel_type, drive_type, seats, luggage, has_ac, has_gps, is_luxury, is_electric, is_hybrid, is_wedding, is_safari, instant_book, promo_price_kes, county_code, town, description, rating_avg, rating_count, mobility_vehicle_images(url, alt, sort_order), mobility_vehicle_rates(unit, price_kes)")
+    let q = sb
+      .from("mobility_vehicles")
+      .select(
+        "id, slug, category, vehicle_type, make, model, trim, color, year, transmission, fuel_type, drive_type, seats, luggage, has_ac, has_gps, is_luxury, is_electric, is_hybrid, is_wedding, is_safari, instant_book, promo_price_kes, county_code, town, description, rating_avg, rating_count, mobility_vehicle_images(url, alt, sort_order), mobility_vehicle_rates(unit, price_kes)",
+      )
       .eq("status", "approved")
       .order("is_featured", { ascending: false })
       .order("rating_avg", { ascending: false, nullsFirst: false })
@@ -551,29 +685,37 @@ export const searchMobilityVehicles = createServerFn({ method: "POST" })
     if (data.query) {
       const { sanitizePostgrestTerm } = await import("@/lib/safe-fetch");
       const clean = sanitizePostgrestTerm(data.query);
-      if (clean) q = q.or(`make.ilike.%${clean}%,model.ilike.%${clean}%,description.ilike.%${clean}%`);
+      if (clean)
+        q = q.or(`make.ilike.%${clean}%,model.ilike.%${clean}%,description.ilike.%${clean}%`);
     }
-    let { data: rows, error } = await q;
+    const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     let vehicles = rows ?? [];
     if (data.priceMaxKes) {
       vehicles = vehicles.filter((v: any) => {
-        const rates = (v.mobility_vehicle_rates ?? []) as Array<{ unit: string; price_kes: number }>;
-        const daily = rates.find(r => r.unit === "day")?.price_kes;
+        const rates = (v.mobility_vehicle_rates ?? []) as Array<{
+          unit: string;
+          price_kes: number;
+        }>;
+        const daily = rates.find((r) => r.unit === "day")?.price_kes;
         return daily != null && Number(daily) <= data.priceMaxKes!;
       });
     }
     return { vehicles };
   });
 
-
 export const getPublicMobilityVehicle = createServerFn({ method: "POST" })
   .inputValidator((v: unknown) => z.object({ slug: z.string() }).parse(v))
   .handler(async ({ data }) => {
     const sb = publicSb();
-    const { data: v } = await sb.from("mobility_vehicles")
-      .select("*, mobility_providers(id, name, slug, bio, logo_url, rating_avg, rating_count), mobility_vehicle_images(url, alt, sort_order), mobility_vehicle_rates(unit, price_kes, min_units, included_km, extra_km_kes)")
-      .eq("slug", data.slug).eq("status", "approved").maybeSingle();
+    const { data: v } = await sb
+      .from("mobility_vehicles")
+      .select(
+        "*, mobility_providers(id, name, slug, bio, logo_url, rating_avg, rating_count), mobility_vehicle_images(url, alt, sort_order), mobility_vehicle_rates(unit, price_kes, min_units, included_km, extra_km_kes)",
+      )
+      .eq("slug", data.slug)
+      .eq("status", "approved")
+      .maybeSingle();
     return { vehicle: v };
   });
 
@@ -602,12 +744,23 @@ const QuoteInput = z.object({
 
 // Shared pricing engine — uses base rates, seasonal overrides, and pricing tiers.
 // Returns a full breakdown for the quote endpoint and the create endpoint.
-async function computeMobilityQuote(sb: SB, params: {
-  vehicleId: string; pickupAt: string; dropoffAt: string; driverOption: "self" | "chauffeur";
-}) {
-  const { data: v, error: vErr } = await sb.from("mobility_vehicles")
-    .select("id, provider_id, org_id, security_deposit_kes, promo_price_kes, mobility_vehicle_rates(unit, price_kes, min_units)")
-    .eq("id", params.vehicleId).eq("status", "approved").maybeSingle();
+async function computeMobilityQuote(
+  sb: SB,
+  params: {
+    vehicleId: string;
+    pickupAt: string;
+    dropoffAt: string;
+    driverOption: "self" | "chauffeur";
+  },
+) {
+  const { data: v, error: vErr } = await sb
+    .from("mobility_vehicles")
+    .select(
+      "id, provider_id, org_id, security_deposit_kes, promo_price_kes, mobility_vehicle_rates(unit, price_kes, min_units)",
+    )
+    .eq("id", params.vehicleId)
+    .eq("status", "approved")
+    .maybeSingle();
   if (vErr || !v) throw new Error("Vehicle not available");
 
   const start = new Date(params.pickupAt).getTime();
@@ -617,27 +770,33 @@ async function computeMobilityQuote(sb: SB, params: {
   }
   const hours = Math.max(1, Math.ceil((end - start) / 3_600_000));
   const days = Math.ceil(hours / 24);
-  const rates: Array<{ unit: string; price_kes: number; min_units?: number }> = v.mobility_vehicle_rates ?? [];
-  const baseDay = Number(rates.find(r => r.unit === "day")?.price_kes ?? 0);
-  const baseHour = Number(rates.find(r => r.unit === "hour")?.price_kes ?? 0);
-  const baseWeek = Number(rates.find(r => r.unit === "week")?.price_kes ?? 0);
-  const baseMonth = Number(rates.find(r => r.unit === "month")?.price_kes ?? 0);
+  const rates: Array<{ unit: string; price_kes: number; min_units?: number }> =
+    v.mobility_vehicle_rates ?? [];
+  const baseDay = Number(rates.find((r) => r.unit === "day")?.price_kes ?? 0);
+  const baseHour = Number(rates.find((r) => r.unit === "hour")?.price_kes ?? 0);
+  const baseWeek = Number(rates.find((r) => r.unit === "week")?.price_kes ?? 0);
+  const baseMonth = Number(rates.find((r) => r.unit === "month")?.price_kes ?? 0);
 
   // Seasonal override
   const pickupDate = new Date(params.pickupAt).toISOString().slice(0, 10);
-  const { data: seasonal } = await sb.from("mobility_seasonal_rates")
+  const { data: seasonal } = await sb
+    .from("mobility_seasonal_rates")
     .select("unit, price_kes, starts_on, ends_on, label")
     .eq("vehicle_id", params.vehicleId)
-    .lte("starts_on", pickupDate).gte("ends_on", pickupDate);
+    .lte("starts_on", pickupDate)
+    .gte("ends_on", pickupDate);
   const seasonalDay = Number((seasonal ?? []).find((s: any) => s.unit === "day")?.price_kes ?? 0);
   const seasonalHour = Number((seasonal ?? []).find((s: any) => s.unit === "hour")?.price_kes ?? 0);
 
   // Duration-based pricing tiers (weekly/monthly discounts)
-  const { data: tiers } = await sb.from("mobility_pricing_tiers")
+  const { data: tiers } = await sb
+    .from("mobility_pricing_tiers")
     .select("tier, price_kes, min_units, starts_on, ends_on, is_active")
-    .eq("vehicle_id", params.vehicleId).eq("is_active", true);
-  const applicableTiers = (tiers ?? []).filter((t: any) =>
-    (!t.starts_on || t.starts_on <= pickupDate) && (!t.ends_on || t.ends_on >= pickupDate)
+    .eq("vehicle_id", params.vehicleId)
+    .eq("is_active", true);
+  const applicableTiers = (tiers ?? []).filter(
+    (t: any) =>
+      (!t.starts_on || t.starts_on <= pickupDate) && (!t.ends_on || t.ends_on >= pickupDate),
   );
   // Best (cheapest per-day-equivalent) tier for the duration
   let tierDaily = 0;
@@ -656,9 +815,18 @@ async function computeMobilityQuote(sb: SB, params: {
   const promoDay = Number(v.promo_price_kes ?? 0);
   let dailyRate = baseDay;
   let dailySource = "base";
-  if (promoDay > 0 && (dailyRate === 0 || promoDay < dailyRate)) { dailyRate = promoDay; dailySource = "promo"; }
-  if (seasonalDay > 0 && seasonalDay < dailyRate) { dailyRate = seasonalDay; dailySource = "seasonal"; }
-  if (tierDaily > 0 && tierDaily < dailyRate) { dailyRate = tierDaily; dailySource = tierLabel ? `tier:${tierLabel}` : "tier"; }
+  if (promoDay > 0 && (dailyRate === 0 || promoDay < dailyRate)) {
+    dailyRate = promoDay;
+    dailySource = "promo";
+  }
+  if (seasonalDay > 0 && seasonalDay < dailyRate) {
+    dailyRate = seasonalDay;
+    dailySource = "seasonal";
+  }
+  if (tierDaily > 0 && tierDaily < dailyRate) {
+    dailyRate = tierDaily;
+    dailySource = tierLabel ? `tier:${tierLabel}` : "tier";
+  }
 
   const hourlyRate = seasonalHour > 0 ? seasonalHour : baseHour;
 
@@ -721,27 +889,31 @@ export const createMobilityBooking = createServerFn({ method: "POST" })
       driverOption: data.driverOption,
     });
 
-    const { data: booking, error } = await sb.from("mobility_bookings").insert({
-      vehicle_id: q.vehicle.id,
-      provider_id: q.vehicle.provider_id,
-      org_id: q.vehicle.org_id,
-      guest_user_id: context.userId,
-      guest_name: data.guestName ?? null,
-      guest_email: data.guestEmail ?? null,
-      guest_phone: data.guestPhone ?? null,
-      pickup_at: data.pickupAt,
-      dropoff_at: data.dropoffAt,
-      pickup_location: data.pickupLocation ?? null,
-      dropoff_location: data.dropoffLocation ?? null,
-      delivery_address: data.deliveryAddress ?? null,
-      driver_option: data.driverOption,
-      total_kes: q.breakdown.totalKes,
-      deposit_kes: q.breakdown.depositKes,
-      status: "pending",
-      payment_status: "unpaid",
-      notes: data.notes ?? null,
-      extension_of: data.extensionOf ?? null,
-    }).select("*").single();
+    const { data: booking, error } = await sb
+      .from("mobility_bookings")
+      .insert({
+        vehicle_id: q.vehicle.id,
+        provider_id: q.vehicle.provider_id,
+        org_id: q.vehicle.org_id,
+        guest_user_id: context.userId,
+        guest_name: data.guestName ?? null,
+        guest_email: data.guestEmail ?? null,
+        guest_phone: data.guestPhone ?? null,
+        pickup_at: data.pickupAt,
+        dropoff_at: data.dropoffAt,
+        pickup_location: data.pickupLocation ?? null,
+        dropoff_location: data.dropoffLocation ?? null,
+        delivery_address: data.deliveryAddress ?? null,
+        driver_option: data.driverOption,
+        total_kes: q.breakdown.totalKes,
+        deposit_kes: q.breakdown.depositKes,
+        status: "pending",
+        payment_status: "unpaid",
+        notes: data.notes ?? null,
+        extension_of: data.extensionOf ?? null,
+      })
+      .select("*")
+      .single();
     if (error) throw new Error(error.message);
 
     // Reserve the calendar slot; if it collides, the exclusion constraint
@@ -764,7 +936,8 @@ export const listMyMobilityBookings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const sb = context.supabase as SB;
-    const { data } = await sb.from("mobility_bookings")
+    const { data } = await sb
+      .from("mobility_bookings")
       .select("*, mobility_vehicles(make, model, slug), mobility_providers(name, slug)")
       .order("pickup_at", { ascending: false })
       .limit(50);
@@ -778,12 +951,17 @@ export const getMobilityProviderAnalytics = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
     const [{ data: bookings }, { data: vehicles }] = await Promise.all([
-      sb.from("mobility_bookings").select("total_kes, status, pickup_at")
-        .eq("org_id", data.orgId).gte("pickup_at", new Date(Date.now() - 90 * 86400000).toISOString()),
+      sb
+        .from("mobility_bookings")
+        .select("total_kes, status, pickup_at")
+        .eq("org_id", data.orgId)
+        .gte("pickup_at", new Date(Date.now() - 90 * 86400000).toISOString()),
       sb.from("mobility_vehicles").select("id, status").eq("org_id", data.orgId),
     ]);
     const list = bookings ?? [];
-    const revenue = list.filter((b: any) => b.status !== "cancelled").reduce((s: number, b: any) => s + Number(b.total_kes ?? 0), 0);
+    const revenue = list
+      .filter((b: any) => b.status !== "cancelled")
+      .reduce((s: number, b: any) => s + Number(b.total_kes ?? 0), 0);
     return {
       revenueKes: revenue,
       bookingsCount: list.length,
@@ -795,12 +973,22 @@ export const getMobilityProviderAnalytics = createServerFn({ method: "POST" })
 // ---------- MOBILITY GROUNDING (for Planner AI) ----------
 export async function fetchMobilityForPlan(
   query: string,
-  opts?: { county?: string; travellers?: number; luggage?: number; purpose?: string; budgetKesPerDay?: number; limit?: number },
+  opts?: {
+    county?: string;
+    travellers?: number;
+    luggage?: number;
+    purpose?: string;
+    budgetKesPerDay?: number;
+    limit?: number;
+  },
 ) {
   const { county, travellers, luggage, purpose, budgetKesPerDay, limit = 4 } = opts ?? {};
   const sb = publicSb();
-  let q = sb.from("mobility_vehicles")
-    .select("id, slug, category, vehicle_type, make, model, seats, luggage, transmission, drive_type, is_luxury, is_safari, is_wedding, is_electric, is_hybrid, town, county_code, mobility_vehicle_rates(unit, price_kes)")
+  let q = sb
+    .from("mobility_vehicles")
+    .select(
+      "id, slug, category, vehicle_type, make, model, seats, luggage, transmission, drive_type, is_luxury, is_safari, is_wedding, is_electric, is_hybrid, town, county_code, mobility_vehicle_rates(unit, price_kes)",
+    )
     .eq("status", "approved")
     .limit(limit * 4);
   if (county) q = q.ilike("county_code", `%${county}%`);
@@ -809,9 +997,9 @@ export async function fetchMobilityForPlan(
   const rows = (data ?? []) as any[];
   const q_l = query.toLowerCase();
   const p_l = (purpose ?? "").toLowerCase();
-  const scored = rows.map(r => {
+  const scored = rows.map((r) => {
     const rates: Array<{ unit: string; price_kes: number }> = r.mobility_vehicle_rates ?? [];
-    const daily = Number(rates.find(x => x.unit === "day")?.price_kes ?? 0);
+    const daily = Number(rates.find((x) => x.unit === "day")?.price_kes ?? 0);
     let score = 0;
     if (q_l.includes(r.category)) score += 3;
     if (r.make && q_l.includes(String(r.make).toLowerCase())) score += 2;
@@ -820,7 +1008,8 @@ export async function fetchMobilityForPlan(
     if (p_l.includes("safari") && r.is_safari) score += 4;
     if (p_l.includes("wedding") && r.is_wedding) score += 4;
     if ((p_l.includes("luxury") || p_l.includes("executive")) && r.is_luxury) score += 3;
-    if ((p_l.includes("eco") || p_l.includes("green")) && (r.is_electric || r.is_hybrid)) score += 2;
+    if ((p_l.includes("eco") || p_l.includes("green")) && (r.is_electric || r.is_hybrid))
+      score += 2;
     if (budgetKesPerDay && daily && daily <= budgetKesPerDay) score += 2;
     if (budgetKesPerDay && daily && daily > budgetKesPerDay) score -= 2;
     return { ...r, _score: score };
@@ -829,18 +1018,22 @@ export async function fetchMobilityForPlan(
   return scored.slice(0, limit);
 }
 
-
 // ---------- BOOKING MANAGEMENT (provider side) ----------
 export const listMobilityProviderBookings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({
-    orgId: z.string().uuid(),
-    vehicleId: z.string().uuid().optional(),
-    status: z.string().max(30).optional(),
-  }).parse(v))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        orgId: z.string().uuid(),
+        vehicleId: z.string().uuid().optional(),
+        status: z.string().max(30).optional(),
+      })
+      .parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    let q = sb.from("mobility_bookings")
+    let q = sb
+      .from("mobility_bookings")
       .select("*, mobility_vehicles(make, model, slug)")
       .eq("org_id", data.orgId)
       .order("pickup_at", { ascending: false })
@@ -854,11 +1047,15 @@ export const listMobilityProviderBookings = createServerFn({ method: "POST" })
 
 export const respondMobilityBooking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({
-    id: z.string().uuid(),
-    status: z.enum(["confirmed", "declined", "cancelled", "completed"]),
-    message: z.string().max(2000).optional(),
-  }).parse(v))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.enum(["confirmed", "declined", "cancelled", "completed"]),
+        message: z.string().max(2000).optional(),
+      })
+      .parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
     const patch: Record<string, unknown> = {
@@ -877,19 +1074,27 @@ export const respondMobilityBooking = createServerFn({ method: "POST" })
 // ---------- REVIEWS ----------
 export const listMobilityProviderReviews = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({
-    orgId: z.string().uuid(),
-    vehicleId: z.string().uuid().optional(),
-    status: z.enum(["pending", "approved", "rejected", "all"]).default("all"),
-  }).parse(v))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        orgId: z.string().uuid(),
+        vehicleId: z.string().uuid().optional(),
+        status: z.enum(["pending", "approved", "rejected", "all"]).default("all"),
+      })
+      .parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
     // mobility_reviews has provider_id (not org_id) — resolve providers under this org.
-    const { data: providers } = await sb.from("mobility_providers").select("id").eq("org_id", data.orgId);
+    const { data: providers } = await sb
+      .from("mobility_providers")
+      .select("id")
+      .eq("org_id", data.orgId);
     const providerIds = (providers ?? []).map((p: any) => p.id);
     if (providerIds.length === 0) return { reviews: [] };
 
-    let q = sb.from("mobility_reviews")
+    let q = sb
+      .from("mobility_reviews")
       .select("*, mobility_vehicles(make, model, slug)")
       .in("provider_id", providerIds)
       .order("created_at", { ascending: false })
@@ -903,16 +1108,23 @@ export const listMobilityProviderReviews = createServerFn({ method: "POST" })
 
 export const respondMobilityReview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({
-    id: z.string().uuid(),
-    response: z.string().min(1).max(2000),
-  }).parse(v))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        response: z.string().min(1).max(2000),
+      })
+      .parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const { error } = await sb.from("mobility_reviews").update({
-      response: data.response,
-      responded_at: new Date().toISOString(),
-    }).eq("id", data.id);
+    const { error } = await sb
+      .from("mobility_reviews")
+      .update({
+        response: data.response,
+        responded_at: new Date().toISOString(),
+      })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -920,36 +1132,50 @@ export const respondMobilityReview = createServerFn({ method: "POST" })
 // Provider approves or rejects a pending review before it goes public.
 export const moderateMobilityReview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({
-    id: z.string().uuid(),
-    action: z.enum(["approve", "reject"]),
-    reason: z.string().max(500).optional(),
-  }).parse(v))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        action: z.enum(["approve", "reject"]),
+        reason: z.string().max(500).optional(),
+      })
+      .parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const { error } = await sb.from("mobility_reviews").update({
-      status: data.action === "approve" ? "approved" : "rejected",
-      moderated_at: new Date().toISOString(),
-      moderated_by: context.userId,
-      moderation_reason: data.reason ?? null,
-    }).eq("id", data.id);
+    const { error } = await sb
+      .from("mobility_reviews")
+      .update({
+        status: data.action === "approve" ? "approved" : "rejected",
+        moderated_at: new Date().toISOString(),
+        moderated_by: context.userId,
+        moderation_reason: data.reason ?? null,
+      })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
 // ---------- PUBLIC COMPANY DIRECTORY ----------
 export const listPublicMobilityProviders = createServerFn({ method: "POST" })
-  .inputValidator((v: unknown) => z.object({
-    query: z.string().max(120).optional(),
-    county: z.string().max(20).optional(),
-    category: z.enum(MOBILITY_CATEGORIES).optional(),
-    limit: z.number().int().min(1).max(60).default(24),
-    offset: z.number().int().min(0).default(0),
-  }).parse(v ?? {}))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        query: z.string().max(120).optional(),
+        county: z.string().max(20).optional(),
+        category: z.enum(MOBILITY_CATEGORIES).optional(),
+        limit: z.number().int().min(1).max(60).default(24),
+        offset: z.number().int().min(0).default(0),
+      })
+      .parse(v ?? {}),
+  )
   .handler(async ({ data }) => {
     const sb = publicSb();
-    let q = sb.from("mobility_providers")
-      .select("id, slug, name, bio, logo_url, cover_image_url, town, county_code, rating_avg, rating_count, service_categories, verification_status")
+    let q = sb
+      .from("mobility_providers")
+      .select(
+        "id, slug, name, bio, logo_url, cover_image_url, town, county_code, rating_avg, rating_count, service_categories, verification_status",
+      )
       .eq("verification_status", "verified")
       .order("rating_avg", { ascending: false, nullsFirst: false })
       .range(data.offset, data.offset + data.limit - 1);
@@ -969,14 +1195,20 @@ export const getPublicMobilityProvider = createServerFn({ method: "POST" })
   .inputValidator((v: unknown) => z.object({ slug: z.string().max(120) }).parse(v))
   .handler(async ({ data }) => {
     const sb = publicSb();
-    const { data: provider } = await sb.from("mobility_providers")
-      .select("id, slug, name, bio, logo_url, cover_image_url, website, contact_email, contact_phone, address, town, county_code, service_categories, service_areas, operating_hours, policies, terms, rating_avg, rating_count, verification_status")
+    const { data: provider } = await sb
+      .from("mobility_providers")
+      .select(
+        "id, slug, name, bio, logo_url, cover_image_url, website, contact_email, contact_phone, address, town, county_code, service_categories, service_areas, operating_hours, policies, terms, rating_avg, rating_count, verification_status",
+      )
       .eq("slug", data.slug)
       .eq("verification_status", "verified")
       .maybeSingle();
     if (!provider) return { provider: null, vehicles: [] };
-    const { data: vehicles } = await sb.from("mobility_vehicles")
-      .select("id, slug, category, vehicle_type, make, model, year, seats, transmission, town, main_image_url, rating_avg, rating_count, mobility_vehicle_rates(unit, price_kes)")
+    const { data: vehicles } = await sb
+      .from("mobility_vehicles")
+      .select(
+        "id, slug, category, vehicle_type, make, model, year, seats, transmission, town, main_image_url, rating_avg, rating_count, mobility_vehicle_rates(unit, price_kes)",
+      )
       .eq("provider_id", provider.id)
       .eq("status", "approved")
       .eq("is_archived", false)
@@ -987,13 +1219,18 @@ export const getPublicMobilityProvider = createServerFn({ method: "POST" })
 
 // ---------- PUBLIC VEHICLE REVIEWS ----------
 export const listPublicVehicleReviews = createServerFn({ method: "POST" })
-  .inputValidator((v: unknown) => z.object({
-    vehicleId: z.string().uuid(),
-    limit: z.number().int().min(1).max(50).default(20),
-  }).parse(v))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        vehicleId: z.string().uuid(),
+        limit: z.number().int().min(1).max(50).default(20),
+      })
+      .parse(v),
+  )
   .handler(async ({ data }) => {
     const sb = publicSb();
-    const { data: rows, error } = await sb.from("mobility_reviews")
+    const { data: rows, error } = await sb
+      .from("mobility_reviews")
       .select("id, rating, comment, response, responded_at, created_at")
       .eq("vehicle_id", data.vehicleId)
       .eq("status", "approved")
@@ -1006,15 +1243,20 @@ export const listPublicVehicleReviews = createServerFn({ method: "POST" })
 // Guest submits a review. Must have a completed booking for the vehicle.
 export const submitMobilityReview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((v: unknown) => z.object({
-    vehicleId: z.string().uuid(),
-    rating: z.number().int().min(1).max(5),
-    comment: z.string().max(2000).optional(),
-  }).parse(v))
+  .inputValidator((v: unknown) =>
+    z
+      .object({
+        vehicleId: z.string().uuid(),
+        rating: z.number().int().min(1).max(5),
+        comment: z.string().max(2000).optional(),
+      })
+      .parse(v),
+  )
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
     // Verify the caller has at least one completed booking on this vehicle.
-    const { data: booking } = await sb.from("mobility_bookings")
+    const { data: booking } = await sb
+      .from("mobility_bookings")
       .select("id, provider_id")
       .eq("vehicle_id", data.vehicleId)
       .eq("guest_user_id", context.userId)
@@ -1024,30 +1266,38 @@ export const submitMobilityReview = createServerFn({ method: "POST" })
     if (!booking) throw new Error("You can only review a vehicle after a completed booking.");
 
     // One review per author per vehicle: update if already exists.
-    const { data: existing } = await sb.from("mobility_reviews")
+    const { data: existing } = await sb
+      .from("mobility_reviews")
       .select("id")
       .eq("vehicle_id", data.vehicleId)
       .eq("author_id", context.userId)
       .maybeSingle();
 
     if (existing) {
-      const { error } = await sb.from("mobility_reviews").update({
-        rating: data.rating,
-        comment: data.comment ?? null,
-        status: "pending",
-      }).eq("id", existing.id);
+      const { error } = await sb
+        .from("mobility_reviews")
+        .update({
+          rating: data.rating,
+          comment: data.comment ?? null,
+          status: "pending",
+        })
+        .eq("id", existing.id);
       if (error) throw new Error(error.message);
       return { ok: true, id: existing.id, updated: true };
     }
 
-    const { data: row, error } = await sb.from("mobility_reviews").insert({
-      vehicle_id: data.vehicleId,
-      provider_id: booking.provider_id,
-      author_id: context.userId,
-      rating: data.rating,
-      comment: data.comment ?? null,
-      status: "pending",
-    }).select("id").single();
+    const { data: row, error } = await sb
+      .from("mobility_reviews")
+      .insert({
+        vehicle_id: data.vehicleId,
+        provider_id: booking.provider_id,
+        author_id: context.userId,
+        rating: data.rating,
+        comment: data.comment ?? null,
+        status: "pending",
+      })
+      .select("id")
+      .single();
     if (error) throw new Error(error.message);
     return { ok: true, id: row.id, updated: false };
   });
@@ -1059,14 +1309,16 @@ export const getMyMobilityReviewStatus = createServerFn({ method: "POST" })
   .inputValidator((v: unknown) => z.object({ vehicleId: z.string().uuid() }).parse(v))
   .handler(async ({ data, context }) => {
     const sb = context.supabase as SB;
-    const { data: booking } = await sb.from("mobility_bookings")
+    const { data: booking } = await sb
+      .from("mobility_bookings")
       .select("id")
       .eq("vehicle_id", data.vehicleId)
       .eq("guest_user_id", context.userId)
       .eq("status", "completed")
       .limit(1)
       .maybeSingle();
-    const { data: mine } = await sb.from("mobility_reviews")
+    const { data: mine } = await sb
+      .from("mobility_reviews")
       .select("id, rating, comment, status, response, created_at")
       .eq("vehicle_id", data.vehicleId)
       .eq("author_id", context.userId)

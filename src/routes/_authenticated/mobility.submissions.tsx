@@ -12,7 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { listMyMobilityProviders } from "@/lib/mobility.functions";
 import {
-  listProviderSubmissions, decideSubmission, updatePrivateVehiclePolicy,
+  listProviderSubmissions,
+  decideSubmission,
+  updatePrivateVehiclePolicy,
   requestSubmissionInfo,
 } from "@/lib/mobility-ext.functions";
 
@@ -35,7 +37,13 @@ function SubmissionsQueue() {
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const subs = useQuery({
     queryKey: ["mob-provider-subs", providerId, statusFilter],
-    queryFn: () => fetchSubs({ data: { providerId: providerId!, status: statusFilter === "all" ? undefined : statusFilter } }),
+    queryFn: () =>
+      fetchSubs({
+        data: {
+          providerId: providerId!,
+          status: statusFilter === "all" ? undefined : statusFilter,
+        },
+      }),
     enabled: !!providerId,
   });
 
@@ -61,8 +69,11 @@ function SubmissionsQueue() {
   });
 
   const policyMut = useMutation({
-    mutationFn: (v: { acceptsPrivateVehicles: boolean; commissionPct?: number; qualityMin?: number }) =>
-      updatePolicy({ data: { providerId: providerId!, ...v } }),
+    mutationFn: (v: {
+      acceptsPrivateVehicles: boolean;
+      commissionPct?: number;
+      qualityMin?: number;
+    }) => updatePolicy({ data: { providerId: providerId!, ...v } }),
     onSuccess: () => {
       toast.success("Policy updated");
       qc.invalidateQueries({ queryKey: ["mob-providers"] });
@@ -70,11 +81,19 @@ function SubmissionsQueue() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (providers.isLoading) return <DashboardShell><LoadingState label="Loading" /></DashboardShell>;
+  if (providers.isLoading)
+    return (
+      <DashboardShell>
+        <LoadingState label="Loading" />
+      </DashboardShell>
+    );
   if (!provider) {
     return (
       <DashboardShell>
-        <EmptyState title="No rental company yet" description="Create your company profile first from the Mobility dashboard." />
+        <EmptyState
+          title="No rental company yet"
+          description="Create your company profile first from the Mobility dashboard."
+        />
       </DashboardShell>
     );
   }
@@ -92,7 +111,9 @@ function SubmissionsQueue() {
         </header>
 
         <Card>
-          <CardHeader><CardTitle>Policy</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Policy</CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="flex flex-wrap items-center gap-4 text-sm">
               <label className="flex items-center gap-2">
@@ -154,7 +175,10 @@ function SubmissionsQueue() {
             {subs.isLoading ? (
               <LoadingState label="Loading" />
             ) : !subs.data || subs.data.length === 0 ? (
-              <EmptyState title="Nothing pending" description="Submissions from private owners will appear here." />
+              <EmptyState
+                title="Nothing pending"
+                description="Submissions from private owners will appear here."
+              />
             ) : (
               <div className="space-y-3">
                 {subs.data.map((s: any) => {
@@ -179,10 +203,21 @@ function SubmissionsQueue() {
                             <p className="text-sm mt-2 max-w-2xl">{snap.description}</p>
                           )}
                           {s.proposed_daily_rate_kes && (
-                            <div className="text-xs mt-1">Proposed rate: KES {Number(s.proposed_daily_rate_kes).toLocaleString()}/day</div>
+                            <div className="text-xs mt-1">
+                              Proposed rate: KES{" "}
+                              {Number(s.proposed_daily_rate_kes).toLocaleString()}/day
+                            </div>
                           )}
                         </div>
-                        <Badge variant={s.status === "approved" ? "default" : s.status === "rejected" ? "destructive" : "outline"}>
+                        <Badge
+                          variant={
+                            s.status === "approved"
+                              ? "default"
+                              : s.status === "rejected"
+                                ? "destructive"
+                                : "outline"
+                          }
+                        >
                           {s.status} · {new Date(s.created_at).toLocaleDateString()}
                         </Badge>
                       </div>
@@ -197,7 +232,13 @@ function SubmissionsQueue() {
                           <div className="flex flex-wrap gap-2">
                             <Button
                               size="sm"
-                              onClick={() => decideMut.mutate({ id: s.id, decision: "approved", reason: reasons[s.id] })}
+                              onClick={() =>
+                                decideMut.mutate({
+                                  id: s.id,
+                                  decision: "approved",
+                                  reason: reasons[s.id],
+                                })
+                              }
                               disabled={decideMut.isPending}
                             >
                               <CheckCircle2 className="h-4 w-4 mr-1" /> Approve
@@ -205,7 +246,13 @@ function SubmissionsQueue() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => decideMut.mutate({ id: s.id, decision: "rejected", reason: reasons[s.id] })}
+                              onClick={() =>
+                                decideMut.mutate({
+                                  id: s.id,
+                                  decision: "rejected",
+                                  reason: reasons[s.id],
+                                })
+                              }
                               disabled={decideMut.isPending}
                             >
                               <XCircle className="h-4 w-4 mr-1" /> Reject
@@ -228,9 +275,10 @@ function SubmissionsQueue() {
                           </div>
                         </div>
                       ) : s.decision_reason ? (
-                        <p className="mt-2 text-xs text-muted-foreground">Note: {s.decision_reason}</p>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          Note: {s.decision_reason}
+                        </p>
                       ) : null}
-
                     </div>
                   );
                 })}

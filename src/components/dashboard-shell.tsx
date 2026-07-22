@@ -2,7 +2,40 @@ import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  BedDouble, Bot, Brain, Bug, Calendar, CalendarSync, ChartBar, ChevronDown, Compass, Coins, CreditCard, FileText, Gauge, Home, Landmark, Lock, LogOut, MapPin, Menu, Plug, Rocket, Route as RouteIcon, Settings, ShieldAlert, Smartphone, Sparkles, Sprout, Store, Ticket, TrendingUp, Users, Wallet, Wrench, X,
+  BedDouble,
+  Bot,
+  Brain,
+  Bug,
+  Calendar,
+  CalendarSync,
+  ChartBar,
+  ChevronDown,
+  Compass,
+  Coins,
+  CreditCard,
+  FileText,
+  Gauge,
+  Home,
+  Landmark,
+  Lock,
+  LogOut,
+  MapPin,
+  Menu,
+  Plug,
+  Rocket,
+  Route as RouteIcon,
+  Settings,
+  ShieldAlert,
+  Smartphone,
+  Sparkles,
+  Sprout,
+  Store,
+  Ticket,
+  TrendingUp,
+  Users,
+  Wallet,
+  Wrench,
+  X,
 } from "lucide-react";
 import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,8 +61,6 @@ type NavGroup = {
   adminOnly?: boolean;
   items: NavItem[];
 };
-
-
 
 const groups: NavGroup[] = [
   {
@@ -76,7 +107,13 @@ const groups: NavGroup[] = [
       { to: "/invoices", label: "Invoices", icon: FileText, permission: "finance.read" },
       { to: "/wallet", label: "Wallet & Payouts", icon: Wallet, permission: "finance.read" },
       { to: "/mpesa", label: "M-PESA", icon: Smartphone, permission: "finance.read" },
-      { to: "/analytics", label: "Analytics", icon: ChartBar, feature: "analytics.basic", permission: "reports.read" },
+      {
+        to: "/analytics",
+        label: "Analytics",
+        icon: ChartBar,
+        feature: "analytics.basic",
+        permission: "reports.read",
+      },
       { to: "/subscription", label: "Subscription", icon: CreditCard },
     ],
   },
@@ -172,7 +209,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         <p className="mt-1 truncate font-medium">{data?.currentOrg?.name ?? "Loading…"}</p>
         <p className="text-xs capitalize text-muted-foreground">
           {data?.currentOrg?.plan ?? "starter"} plan · {data?.currentOrg?.role}
-          {isAdmin && <span className="ml-1 rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">admin</span>}
+          {isAdmin && (
+            <span className="ml-1 rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+              admin
+            </span>
+          )}
         </p>
       </div>
 
@@ -189,14 +230,18 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 aria-controls={`nav-group-${group.id}`}
               >
                 <span>{group.label}</span>
-                <ChevronDown className={cn("h-3 w-3 transition-transform", open ? "rotate-0" : "-rotate-90")} aria-hidden />
+                <ChevronDown
+                  className={cn("h-3 w-3 transition-transform", open ? "rotate-0" : "-rotate-90")}
+                  aria-hidden
+                />
               </button>
               {open && (
                 <ul id={`nav-group-${group.id}`} className="mt-1 space-y-0.5">
                   {group.items.map((item) => {
                     const active = pathname === item.to || pathname.startsWith(item.to + "/");
                     const Icon = item.icon;
-                    const locked = "feature" in item && item.feature && !planAllows(plan, item.feature);
+                    const locked =
+                      "feature" in item && item.feature && !planAllows(plan, item.feature);
                     return (
                       <li key={item.to}>
                         <Link
@@ -213,7 +258,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                             <Icon className="h-4 w-4" aria-hidden />
                             {item.label}
                           </span>
-                          {locked && <Lock className="h-3 w-3 opacity-60" aria-label="Upgrade required" />}
+                          {locked && (
+                            <Lock className="h-3 w-3 opacity-60" aria-label="Upgrade required" />
+                          )}
                         </Link>
                       </li>
                     );
@@ -246,7 +293,12 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-dvh bg-background lg:grid lg:grid-cols-[16rem_1fr]">
       {/* Mobile top bar */}
       <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-border/60 bg-background/95 px-4 backdrop-blur lg:hidden">
-        <Button variant="ghost" size="icon" aria-label="Open navigation" onClick={() => setMobileOpen(true)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Open navigation"
+          onClick={() => setMobileOpen(true)}
+        >
           <Menu className="h-5 w-5" />
         </Button>
         <Link to="/dashboard" className="flex items-center gap-2">
@@ -263,15 +315,18 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
+        <div
+          className="fixed inset-0 z-50 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation"
+        >
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
             aria-hidden
           />
-          <div className="absolute inset-y-0 left-0 w-72 max-w-[85vw] shadow-2xl">
-            {sidebar}
-          </div>
+          <div className="absolute inset-y-0 left-0 w-72 max-w-[85vw] shadow-2xl">{sidebar}</div>
         </div>
       )}
 

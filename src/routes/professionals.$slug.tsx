@@ -36,7 +36,11 @@ function ProfessionalProfile() {
       {/* Cover */}
       <div className="relative h-56 bg-muted md:h-80">
         {p.cover_image_path && (
-          <img src={p.cover_image_path} alt={p.business_name} className="h-full w-full object-cover" />
+          <img
+            src={p.cover_image_path}
+            alt={p.business_name}
+            className="h-full w-full object-cover"
+          />
         )}
       </div>
 
@@ -45,7 +49,11 @@ function ProfessionalProfile() {
           <div className="flex flex-col gap-4 md:flex-row md:items-start">
             <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-card bg-muted">
               {p.profile_image_path && (
-                <img src={p.profile_image_path} alt={p.business_name} className="h-full w-full object-cover" />
+                <img
+                  src={p.profile_image_path}
+                  alt={p.business_name}
+                  className="h-full w-full object-cover"
+                />
               )}
             </div>
             <div className="flex-1">
@@ -63,7 +71,8 @@ function ProfessionalProfile() {
               <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 {(p.town || p.county_code) && (
                   <span className="inline-flex items-center gap-1">
-                    <MapPin className="h-4 w-4" /> {[p.town, p.county_code].filter(Boolean).join(", ")}
+                    <MapPin className="h-4 w-4" />{" "}
+                    {[p.town, p.county_code].filter(Boolean).join(", ")}
                   </span>
                 )}
                 {p.avg_rating != null && (
@@ -82,7 +91,11 @@ function ProfessionalProfile() {
                 </Link>
               </Button>
               {p.whatsapp && (
-                <a href={`https://wa.me/${p.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">
+                <a
+                  href={`https://wa.me/${p.whatsapp.replace(/\D/g, "")}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   <Button variant="outline" size="lg" className="w-full">
                     <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
                   </Button>
@@ -120,10 +133,15 @@ function ProfessionalProfile() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {data.services.map((s: any) => (
-                    <div key={s.id} className="flex items-start justify-between border-b pb-3 last:border-0">
+                    <div
+                      key={s.id}
+                      className="flex items-start justify-between border-b pb-3 last:border-0"
+                    >
                       <div>
                         <div className="font-medium">{s.title}</div>
-                        {s.description && <div className="text-sm text-muted-foreground">{s.description}</div>}
+                        {s.description && (
+                          <div className="text-sm text-muted-foreground">{s.description}</div>
+                        )}
                       </div>
                       {s.base_price != null && (
                         <div className="text-sm font-medium">
@@ -247,7 +265,9 @@ function ProfessionalProfile() {
                 {p.nationwide && <div>✓ Serves nationwide</div>}
                 {p.online_services && <div>✓ Online services available</div>}
                 {p.travels_to_clients && (
-                  <div>✓ Travels to clients{p.max_travel_km ? ` (up to ${p.max_travel_km} km)` : ""}</div>
+                  <div>
+                    ✓ Travels to clients{p.max_travel_km ? ` (up to ${p.max_travel_km} km)` : ""}
+                  </div>
                 )}
                 {p.emergency_bookings && <div>✓ Emergency bookings accepted</div>}
                 <div>Booking lead time: {p.booking_lead_hours ?? 24}h</div>

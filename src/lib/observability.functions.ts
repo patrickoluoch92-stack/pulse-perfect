@@ -32,7 +32,7 @@ export const reportAppError = createServerFn({ method: "POST" })
     // Derive identity strictly from the authenticated session — never trust
     // client-supplied userId / tenantId (would allow log-poisoning of other orgs).
     const authedId = context.userId;
-    let userId: string | null = authedId;
+    const userId: string | null = authedId;
     let orgId: string | null = null;
     let inboundCorrelation: string | null = data.correlationId ?? null;
 
@@ -80,7 +80,13 @@ const listSchema = z
     source: z.string().max(255).optional().nullable(),
     level: z.enum(["error", "warn", "info"]).optional().nullable(),
     search: z.string().max(200).optional().nullable(),
-    sinceMinutes: z.number().int().min(1).max(60 * 24 * 30).optional().nullable(),
+    sinceMinutes: z
+      .number()
+      .int()
+      .min(1)
+      .max(60 * 24 * 30)
+      .optional()
+      .nullable(),
     limit: z.number().int().min(1).max(500).optional(),
   })
   .partial()

@@ -2,7 +2,10 @@
  * Shared formatting helpers. Keep pure & isomorphic (no server-only imports).
  */
 
-export function formatKES(value: number | null | undefined, opts: { compact?: boolean } = {}): string {
+export function formatKES(
+  value: number | null | undefined,
+  opts: { compact?: boolean } = {},
+): string {
   const n = Number(value ?? 0);
   if (!Number.isFinite(n)) return "KES 0";
   if (opts.compact && Math.abs(n) >= 1_000) {
@@ -11,12 +14,19 @@ export function formatKES(value: number | null | undefined, opts: { compact?: bo
   return `KES ${new Intl.NumberFormat("en-KE", { maximumFractionDigits: 0 }).format(n)}`;
 }
 
-export function formatCurrency(value: number | null | undefined, currency: string | null | undefined = "KES"): string {
+export function formatCurrency(
+  value: number | null | undefined,
+  currency: string | null | undefined = "KES",
+): string {
   const n = Number(value ?? 0);
   const cur = (currency ?? "KES").toUpperCase();
   if (cur === "KES") return formatKES(n);
   try {
-    return new Intl.NumberFormat("en-KE", { style: "currency", currency: cur, maximumFractionDigits: 0 }).format(n);
+    return new Intl.NumberFormat("en-KE", {
+      style: "currency",
+      currency: cur,
+      maximumFractionDigits: 0,
+    }).format(n);
   } catch {
     return `${cur} ${n.toLocaleString()}`;
   }

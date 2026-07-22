@@ -70,9 +70,7 @@ export function getPartnerStatus() {
   return {
     booking: {
       mode: getProviderMode("booking"),
-      hasCredentials: Boolean(
-        process.env.BOOKING_COM_USERNAME && process.env.BOOKING_COM_PASSWORD,
-      ),
+      hasCredentials: Boolean(process.env.BOOKING_COM_USERNAME && process.env.BOOKING_COM_PASSWORD),
     },
     expedia: {
       mode: getProviderMode("expedia"),
@@ -87,14 +85,42 @@ export function getPartnerStatus() {
 // ---------- Kenya county mapping (used to project partner listings onto local UI) ----------
 
 const KENYA_COUNTY_BY_TOWN: Record<string, string> = {
-  nairobi: "030", mombasa: "001", kisumu: "042", nakuru: "032", eldoret: "027",
-  thika: "022", malindi: "003", kilifi: "003", lamu: "005", diani: "002",
-  ukunda: "002", watamu: "003", naivasha: "032", narok: "033", kericho: "035",
-  meru: "012", embu: "014", nyeri: "019", nanyuki: "013", kitale: "024",
-  kakamega: "037", machakos: "016", kajiado: "034", garissa: "007",
-  isiolo: "011", wajir: "008", marsabit: "010", mandera: "009",
-  voi: "006", taveta: "006", kwale: "002", "tsavo": "006",
-  "maasai mara": "033", "amboseli": "034", "samburu": "018", "laikipia": "031",
+  nairobi: "030",
+  mombasa: "001",
+  kisumu: "042",
+  nakuru: "032",
+  eldoret: "027",
+  thika: "022",
+  malindi: "003",
+  kilifi: "003",
+  lamu: "005",
+  diani: "002",
+  ukunda: "002",
+  watamu: "003",
+  naivasha: "032",
+  narok: "033",
+  kericho: "035",
+  meru: "012",
+  embu: "014",
+  nyeri: "019",
+  nanyuki: "013",
+  kitale: "024",
+  kakamega: "037",
+  machakos: "016",
+  kajiado: "034",
+  garissa: "007",
+  isiolo: "011",
+  wajir: "008",
+  marsabit: "010",
+  mandera: "009",
+  voi: "006",
+  taveta: "006",
+  kwale: "002",
+  tsavo: "006",
+  "maasai mara": "033",
+  amboseli: "034",
+  samburu: "018",
+  laikipia: "031",
 };
 
 export function mapTownToCountyCode(town: string | null | undefined): string | null {
@@ -174,8 +200,10 @@ export async function searchBookingComLive(input: SearchInput): Promise<External
         null,
       price_per_night: row.product_price_breakdown?.gross_amount_per_night?.value ?? null,
       currency: row.product_price_breakdown?.gross_amount_per_night?.currency ?? "USD",
-      rating: typeof row.accommodation?.review_score === "number" ? row.accommodation.review_score : null,
-      review_count: typeof row.accommodation?.review_count === "number" ? row.accommodation.review_count : null,
+      rating:
+        typeof row.accommodation?.review_score === "number" ? row.accommodation.review_score : null,
+      review_count:
+        typeof row.accommodation?.review_count === "number" ? row.accommodation.review_count : null,
       deeplink_url: row.url ?? `https://www.booking.com/hotel/${row.id}.html`,
       raw: row,
     };
@@ -227,7 +255,9 @@ export async function searchExpediaLive(input: SearchInput): Promise<ExternalLis
       location?: { coordinates?: { latitude?: number; longitude?: number } };
       thumbnail_url?: string;
       ratings?: { property?: { rating?: number; count?: number } };
-      rate?: { totals?: { inclusive?: { billable_currency?: { value?: number; currency?: string } } } };
+      rate?: {
+        totals?: { inclusive?: { billable_currency?: { value?: number; currency?: string } } };
+      };
       links?: { web_details?: { href?: string } };
     }
   >;
@@ -248,7 +278,8 @@ export async function searchExpediaLive(input: SearchInput): Promise<ExternalLis
       rating: row.ratings?.property?.rating ?? null,
       review_count: row.ratings?.property?.count ?? null,
       deeplink_url:
-        row.links?.web_details?.href ?? `https://www.expedia.com/h${row.property_id}.Hotel-Information`,
+        row.links?.web_details?.href ??
+        `https://www.expedia.com/h${row.property_id}.Hotel-Information`,
       raw: row,
     };
   });
@@ -297,7 +328,7 @@ function mockResults(provider: ProviderId, input: SearchInput): ExternalListing[
   for (let i = 0; i < count; i++) {
     const place = pool[(seed + i) % pool.length];
     const price = 60 + ((seed + i * 17) % 240);
-    const rating = 6.5 + (((seed + i * 7) % 35) / 10);
+    const rating = 6.5 + ((seed + i * 7) % 35) / 10;
     const id = `${provider}-${seed}-${i}`;
     out.push({
       provider,
@@ -333,9 +364,7 @@ export async function searchProvider(
   if (mode === "disabled") return { mode, rows: [] };
   if (mode === "mock") return { mode, rows: mockResults(provider, input) };
   const rows =
-    provider === "booking"
-      ? await searchBookingComLive(input)
-      : await searchExpediaLive(input);
+    provider === "booking" ? await searchBookingComLive(input) : await searchExpediaLive(input);
   return { mode, rows };
 }
 
@@ -420,10 +449,23 @@ export async function syncDestinations(args: {
       const startedAt = new Date();
       const mode = getProviderMode(provider);
       if (mode === "disabled") {
-        summary.push({ provider, destination, mode, status: "skipped", itemsFound: 0, itemsUpserted: 0 });
+        summary.push({
+          provider,
+          destination,
+          mode,
+          status: "skipped",
+          itemsFound: 0,
+          itemsUpserted: 0,
+        });
         await recordSyncRun({
-          provider, destination, mode, status: "skipped",
-          itemsFound: 0, itemsUpserted: 0, triggeredBy: args.triggeredBy ?? null, startedAt,
+          provider,
+          destination,
+          mode,
+          status: "skipped",
+          itemsFound: 0,
+          itemsUpserted: 0,
+          triggeredBy: args.triggeredBy ?? null,
+          startedAt,
         });
         continue;
       }
@@ -434,17 +476,45 @@ export async function syncDestinations(args: {
         });
         const { count } = await upsertExternalListings(rows);
         totalUpserted += count;
-        summary.push({ provider, destination, mode, status: "success", itemsFound: rows.length, itemsUpserted: count });
+        summary.push({
+          provider,
+          destination,
+          mode,
+          status: "success",
+          itemsFound: rows.length,
+          itemsUpserted: count,
+        });
         await recordSyncRun({
-          provider, destination, mode, status: "success",
-          itemsFound: rows.length, itemsUpserted: count, triggeredBy: args.triggeredBy ?? null, startedAt,
+          provider,
+          destination,
+          mode,
+          status: "success",
+          itemsFound: rows.length,
+          itemsUpserted: count,
+          triggeredBy: args.triggeredBy ?? null,
+          startedAt,
         });
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
-        summary.push({ provider, destination, mode, status: "failed", itemsFound: 0, itemsUpserted: 0, error: msg });
+        summary.push({
+          provider,
+          destination,
+          mode,
+          status: "failed",
+          itemsFound: 0,
+          itemsUpserted: 0,
+          error: msg,
+        });
         await recordSyncRun({
-          provider, destination, mode, status: "failed",
-          itemsFound: 0, itemsUpserted: 0, errorMessage: msg, triggeredBy: args.triggeredBy ?? null, startedAt,
+          provider,
+          destination,
+          mode,
+          status: "failed",
+          itemsFound: 0,
+          itemsUpserted: 0,
+          errorMessage: msg,
+          triggeredBy: args.triggeredBy ?? null,
+          startedAt,
         });
       }
     }

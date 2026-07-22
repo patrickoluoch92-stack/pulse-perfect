@@ -20,7 +20,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 // deno-lint-ignore no-explicit-any
 type Json = any;
 
-interface StkCallbackItem { Name: string; Value?: string | number }
+interface StkCallbackItem {
+  Name: string;
+  Value?: string | number;
+}
 interface StkCallback {
   MerchantRequestID?: string;
   CheckoutRequestID?: string;
@@ -28,7 +31,9 @@ interface StkCallback {
   ResultDesc?: string;
   CallbackMetadata?: { Item?: StkCallbackItem[] };
 }
-interface MpesaCallbackPayload { Body?: { stkCallback?: StkCallback } }
+interface MpesaCallbackPayload {
+  Body?: { stkCallback?: StkCallback };
+}
 
 interface ParsedCallback {
   merchantRequestId: string | null;
@@ -45,7 +50,6 @@ interface ParsedCallback {
 const ACK = { ResultCode: 0, ResultDesc: "Accepted" };
 
 function log(level: "info" | "warn" | "error", message: string, data?: Json) {
-  // eslint-disable-next-line no-console
   console[level](JSON.stringify({ fn: "mpesa-callback", level, message, data }));
 }
 
@@ -124,10 +128,7 @@ export async function saveMpesaTransaction(
   return data;
 }
 
-async function handleSubscription(
-  supabase: ReturnType<typeof getClient>,
-  parsed: ParsedCallback,
-) {
+async function handleSubscription(supabase: ReturnType<typeof getClient>, parsed: ParsedCallback) {
   const { data: sub } = await supabase
     .from("subscriptions")
     .select("id, org_id, plan")
@@ -177,10 +178,7 @@ async function handleSubscription(
   return { kind: "subscription" as const, id: sub.id, orgId: sub.org_id };
 }
 
-async function handleInvoice(
-  supabase: ReturnType<typeof getClient>,
-  parsed: ParsedCallback,
-) {
+async function handleInvoice(supabase: ReturnType<typeof getClient>, parsed: ParsedCallback) {
   // Linkage was written at STK initiation time on the mpesa_transactions row.
   const { data: tx } = await supabase
     .from("mpesa_transactions")
@@ -228,14 +226,21 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
-      headers: { "access-control-allow-origin": "*", "access-control-allow-methods": "POST, OPTIONS" },
+      headers: {
+        "access-control-allow-origin": "*",
+        "access-control-allow-methods": "POST, OPTIONS",
+      },
     });
   }
   if (req.method !== "POST") return Response.json(ACK, { status: 200 });
 
   let raw: unknown;
-  try { raw = await req.json(); }
-  catch (e) { log("warn", "invalid_json", { err: String(e) }); return Response.json(ACK, { status: 200 }); }
+  try {
+    raw = await req.json();
+  } catch (e) {
+    log("warn", "invalid_json", { err: String(e) });
+    return Response.json(ACK, { status: 200 });
+  }
 
   log("info", "callback_received");
   if (!validateMpesaPayload(raw)) {
@@ -245,7 +250,10 @@ Deno.serve(async (req: Request) => {
 
   try {
     const parsed = parseMpesaCallback(raw);
-    log("info", "callback_parsed", { checkoutRequestId: parsed.checkoutRequestId, status: parsed.status });
+    log("info", "callback_parsed", {
+      checkoutRequestId: parsed.checkoutRequestId,
+      status: parsed.status,
+    });
     const supabase = getClient();
     const saved = await saveMpesaTransaction(supabase, parsed, raw);
     log("info", "transaction_saved", { id: saved.id, status: saved.status });

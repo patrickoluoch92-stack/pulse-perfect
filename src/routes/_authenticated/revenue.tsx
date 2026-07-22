@@ -6,7 +6,13 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingState } from "@/components/ui/states";
 import { listUnits } from "@/lib/units.functions";
@@ -73,19 +79,33 @@ function RevenuePage() {
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
-          <Select value={propertyId} onValueChange={(v) => { setPropertyId(v); setUnitId(""); }}>
-            <SelectTrigger><SelectValue placeholder="Select property" /></SelectTrigger>
+          <Select
+            value={propertyId}
+            onValueChange={(v) => {
+              setPropertyId(v);
+              setUnitId("");
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select property" />
+            </SelectTrigger>
             <SelectContent>
               {(properties.data ?? []).map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                <SelectItem key={p.id} value={p.id}>
+                  {p.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={unitId} onValueChange={setUnitId} disabled={!propertyId}>
-            <SelectTrigger><SelectValue placeholder="Select unit" /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder="Select unit" />
+            </SelectTrigger>
             <SelectContent>
               {(unitsQ.data ?? []).map((u) => (
-                <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                <SelectItem key={u.id} value={u.id}>
+                  {u.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -93,15 +113,23 @@ function RevenuePage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2"><TrendingUp className="h-4 w-4" /> 60-day occupancy forecast</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" /> 60-day occupancy forecast
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {forecastQ.data ? (
               <div className="space-y-3">
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <Stat label="Units tracked" value={forecastQ.data.summary.unitCount ?? 0} />
-                  <Stat label="Avg occupancy" value={`${Math.round((forecastQ.data.summary.avgOccupancy ?? 0) * 100)}%`} />
-                  <Stat label="Booked nights (60d)" value={forecastQ.data.summary.totalNights ?? 0} />
+                  <Stat
+                    label="Avg occupancy"
+                    value={`${Math.round((forecastQ.data.summary.avgOccupancy ?? 0) * 100)}%`}
+                  />
+                  <Stat
+                    label="Booked nights (60d)"
+                    value={forecastQ.data.summary.totalNights ?? 0}
+                  />
                 </div>
                 <div className="flex h-24 items-end gap-[2px]">
                   {forecastQ.data.days.map((d) => (
@@ -114,19 +142,29 @@ function RevenuePage() {
                   ))}
                 </div>
               </div>
-            ) : <LoadingState label="Loading forecast…" />}
+            ) : (
+              <LoadingState label="Loading forecast…" />
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Dynamic pricing (next 30 nights)</CardTitle>
-            <Button size="sm" onClick={() => unitId && pricing.mutate(unitId)} disabled={!unitId || pricing.isPending}>
+            <Button
+              size="sm"
+              onClick={() => unitId && pricing.mutate(unitId)}
+              disabled={!unitId || pricing.isPending}
+            >
               {pricing.isPending ? "Calculating…" : "Recommend prices"}
             </Button>
           </CardHeader>
           <CardContent>
-            {!unitId && <p className="text-sm text-muted-foreground">Pick a unit to compute recommendations.</p>}
+            {!unitId && (
+              <p className="text-sm text-muted-foreground">
+                Pick a unit to compute recommendations.
+              </p>
+            )}
             {pricing.data && (
               <div className="max-h-80 overflow-y-auto rounded border">
                 <table className="w-full text-sm">
@@ -156,7 +194,9 @@ function RevenuePage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> AI revenue insights</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" /> AI revenue insights
+            </CardTitle>
             <Button size="sm" onClick={() => ai.mutate()} disabled={ai.isPending}>
               {ai.isPending ? "Analysing…" : "Generate insights"}
             </Button>
@@ -170,14 +210,20 @@ function RevenuePage() {
                     <div key={i} className="rounded border p-3">
                       <div className="flex items-center justify-between">
                         <p className="font-medium">{r.title}</p>
-                        <Badge variant={r.impact === "high" ? "default" : "secondary"}>{r.impact}</Badge>
+                        <Badge variant={r.impact === "high" ? "default" : "secondary"}>
+                          {r.impact}
+                        </Badge>
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">{r.detail}</p>
                     </div>
                   ))}
                 </div>
               </div>
-            ) : <p className="text-sm text-muted-foreground">Click generate to analyse your last 90 days.</p>}
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Click generate to analyse your last 90 days.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

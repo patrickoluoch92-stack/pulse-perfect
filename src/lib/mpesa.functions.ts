@@ -149,12 +149,16 @@ export const getInvoiceMpesaStatus = createServerFn({ method: "GET" })
 export const listMpesaTransactions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ orgId: z.string().uuid(), limit: z.number().int().min(1).max(200).optional() }).parse(d),
+    z
+      .object({ orgId: z.string().uuid(), limit: z.number().int().min(1).max(200).optional() })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase
       .from("mpesa_transactions")
-      .select("id, checkout_request_id, merchant_request_id, status, result_code, result_desc, amount, phone_number, mpesa_receipt_number, transaction_date, created_at, invoice_id, subscription_id")
+      .select(
+        "id, checkout_request_id, merchant_request_id, status, result_code, result_desc, amount, phone_number, mpesa_receipt_number, transaction_date, created_at, invoice_id, subscription_id",
+      )
       .eq("org_id", data.orgId)
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 100);
