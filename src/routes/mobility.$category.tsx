@@ -54,7 +54,23 @@ function CategoryPage() {
         <h1 className="text-3xl font-semibold tracking-tight">{label}</h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">Browse available {label.toLowerCase()} across Kenya. Book directly through HostPulse.</p>
 
-        <div className="mt-6 grid gap-3 rounded-lg border bg-card p-4 sm:grid-cols-2 md:grid-cols-5">
+        <div className="mt-6 grid gap-3 rounded-lg border bg-card p-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
+          <div>
+            <Label className="text-xs">County</Label>
+            <select className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+              value={filters.county ?? ""}
+              onChange={(e) => setFilters({ ...filters, county: e.target.value || undefined })}>
+              <option value="">Any county</option>
+              {(counties.data ?? []).map((c: any) => (
+                <option key={c.code} value={c.code}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">Town / city / area</Label>
+            <Input className="mt-1" placeholder="e.g. Westlands" value={filters.town ?? ""} onChange={(e) => setFilters({ ...filters, town: e.target.value })} />
+          </div>
+
           <div>
             <Label className="text-xs">Vehicle type</Label>
             <select className="mt-1 w-full rounded-md border bg-background px-2 py-1.5 text-sm"
