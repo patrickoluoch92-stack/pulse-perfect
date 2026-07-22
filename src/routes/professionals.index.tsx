@@ -33,17 +33,32 @@ export const Route = createFileRoute("/professionals/")({
 function ProfessionalsIndex() {
   const fetchCats = useServerFn(listProfessionalCategories);
   const fetchSearch = useServerFn(searchProfessionals);
+  const fetchCounties = useServerFn(listCounties);
   const [q, setQ] = useState("");
   const [category, setCategory] = useState<string | undefined>();
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [countyCode, setCountyCode] = useState<string>("");
+  const [town, setTown] = useState("");
   const debouncedQ = useDebouncedValue(q, 300);
+  const debouncedTown = useDebouncedValue(town, 300);
 
   const cats = useQuery({ queryKey: ["pro-cats"], queryFn: () => fetchCats() });
+  const counties = useQuery({ queryKey: ["counties"], queryFn: () => fetchCounties() });
   const results = useQuery({
-    queryKey: ["pro-search", debouncedQ, category, verifiedOnly],
+    queryKey: ["pro-search", debouncedQ, category, verifiedOnly, countyCode, debouncedTown],
     queryFn: () =>
       fetchSearch({
-        data: { q: debouncedQ || undefined, categorySlug: category, verifiedOnly, limit: 24, offset: 0 },
+        data: {
+          q: debouncedQ || undefined,
+          categorySlug: category,
+          verifiedOnly,
+          countyCode: countyCode || undefined,
+          town: debouncedTown || undefined,
+          city: debouncedTown || undefined,
+          area: debouncedTown || undefined,
+          limit: 24,
+          offset: 0,
+        },
       }),
   });
 
