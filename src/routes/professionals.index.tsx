@@ -38,14 +38,14 @@ function ProfessionalsIndex() {
   const [category, setCategory] = useState<string | undefined>();
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [countyCode, setCountyCode] = useState<string>("");
-  const [town, setTown] = useState("");
+  const [location, setLocation] = useState("");
   const debouncedQ = useDebouncedValue(q, 300);
-  const debouncedTown = useDebouncedValue(town, 300);
+  const debouncedLocation = useDebouncedValue(location, 300);
 
   const cats = useQuery({ queryKey: ["pro-cats"], queryFn: () => fetchCats() });
   const counties = useQuery({ queryKey: ["counties"], queryFn: () => fetchCounties() });
   const results = useQuery({
-    queryKey: ["pro-search", debouncedQ, category, verifiedOnly, countyCode, debouncedTown],
+    queryKey: ["pro-search", debouncedQ, category, verifiedOnly, countyCode, debouncedLocation],
     queryFn: () =>
       fetchSearch({
         data: {
@@ -53,9 +53,7 @@ function ProfessionalsIndex() {
           categorySlug: category,
           verifiedOnly,
           countyCode: countyCode || undefined,
-          town: debouncedTown || undefined,
-          city: debouncedTown || undefined,
-          area: debouncedTown || undefined,
+          location: debouncedLocation || undefined,
           limit: 24,
           offset: 0,
         },
