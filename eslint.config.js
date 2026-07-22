@@ -38,7 +38,7 @@ export default tseslint.config(
       // third-party payloads — keep `any` visible as a warning rather than a hard failure.
       "@typescript-eslint/no-explicit-any": "warn",
     },
-
   },
+
   eslintPluginPrettier,
 );
