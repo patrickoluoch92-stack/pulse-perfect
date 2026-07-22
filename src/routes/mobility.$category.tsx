@@ -32,13 +32,18 @@ export const Route = createFileRoute("/mobility/$category")({
 function CategoryPage() {
   const { category } = Route.useParams();
   const fetchList = useServerFn(searchMobilityVehicles);
-  const [filters, setFilters] = useState<{ vehicleType?: MobilityVehicleType; make?: string; minSeats?: number; priceMaxKes?: number; transmission?: "automatic" | "manual" }>({});
+  const countiesFn = useServerFn(listCounties);
+  const counties = useQuery({ queryKey: ["mkt-counties"], queryFn: () => countiesFn() });
+  const [filters, setFilters] = useState<{ vehicleType?: MobilityVehicleType; make?: string; minSeats?: number; priceMaxKes?: number; transmission?: "automatic" | "manual"; county?: string; town?: string }>({});
+  const debouncedTown = useDebouncedValue(filters.town ?? "", 350);
+  const debouncedMake = useDebouncedValue(filters.make ?? "", 350);
   const { data, isLoading } = useQuery({
-    queryKey: ["mobility-cat", category, filters],
-    queryFn: () => fetchList({ data: { category: category as MobilityCategory, limit: 30, ...filters } }),
+    queryKey: ["mobility-cat", category, { ...filters, town: debouncedTown, make: debouncedMake }],
+    queryFn: () => fetchList({ data: { category: category as MobilityCategory, limit: 30, ...filters, town: debouncedTown || undefined, make: debouncedMake || undefined } }),
   });
   const vehicles = data?.vehicles ?? [];
   const label = MOBILITY_CATEGORY_LABELS[category as MobilityCategory];
+
 
   return (
     <div className="min-h-dvh bg-background">
