@@ -213,7 +213,8 @@ export const adminListDiscovered = createServerFn({ method: "GET" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { data: rows, error } = await context.supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
       .from("discovered_properties")
       .select("*")
       .eq("status", data.status)
