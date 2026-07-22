@@ -97,16 +97,12 @@ function InvoicesPage() {
               {INVOICE_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Button variant="outline" onClick={() => setGenOpen(true)} disabled={!orgId || (reservations.data?.length ?? 0) === 0}>
-            <Wand2 className="mr-2 h-4 w-4" /> From reservation
-          </Button>
-          <Button asChild>
-            <Link to="/invoices/new">
-              <Plus className="mr-2 h-4 w-4" /> New invoice
-            </Link>
+          <Button onClick={() => setGenOpen(true)} disabled={!orgId || (reservations.data?.length ?? 0) === 0}>
+            <Plus className="mr-2 h-4 w-4" /> New invoice
           </Button>
         </div>
       </header>
+
 
       {invoices.isLoading ? (
         <LoadingState label="Loading invoices…" />
