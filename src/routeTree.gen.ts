@@ -89,6 +89,7 @@ import { Route as AuthenticatedAdminAiOpsRouteImport } from './routes/_authentic
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicIcalTokenRouteImport } from './routes/api/public/ical.$token'
 import { Route as ApiPublicHooksSubscriptionRenewalsRouteImport } from './routes/api/public/hooks/subscription-renewals'
+import { Route as ApiPublicHooksPaymentsTickRouteImport } from './routes/api/public/hooks/payments-tick'
 import { Route as ApiPublicHooksPartnerSyncRouteImport } from './routes/api/public/hooks/partner-sync'
 import { Route as ApiPublicHooksOrchestratorTickRouteImport } from './routes/api/public/hooks/orchestrator-tick'
 import { Route as ApiPublicHooksOpsTickRouteImport } from './routes/api/public/hooks/ops-tick'
@@ -102,6 +103,9 @@ import { Route as AuthenticatedMobilityManageIdRouteImport } from './routes/_aut
 import { Route as AuthenticatedListingsAdminDiscoveryRouteImport } from './routes/_authenticated/listings.admin.discovery'
 import { Route as AuthenticatedListingsAdminCouponsRouteImport } from './routes/_authenticated/listings.admin.coupons'
 import { Route as AuthenticatedListingsIdAvailabilityRouteImport } from './routes/_authenticated/listings.$id.availability'
+import { Route as ApiPublicMpesaStkTokenRouteImport } from './routes/api/public/mpesa/stk.$token'
+import { Route as ApiPublicMpesaB2cTimeoutTokenRouteImport } from './routes/api/public/mpesa/b2c-timeout.$token'
+import { Route as ApiPublicMpesaB2cResultTokenRouteImport } from './routes/api/public/mpesa/b2c-result.$token'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -529,6 +533,12 @@ const ApiPublicHooksSubscriptionRenewalsRoute =
     path: '/api/public/hooks/subscription-renewals',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksPaymentsTickRoute =
+  ApiPublicHooksPaymentsTickRouteImport.update({
+    id: '/api/public/hooks/payments-tick',
+    path: '/api/public/hooks/payments-tick',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksPartnerSyncRoute =
   ApiPublicHooksPartnerSyncRouteImport.update({
     id: '/api/public/hooks/partner-sync',
@@ -605,6 +615,23 @@ const AuthenticatedListingsIdAvailabilityRoute =
     id: '/availability',
     path: '/availability',
     getParentRoute: () => AuthenticatedListingsIdRoute,
+  } as any)
+const ApiPublicMpesaStkTokenRoute = ApiPublicMpesaStkTokenRouteImport.update({
+  id: '/api/public/mpesa/stk/$token',
+  path: '/api/public/mpesa/stk/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicMpesaB2cTimeoutTokenRoute =
+  ApiPublicMpesaB2cTimeoutTokenRouteImport.update({
+    id: '/api/public/mpesa/b2c-timeout/$token',
+    path: '/api/public/mpesa/b2c-timeout/$token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicMpesaB2cResultTokenRoute =
+  ApiPublicMpesaB2cResultTokenRouteImport.update({
+    id: '/api/public/mpesa/b2c-result/$token',
+    path: '/api/public/mpesa/b2c-result/$token',
+    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -697,9 +724,13 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/ops-tick': typeof ApiPublicHooksOpsTickRoute
   '/api/public/hooks/orchestrator-tick': typeof ApiPublicHooksOrchestratorTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
+  '/api/public/hooks/payments-tick': typeof ApiPublicHooksPaymentsTickRoute
   '/api/public/hooks/subscription-renewals': typeof ApiPublicHooksSubscriptionRenewalsRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/mpesa/b2c-result/$token': typeof ApiPublicMpesaB2cResultTokenRoute
+  '/api/public/mpesa/b2c-timeout/$token': typeof ApiPublicMpesaB2cTimeoutTokenRoute
+  '/api/public/mpesa/stk/$token': typeof ApiPublicMpesaStkTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -788,9 +819,13 @@ export interface FileRoutesByTo {
   '/api/public/hooks/ops-tick': typeof ApiPublicHooksOpsTickRoute
   '/api/public/hooks/orchestrator-tick': typeof ApiPublicHooksOrchestratorTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
+  '/api/public/hooks/payments-tick': typeof ApiPublicHooksPaymentsTickRoute
   '/api/public/hooks/subscription-renewals': typeof ApiPublicHooksSubscriptionRenewalsRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/mpesa/b2c-result/$token': typeof ApiPublicMpesaB2cResultTokenRoute
+  '/api/public/mpesa/b2c-timeout/$token': typeof ApiPublicMpesaB2cTimeoutTokenRoute
+  '/api/public/mpesa/stk/$token': typeof ApiPublicMpesaStkTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -884,9 +919,13 @@ export interface FileRoutesById {
   '/api/public/hooks/ops-tick': typeof ApiPublicHooksOpsTickRoute
   '/api/public/hooks/orchestrator-tick': typeof ApiPublicHooksOrchestratorTickRoute
   '/api/public/hooks/partner-sync': typeof ApiPublicHooksPartnerSyncRoute
+  '/api/public/hooks/payments-tick': typeof ApiPublicHooksPaymentsTickRoute
   '/api/public/hooks/subscription-renewals': typeof ApiPublicHooksSubscriptionRenewalsRoute
   '/api/public/ical/$token': typeof ApiPublicIcalTokenRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/mpesa/b2c-result/$token': typeof ApiPublicMpesaB2cResultTokenRoute
+  '/api/public/mpesa/b2c-timeout/$token': typeof ApiPublicMpesaB2cTimeoutTokenRoute
+  '/api/public/mpesa/stk/$token': typeof ApiPublicMpesaStkTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -980,9 +1019,13 @@ export interface FileRouteTypes {
     | '/api/public/hooks/ops-tick'
     | '/api/public/hooks/orchestrator-tick'
     | '/api/public/hooks/partner-sync'
+    | '/api/public/hooks/payments-tick'
     | '/api/public/hooks/subscription-renewals'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
+    | '/api/public/mpesa/b2c-result/$token'
+    | '/api/public/mpesa/b2c-timeout/$token'
+    | '/api/public/mpesa/stk/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1071,9 +1114,13 @@ export interface FileRouteTypes {
     | '/api/public/hooks/ops-tick'
     | '/api/public/hooks/orchestrator-tick'
     | '/api/public/hooks/partner-sync'
+    | '/api/public/hooks/payments-tick'
     | '/api/public/hooks/subscription-renewals'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
+    | '/api/public/mpesa/b2c-result/$token'
+    | '/api/public/mpesa/b2c-timeout/$token'
+    | '/api/public/mpesa/stk/$token'
   id:
     | '__root__'
     | '/'
@@ -1166,9 +1213,13 @@ export interface FileRouteTypes {
     | '/api/public/hooks/ops-tick'
     | '/api/public/hooks/orchestrator-tick'
     | '/api/public/hooks/partner-sync'
+    | '/api/public/hooks/payments-tick'
     | '/api/public/hooks/subscription-renewals'
     | '/api/public/ical/$token'
     | '/api/public/payments/webhook'
+    | '/api/public/mpesa/b2c-result/$token'
+    | '/api/public/mpesa/b2c-timeout/$token'
+    | '/api/public/mpesa/stk/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1204,9 +1255,13 @@ export interface RootRouteChildren {
   ApiPublicHooksOpsTickRoute: typeof ApiPublicHooksOpsTickRoute
   ApiPublicHooksOrchestratorTickRoute: typeof ApiPublicHooksOrchestratorTickRoute
   ApiPublicHooksPartnerSyncRoute: typeof ApiPublicHooksPartnerSyncRoute
+  ApiPublicHooksPaymentsTickRoute: typeof ApiPublicHooksPaymentsTickRoute
   ApiPublicHooksSubscriptionRenewalsRoute: typeof ApiPublicHooksSubscriptionRenewalsRoute
   ApiPublicIcalTokenRoute: typeof ApiPublicIcalTokenRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
+  ApiPublicMpesaB2cResultTokenRoute: typeof ApiPublicMpesaB2cResultTokenRoute
+  ApiPublicMpesaB2cTimeoutTokenRoute: typeof ApiPublicMpesaB2cTimeoutTokenRoute
+  ApiPublicMpesaStkTokenRoute: typeof ApiPublicMpesaStkTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1771,6 +1826,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksSubscriptionRenewalsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/payments-tick': {
+      id: '/api/public/hooks/payments-tick'
+      path: '/api/public/hooks/payments-tick'
+      fullPath: '/api/public/hooks/payments-tick'
+      preLoaderRoute: typeof ApiPublicHooksPaymentsTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/partner-sync': {
       id: '/api/public/hooks/partner-sync'
       path: '/api/public/hooks/partner-sync'
@@ -1861,6 +1923,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/listings/$id/availability'
       preLoaderRoute: typeof AuthenticatedListingsIdAvailabilityRouteImport
       parentRoute: typeof AuthenticatedListingsIdRoute
+    }
+    '/api/public/mpesa/stk/$token': {
+      id: '/api/public/mpesa/stk/$token'
+      path: '/api/public/mpesa/stk/$token'
+      fullPath: '/api/public/mpesa/stk/$token'
+      preLoaderRoute: typeof ApiPublicMpesaStkTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/mpesa/b2c-timeout/$token': {
+      id: '/api/public/mpesa/b2c-timeout/$token'
+      path: '/api/public/mpesa/b2c-timeout/$token'
+      fullPath: '/api/public/mpesa/b2c-timeout/$token'
+      preLoaderRoute: typeof ApiPublicMpesaB2cTimeoutTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/mpesa/b2c-result/$token': {
+      id: '/api/public/mpesa/b2c-result/$token'
+      path: '/api/public/mpesa/b2c-result/$token'
+      fullPath: '/api/public/mpesa/b2c-result/$token'
+      preLoaderRoute: typeof ApiPublicMpesaB2cResultTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -2120,10 +2203,14 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksOpsTickRoute: ApiPublicHooksOpsTickRoute,
   ApiPublicHooksOrchestratorTickRoute: ApiPublicHooksOrchestratorTickRoute,
   ApiPublicHooksPartnerSyncRoute: ApiPublicHooksPartnerSyncRoute,
+  ApiPublicHooksPaymentsTickRoute: ApiPublicHooksPaymentsTickRoute,
   ApiPublicHooksSubscriptionRenewalsRoute:
     ApiPublicHooksSubscriptionRenewalsRoute,
   ApiPublicIcalTokenRoute: ApiPublicIcalTokenRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
+  ApiPublicMpesaB2cResultTokenRoute: ApiPublicMpesaB2cResultTokenRoute,
+  ApiPublicMpesaB2cTimeoutTokenRoute: ApiPublicMpesaB2cTimeoutTokenRoute,
+  ApiPublicMpesaStkTokenRoute: ApiPublicMpesaStkTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
