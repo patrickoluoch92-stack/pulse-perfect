@@ -4159,6 +4159,558 @@ export type Database = {
           },
         ]
       }
+      pay_booking_events: {
+        Row: {
+          actor: string
+          booking_id: string
+          created_at: string
+          from_status: string | null
+          id: string
+          reason: string | null
+          to_status: string
+        }
+        Insert: {
+          actor: string
+          booking_id: string
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          reason?: string | null
+          to_status: string
+        }
+        Update: {
+          actor?: string
+          booking_id?: string
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          reason?: string | null
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_booking_events_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "pay_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pay_bookings: {
+        Row: {
+          amount_minor: number
+          commission_bps: number
+          completed_at: string | null
+          created_at: string
+          customer_user_id: string | null
+          id: string
+          paid_at: string | null
+          provider_id: string
+          source_id: string
+          source_kind: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_minor: number
+          commission_bps: number
+          completed_at?: string | null
+          created_at?: string
+          customer_user_id?: string | null
+          id?: string
+          paid_at?: string | null
+          provider_id: string
+          source_id: string
+          source_kind: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_minor?: number
+          commission_bps?: number
+          completed_at?: string | null
+          created_at?: string
+          customer_user_id?: string | null
+          id?: string
+          paid_at?: string | null
+          provider_id?: string
+          source_id?: string
+          source_kind?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_bookings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "pay_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pay_config: {
+        Row: {
+          default_commission_bps: number
+          hold_hours: number
+          id: boolean
+          max_payout_attempts: number
+          min_payout_minor: number
+          payout_fee_mode: string
+          refund_returns_commission: boolean
+          stuck_payment_minutes: number
+        }
+        Insert: {
+          default_commission_bps?: number
+          hold_hours?: number
+          id?: boolean
+          max_payout_attempts?: number
+          min_payout_minor?: number
+          payout_fee_mode?: string
+          refund_returns_commission?: boolean
+          stuck_payment_minutes?: number
+        }
+        Update: {
+          default_commission_bps?: number
+          hold_hours?: number
+          id?: boolean
+          max_payout_attempts?: number
+          min_payout_minor?: number
+          payout_fee_mode?: string
+          refund_returns_commission?: boolean
+          stuck_payment_minutes?: number
+        }
+        Relationships: []
+      }
+      pay_ledger_accounts: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          type: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          type: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      pay_ledger_entries: {
+        Row: {
+          account_id: string
+          amount_minor: number
+          created_at: string
+          direction: string
+          id: string
+          transaction_id: string
+        }
+        Insert: {
+          account_id: string
+          amount_minor: number
+          created_at?: string
+          direction: string
+          id?: string
+          transaction_id: string
+        }
+        Update: {
+          account_id?: string
+          amount_minor?: number
+          created_at?: string
+          direction?: string
+          id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_ledger_entries_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "pay_ledger_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_ledger_entries_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "pay_ledger_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pay_ledger_transactions: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          id: string
+          idempotency_key: string
+          kind: string
+          memo: string | null
+          reverses_id: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          kind: string
+          memo?: string | null
+          reverses_id?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          kind?: string
+          memo?: string | null
+          reverses_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_ledger_transactions_reverses_id_fkey"
+            columns: ["reverses_id"]
+            isOneToOne: false
+            referencedRelation: "pay_ledger_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pay_payments: {
+        Row: {
+          amount_minor: number
+          booking_id: string
+          callback_amount_minor: number | null
+          checkout_request_id: string
+          created_at: string
+          failure_reason: string | null
+          id: string
+          merchant_request_id: string | null
+          msisdn_masked: string | null
+          receipt: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_minor: number
+          booking_id: string
+          callback_amount_minor?: number | null
+          checkout_request_id: string
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          merchant_request_id?: string | null
+          msisdn_masked?: string | null
+          receipt?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_minor?: number
+          booking_id?: string
+          callback_amount_minor?: number | null
+          checkout_request_id?: string
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          merchant_request_id?: string | null
+          msisdn_masked?: string | null
+          receipt?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "pay_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pay_payout_items: {
+        Row: {
+          amount_minor: number
+          booking_id: string
+          id: string
+          payout_id: string
+        }
+        Insert: {
+          amount_minor: number
+          booking_id: string
+          id?: string
+          payout_id: string
+        }
+        Update: {
+          amount_minor?: number
+          booking_id?: string
+          id?: string
+          payout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_payout_items_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "pay_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pay_payout_items_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "pay_payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pay_payouts: {
+        Row: {
+          amount_minor: number
+          attempts: number
+          conversation_id: string | null
+          created_at: string
+          failure_reason: string | null
+          fee_minor: number
+          id: string
+          next_attempt_at: string
+          originator_conversation_id: string
+          provider_id: string
+          receipt: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_minor: number
+          attempts?: number
+          conversation_id?: string | null
+          created_at?: string
+          failure_reason?: string | null
+          fee_minor?: number
+          id?: string
+          next_attempt_at?: string
+          originator_conversation_id: string
+          provider_id: string
+          receipt?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_minor?: number
+          attempts?: number
+          conversation_id?: string | null
+          created_at?: string
+          failure_reason?: string | null
+          fee_minor?: number
+          id?: string
+          next_attempt_at?: string
+          originator_conversation_id?: string
+          provider_id?: string
+          receipt?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_payouts_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "pay_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pay_providers: {
+        Row: {
+          commission_bps: number | null
+          created_at: string
+          id: string
+          payout_msisdn: string | null
+          provider_kind: string
+          provider_ref: string
+        }
+        Insert: {
+          commission_bps?: number | null
+          created_at?: string
+          id?: string
+          payout_msisdn?: string | null
+          provider_kind: string
+          provider_ref: string
+        }
+        Update: {
+          commission_bps?: number | null
+          created_at?: string
+          id?: string
+          payout_msisdn?: string | null
+          provider_kind?: string
+          provider_ref?: string
+        }
+        Relationships: []
+      }
+      pay_reconciliation_breaks: {
+        Row: {
+          actual_minor: number | null
+          created_at: string
+          details: Json | null
+          expected_minor: number | null
+          id: string
+          kind: string
+          receipt: string | null
+          resolved_at: string | null
+          run_date: string
+        }
+        Insert: {
+          actual_minor?: number | null
+          created_at?: string
+          details?: Json | null
+          expected_minor?: number | null
+          id?: string
+          kind: string
+          receipt?: string | null
+          resolved_at?: string | null
+          run_date: string
+        }
+        Update: {
+          actual_minor?: number | null
+          created_at?: string
+          details?: Json | null
+          expected_minor?: number | null
+          id?: string
+          kind?: string
+          receipt?: string | null
+          resolved_at?: string | null
+          run_date?: string
+        }
+        Relationships: []
+      }
+      pay_refunds: {
+        Row: {
+          amount_minor: number
+          attempts: number
+          booking_id: string
+          cancellation_fee_minor: number
+          created_at: string
+          failure_reason: string | null
+          id: string
+          msisdn: string | null
+          originator_conversation_id: string
+          receipt: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_minor: number
+          attempts?: number
+          booking_id: string
+          cancellation_fee_minor?: number
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          msisdn?: string | null
+          originator_conversation_id: string
+          receipt?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_minor?: number
+          attempts?: number
+          booking_id?: string
+          cancellation_fee_minor?: number
+          created_at?: string
+          failure_reason?: string | null
+          id?: string
+          msisdn?: string | null
+          originator_conversation_id?: string
+          receipt?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pay_refunds_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "pay_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pay_settlement_lines: {
+        Row: {
+          amount_minor: number
+          balance_minor: number | null
+          created_at: string
+          direction: string
+          id: string
+          raw: Json | null
+          receipt: string
+          statement_date: string
+        }
+        Insert: {
+          amount_minor: number
+          balance_minor?: number | null
+          created_at?: string
+          direction: string
+          id?: string
+          raw?: Json | null
+          receipt: string
+          statement_date: string
+        }
+        Update: {
+          amount_minor?: number
+          balance_minor?: number | null
+          created_at?: string
+          direction?: string
+          id?: string
+          raw?: Json | null
+          receipt?: string
+          statement_date?: string
+        }
+        Relationships: []
+      }
+      pay_webhook_events: {
+        Row: {
+          attempts: number
+          created_at: string
+          error: string | null
+          external_id: string
+          id: string
+          payload: Json
+          processed_at: string | null
+          source: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          external_id: string
+          id?: string
+          payload: Json
+          processed_at?: string | null
+          source: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          external_id?: string
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          source?: string
+        }
+        Relationships: []
+      }
       payouts: {
         Row: {
           amount: number
@@ -6435,6 +6987,96 @@ export type Database = {
       org_has_active_subscription: {
         Args: { _org_id: string }
         Returns: boolean
+      }
+      pay_account: { Args: { _code: string; _type: string }; Returns: string }
+      pay_account_balance: { Args: { _code: string }; Returns: number }
+      pay_build_payouts: { Args: never; Returns: number }
+      pay_cancel_or_refund: {
+        Args: {
+          _actor: string
+          _booking: string
+          _msisdn: string
+          _reason: string
+          _refund_minor: number
+        }
+        Returns: string
+      }
+      pay_claim_payouts: {
+        Args: { _limit?: number }
+        Returns: {
+          amount_minor: number
+          attempts: number
+          conversation_id: string | null
+          created_at: string
+          failure_reason: string | null
+          fee_minor: number
+          id: string
+          next_attempt_at: string
+          originator_conversation_id: string
+          provider_id: string
+          receipt: string | null
+          status: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "pay_payouts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      pay_complete_booking: {
+        Args: { _actor: string; _booking: string }
+        Returns: undefined
+      }
+      pay_payout_result: {
+        Args: {
+          _fee_minor: number
+          _ocid: string
+          _reason: string
+          _receipt: string
+          _success: boolean
+        }
+        Returns: string
+      }
+      pay_post: {
+        Args: {
+          _booking: string
+          _entries: Json
+          _key: string
+          _kind: string
+          _memo: string
+          _reverses?: string
+        }
+        Returns: string
+      }
+      pay_process_stk: {
+        Args: {
+          _amount_minor: number
+          _checkout: string
+          _desc: string
+          _receipt: string
+          _result_code: number
+        }
+        Returns: string
+      }
+      pay_reconcile: { Args: { _date: string }; Returns: Json }
+      pay_refund_result: {
+        Args: {
+          _ocid: string
+          _reason: string
+          _receipt: string
+          _success: boolean
+        }
+        Returns: string
+      }
+      pay_reverse: {
+        Args: { _key: string; _memo: string; _tx: string }
+        Returns: string
+      }
+      pay_transition: {
+        Args: { _actor: string; _booking: string; _reason: string; _to: string }
+        Returns: string
       }
       recommend_for_user: {
         Args: { match_count?: number; p_session_id?: string; p_user_id: string }
